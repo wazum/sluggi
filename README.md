@@ -36,3 +36,7 @@ https://packagist.org/packages/wazum/sluggi
 I'm already working on another prototype where the limited edit functionality is incorporated into the existing single slug field.
 
 ![Slug field with limited edit functionality](Resources/Public/Screenshots/slug_future.png)
+
+## Support me
+
+You like my extensions? Get something for me (surprise! surprise!) from my wishlist on [Amazon](https://smile.amazon.de/hz/wishlist/dl/invite/cuUyzSQ) or [help me pay](https://www.paypal.me/wazum) the next pizza or Pho soup (mjam). Thanks a lot!
