@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<xliff version="1.0">
+	<file target-language="en" datatype="plaintext" original="messages" product-name="sluggi">
+		<header/>
+		<body>
+            <trans-unit id="pages.tx_sluggi_segment">
+                <target>Einzelnes URL-Segment überschreiben</target>
+            </trans-unit>
+            <trans-unit id="pages.tx_sluggi_segment.description">
+                <target>Drücken Sie den URL-Segment-Neuberechnen Button nach dem Ausfüllen</target>
+            </trans-unit>
+		</body>
+	</file>
+</xliff>

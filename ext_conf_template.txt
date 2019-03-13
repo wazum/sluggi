@@ -1,0 +1,2 @@
+# cat=basic; type=string; label=Backend user group ID list
+whitelist =

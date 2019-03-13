@@ -1,0 +1,14 @@
+{
+	"name": "wazum/sluggi",
+	"description": "The little TYPO3 CMS slug helper",
+	"require": {
+		"php": ">=7.0.0",
+		"typo3/cms-core": ">=9.5.5"
+	},
+	"type": "typo3-cms-extension",
+	"autoload": {
+		"psr-4": {
+			"Wazum\\Sluggi\\": "Classes"
+		}
+	}
+}

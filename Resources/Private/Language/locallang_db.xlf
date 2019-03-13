@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<xliff version="1.0">
+	<file source-language="en" datatype="plaintext" original="messages" product-name="sluggi">
+		<header/>
+		<body>
+            <trans-unit id="pages.tx_sluggi_segment">
+                <source>Overwrite single URL segment</source>
+            </trans-unit>
+            <trans-unit id="pages.tx_sluggi_segment.description">
+                <source>Press the recalculate URL segment button after filling out</source>
+            </trans-unit>
+		</body>
+	</file>
+</xliff>
