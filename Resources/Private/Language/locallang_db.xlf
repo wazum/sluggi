@@ -3,12 +3,18 @@
 	<file source-language="en" datatype="plaintext" original="messages" product-name="sluggi">
 		<header/>
 		<body>
-            <trans-unit id="pages.tx_sluggi_segment">
-                <source>Overwrite single URL segment</source>
+            <trans-unit id="pages.tx_sluggi_locked">
+                <source>Lock URL Segment</source>
             </trans-unit>
-            <trans-unit id="pages.tx_sluggi_segment.description">
-                <source>Press the recalculate URL segment button after filling out</source>
+            <trans-unit id="pages.tx_sluggi_locked.description">
+                <source>Restrict editing of the URL Segment</source>
             </trans-unit>
+			<trans-unit id="pages.tx_sluggi_locked.enabled">
+				<source>Locked</source>
+			</trans-unit>
+			<trans-unit id="pages.tx_sluggi_locked.disabled">
+				<source>Unlocked</source>
+			</trans-unit>
 		</body>
 	</file>
 </xliff>

@@ -3,8 +3,9 @@
 ## What does it do?
 
 The extension … 
-* removes the page slug edit button for all non-administrators and users who are not members of the whitelisted backend user groups (see Extension Configuration below), so they are unable to edit the whole page URL slug anymore (which is usually desired with different permissions), but only the URL segments of pages they have permission to edit
-* sets a fallback chain for page slug calculation as follows (the first nonempty value is used): the new 'Overwrite single URL segment' field (see Extension configuration below) > Alternative page title > Page title
+* modifies the page slug field, so normal users can only edit the part of the page slug they have appropriate permissions on the related pages (see screenshot below)
+* allows administrators to restrict editing the page slug on certain pages
+* sets a fallback chain for page slug calculation as follows (the first nonempty value is used): Alternative page title > Page title
 * configures a replacement of forward slashes (`/`) in the page slug with a hyphen (`-`) for new pages (existing pages are not affected as long as you don't recalculate the slugs)
 
 ![sluggi Features](Resources/Public/Screenshots/sluggi_features.png)
@@ -29,13 +30,10 @@ https://packagist.org/packages/wazum/sluggi
 
 * Set a list of whitelisted backend user group IDs in the extension configuration. Members of these groups will be able to edit the whole slug.
 
-* Grant permissions for backend user groups to the page 'Overwrite single URL segment' field.
+## Required core patch
 
-## Outlook into the future
-
-I'm already working on another prototype where the limited edit functionality is incorporated into the existing single slug field.
-
-![Slug field with limited edit functionality](Resources/Public/Screenshots/slug_future.png)
+You have to apply the patch from https://review.typo3.org/c/Packages/TYPO3.CMS/+/60263
+before TYPO3 CMS 9.5.6 or 10.0.1
 
 ## Support me
 

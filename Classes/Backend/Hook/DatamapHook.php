@@ -4,6 +4,8 @@ declare(strict_types=1);
 namespace Wazum\Sluggi\Backend\Hook;
 
 use TYPO3\CMS\Core\DataHandling\DataHandler;
+use Wazum\Sluggi\Helper\PermissionHelper;
+use Wazum\Sluggi\Helper\SlugHelper as SluggiSlugHelper;
 
 /**
  * Class DatamapHook
@@ -12,6 +14,7 @@ use TYPO3\CMS\Core\DataHandling\DataHandler;
  */
 class DatamapHook
 {
+
     /**
      * @param string $status
      * @param string $table
@@ -27,9 +30,13 @@ class DatamapHook
         &$fieldArray,
         DataHandler $dataHandler
     ): void {
-        if ($table === 'pages' && !empty($fieldArray['tx_sluggi_segment'])) {
-            // Empty field
-            $fieldArray['tx_sluggi_segment'] = '';
+        if ($table === 'pages' &&
+            !empty($fieldArray['slug']) &&
+            !PermissionHelper::hasFullPermission()) {
+            // @todo
+            $mountRootPage = PermissionHelper::getTopmostAccessiblePage($id);
+            $inaccessibleSlugSegments = SluggiSlugHelper::getSlug($mountRootPage['pid']);
+            $fieldArray['slug'] = $inaccessibleSlugSegments . $fieldArray['slug'];
         }
     }
 

@@ -3,12 +3,18 @@
 	<file target-language="en" datatype="plaintext" original="messages" product-name="sluggi">
 		<header/>
 		<body>
-            <trans-unit id="pages.tx_sluggi_segment">
-                <target>Einzelnes URL-Segment überschreiben</target>
-            </trans-unit>
-            <trans-unit id="pages.tx_sluggi_segment.description">
-                <target>Drücken Sie den URL-Segment-Neuberechnen Button nach dem Ausfüllen</target>
-            </trans-unit>
+			<trans-unit id="pages.tx_sluggi_locked">
+				<target>Sperre URL Segment</target>
+			</trans-unit>
+			<trans-unit id="pages.tx_sluggi_locked.description">
+				<target>Sperre die Bearbeitung des URL Segmentes</target>
+			</trans-unit>
+			<trans-unit id="pages.tx_sluggi_locked.enabled">
+				<target>Gesperrt</target>
+			</trans-unit>
+			<trans-unit id="pages.tx_sluggi_locked.disabled">
+				<target>Freigeschalten</target>
+			</trans-unit>
 		</body>
 	</file>
 </xliff>

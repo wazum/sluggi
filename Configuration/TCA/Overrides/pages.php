@@ -10,29 +10,35 @@ if (!isset($GLOBALS['TCA']['pages']['columns']['slug']['config']['generatorOptio
 // Add fallback chain for slug generation
 $GLOBALS['TCA']['pages']['columns']['slug']['config']['generatorOptions']['fields'] = [
     [
-        'tx_sluggi_segment',
         'nav_title',
         'title'
     ]
 ];
 
 $fields = [
-    'tx_sluggi_segment' => [
+    'tx_sluggi_locked' => [
         'exclude' => 1,
-        'label' => 'LLL:EXT:sluggi/Resources/Private/Language/locallang_db.xlf:pages.tx_sluggi_segment',
-        'description' => 'LLL:EXT:sluggi/Resources/Private/Language/locallang_db.xlf:pages.tx_sluggi_segment.description',
+        'label' => 'LLL:EXT:sluggi/Resources/Private/Language/locallang_db.xlf:pages.tx_sluggi_locked',
+        'description' => 'LLL:EXT:sluggi/Resources/Private/Language/locallang_db.xlf:pages.tx_sluggi_locked.description',
         'config' => [
-            'type' => 'input',
-            'default' => '',
-            'eval' => 'trim,uniqueInPid',
-            'max' => '100',
-            'size' => '20'
+            'type' => 'check',
+            'renderType' => 'checkboxToggle',
+            'items' => [
+                [
+                    0 => '',
+                    1 => '',
+                    'labelChecked' => 'LLL:EXT:sluggi/Resources/Private/Language/locallang_db.xlf:pages.tx_sluggi_locked.enabled',
+                    'labelUnchecked' => 'LLL:EXT:sluggi/Resources/Private/Language/locallang_db.xlf:pages.tx_sluggi_locked.disabled'
+                ]
+            ]
         ]
     ]
 ];
 
 \TYPO3\CMS\Core\Utility\ExtensionManagementUtility::addTCAcolumns('pages', $fields);
-foreach (['title', 'titleonly'] as $palette) {
-    $GLOBALS['TCA']['pages']['palettes'][$palette]['showitem'] = str_replace('slug, --linebreak--,', 'slug, --linebreak--, tx_sluggi_segment, --linebreak--,', $GLOBALS['TCA']['pages']['palettes'][$palette]['showitem']);
+foreach ($GLOBALS['TCA']['pages']['palettes'] as &$palette) {
+    $palette['showitem'] = str_replace('slug, --linebreak--,',
+        'slug, --linebreak--, tx_sluggi_locked, --linebreak--,',
+        $palette['showitem']);
 }
 
