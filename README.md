@@ -10,6 +10,8 @@ The extension …
 
 ![sluggi Features](Resources/Public/Screenshots/sluggi_features.png)
 
+In this example the editor has no rights to edit the _About_ page of the website, so he has no permission to change the _/about/_ segment of the URL too.
+
 ## Requirements
 
 You need at least TYPO3 CMS version 9.5.5 including the following features:
