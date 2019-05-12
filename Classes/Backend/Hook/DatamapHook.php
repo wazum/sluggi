@@ -10,6 +10,9 @@ use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\Authentication\BackendUserAuthentication;
 use TYPO3\CMS\Core\Cache\CacheManager;
 use TYPO3\CMS\Core\Cache\Exception\NoSuchCacheGroupException;
+use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException;
+use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException;
+use TYPO3\CMS\Core\Configuration\ExtensionConfiguration;
 use TYPO3\CMS\Core\Database\Connection;
 use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Database\Query\QueryBuilder;
@@ -61,8 +64,18 @@ class DatamapHook
             }
 
             $this->createRedirect($id);
-            $oldSlug = BackendUtility::getRecord('pages', $id, 'slug')['slug'] ?? '';
-            $this->renameChildSlugsAndCreateRedirects($id, $languageId, $fieldArray['slug'], $oldSlug);
+
+            $renameRecursively = false;
+            try {
+                $renameRecursively = (bool)GeneralUtility::makeInstance(ExtensionConfiguration::class)->get('sluggi',
+                    'recursively');
+            } catch (ExtensionConfigurationExtensionNotConfiguredException $e) {
+            } catch (ExtensionConfigurationPathDoesNotExistException $e) {
+            }
+            if ($renameRecursively) {
+                $oldSlug = BackendUtility::getRecord('pages', $id, 'slug')['slug'] ?? '';
+                $this->renameChildSlugsAndCreateRedirects($id, $languageId, $fieldArray['slug'], $oldSlug);
+            }
 
             // clear redirect cache
             /** @var CacheManager $cacheManager */
