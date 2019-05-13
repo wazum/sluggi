@@ -19,6 +19,7 @@ use TYPO3\CMS\Core\Database\Query\QueryBuilder;
 use TYPO3\CMS\Core\Database\Query\Restriction\HiddenRestriction;
 use TYPO3\CMS\Core\DataHandling\DataHandler;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
+use TYPO3\CMS\Redirects\Service\RedirectCacheService;
 use Wazum\Sluggi\Helper\PermissionHelper;
 use Wazum\Sluggi\Helper\SlugHelper as SluggiSlugHelper;
 
@@ -77,13 +78,8 @@ class DatamapHook
                 $this->renameChildSlugsAndCreateRedirects($id, $languageId, $fieldArray['slug'], $oldSlug);
             }
 
-            // clear redirect cache
-            /** @var CacheManager $cacheManager */
-            $cacheManager = GeneralUtility::makeInstance(CacheManager::class);
-            try {
-                $cacheManager->flushCachesInGroupByTags('pages', ['redirects']);
-            } catch (NoSuchCacheGroupException $e) {
-            }
+            // rebuild redirect cache
+            GeneralUtility::makeInstance(RedirectCacheService::class)->rebuild();
         }
     }
 
@@ -153,7 +149,7 @@ class DatamapHook
                     'source_host' => '*',
                     'source_path' => $oldSlug,
                     'target_statuscode' => 301,
-                    'target' => 't3://page?uid=' . $pageId,
+                    'target' => 't3://page?uid=' . $pageId
                 ]);
         }
     }
