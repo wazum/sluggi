@@ -8,8 +8,6 @@ use PDO;
 use RuntimeException;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\Authentication\BackendUserAuthentication;
-use TYPO3\CMS\Core\Cache\CacheManager;
-use TYPO3\CMS\Core\Cache\Exception\NoSuchCacheGroupException;
 use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException;
 use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException;
 use TYPO3\CMS\Core\Configuration\ExtensionConfiguration;
@@ -56,7 +54,7 @@ class DatamapHook
         &$fieldArray,
         DataHandler $dataHandler
     ): void {
-        if ($table === 'pages' && !empty($fieldArray['slug'])) {
+        if ($status !== 'new' && $table === 'pages' && !empty($fieldArray['slug'])) {
             $languageId = BackendUtility::getRecord('pages', $id, 'sys_language_uid')['sys_language_uid'] ?? 0;
             if (!PermissionHelper::hasFullPermission()) {
                 $mountRootPage = PermissionHelper::getTopmostAccessiblePage($id);
