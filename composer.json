@@ -6,7 +6,7 @@
 		"php": ">=7.0.0",
 		"ext-libxml": "*",
 		"ext-dom": "*",
-		"typo3/cms-core": "^9.5.5"
+		"typo3/cms-redirects": "^9.5.5"
 	},
 	"type": "typo3-cms-extension",
 	"autoload": {
