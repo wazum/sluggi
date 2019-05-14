@@ -62,7 +62,7 @@ class DatamapHook
                 $fieldArray['slug'] = $inaccessibleSlugSegments . $fieldArray['slug'];
             }
 
-            $this->createRedirect($id);
+            $this->updateRedirect($id, $fieldArray['slug']);
 
             $renameRecursively = false;
             try {
@@ -72,8 +72,8 @@ class DatamapHook
             } catch (ExtensionConfigurationPathDoesNotExistException $e) {
             }
             if ($renameRecursively) {
-                $oldSlug = BackendUtility::getRecord('pages', $id, 'slug')['slug'] ?? '';
-                $this->renameChildSlugsAndCreateRedirects($id, $languageId, $fieldArray['slug'], $oldSlug);
+                $previousSlug = BackendUtility::getRecord('pages', $id, 'slug')['slug'] ?? '';
+                $this->renameChildSlugsAndCreateRedirects($id, $languageId, $fieldArray['slug'], $previousSlug);
             }
 
             // rebuild redirect cache
@@ -85,27 +85,28 @@ class DatamapHook
      * @param int $pageId
      * @param int $languageId
      * @param string $slug
-     * @param string $oldSlug
+     * @param string $previousSlug
      */
     protected function renameChildSlugsAndCreateRedirects(
         int $pageId,
         int $languageId,
         string $slug,
-        string $oldSlug
+        string $previousSlug
     ): void {
-        if (!empty($oldSlug) && $slug !== $oldSlug) {
+        if (!empty($previousSlug) && $slug !== $previousSlug) {
             $childPages = $this->getChildPages($pageId, $languageId);
             if (count($childPages)) {
                 // replace slug segments for all child pages recursively
                 foreach ($childPages as $page) {
+                    $updatedSlug = str_replace($previousSlug, $slug, $page['slug']);
                     try {
                         $this->connection->beginTransaction();
-                        $this->createRedirect((int)$page['uid']);
-                        $this->updateSlug((int)$page['uid'], str_replace($oldSlug, $slug, $page['slug']));
+                        $this->updateRedirect((int)$page['uid'], $updatedSlug);
+                        $this->updateSlug((int)$page['uid'], $updatedSlug);
                         $this->connection->commit();
                     } catch (ConnectionException $e) {
                     }
-                    $this->renameChildSlugsAndCreateRedirects((int)$page['uid'], $languageId, $slug, $oldSlug);
+                    $this->renameChildSlugsAndCreateRedirects((int)$page['uid'], $languageId, $slug, $previousSlug);
                 }
             }
         }
@@ -125,11 +126,20 @@ class DatamapHook
 
     /**
      * @param int $pageId
+     * @param string $slug
      */
-    protected function createRedirect(int $pageId): void
+    protected function updateRedirect(int $pageId, string $slug): void
     {
-        $oldSlug = BackendUtility::getRecord('pages', $pageId, 'slug')['slug'] ?? null;
-        if ($oldSlug) {
+        // @todo
+        // Remove old redirects matching the new slug
+        $this->deleteRedirect($slug);
+
+        $previousSlug = BackendUtility::getRecord('pages', $pageId, 'slug')['slug'] ?? '';
+        if (!empty($previousSlug)) {
+            // @todo
+            // Remove old redirects matching the previous slug
+            $this->deleteRedirect($previousSlug);
+
             $this->connection->insert('sys_redirect',
                 [
                     // the redirect does not work currently
@@ -143,9 +153,9 @@ class DatamapHook
                     'pid' => 0,
                     'createdon' => time(),
                     'updatedon' => time(),
-                    'createdby' => (int)$this->getBackendUser()->id,
+                    'createdby' => $this->getBackendUserId(),
                     'source_host' => '*',
-                    'source_path' => $oldSlug,
+                    'source_path' => $previousSlug,
                     'target_statuscode' => 301,
                     'target' => 't3://page?uid=' . $pageId
                 ]);
@@ -181,11 +191,31 @@ class DatamapHook
     }
 
     /**
-     * @return BackendUserAuthentication
+     * @return int
      */
-    protected function getBackendUser(): BackendUserAuthentication
+    protected function getBackendUserId(): int
     {
-        return $GLOBALS['BE_USER'];
+        /** @var BackendUserAuthentication $BE_USER */
+        global $BE_USER;
+
+        return $BE_USER->user['uid'] ?? 0;
+    }
+
+    /**
+     * @param string $slug
+     */
+    private function deleteRedirect(string $slug): void
+    {
+        /** @var QueryBuilder $queryBuilder */
+        $queryBuilder = GeneralUtility::makeInstance(ConnectionPool::class)
+            ->getQueryBuilderForTable('sys_redirect');
+        $queryBuilder->getRestrictions()->removeAll();
+
+        $queryBuilder->delete('sys_redirect')
+            ->where(
+                $queryBuilder->expr()->eq('source_path',
+                    $queryBuilder->createNamedParameter($slug))
+            )->execute();
     }
 
 }
