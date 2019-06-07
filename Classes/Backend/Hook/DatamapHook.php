@@ -16,6 +16,7 @@ use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Database\Query\QueryBuilder;
 use TYPO3\CMS\Core\Database\Query\Restriction\HiddenRestriction;
 use TYPO3\CMS\Core\DataHandling\DataHandler;
+use TYPO3\CMS\Core\Site\SiteFinder;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Redirects\Service\RedirectCacheService;
 use Wazum\Sluggi\Helper\PermissionHelper;
@@ -45,6 +46,7 @@ class DatamapHook
      * @param integer $id
      * @param array $fieldArray
      * @param DataHandler $dataHandler
+     * @throws \TYPO3\CMS\Core\Exception\SiteNotFoundException
      */
     public function processDatamap_postProcessFieldArray(
         /** @noinspection PhpUnusedParameterInspection */
@@ -62,7 +64,7 @@ class DatamapHook
                 $fieldArray['slug'] = $inaccessibleSlugSegments . $fieldArray['slug'];
             }
 
-            $this->updateRedirect($id, $fieldArray['slug']);
+            $this->updateRedirect($id, $fieldArray['slug'], $languageId);
 
             $renameRecursively = false;
             try {
@@ -86,6 +88,7 @@ class DatamapHook
      * @param int $languageId
      * @param string $slug
      * @param string $previousSlug
+     * @throws \TYPO3\CMS\Core\Exception\SiteNotFoundException
      */
     protected function renameChildSlugsAndCreateRedirects(
         int $pageId,
@@ -101,7 +104,7 @@ class DatamapHook
                     $updatedSlug = str_replace($previousSlug, $slug, $page['slug']);
                     try {
                         $this->connection->beginTransaction();
-                        $this->updateRedirect((int)$page['uid'], $updatedSlug);
+                        $this->updateRedirect((int)$page['uid'], $updatedSlug, $languageId);
                         $this->updateSlug((int)$page['uid'], $updatedSlug);
                         $this->connection->commit();
                     } catch (ConnectionException $e) {
@@ -127,18 +130,21 @@ class DatamapHook
     /**
      * @param int $pageId
      * @param string $slug
+     * @param int $languageId
+     * @throws \TYPO3\CMS\Core\Exception\SiteNotFoundException
      */
-    protected function updateRedirect(int $pageId, string $slug): void
+    protected function updateRedirect(int $pageId, string $slug, int $languageId): void
     {
+        $siteBase = $this->getSiteBaseByPageId($pageId, $languageId);
         // @todo
         // Remove old redirects matching the new slug
-        $this->deleteRedirect($slug);
+        $this->deleteRedirect($siteBase . $slug);
 
         $previousSlug = BackendUtility::getRecord('pages', $pageId, 'slug')['slug'] ?? '';
         if (!empty($previousSlug)) {
             // @todo
             // Remove old redirects matching the previous slug
-            $this->deleteRedirect($previousSlug);
+            $this->deleteRedirect($siteBase . $previousSlug);
 
             $this->connection->insert('sys_redirect',
                 [
@@ -155,7 +161,7 @@ class DatamapHook
                     'updatedon' => time(),
                     'createdby' => $this->getBackendUserId(),
                     'source_host' => '*',
-                    'source_path' => $previousSlug,
+                    'source_path' => $siteBase . $previousSlug,
                     'target_statuscode' => 301,
                     'target' => 't3://page?uid=' . $pageId
                 ]);
@@ -199,6 +205,27 @@ class DatamapHook
         global $BE_USER;
 
         return $BE_USER->user['uid'] ?? 0;
+    }
+
+    /**
+     * @param $pageId
+     * @param $languageId
+     * @return string
+     * @throws \TYPO3\CMS\Core\Exception\SiteNotFoundException
+     */
+    protected function getSiteBaseByPageId($pageId, $languageId): string
+    {
+        $language = null;
+        /** @var SiteFinder $siteFinder */
+        $siteFinder = GeneralUtility::makeInstance(SiteFinder::class);
+        $site = $siteFinder->getSiteByPageId($pageId);
+        if ($languageId !== null) {
+            $language = $site->getLanguageById((int)$languageId);
+        }
+        if ($language === null) {
+            $language = $site->getDefaultLanguage();
+        }
+        return rtrim($language->getBase()->getPath(), '/');
     }
 
     /**
