@@ -1,17 +1,17 @@
 {
-	"name": "wazum/sluggi",
+  "name": "wazum/sluggi",
   "license": "GPL-3.0",
   "description": "The little TYPO3 CMS slug helper",
-	"require": {
-		"php": ">=7.0.0",
-		"ext-libxml": "*",
-		"ext-dom": "*",
-		"typo3/cms-redirects": "^9.5.5"
-	},
-	"type": "typo3-cms-extension",
-	"autoload": {
-		"psr-4": {
-			"Wazum\\Sluggi\\": "Classes"
-		}
-	}
+  "require": {
+    "php": ">=7.0.0",
+    "ext-libxml": "*",
+    "ext-dom": "*",
+    "typo3/cms-redirects": "^9.5.5"
+  },
+  "type": "typo3-cms-extension",
+  "autoload": {
+    "psr-4": {
+      "Wazum\\Sluggi\\": "Classes"
+    }
+  }
 }

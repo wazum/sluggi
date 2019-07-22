@@ -16,6 +16,7 @@ use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Database\Query\QueryBuilder;
 use TYPO3\CMS\Core\Database\Query\Restriction\HiddenRestriction;
 use TYPO3\CMS\Core\DataHandling\DataHandler;
+use TYPO3\CMS\Core\Exception\SiteNotFoundException;
 use TYPO3\CMS\Core\Site\SiteFinder;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Redirects\Service\RedirectCacheService;
@@ -46,7 +47,7 @@ class DatamapHook
      * @param integer $id
      * @param array $fieldArray
      * @param DataHandler $dataHandler
-     * @throws \TYPO3\CMS\Core\Exception\SiteNotFoundException
+     * @throws SiteNotFoundException
      */
     public function processDatamap_postProcessFieldArray(
         /** @noinspection PhpUnusedParameterInspection */
@@ -88,7 +89,7 @@ class DatamapHook
      * @param int $languageId
      * @param string $slug
      * @param string $previousSlug
-     * @throws \TYPO3\CMS\Core\Exception\SiteNotFoundException
+     * @throws SiteNotFoundException
      */
     protected function renameChildSlugsAndCreateRedirects(
         int $pageId,
@@ -131,7 +132,7 @@ class DatamapHook
      * @param int $pageId
      * @param string $slug
      * @param int $languageId
-     * @throws \TYPO3\CMS\Core\Exception\SiteNotFoundException
+     * @throws SiteNotFoundException
      */
     protected function updateRedirect(int $pageId, string $slug, int $languageId): void
     {
@@ -211,7 +212,7 @@ class DatamapHook
      * @param $pageId
      * @param $languageId
      * @return string
-     * @throws \TYPO3\CMS\Core\Exception\SiteNotFoundException
+     * @throws SiteNotFoundException
      */
     protected function getSiteBaseByPageId($pageId, $languageId): string
     {
