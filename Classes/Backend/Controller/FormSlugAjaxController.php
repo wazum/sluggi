@@ -21,7 +21,6 @@ use Wazum\Sluggi\Helper\SlugHelper as SluggiSlugHelper;
  */
 class FormSlugAjaxController extends \TYPO3\CMS\Backend\Controller\FormSlugAjaxController
 {
-
     /**
      *
      * @param ServerRequestInterface $request
@@ -103,7 +102,7 @@ class FormSlugAjaxController extends \TYPO3\CMS\Backend\Controller\FormSlugAjaxC
             $proposal = $slug->buildSlugForUniqueInPid($proposal, $state);
         }
 
-        $mountRootPage = PermissionHelper::getTopmostAccessiblePage($parentPageId);
+        $mountRootPage = PermissionHelper::getTopmostAccessiblePage($pid);
         $inaccessibleSlugSegments = SluggiSlugHelper::getSlug($mountRootPage['pid']);
         if (strpos($proposal, $inaccessibleSlugSegments) === 0) {
             $proposal = substr($proposal, strlen($inaccessibleSlugSegments));
@@ -115,5 +114,4 @@ class FormSlugAjaxController extends \TYPO3\CMS\Backend\Controller\FormSlugAjaxC
             'proposal' => $proposal,
         ]);
     }
-
 }
