@@ -25,12 +25,12 @@ use Wazum\Sluggi\Helper\SlugHelper as SluggiSlugHelper;
 
 /**
  * Class DatamapHook
+ *
  * @package Wazum\Sluggi\Backend\Hook
  * @author Wolfgang Klinger <wolfgang@wazum.com>
  */
 class DatamapHook
 {
-
     /**
      * @var Connection
      */
@@ -38,7 +38,8 @@ class DatamapHook
 
     public function __construct()
     {
-        $this->connection = GeneralUtility::makeInstance(ConnectionPool::class)->getConnectionForTable('pages');
+        $this->connection = GeneralUtility::makeInstance(ConnectionPool::class)
+            ->getConnectionForTable('pages');
     }
 
     /**
@@ -69,8 +70,8 @@ class DatamapHook
 
             $renameRecursively = false;
             try {
-                $renameRecursively = (bool)GeneralUtility::makeInstance(ExtensionConfiguration::class)->get('sluggi',
-                    'recursively');
+                $renameRecursively = (bool)GeneralUtility::makeInstance(ExtensionConfiguration::class)
+                    ->get('sluggi', 'recursively');
             } catch (ExtensionConfigurationExtensionNotConfiguredException $e) {
             } catch (ExtensionConfigurationPathDoesNotExistException $e) {
             }
@@ -79,7 +80,7 @@ class DatamapHook
                 $this->renameChildSlugsAndCreateRedirects($id, $languageId, $fieldArray['slug'], $previousSlug);
             }
 
-            // rebuild redirect cache
+            // Rebuild redirect cache
             GeneralUtility::makeInstance(RedirectCacheService::class)->rebuild();
         }
     }
@@ -100,7 +101,7 @@ class DatamapHook
         if (!empty($previousSlug) && $slug !== $previousSlug) {
             $childPages = $this->getChildPages($pageId, $languageId);
             if (count($childPages)) {
-                // replace slug segments for all child pages recursively
+                // Replace slug segments for all child pages recursively
                 foreach ($childPages as $page) {
                     $updatedSlug = str_replace($previousSlug, $slug, $page['slug']);
                     try {
@@ -136,36 +137,33 @@ class DatamapHook
      */
     protected function updateRedirect(int $pageId, string $slug, int $languageId): void
     {
-        $siteBase = $this->getSiteBaseByPageId($pageId, $languageId);
-        // @todo
+        [$siteHost, $sitePath] = $this->getBaseByPageId($pageId, $languageId);
         // Remove old redirects matching the new slug
-        $this->deleteRedirect($siteBase . $slug);
+        $this->deleteRedirect($siteHost, $sitePath . $slug);
 
         $previousSlug = BackendUtility::getRecord('pages', $pageId, 'slug')['slug'] ?? '';
         if (!empty($previousSlug)) {
-            // @todo
             // Remove old redirects matching the previous slug
-            $this->deleteRedirect($siteBase . $previousSlug);
+            $this->deleteRedirect($siteHost, $sitePath . $previousSlug);
 
-            $this->connection->insert('sys_redirect',
-                [
-                    // the redirect does not work currently
-                    // when an endtime or respect/keep query parameters
-                    // is set (core bug?)
+            $this->connection->insert('sys_redirect', [
+                // The redirect does not work currently
+                // when an endtime or respect/keep query parameters
+                // is set (core bug?)
 
-                    // 'respect_query_parameters' => 1,
-                    // 'keep_query_parameters' => 1,
-                    // 'endtime' => strtotime('+1 month')
+                // 'respect_query_parameters' => 1,
+                // 'keep_query_parameters' => 1,
+                // 'endtime' => strtotime('+1 month')
 
-                    'pid' => 0,
-                    'createdon' => time(),
-                    'updatedon' => time(),
-                    'createdby' => $this->getBackendUserId(),
-                    'source_host' => '*',
-                    'source_path' => $siteBase . $previousSlug,
-                    'target_statuscode' => 301,
-                    'target' => 't3://page?uid=' . $pageId
-                ]);
+                'pid' => 0,
+                'createdon' => time(),
+                'updatedon' => time(),
+                'createdby' => $this->getBackendUserId(),
+                'source_host' => $siteHost,
+                'source_path' => $sitePath . $previousSlug,
+                'target_statuscode' => 301,
+                'target' => 't3://page?uid=' . $pageId
+            ]);
         }
     }
 
@@ -209,12 +207,14 @@ class DatamapHook
     }
 
     /**
+     * Returns the site base host and path
+     *
      * @param $pageId
      * @param $languageId
-     * @return string
+     * @return array
      * @throws SiteNotFoundException
      */
-    protected function getSiteBaseByPageId($pageId, $languageId): string
+    protected function getBaseByPageId($pageId, $languageId): array
     {
         $language = null;
         /** @var SiteFinder $siteFinder */
@@ -226,13 +226,18 @@ class DatamapHook
         if ($language === null) {
             $language = $site->getDefaultLanguage();
         }
-        return rtrim($language->getBase()->getPath(), '/');
+
+        return [
+            $site->getBase()->getHost(), // Site host
+            rtrim($language->getBase()->getPath(), '/') // Site language path
+        ];
     }
 
     /**
-     * @param string $slug
+     * @param string $host
+     * @param string $path
      */
-    private function deleteRedirect(string $slug): void
+    private function deleteRedirect(string $host, string $path): void
     {
         /** @var QueryBuilder $queryBuilder */
         $queryBuilder = GeneralUtility::makeInstance(ConnectionPool::class)
@@ -241,9 +246,8 @@ class DatamapHook
 
         $queryBuilder->delete('sys_redirect')
             ->where(
-                $queryBuilder->expr()->eq('source_path',
-                    $queryBuilder->createNamedParameter($slug))
+                $queryBuilder->expr()->eq('source_host', $queryBuilder->createNamedParameter($host)),
+                $queryBuilder->expr()->eq('source_path', $queryBuilder->createNamedParameter($path))
             )->execute();
     }
-
 }
