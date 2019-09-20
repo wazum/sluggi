@@ -62,7 +62,7 @@ class DatamapHook
             $languageId = BackendUtility::getRecord('pages', $id, 'sys_language_uid')['sys_language_uid'] ?? 0;
             if (!PermissionHelper::hasFullPermission()) {
                 $mountRootPage = PermissionHelper::getTopmostAccessiblePage($id);
-                $inaccessibleSlugSegments = SluggiSlugHelper::getSlug($mountRootPage['pid']);
+                $inaccessibleSlugSegments = SluggiSlugHelper::getSlug($mountRootPage['pid'], $languageId);
                 $fieldArray['slug'] = $inaccessibleSlugSegments . $fieldArray['slug'];
             }
 
@@ -217,6 +217,13 @@ class DatamapHook
     protected function getBaseByPageId($pageId, $languageId): array
     {
         $language = null;
+        // Fetch default language page ID to get the site
+        if ($languageId > 0) {
+            $defaultLanguagePageId = BackendUtility::getRecord('pages', $pageId, 'l10n_parent')['l10n_parent'];
+            if ($defaultLanguagePageId > 0) {
+                $pageId = $defaultLanguagePageId;
+            }
+        }
         /** @var SiteFinder $siteFinder */
         $siteFinder = GeneralUtility::makeInstance(SiteFinder::class);
         $site = $siteFinder->getSiteByPageId($pageId);
