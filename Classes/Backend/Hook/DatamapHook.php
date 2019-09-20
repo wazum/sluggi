@@ -62,7 +62,7 @@ class DatamapHook
             $languageId = BackendUtility::getRecord('pages', $id, 'sys_language_uid')['sys_language_uid'] ?? 0;
             if (!PermissionHelper::hasFullPermission()) {
                 $mountRootPage = PermissionHelper::getTopmostAccessiblePage($id);
-                $inaccessibleSlugSegments = SluggiSlugHelper::getSlug($mountRootPage['pid']);
+                $inaccessibleSlugSegments = SluggiSlugHelper::getSlug($mountRootPage['pid'], $languageId);
                 $fieldArray['slug'] = $inaccessibleSlugSegments . $fieldArray['slug'];
             }
 
