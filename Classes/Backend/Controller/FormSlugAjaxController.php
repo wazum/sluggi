@@ -18,7 +18,7 @@ use Wazum\Sluggi\Helper\SlugHelper as SluggiSlugHelper;
  * Class FormSlugAjaxController
  *
  * @package Wazum\Sluggi\Backend\Controller
- * @author Wolfgang Klinger <wk@plan2.net>
+ * @author Wolfgang Klinger <wolfgang@wazum.com>
  */
 class FormSlugAjaxController extends \TYPO3\CMS\Backend\Controller\FormSlugAjaxController
 {

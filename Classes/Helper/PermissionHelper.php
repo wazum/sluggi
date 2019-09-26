@@ -10,13 +10,12 @@ use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExis
 use TYPO3\CMS\Core\Configuration\ExtensionConfiguration;
 use TYPO3\CMS\Core\Type\Bitmask\Permission;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
-use TYPO3\CMS\Core\Utility\RootlineUtility;
 
 /**
  * Class PermissionHelper
  *
  * @package Wazum\Sluggi\Helper
- * @author Wolfgang Klinger <wolfgang@wazum.com>
+ * @author  Wolfgang Klinger <wolfgang@wazum.com>
  */
 class PermissionHelper
 {
@@ -32,9 +31,13 @@ class PermissionHelper
 
         $groupWhitelist = [];
         try {
-            $groupWhitelist = explode(',',
-                GeneralUtility::makeInstance(ExtensionConfiguration::class)->get('sluggi',
-                    'whitelist'));
+            $groupWhitelist = explode(
+                ',',
+                GeneralUtility::makeInstance(ExtensionConfiguration::class)->get(
+                    'sluggi',
+                    'whitelist'
+                )
+            );
         } catch (ExtensionConfigurationExtensionNotConfiguredException $e) {
         } catch (ExtensionConfigurationPathDoesNotExistException $e) {
         }
@@ -76,7 +79,7 @@ class PermissionHelper
                 'perms_groupid',
                 'perms_user',
                 'perms_group',
-                'perms_everybody'
+                'perms_everybody',
             ]
         );
         $rootLine = array_reverse($rootLine);

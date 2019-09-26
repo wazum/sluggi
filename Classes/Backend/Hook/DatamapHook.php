@@ -14,6 +14,7 @@ use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Database\Query\QueryBuilder;
 use TYPO3\CMS\Core\Database\Query\Restriction\HiddenRestriction;
 use TYPO3\CMS\Core\DataHandling\DataHandler;
+use TYPO3\CMS\Core\DataHandling\SlugHelper;
 use TYPO3\CMS\Core\Exception\SiteNotFoundException;
 use TYPO3\CMS\Core\Messaging\FlashMessage;
 use TYPO3\CMS\Core\Messaging\FlashMessageService;
@@ -27,7 +28,7 @@ use Wazum\Sluggi\Helper\SlugHelper as SluggiSlugHelper;
  * Class DatamapHook
  *
  * @package Wazum\Sluggi\Backend\Hook
- * @author Wolfgang Klinger <wolfgang@wazum.com>
+ * @author  Wolfgang Klinger <wolfgang@wazum.com>
  */
 class DatamapHook
 {
@@ -43,12 +44,55 @@ class DatamapHook
     }
 
     /**
+     * @param array $incomingFieldArray
+     * @param string $table
+     * @param $id
+     * @param DataHandler $dataHandler
+     */
+    public function processDatamap_preProcessFieldArray(
+        /** @noinspection PhpUnusedParameterInspection */
+        array &$incomingFieldArray,
+        string $table,
+        $id,
+        DataHandler $dataHandler
+    ): void {
+        if ($table !== 'pages' || !is_numeric($id)) {
+            return;
+        }
+
+        $synchronize = true;
+        try {
+            $synchronize = GeneralUtility::makeInstance(ExtensionConfiguration::class)->get(
+                'sluggi',
+                'synchronize'
+            );
+        } catch (ExtensionConfigurationExtensionNotConfiguredException $e) {
+        } catch
+        (ExtensionConfigurationPathDoesNotExistException $e) {
+        }
+        // Synchronization happens already via Javascript (Ajax)
+        // but if the connection is too slow it could happen,
+        // that the save request contains the old slug
+        // so we have to do this on the server too
+        if ($synchronize) {
+            $data = array_merge(BackendUtility::getRecord('pages', $id), $incomingFieldArray);
+            if ((bool)$data['tx_sluggi_sync']) {
+                $fieldConfig = $GLOBALS['TCA']['pages']['columns']['slug']['config'] ?? [];
+                /** @var SlugHelper $helper */
+                $helper = GeneralUtility::makeInstance(SlugHelper::class, 'pages', 'slug', $fieldConfig);
+                $incomingFieldArray['slug'] = $helper->generate($data, $data['pid']);
+            }
+        }
+    }
+
+    /**
      * @param string $status
      * @param string $table
      * @param string|integer $id
      * @param array $fieldArray
      * @param DataHandler $dataHandler
      * @throws SiteNotFoundException
+     * @see processDatamap_preProcessFieldArray
      */
     public function processDatamap_postProcessFieldArray(
         /** @noinspection PhpUnusedParameterInspection */
@@ -63,14 +107,27 @@ class DatamapHook
         }
 
         $id = (int)$id; // not a new record, so definitely an integer
-        $languageId = BackendUtility::getRecord('pages', $id, 'sys_language_uid')['sys_language_uid'] ?? 0;
-        if (!PermissionHelper::hasFullPermission()) {
+        $page = BackendUtility::getRecord('pages', $id);
+        $languageId = $page['sys_language_uid'];
+        $synchronize = true;
+        try {
+            $synchronize = GeneralUtility::makeInstance(ExtensionConfiguration::class)->get(
+                'sluggi',
+                'synchronize'
+            );
+        } catch (ExtensionConfigurationExtensionNotConfiguredException $e) {
+        } catch
+        (ExtensionConfigurationPathDoesNotExistException $e) {
+        }
+        // If we synchronized in processDatamap_preProcessFieldArray
+        // we don't need to modify the slug here
+        if (!$synchronize && !PermissionHelper::hasFullPermission()) {
             $mountRootPage = PermissionHelper::getTopmostAccessiblePage($id);
             $inaccessibleSlugSegments = SluggiSlugHelper::getSlug($mountRootPage['pid'], $languageId);
             $fieldArray['slug'] = $inaccessibleSlugSegments . $fieldArray['slug'];
         }
 
-        $previousSlug = BackendUtility::getRecord('pages', $id, 'slug')['slug'] ?? '';
+        $previousSlug = $page['slug'] ?? '';
         $this->updateRedirect($id, $fieldArray['slug'], $languageId);
         $this->renameRecursively($id, $fieldArray['slug'], $previousSlug, $languageId);
     }
@@ -93,8 +150,8 @@ class DatamapHook
         int $siblingTargetId,
         array $moveRecord,
         array $updateFields,
-        Datahandler $dataHandler): void
-    {
+        DataHandler $dataHandler
+    ): void {
         if ($table !== 'pages') {
             return;
         }
@@ -173,24 +230,30 @@ class DatamapHook
             // Remove old redirects matching the previous slug
             $this->deleteRedirect($siteHost, $sitePath . $previousSlug);
 
-            $this->connection->insert('sys_redirect', [
-                // The redirect does not work currently
-                // when an endtime or respect/keep query parameters
-                // is set (core bug?)
-
-                // 'respect_query_parameters' => 1,
-                // 'keep_query_parameters' => 1,
-                // 'endtime' => strtotime('+1 month')
-
-                'pid' => 0,
-                'createdon' => time(),
-                'updatedon' => time(),
-                'createdby' => $this->getBackendUserId(),
-                'source_host' => $siteHost,
-                'source_path' => $sitePath . $previousSlug,
-                'target_statuscode' => 301,
-                'target' => 't3://page?uid=' . $pageId
-            ]);
+            $redirectLifetime = '+1 month';
+            try {
+                $redirectLifetime = GeneralUtility::makeInstance(ExtensionConfiguration::class)->get(
+                    'sluggi',
+                    'redirect_lifetime'
+                );
+            } catch (ExtensionConfigurationExtensionNotConfiguredException $e) {
+            } catch
+            (ExtensionConfigurationPathDoesNotExistException $e) {
+            }
+            $this->connection->insert(
+                'sys_redirect',
+                [
+                    'pid' => 0,
+                    'createdon' => time(),
+                    'updatedon' => time(),
+                    'createdby' => $this->getBackendUserId(),
+                    'endtime' => strtotime($redirectLifetime),
+                    'source_host' => $siteHost,
+                    'source_path' => $sitePath . $previousSlug,
+                    'target_statuscode' => 301,
+                    'target' => 't3://page?uid=' . $pageId
+                ]
+            );
         }
     }
 
@@ -200,7 +263,8 @@ class DatamapHook
      */
     protected function updateSlug(int $pageId, string $slug): void
     {
-        $this->connection->update('pages',
+        $this->connection->update(
+            'pages',
             ['slug' => $slug],
             ['uid' => $pageId]
         );
@@ -266,15 +330,15 @@ class DatamapHook
      */
     protected function renameRecursively(int $id, string $slug, string $previousSlug, int $languageId): void
     {
-        // Default, see ext_conf_template
         $renameRecursively = true;
         try {
-            $renameRecursively = (bool)GeneralUtility::makeInstance(ExtensionConfiguration::class)
-                ->get('sluggi', 'recursively');
+            $renameRecursively = GeneralUtility::makeInstance(ExtensionConfiguration::class)->get(
+                'sluggi',
+                'recursively'
+            );
         } catch (ExtensionConfigurationExtensionNotConfiguredException $e) {
-            $this->setFlashMessage($e->getMessage(), FlashMessage::ERROR);
-        } catch (ExtensionConfigurationPathDoesNotExistException $e) {
-            $this->setFlashMessage($e->getMessage(), FlashMessage::ERROR);
+        } catch
+        (ExtensionConfigurationPathDoesNotExistException $e) {
         }
         if ($renameRecursively) {
             $this->renameChildSlugsAndCreateRedirects($id, $languageId, $slug, $previousSlug);

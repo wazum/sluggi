@@ -1,20 +1,32 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
 <xliff version="1.0">
-	<file source-language="en" datatype="plaintext" original="messages" product-name="sluggi">
-		<header/>
-		<body>
-            <trans-unit id="pages.tx_sluggi_locked">
+    <file source-language="en" datatype="plaintext" original="messages" product-name="sluggi">
+        <header/>
+        <body>
+            <trans-unit id="pages.tx_sluggi_lock">
                 <source>Lock URL Segment</source>
             </trans-unit>
-            <trans-unit id="pages.tx_sluggi_locked.description">
+            <trans-unit id="pages.tx_sluggi_lock.description">
                 <source>Restrict editing of the URL Segment</source>
             </trans-unit>
-			<trans-unit id="pages.tx_sluggi_locked.enabled">
-				<source>Locked</source>
-			</trans-unit>
-			<trans-unit id="pages.tx_sluggi_locked.disabled">
-				<source>Unlocked</source>
-			</trans-unit>
-		</body>
-	</file>
+            <trans-unit id="pages.tx_sluggi_lock.enabled">
+                <source>Locked</source>
+            </trans-unit>
+            <trans-unit id="pages.tx_sluggi_lock.disabled">
+                <source>Unlocked</source>
+            </trans-unit>
+            <trans-unit id="pages.tx_sluggi_sync">
+                <source>Synchronize URL Segment</source>
+            </trans-unit>
+            <trans-unit id="pages.tx_sluggi_sync.description">
+                <source>Synchronize URL Segment with the configured fields</source>
+            </trans-unit>
+            <trans-unit id="pages.tx_sluggi_sync.enabled">
+                <source>Active</source>
+            </trans-unit>
+            <trans-unit id="pages.tx_sluggi_sync.disabled">
+                <source>Disabled</source>
+            </trans-unit>
+        </body>
+    </file>
 </xliff>

@@ -15,17 +15,21 @@ defined('TYPO3_MODE') or die ('Access denied.');
         $GLOBALS['TCA']['pages']['columns']['slug']['config']['generatorOptions']['replacements']['/'] = '-';
     }
 
-    if (!empty($configuration['pages_fields'])) {
+    $pagesFieldsForSlug = explode(',', $configuration['pages_fields']);
+    if (!empty($pagesFieldsForSlug)) {
         $GLOBALS['TCA']['pages']['columns']['slug']['config']['generatorOptions']['fields'] = [
-            explode(',', $configuration['pages_fields'])
+            $pagesFieldsForSlug
         ];
+    }
+    foreach ($pagesFieldsForSlug as $field) {
+        $GLOBALS['TCA']['pages']['columns'][$field]['config']['renderType'] = 'inputTextWithSlugImpact';
     }
 
     $fields = [
-        'tx_sluggi_locked' => [
+        'tx_sluggi_lock' => [
             'exclude' => 1,
-            'label' => 'LLL:EXT:sluggi/Resources/Private/Language/locallang_db.xlf:pages.tx_sluggi_locked',
-            'description' => 'LLL:EXT:sluggi/Resources/Private/Language/locallang_db.xlf:pages.tx_sluggi_locked.description',
+            'label' => 'LLL:EXT:sluggi/Resources/Private/Language/locallang_db.xlf:pages.tx_sluggi_lock',
+            'description' => 'LLL:EXT:sluggi/Resources/Private/Language/locallang_db.xlf:pages.tx_sluggi_lock.description',
             'config' => [
                 'type' => 'check',
                 'renderType' => 'checkboxToggle',
@@ -33,18 +37,40 @@ defined('TYPO3_MODE') or die ('Access denied.');
                     [
                         0 => '',
                         1 => '',
-                        'labelChecked' => 'LLL:EXT:sluggi/Resources/Private/Language/locallang_db.xlf:pages.tx_sluggi_locked.enabled',
-                        'labelUnchecked' => 'LLL:EXT:sluggi/Resources/Private/Language/locallang_db.xlf:pages.tx_sluggi_locked.disabled'
+                        'labelChecked' => 'LLL:EXT:sluggi/Resources/Private/Language/locallang_db.xlf:pages.tx_sluggi_lock.enabled',
+                        'labelUnchecked' => 'LLL:EXT:sluggi/Resources/Private/Language/locallang_db.xlf:pages.tx_sluggi_lock.disabled'
                     ]
                 ]
             ]
+        ],
+        'tx_sluggi_sync' => [
+            'exclude' => 1,
+            'label' => 'LLL:EXT:sluggi/Resources/Private/Language/locallang_db.xlf:pages.tx_sluggi_sync',
+            'description' => 'LLL:EXT:sluggi/Resources/Private/Language/locallang_db.xlf:pages.tx_sluggi_sync.description',
+            'config' => [
+                'type' => 'check',
+                'renderType' => 'checkboxToggleWithSlugSync',
+                'items' => [
+                    [
+                        0 => '',
+                        1 => '',
+                        'labelChecked' => 'LLL:EXT:sluggi/Resources/Private/Language/locallang_db.xlf:pages.tx_sluggi_sync.enabled',
+                        'labelUnchecked' => 'LLL:EXT:sluggi/Resources/Private/Language/locallang_db.xlf:pages.tx_sluggi_sync.disabled'
+                    ]
+                ],
+                'default' => 1
+            ]
         ]
     ];
+    $showItems = ['tx_sluggi_lock', 'tx_sluggi_sync'];
+    if ((bool)$configuration['synchronize'] === false) {
+        unset($fields['tx_sluggi_sync'], $showItems['tx_sluggi_sync']);
+    }
 
     \TYPO3\CMS\Core\Utility\ExtensionManagementUtility::addTCAcolumns('pages', $fields);
     foreach ($GLOBALS['TCA']['pages']['palettes'] as &$palette) {
         $palette['showitem'] = str_replace('slug, --linebreak--,',
-            'slug, --linebreak--, tx_sluggi_locked, --linebreak--,',
+            'slug, --linebreak--, ' . implode(',', $showItems) . ', --linebreak--,',
             $palette['showitem']);
     }
 })();

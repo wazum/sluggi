@@ -1,20 +1,32 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
 <xliff version="1.0">
-	<file target-language="en" datatype="plaintext" original="messages" product-name="sluggi">
-		<header/>
-		<body>
-			<trans-unit id="pages.tx_sluggi_locked">
-				<target>Sperre URL Segment</target>
-			</trans-unit>
-			<trans-unit id="pages.tx_sluggi_locked.description">
-				<target>Sperre die Bearbeitung des URL Segmentes</target>
-			</trans-unit>
-			<trans-unit id="pages.tx_sluggi_locked.enabled">
-				<target>Gesperrt</target>
-			</trans-unit>
-			<trans-unit id="pages.tx_sluggi_locked.disabled">
-				<target>Freigeschalten</target>
-			</trans-unit>
-		</body>
-	</file>
+    <file target-language="en" datatype="plaintext" original="messages" product-name="sluggi">
+        <header/>
+        <body>
+            <trans-unit id="pages.tx_sluggi_lock">
+                <target>Sperre URL Segment</target>
+            </trans-unit>
+            <trans-unit id="pages.tx_sluggi_lock.description">
+                <target>Sperre die Bearbeitung des URL Segmentes</target>
+            </trans-unit>
+            <trans-unit id="pages.tx_sluggi_lock.enabled">
+                <target>Gesperrt</target>
+            </trans-unit>
+            <trans-unit id="pages.tx_sluggi_lock.disabled">
+                <target>Freigeschalten</target>
+            </trans-unit>
+            <trans-unit id="pages.tx_sluggi_sync">
+                <target>Synchronisiere URL Segment</target>
+            </trans-unit>
+            <trans-unit id="pages.tx_sluggi_sync.description">
+                <target>Synchronisiere das URL Segment mit den konfigurierten Feldern</target>
+            </trans-unit>
+            <trans-unit id="pages.tx_sluggi_sync.enabled">
+                <target>Aktiv</target>
+            </trans-unit>
+            <trans-unit id="pages.tx_sluggi_sync.disabled">
+                <target>Deaktiviert</target>
+            </trans-unit>
+        </body>
+    </file>
 </xliff>
