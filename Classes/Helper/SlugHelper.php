@@ -9,6 +9,7 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 /**
  * Class SlugHelper
+ *
  * @package Wazum\Sluggi\Helper
  * @author  Wolfgang Klinger <wk@plan2.net>
  */

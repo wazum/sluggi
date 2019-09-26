@@ -12,12 +12,12 @@ use Wazum\Sluggi\Helper\SlugHelper as SluggiSlugHelper;
 
 /**
  * Class InputSlugElement
+ *
  * @package Wazum\Sluggi\Backend\Form
  * @author Wolfgang Klinger <wolfgang@wazum.com>
  */
 class InputSlugElement extends \TYPO3\CMS\Backend\Form\Element\InputSlugElement
 {
-
     /**
      * Additional group/admin check for slug edit button
      *
@@ -44,7 +44,8 @@ class InputSlugElement extends \TYPO3\CMS\Backend\Form\Element\InputSlugElement
             $inaccessibleSlugSegments = SluggiSlugHelper::getSlug((int)$mountRootPage['pid'], $languageId);
             $prefix = $this->getPrefix($this->data['site'], $languageId) . $inaccessibleSlugSegments;
             $editableSlugSegments = $this->data['databaseRow']['slug'];
-            if (!empty($inaccessibleSlugSegments) && strpos($this->data['databaseRow']['slug'], $inaccessibleSlugSegments) === 0) {
+            if (!empty($inaccessibleSlugSegments) && strpos($this->data['databaseRow']['slug'],
+                    $inaccessibleSlugSegments) === 0) {
                 $editableSlugSegments = substr($this->data['databaseRow']['slug'], strlen($inaccessibleSlugSegments));
             }
 
@@ -66,8 +67,7 @@ class InputSlugElement extends \TYPO3\CMS\Backend\Form\Element\InputSlugElement
         if (isset($GLOBALS['TCA'][$table]['ctrl']['languageField']) &&
             !empty($GLOBALS['TCA'][$table]['ctrl']['languageField'])) {
             $languageField = $GLOBALS['TCA'][$table]['ctrl']['languageField'];
-            $languageId = (int)(
-                (is_array($row[$languageField]) ?
+            $languageId = (int)((is_array($row[$languageField]) ?
                     $row[$languageField][0] :
                     $row[$languageField]) ?? 0
             );
@@ -125,5 +125,4 @@ class InputSlugElement extends \TYPO3\CMS\Backend\Form\Element\InputSlugElement
 
         return $result;
     }
-
 }

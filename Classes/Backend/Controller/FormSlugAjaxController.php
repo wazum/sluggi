@@ -16,6 +16,7 @@ use Wazum\Sluggi\Helper\SlugHelper as SluggiSlugHelper;
 
 /**
  * Class FormSlugAjaxController
+ *
  * @package Wazum\Sluggi\Backend\Controller
  * @author Wolfgang Klinger <wk@plan2.net>
  */

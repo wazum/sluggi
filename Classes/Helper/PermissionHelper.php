@@ -14,12 +14,12 @@ use TYPO3\CMS\Core\Utility\RootlineUtility;
 
 /**
  * Class PermissionHelper
+ *
  * @package Wazum\Sluggi\Helper
  * @author Wolfgang Klinger <wolfgang@wazum.com>
  */
 class PermissionHelper
 {
-
     /**
      * @return bool
      */
@@ -97,5 +97,4 @@ class PermissionHelper
     {
         return $GLOBALS['BE_USER'];
     }
-
 }
