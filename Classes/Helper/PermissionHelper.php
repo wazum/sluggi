@@ -5,11 +5,7 @@ namespace Wazum\Sluggi\Helper;
 
 use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\Authentication\BackendUserAuthentication;
-use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException;
-use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException;
-use TYPO3\CMS\Core\Configuration\ExtensionConfiguration;
 use TYPO3\CMS\Core\Type\Bitmask\Permission;
-use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 /**
  * Class PermissionHelper
@@ -29,18 +25,7 @@ class PermissionHelper
             return true;
         }
 
-        $groupWhitelist = [];
-        try {
-            $groupWhitelist = explode(
-                ',',
-                GeneralUtility::makeInstance(ExtensionConfiguration::class)->get(
-                    'sluggi',
-                    'whitelist'
-                )
-            );
-        } catch (ExtensionConfigurationExtensionNotConfiguredException $e) {
-        } catch (ExtensionConfigurationPathDoesNotExistException $e) {
-        }
+        $groupWhitelist = explode(',', (string)Configuration::get('whitelist'));
         foreach ($groupWhitelist as $groupId) {
             if ($backendUser->isMemberOfGroup((int)$groupId)) {
                 return true;

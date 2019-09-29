@@ -6,9 +6,6 @@ namespace Wazum\Sluggi\Backend\Hook;
 use Doctrine\DBAL\ConnectionException;
 use RuntimeException;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
-use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException;
-use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException;
-use TYPO3\CMS\Core\Configuration\ExtensionConfiguration;
 use TYPO3\CMS\Core\Database\Connection;
 use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Database\Query\QueryBuilder;
@@ -21,6 +18,7 @@ use TYPO3\CMS\Core\Messaging\FlashMessageService;
 use TYPO3\CMS\Core\Site\SiteFinder;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Redirects\Service\RedirectCacheService;
+use Wazum\Sluggi\Helper\Configuration;
 use Wazum\Sluggi\Helper\PermissionHelper;
 use Wazum\Sluggi\Helper\SlugHelper as SluggiSlugHelper;
 
@@ -60,16 +58,7 @@ class DatamapHook
             return;
         }
 
-        $synchronize = true;
-        try {
-            $synchronize = GeneralUtility::makeInstance(ExtensionConfiguration::class)->get(
-                'sluggi',
-                'synchronize'
-            );
-        } catch (ExtensionConfigurationExtensionNotConfiguredException $e) {
-        } catch
-        (ExtensionConfigurationPathDoesNotExistException $e) {
-        }
+        $synchronize = (bool)Configuration::get('synchronize');
         // Synchronization happens already via Javascript (Ajax)
         // but if the connection is too slow it could happen,
         // that the save request contains the old slug
@@ -109,16 +98,7 @@ class DatamapHook
         $id = (int)$id; // not a new record, so definitely an integer
         $page = BackendUtility::getRecord('pages', $id);
         $languageId = $page['sys_language_uid'];
-        $synchronize = true;
-        try {
-            $synchronize = GeneralUtility::makeInstance(ExtensionConfiguration::class)->get(
-                'sluggi',
-                'synchronize'
-            );
-        } catch (ExtensionConfigurationExtensionNotConfiguredException $e) {
-        } catch
-        (ExtensionConfigurationPathDoesNotExistException $e) {
-        }
+        $synchronize = (bool)Configuration::get('synchronize');
         // If we synchronized in processDatamap_preProcessFieldArray
         // we don't need to modify the slug here
         if (!$synchronize && !PermissionHelper::hasFullPermission()) {
@@ -230,16 +210,7 @@ class DatamapHook
             // Remove old redirects matching the previous slug
             $this->deleteRedirect($siteHost, $sitePath . $previousSlug);
 
-            $redirectLifetime = '+1 month';
-            try {
-                $redirectLifetime = GeneralUtility::makeInstance(ExtensionConfiguration::class)->get(
-                    'sluggi',
-                    'redirect_lifetime'
-                );
-            } catch (ExtensionConfigurationExtensionNotConfiguredException $e) {
-            } catch
-            (ExtensionConfigurationPathDoesNotExistException $e) {
-            }
+            $redirectLifetime = (string)Configuration::get('redirect_lifetime');
             $this->connection->insert(
                 'sys_redirect',
                 [
@@ -330,16 +301,7 @@ class DatamapHook
      */
     protected function renameRecursively(int $id, string $slug, string $previousSlug, int $languageId): void
     {
-        $renameRecursively = true;
-        try {
-            $renameRecursively = GeneralUtility::makeInstance(ExtensionConfiguration::class)->get(
-                'sluggi',
-                'recursively'
-            );
-        } catch (ExtensionConfigurationExtensionNotConfiguredException $e) {
-        } catch
-        (ExtensionConfigurationPathDoesNotExistException $e) {
-        }
+        $renameRecursively = (bool)Configuration::get('recursively');
         if ($renameRecursively) {
             $this->renameChildSlugsAndCreateRedirects($id, $languageId, $slug, $previousSlug);
         }

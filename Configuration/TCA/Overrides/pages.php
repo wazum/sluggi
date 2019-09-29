@@ -1,21 +1,16 @@
 <?php
 
+use Wazum\Sluggi\Helper\Configuration;
+
 defined('TYPO3_MODE') or die ('Access denied.');
 
 (static function () {
-    $configuration = [];
-    try {
-        $configuration = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance(\TYPO3\CMS\Core\Configuration\ExtensionConfiguration::class)->get('sluggi');
-    } catch (\TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException $e) {
-    } catch (\TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException $e) {
-    }
-
-    if ($configuration['slash_replacement'] && !isset($GLOBALS['TCA']['pages']['columns']['slug']['config']['generatorOptions']['replacements']['/'])) {
+    if ((bool)Configuration::get('slash_replacement') && !isset($GLOBALS['TCA']['pages']['columns']['slug']['config']['generatorOptions']['replacements']['/'])) {
         // Replace / in slugs with -
         $GLOBALS['TCA']['pages']['columns']['slug']['config']['generatorOptions']['replacements']['/'] = '-';
     }
 
-    $pagesFieldsForSlug = explode(',', $configuration['pages_fields']);
+    $pagesFieldsForSlug = explode(',', (string)Configuration::get('pages_fields'));
     if (!empty($pagesFieldsForSlug)) {
         $GLOBALS['TCA']['pages']['columns']['slug']['config']['generatorOptions']['fields'] = [
             $pagesFieldsForSlug
@@ -63,7 +58,7 @@ defined('TYPO3_MODE') or die ('Access denied.');
         ]
     ];
     $showItems = ['tx_sluggi_lock', 'tx_sluggi_sync'];
-    if ((bool)$configuration['synchronize'] === false) {
+    if (!(bool)Configuration::get('synchronize')) {
         unset($fields['tx_sluggi_sync'], $showItems['tx_sluggi_sync']);
     }
 
