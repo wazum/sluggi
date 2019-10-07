@@ -27,6 +27,17 @@ In this example the editor has no rights to edit the _About_ page of the website
 
 You can set a whitelist with backend user group IDs in the extension configuration. Members of these groups will still be able to edit the whole slug.
 
+# Synchronize the URL with the configured fields
+
+The most awaited feature is here!
+
+No more URLs like '/about/translate-to-english-ueber-uns' because you forgot to press the re-generate button while translating a page.
+_sluggi_ will do the hard work for you and keep the URL in sync with your configured (e.g. the title) field.
+
+![sluggi Synchronization](Resources/Public/Screenshots/sluggi_sync.png)
+
+This feature is enabled by default, but you can switch it off in the extension configuration completely or on every single page if you need a different URL.
+
 ## Requirements
 
 You need at least TYPO3 CMS version 9.5.5 including the following features:

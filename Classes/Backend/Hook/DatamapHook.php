@@ -108,8 +108,19 @@ class DatamapHook
         }
 
         $previousSlug = $page['slug'] ?? '';
-        $this->updateRedirect($id, $fieldArray['slug'], $languageId);
-        $this->renameRecursively($id, $fieldArray['slug'], $previousSlug, $languageId);
+        try {
+            $this->connection->beginTransaction();
+            $this->updateRedirect($id, $fieldArray['slug'], $languageId);
+            $this->renameRecursively($id, $fieldArray['slug'], $previousSlug, $languageId);
+            $this->connection->commit();
+        } catch (ConnectionException $e) {
+            try {
+                $this->connection->rollBack();
+            } catch (ConnectionException $e) {
+                $this->setFlashMessage($e->getMessage(), FlashMessage::ERROR);
+            }
+            $this->setFlashMessage($e->getMessage(), FlashMessage::ERROR);
+        }
     }
 
     /**
@@ -184,9 +195,14 @@ class DatamapHook
                     $this->connection->beginTransaction();
                     $this->updateRedirect($id, $newSlug, $languageId);
                     $this->updateSlug($id, $newSlug);
-                    $this->connection->commit();
                     $this->renameRecursively($id, $newSlug, $currentPage['slug'], $languageId);
+                    $this->connection->commit();
                 } catch (ConnectionException $e) {
+                    try {
+                        $this->connection->rollBack();
+                    } catch (ConnectionException $e) {
+                        $this->setFlashMessage($e->getMessage(), FlashMessage::ERROR);
+                    }
                     $this->setFlashMessage($e->getMessage(), FlashMessage::ERROR);
                 }
             }
@@ -202,11 +218,8 @@ class DatamapHook
     protected function updateRedirect(int $pageId, string $slug, int $languageId): void
     {
         [$siteHost, $sitePath] = $this->getBaseByPageId($pageId, $languageId);
-        // Remove old redirects matching the new slug
-        $this->deleteRedirect($siteHost, $sitePath . $slug);
-
         $previousSlug = BackendUtility::getRecord('pages', $pageId, 'slug')['slug'] ?? '';
-        if (!empty($previousSlug)) {
+        if (!empty($previousSlug) && $previousSlug !== $slug) {
             // Remove old redirects matching the previous slug
             $this->deleteRedirect($siteHost, $sitePath . $previousSlug);
 
@@ -226,6 +239,8 @@ class DatamapHook
                 ]
             );
         }
+        // Remove redirects matching the new slug
+        $this->deleteRedirect($siteHost, $sitePath . $slug);
     }
 
     /**
@@ -260,14 +275,8 @@ class DatamapHook
                 // Replace slug segments for all child pages recursively
                 foreach ($childPages as $page) {
                     $updatedSlug = str_replace($previousSlug, $slug, $page['slug']);
-                    try {
-                        $this->connection->beginTransaction();
-                        $this->updateRedirect((int)$page['uid'], $updatedSlug, $languageId);
-                        $this->updateSlug((int)$page['uid'], $updatedSlug);
-                        $this->connection->commit();
-                    } catch (ConnectionException $e) {
-                        $this->setFlashMessage($e->getMessage(), FlashMessage::ERROR);
-                    }
+                    $this->updateRedirect((int)$page['uid'], $updatedSlug, $languageId);
+                    $this->updateSlug((int)$page['uid'], $updatedSlug);
                     $this->renameChildSlugsAndCreateRedirects((int)$page['uid'], $languageId, $slug, $previousSlug);
                 }
             }
@@ -281,8 +290,7 @@ class DatamapHook
     private function deleteRedirect(string $host, string $path): void
     {
         /** @var QueryBuilder $queryBuilder */
-        $queryBuilder = GeneralUtility::makeInstance(ConnectionPool::class)
-            ->getQueryBuilderForTable('sys_redirect');
+        $queryBuilder = $this->connection->createQueryBuilder();
         $queryBuilder->getRestrictions()->removeAll();
 
         $queryBuilder->delete('sys_redirect')
