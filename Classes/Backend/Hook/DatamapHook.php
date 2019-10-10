@@ -234,7 +234,7 @@ class DatamapHook
                     'endtime' => strtotime($redirectLifetime),
                     'source_host' => $siteHost,
                     'source_path' => $sitePath . $previousSlug,
-                    'target_statuscode' => 301,
+                    'target_statuscode' => 307,
                     'target' => 't3://page?uid=' . $pageId
                 ]
             );
