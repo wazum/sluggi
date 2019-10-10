@@ -8,5 +8,7 @@ pages_fields = nav_title,title
 recursively = 1
 # cat=basic; type=string; label=Redirect lifetime (strtotime)
 redirect_lifetime = +1 month
+# cat=basic; type=string; label=Use HTTP redirect code
+redirect_code = 307
 # cat=basic; type=boolean; label=Enable synchronization of slug segment with configured page fields
 synchronize = 1

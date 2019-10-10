@@ -228,7 +228,8 @@ class DatamapHook
             // Remove old redirects matching the previous slug
             $this->deleteRedirect($siteHost, $sitePath . $previousSlug);
 
-            $redirectLifetime = (string)Configuration::get('redirect_lifetime');
+            $redirectLifetime = strtotime((string)Configuration::get('redirect_lifetime'));
+            $redirectHttpStatusCode = (int)Configuration::get('redirect_lifetime');
             $this->connection->insert(
                 'sys_redirect',
                 [
@@ -236,10 +237,10 @@ class DatamapHook
                     'createdon' => time(),
                     'updatedon' => time(),
                     'createdby' => $this->getBackendUserId(),
-                    'endtime' => strtotime($redirectLifetime),
+                    'endtime' => $redirectLifetime !== false ? $redirectLifetime : strtotime('+1 month'),
                     'source_host' => $siteHost,
                     'source_path' => $sitePath . $previousSlug,
-                    'target_statuscode' => 307,
+                    'target_statuscode' => in_array($redirectHttpStatusCode, [301, 307]) ? $redirectHttpStatusCode : 307,
                     'target' => 't3://page?uid=' . $pageId
                 ]
             );
