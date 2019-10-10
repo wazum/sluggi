@@ -58,6 +58,11 @@ class DatamapHook
             return;
         }
 
+        // Strip off every trailing slash
+        if (!empty($incomingFieldArray['slug']) && $incomingFieldArray['slug'] !== '/') {
+            $incomingFieldArray['slug'] = rtrim($incomingFieldArray['slug'], '/');
+        }
+
         $synchronize = (bool)Configuration::get('synchronize');
         // Synchronization happens already via Javascript (Ajax)
         // but if the connection is too slow it could happen,
@@ -269,6 +274,8 @@ class DatamapHook
         string $slug,
         string $previousSlug
     ): void {
+        $slug = rtrim($slug, '/') . '/';
+        $previousSlug = rtrim($previousSlug, '/') . '/';
         if (!empty($previousSlug) && $slug !== $previousSlug) {
             $childPages = $this->getChildPages($pageId, $languageId);
             if (count($childPages)) {
