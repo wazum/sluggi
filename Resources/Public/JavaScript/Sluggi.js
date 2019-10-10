@@ -9,7 +9,9 @@ define([
       });
     }
     $(document).on('click', 'label.slug-sync', function (e) {
-      $('.t3js-form-field-slug-recreate').trigger('click');
+        if ($('input[name*="][tx_sluggi_sync]"]').val() < 1) {
+            $('.t3js-form-field-slug-recreate').trigger('click');
+        }
     });
   }
 );
