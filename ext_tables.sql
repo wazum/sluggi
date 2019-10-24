@@ -10,5 +10,5 @@ CREATE TABLE pages (
 # Table structure for table 'sys_redirect'
 #
 CREATE TABLE sys_redirect (
-  source_path TEXT NOT NULL
+  source_path varchar(255) DEFAULT '' NOT NULL
 );
