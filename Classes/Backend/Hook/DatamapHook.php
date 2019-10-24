@@ -222,31 +222,40 @@ class DatamapHook
      */
     protected function updateRedirect(int $pageId, string $slug, int $languageId): void
     {
-        [$siteHost, $sitePath] = $this->getBaseByPageId($pageId, $languageId);
-        $previousSlug = BackendUtility::getRecord('pages', $pageId, 'slug')['slug'] ?? '';
-        if (!empty($previousSlug) && $previousSlug !== $slug) {
-            // Remove old redirects matching the previous slug
-            $this->deleteRedirect($siteHost, $sitePath . $previousSlug);
+        // Get current application context
+        $currentApplicationContext = GeneralUtility::getApplicationContext();
 
-            $redirectLifetime = strtotime((string)Configuration::get('redirect_lifetime'));
-            $redirectHttpStatusCode = (int)Configuration::get('redirect_lifetime');
-            $this->connection->insert(
-                'sys_redirect',
-                [
-                    'pid' => 0,
-                    'createdon' => time(),
-                    'updatedon' => time(),
-                    'createdby' => $this->getBackendUserId(),
-                    'endtime' => $redirectLifetime !== false ? $redirectLifetime : strtotime('+1 month'),
-                    'source_host' => $siteHost,
-                    'source_path' => $sitePath . $previousSlug,
-                    'target_statuscode' => in_array($redirectHttpStatusCode, [301, 307]) ? $redirectHttpStatusCode : 307,
-                    'target' => 't3://page?uid=' . $pageId
-                ]
-            );
+        // Get config
+        $redirectsProduction = (bool)Configuration::get('redirects_production');
+
+        // Check if current application context is set to production
+        if ($currentApplicationContext->isProduction() || $redirectsProduction === false) {
+            [$siteHost, $sitePath] = $this->getBaseByPageId($pageId, $languageId);
+            $previousSlug = BackendUtility::getRecord('pages', $pageId, 'slug')['slug'] ?? '';
+            if (!empty($previousSlug) && $previousSlug !== $slug) {
+                // Remove old redirects matching the previous slug
+                $this->deleteRedirect($siteHost, $sitePath . $previousSlug);
+
+                $redirectLifetime = strtotime((string)Configuration::get('redirect_lifetime'));
+                $redirectHttpStatusCode = (int)Configuration::get('redirect_lifetime');
+                $this->connection->insert(
+                    'sys_redirect',
+                    [
+                        'pid' => 0,
+                        'createdon' => time(),
+                        'updatedon' => time(),
+                        'createdby' => $this->getBackendUserId(),
+                        'endtime' => $redirectLifetime !== false ? $redirectLifetime : strtotime('+1 month'),
+                        'source_host' => $siteHost,
+                        'source_path' => $sitePath . $previousSlug,
+                        'target_statuscode' => in_array($redirectHttpStatusCode, [301, 307]) ? $redirectHttpStatusCode : 307,
+                        'target' => 't3://page?uid=' . $pageId
+                    ]
+                );
+            }
+            // Remove redirects matching the new slug
+            $this->deleteRedirect($siteHost, $sitePath . $slug);
         }
-        // Remove redirects matching the new slug
-        $this->deleteRedirect($siteHost, $sitePath . $slug);
     }
 
     /**
