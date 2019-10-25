@@ -5,7 +5,9 @@
   "require": {
     "php": ">=7.0.0",
     "ext-libxml": "*",
-    "ext-dom": "*",
+    "ext-dom": "*"
+  },
+  "suggest": {
     "typo3/cms-redirects": "^9.5.5"
   },
   "type": "typo3-cms-extension",

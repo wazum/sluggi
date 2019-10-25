@@ -13,6 +13,8 @@ $EM_CONF[$_EXTKEY] = [
     'constraints' => [
         'depends' => [
             'typo3' => '9.5.5-9.5.99',
+        ],
+        'suggests' => [
             'redirects' => ''
         ]
     ]

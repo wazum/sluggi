@@ -16,8 +16,8 @@ use TYPO3\CMS\Core\Exception\SiteNotFoundException;
 use TYPO3\CMS\Core\Messaging\FlashMessage;
 use TYPO3\CMS\Core\Messaging\FlashMessageService;
 use TYPO3\CMS\Core\Site\SiteFinder;
+use TYPO3\CMS\Core\Utility\ExtensionManagementUtility;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
-use TYPO3\CMS\Redirects\Service\RedirectCacheService;
 use Wazum\Sluggi\Helper\Configuration;
 use Wazum\Sluggi\Helper\PermissionHelper;
 use Wazum\Sluggi\Helper\SlugHelper as SluggiSlugHelper;
@@ -222,6 +222,10 @@ class DatamapHook
      */
     protected function updateRedirect(int $pageId, string $slug, int $languageId): void
     {
+        if (!ExtensionManagementUtility::isLoaded('redirects')) {
+            return;
+        }
+
         [$siteHost, $sitePath] = $this->getBaseByPageId($pageId, $languageId);
         $previousSlug = BackendUtility::getRecord('pages', $pageId, 'slug')['slug'] ?? '';
         if (!empty($previousSlug) && $previousSlug !== $slug) {
@@ -322,8 +326,10 @@ class DatamapHook
             $this->renameChildSlugsAndCreateRedirects($id, $languageId, $slug, $previousSlug);
         }
 
-        // Rebuild redirect cache
-        GeneralUtility::makeInstance(RedirectCacheService::class)->rebuild();
+        if (ExtensionManagementUtility::isLoaded('redirects')) {
+            // Rebuild redirect cache
+            GeneralUtility::makeInstance(\TYPO3\CMS\Redirects\Service\RedirectCacheService::class)->rebuild();
+        }
     }
 
     /**
