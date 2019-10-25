@@ -9,6 +9,10 @@ CREATE TABLE pages (
 #
 # Table structure for table 'sys_redirect'
 #
+# source_path varchar(255) is not long enough for some URL
+#
 CREATE TABLE sys_redirect (
-  source_path TEXT NOT NULL
+  source_host varchar(255) DEFAULT '' NOT NULL,
+  source_path TEXT NOT NULL,
+  KEY index_source (source_host(80),source_path(80))
 );
