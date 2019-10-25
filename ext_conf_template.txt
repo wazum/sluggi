@@ -4,11 +4,13 @@ whitelist =
 slash_replacement = 1
 # cat=basic; type=string; label=Use the following page fields for slug generation
 pages_fields = nav_title,title
-# cat=basic; type=boolean; label=Enable renaming slug segments recursively
-recursively = 1
-# cat=basic; type=string; label=Redirect lifetime (strtotime)
-redirect_lifetime = +1 month
-# cat=basic; type=string; label=Use HTTP redirect code
-redirect_code = 307
 # cat=basic; type=boolean; label=Enable synchronization of slug segment with configured page fields
 synchronize = 1
+# cat=basic; type=boolean; label=Enable renaming slug segments recursively
+recursively = 1
+# cat=basic; type=boolean; label=Enable redirects (requires active 'typo3/cms-redirects' extension)
+redirects = 1
+# cat=basic; type=string; label=Redirect lifetime (strtotime)
+redirect_lifetime = +1 month
+# cat=basic; type=options[307 Temporary Redirect=307,301 Moved Permanently=301]; label=Use HTTP redirect code
+redirect_code = 307

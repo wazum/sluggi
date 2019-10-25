@@ -222,7 +222,8 @@ class DatamapHook
      */
     protected function updateRedirect(int $pageId, string $slug, int $languageId): void
     {
-        if (!ExtensionManagementUtility::isLoaded('redirects')) {
+        $redirectsActive = (bool)Configuration::get('redirects');
+        if (!$redirectsActive || !ExtensionManagementUtility::isLoaded('redirects')) {
             return;
         }
 
@@ -244,7 +245,7 @@ class DatamapHook
                     'endtime' => $redirectLifetime !== false ? $redirectLifetime : strtotime('+1 month'),
                     'source_host' => $siteHost,
                     'source_path' => $sitePath . $previousSlug,
-                    'target_statuscode' => in_array($redirectHttpStatusCode, [301, 307]) ? $redirectHttpStatusCode : 307,
+                    'target_statuscode' => in_array($redirectHttpStatusCode, [301, 307], true) ? $redirectHttpStatusCode : 307,
                     'target' => 't3://page?uid=' . $pageId
                 ]
             );
@@ -326,7 +327,8 @@ class DatamapHook
             $this->renameChildSlugsAndCreateRedirects($id, $languageId, $slug, $previousSlug);
         }
 
-        if (ExtensionManagementUtility::isLoaded('redirects')) {
+        $redirectsActive = (bool)Configuration::get('redirects');
+        if ($redirectsActive && ExtensionManagementUtility::isLoaded('redirects')) {
             // Rebuild redirect cache
             GeneralUtility::makeInstance(\TYPO3\CMS\Redirects\Service\RedirectCacheService::class)->rebuild();
         }

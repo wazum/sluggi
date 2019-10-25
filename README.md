@@ -5,7 +5,7 @@
 The latest version of the extension … 
 * modifies the page slug field, so normal users can only edit the part of the page slug they have appropriate permissions on the related pages (see screenshot and example below)
 * allows administrators to restrict editing the page slug on certain pages
-* renames slug segments recursively, so if you change the slug of a parent page, the segments of this page are updated in all slugs on child pages. [Redirects](https://docs.typo3.org/typo3cms/extensions/core/Changelog/9.1/Feature-83631-SystemExtensionRedirectsHasBeenAdded.html) are created for all _old_ paths too
+* renames slug segments recursively, so if you change the slug of a parent page, the segments of this page are updated in all slugs on child pages. [Redirects](https://docs.typo3.org/typo3cms/extensions/core/Changelog/9.1/Feature-83631-SystemExtensionRedirectsHasBeenAdded.html) are created for all renamed pages if the `typo3/cms-redirects` extension is active
 * renames slug segments when moving a page (including child pages recursively)
 * allows to synchronize the slug segment with the configured (title) fields automatically (behaviour like with RealURL)
 * sets a fallback chain for page slug calculation as follows (the first nonempty value is used): Alternative page title > Page title (you can change the fields used in the extension configuration)
@@ -27,12 +27,16 @@ In this example the editor has no rights to edit the _About_ page of the website
 
 You can set a whitelist with backend user group IDs in the extension configuration. Members of these groups will still be able to edit the whole slug.
 
+# Redirects
+
+_sluggi_ will automatically create redirects for all renamed pages if the extension `typo3/cms-redirects` is active. See the extension settings for further options (like redirect HTTP status code).
+
 # Recursive update of URLs
 
 If the feature is enabled in the extension configuration (see above), whenever you move a page or change the URL of a page with subpages,
 the URL part that matches the affected page is recursively updated (or replaced) on all these pages.
 
-Of course, if your subpages have custom URLs that are not related to the parent pages, nothing will change on this pages!
+Of course, if your subpages have custom URLs that are not related to the parent pages, nothing will change on these pages!
 
 # Synchronize the URL with the configured fields
 
