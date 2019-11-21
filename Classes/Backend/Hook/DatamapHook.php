@@ -15,6 +15,8 @@ use TYPO3\CMS\Core\DataHandling\SlugHelper;
 use TYPO3\CMS\Core\Exception\SiteNotFoundException;
 use TYPO3\CMS\Core\Messaging\FlashMessage;
 use TYPO3\CMS\Core\Messaging\FlashMessageService;
+use TYPO3\CMS\Core\Routing\PageRouter;
+use TYPO3\CMS\Core\Site\Entity\Site;
 use TYPO3\CMS\Core\Site\SiteFinder;
 use TYPO3\CMS\Core\Utility\ExtensionManagementUtility;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
@@ -227,31 +229,62 @@ class DatamapHook
             return;
         }
 
-        [$siteHost, $sitePath] = $this->getBaseByPageId($pageId, $languageId);
-        $previousSlug = BackendUtility::getRecord('pages', $pageId, 'slug')['slug'] ?? '';
-        if (!empty($previousSlug) && $previousSlug !== $slug) {
-            // Remove old redirects matching the previous slug
-            $this->deleteRedirect($siteHost, $sitePath . $previousSlug);
+        /** @var SiteFinder $siteFinder */
+        $siteFinder = GeneralUtility::makeInstance(SiteFinder::class);
+        $site = $siteFinder->getSiteByPageId($pageId);
 
-            $redirectLifetime = strtotime((string)Configuration::get('redirect_lifetime'));
-            $redirectHttpStatusCode = (int)Configuration::get('redirect_lifetime');
-            $this->connection->insert(
-                'sys_redirect',
-                [
-                    'pid' => 0,
-                    'createdon' => time(),
-                    'updatedon' => time(),
-                    'createdby' => $this->getBackendUserId(),
-                    'endtime' => $redirectLifetime !== false ? $redirectLifetime : strtotime('+1 month'),
-                    'source_host' => $siteHost,
-                    'source_path' => $sitePath . $previousSlug,
-                    'target_statuscode' => in_array($redirectHttpStatusCode, [301, 307], true) ? $redirectHttpStatusCode : 307,
-                    'target' => 't3://page?uid=' . $pageId
-                ]
-            );
+        [$siteHost, $sitePath] = $this->getBaseByPageId($site, $pageId, $languageId);
+        $currentSlug = BackendUtility::getRecord('pages', $pageId, 'slug')['slug'] ?? '';
+        if (!empty($currentSlug)) {
+            // Check for possibly different URL (e.g. with /index.html appended)
+            $pageRouter = GeneralUtility::makeInstance(PageRouter::class, $site);
+            $generatedPath = $pageRouter->generateUri($pageId, ['_language' => $languageId])->getPath();
+            $variant = null;
+            // There must be some kind of route enhancer involved
+            if (($generatedPath !== $currentSlug) && strpos($generatedPath, $currentSlug) !== false) {
+                $variant = str_replace($currentSlug, '', $generatedPath);
+            }
+            if ($currentSlug !== $slug) {
+                // Remove old redirects matching the previous slug
+                $this->deleteRedirect($siteHost, $sitePath . $currentSlug);
+                $this->createRedirect($siteHost, $sitePath . $currentSlug, $pageId);
+                if (!empty($variant)) {
+                    $this->deleteRedirect($siteHost, $sitePath . $currentSlug . $variant);
+                    $this->createRedirect($siteHost, $sitePath . $currentSlug . $variant, $pageId);
+                }
+            }
         }
         // Remove redirects matching the new slug
         $this->deleteRedirect($siteHost, $sitePath . $slug);
+        if (!empty($variant)) {
+            $this->deleteRedirect($siteHost, $sitePath . $slug . $variant);
+        }
+    }
+
+    /**
+     * @param string $siteHost
+     * @param string $path
+     * @param int $pageId
+     */
+    protected function createRedirect(string $siteHost, string $path, int $pageId): void
+    {
+        $redirectLifetime = strtotime((string)Configuration::get('redirect_lifetime'));
+        $redirectHttpStatusCode = (int)Configuration::get('redirect_lifetime');
+        $this->connection->insert(
+            'sys_redirect',
+            [
+                'pid' => 0,
+                'createdon' => time(),
+                'updatedon' => time(),
+                'createdby' => $this->getBackendUserId(),
+                'endtime' => $redirectLifetime !== false ? $redirectLifetime : strtotime('+1 month'),
+                'source_host' => $siteHost,
+                'source_path' => $path,
+                'target_statuscode' => in_array($redirectHttpStatusCode, [301, 307],
+                    true) ? $redirectHttpStatusCode : 307,
+                'target' => 't3://page?uid=' . $pageId
+            ]
+        );
     }
 
     /**
@@ -397,12 +430,12 @@ class DatamapHook
     /**
      * Returns the site base host and path
      *
+     * @param Site $site
      * @param $pageId
      * @param $languageId
      * @return array
-     * @throws SiteNotFoundException
      */
-    protected function getBaseByPageId($pageId, $languageId): array
+    protected function getBaseByPageId(Site $site, $pageId, $languageId): array
     {
         $language = null;
         // Fetch default language page ID to get the site
@@ -412,9 +445,6 @@ class DatamapHook
                 $pageId = $defaultLanguagePageId;
             }
         }
-        /** @var SiteFinder $siteFinder */
-        $siteFinder = GeneralUtility::makeInstance(SiteFinder::class);
-        $site = $siteFinder->getSiteByPageId($pageId);
         if ($languageId !== null) {
             $language = $site->getLanguageById((int)$languageId);
         }
