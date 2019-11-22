@@ -44,7 +44,7 @@ defined('TYPO3_MODE') or die ('Access denied.');
             'description' => 'LLL:EXT:sluggi/Resources/Private/Language/locallang_db.xlf:pages.tx_sluggi_sync.description',
             'config' => [
                 'type' => 'check',
-                'renderType' => 'checkboxToggleWithSlugSync',
+                'renderType' => 'checkboxToggle',
                 'items' => [
                     [
                         0 => '',

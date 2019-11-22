@@ -9,11 +9,6 @@ defined('TYPO3_MODE') or die();
             'priority' => 40,
             'class' => \Wazum\Sluggi\Backend\Form\InputTextWithSlugImpactElement::class
         ];
-        $GLOBALS['TYPO3_CONF_VARS']['SYS']['formEngine']['nodeRegistry'][1569661271] = [
-            'nodeName' => 'checkboxToggleWithSlugSync',
-            'priority' => 40,
-            'class' => \Wazum\Sluggi\Backend\Form\CheckboxToggleWithSlugSyncElement::class
-        ];
         /** @var \TYPO3\CMS\Core\Page\PageRenderer $pageRenderer */
         $pageRenderer = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance(\TYPO3\CMS\Core\Page\PageRenderer::class);
         $pageRenderer->loadRequireJsModule('TYPO3/CMS/Sluggi/Sluggi');
