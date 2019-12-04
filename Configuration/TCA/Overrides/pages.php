@@ -57,15 +57,12 @@ defined('TYPO3_MODE') or die ('Access denied.');
             ]
         ]
     ];
-    $showItems = ['tx_sluggi_lock', 'tx_sluggi_sync'];
+    $showItems = ['--linebreak--', 'tx_sluggi_lock', 'tx_sluggi_sync'];
     if (!(bool)Configuration::get('synchronize')) {
         unset($fields['tx_sluggi_sync'], $showItems['tx_sluggi_sync']);
     }
 
     \TYPO3\CMS\Core\Utility\ExtensionManagementUtility::addTCAcolumns('pages', $fields);
-    foreach ($GLOBALS['TCA']['pages']['palettes'] as &$palette) {
-        $palette['showitem'] = str_replace('slug, --linebreak--,',
-            'slug, --linebreak--, ' . implode(',', $showItems) . ', --linebreak--,',
-            $palette['showitem']);
-    }
+    \TYPO3\CMS\Core\Utility\ExtensionManagementUtility::addFieldsToPalette('pages', 'title', implode(',', $showItems), 'after:slug');
+    \TYPO3\CMS\Core\Utility\ExtensionManagementUtility::addFieldsToPalette('pages', 'titleonly', implode(',', $showItems), 'after:slug');
 })();
