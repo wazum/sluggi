@@ -38,6 +38,7 @@ class InputSlugElement extends \TYPO3\CMS\Backend\Form\Element\InputSlugElement
             // Remove edit and recalculate buttons if slug segment is locked
             if (PermissionHelper::isLocked($page)) {
                 $result['html'] = $this->removeButtonsFields($result['html']);
+                $result['html'] .= '<script>var tx_sluggi_lock = true;</script>';
             }
 
             $mountRootPage = PermissionHelper::getTopmostAccessiblePage((int)$this->data['databaseRow']['uid']);

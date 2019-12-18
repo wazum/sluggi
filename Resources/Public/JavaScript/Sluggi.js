@@ -23,6 +23,11 @@ define([
     if ($(syncCheckboxSelector).val() === '1' || $(lockCheckboxSelector).val() === '1') {
         hideRecreate();
     }
+    $(document).ready(function () {
+        if (tx_sluggi_lock === true) {
+            $(syncLabelSelector).parents('.form-group').hide();
+        }
+    });
     $(document).on('blur', '.slug-impact', function (e) {
         if ($(syncCheckboxSelector).val() === '1') {
             triggerRecreate();
@@ -36,7 +41,7 @@ define([
                 $(lockLabelSelector).trigger('click');
             }
             hideRecreate();
-        } else if ($(lockCheckboxSelector).val() === '0') {
+        } else if ($(lockCheckboxSelector).val() === '0' || $(lockCheckboxSelector).val() === undefined) {
             showRecreate();
         }
     });
