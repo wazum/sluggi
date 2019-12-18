@@ -269,7 +269,7 @@ class DatamapHook
     protected function createRedirect(string $siteHost, string $path, int $pageId): void
     {
         $redirectLifetime = strtotime((string)Configuration::get('redirect_lifetime'));
-        $redirectHttpStatusCode = (int)Configuration::get('redirect_lifetime');
+        $redirectHttpStatusCode = (int)Configuration::get('redirect_code');
         $this->connection->insert(
             'sys_redirect',
             [
