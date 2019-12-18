@@ -41,7 +41,7 @@ class PermissionHelper
      */
     public static function isLocked(array $page): bool
     {
-        return (bool)$page['tx_sluggi_locked'];
+        return (bool)$page['tx_sluggi_lock'];
     }
 
     /**
