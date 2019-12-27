@@ -24,7 +24,7 @@ define([
         hideRecreate();
     }
     $(document).ready(function () {
-        if (tx_sluggi_lock === true) {
+        if (window && window.hasOwnProperty('tx_sluggi_lock') && window.tx_sluggi_lock === true) {
             $(syncLabelSelector).parents('.form-group').hide();
         }
     });
