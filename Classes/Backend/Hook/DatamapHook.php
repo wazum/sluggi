@@ -15,6 +15,7 @@ use TYPO3\CMS\Core\DataHandling\SlugHelper;
 use TYPO3\CMS\Core\Exception\SiteNotFoundException;
 use TYPO3\CMS\Core\Messaging\FlashMessage;
 use TYPO3\CMS\Core\Messaging\FlashMessageService;
+use TYPO3\CMS\Core\Routing\InvalidRouteArgumentsException;
 use TYPO3\CMS\Core\Routing\PageRouter;
 use TYPO3\CMS\Core\Site\Entity\Site;
 use TYPO3\CMS\Core\Site\SiteFinder;
@@ -115,11 +116,16 @@ class DatamapHook
         }
 
         $previousSlug = $page['slug'] ?? '';
+        $useTransactions = (bool)Configuration::get('use_transactions');
         try {
-            $this->connection->beginTransaction();
+            if ($useTransactions) {
+                $this->connection->beginTransaction();
+            }
             $this->updateRedirect($id, $fieldArray['slug'], $languageId);
             $this->renameRecursively($id, $fieldArray['slug'], $previousSlug, $languageId);
-            $this->connection->commit();
+            if ($useTransactions) {
+                $this->connection->commit();
+            }
         } catch (ConnectionException $e) {
             try {
                 $this->connection->rollBack();
@@ -198,12 +204,17 @@ class DatamapHook
             if (!empty($targetPage)) {
                 $newSlug = rtrim($targetPage['slug'], '/') . '/' . $currentSlugSegment;
 
+                $useTransactions = (bool)Configuration::get('use_transactions');
                 try {
-                    $this->connection->beginTransaction();
+                    if ($useTransactions) {
+                        $this->connection->beginTransaction();
+                    }
                     $this->updateRedirect($id, $newSlug, $languageId);
                     $this->updateSlug($id, $newSlug);
                     $this->renameRecursively($id, $newSlug, $currentPage['slug'], $languageId);
-                    $this->connection->commit();
+                    if ($useTransactions) {
+                        $this->connection->commit();
+                    }
                 } catch (ConnectionException $e) {
                     try {
                         $this->connection->rollBack();
@@ -238,7 +249,11 @@ class DatamapHook
         if (!empty($currentSlug)) {
             // Check for possibly different URL (e.g. with /index.html appended)
             $pageRouter = GeneralUtility::makeInstance(PageRouter::class, $site);
-            $generatedPath = $pageRouter->generateUri($pageId, ['_language' => $languageId])->getPath();
+            $generatedPath = '';
+            try {
+                $generatedPath = $pageRouter->generateUri($pageId, ['_language' => $languageId])->getPath();
+            } catch (InvalidRouteArgumentsException $e) {
+            }
             $variant = null;
             // There must be some kind of route enhancer involved
             if (($generatedPath !== $currentSlug) && strpos($generatedPath, $currentSlug) !== false) {

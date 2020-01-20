@@ -14,3 +14,5 @@ redirects = 1
 redirect_lifetime = +1 month
 # cat=basic; type=options[307 Temporary Redirect=307,301 Moved Permanently=301]; label=Use HTTP redirect code
 redirect_code = 307
+# cat=basic; type=boolean; label=Use doctrine transactions
+use_transactions = 1
