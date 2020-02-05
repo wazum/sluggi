@@ -1,31 +1,34 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
 <xliff version="1.0">
-    <file target-language="en" datatype="plaintext" original="messages" product-name="sluggi">
+    <file source-language="en" datatype="plaintext" original="messages" product-name="sluggi">
         <header/>
         <body>
             <trans-unit id="pages.tx_sluggi_lock">
-                <target>Sperre URL Segment</target>
+                <source>Lock URL Segment</source>
             </trans-unit>
             <trans-unit id="pages.tx_sluggi_lock.description">
-                <target>Sperre die Bearbeitung des URL Segmentes</target>
+                <source>Restrict editing of the URL Segment</source>
             </trans-unit>
             <trans-unit id="pages.tx_sluggi_lock.enabled">
-                <target>Gesperrt</target>
+                <source>Locked</source>
             </trans-unit>
             <trans-unit id="pages.tx_sluggi_lock.disabled">
-                <target>Freigeschalten</target>
+                <source>Unlocked</source>
             </trans-unit>
             <trans-unit id="pages.tx_sluggi_sync">
-                <target>Synchronisiere URL Segment</target>
+                <source>Synchronize URL Segment</source>
             </trans-unit>
             <trans-unit id="pages.tx_sluggi_sync.description">
-                <target>Synchronisiere das URL Segment mit den konfigurierten Feldern</target>
+                <source>Synchronize URL Segment with the configured fields</source>
             </trans-unit>
             <trans-unit id="pages.tx_sluggi_sync.enabled">
-                <target>Aktiv</target>
+                <source>Active</source>
             </trans-unit>
             <trans-unit id="pages.tx_sluggi_sync.disabled">
-                <target>Deaktiviert</target>
+                <source>Disabled</source>
+            </trans-unit>
+            <trans-unit id="message.changed">
+                <source>URL segment on this page and on %d/%d child pages changed!</source>
             </trans-unit>
         </body>
     </file>

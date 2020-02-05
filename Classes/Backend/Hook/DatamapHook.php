@@ -21,6 +21,7 @@ use TYPO3\CMS\Core\Site\Entity\Site;
 use TYPO3\CMS\Core\Site\SiteFinder;
 use TYPO3\CMS\Core\Utility\ExtensionManagementUtility;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
+use TYPO3\CMS\Extbase\Utility\LocalizationUtility;
 use Wazum\Sluggi\Helper\Configuration;
 use Wazum\Sluggi\Helper\PermissionHelper;
 use Wazum\Sluggi\Helper\SlugHelper as SluggiSlugHelper;
@@ -105,6 +106,11 @@ class DatamapHook
 
         $id = (int)$id; // not a new record, so definitely an integer
         $page = BackendUtility::getRecord('pages', $id);
+
+        if (PermissionHelper::isLocked($page)) {
+            return;
+        }
+
         $languageId = $page['sys_language_uid'];
         $synchronize = (bool)Configuration::get('synchronize');
         // If we synchronized in processDatamap_preProcessFieldArray
@@ -316,10 +322,13 @@ class DatamapHook
     }
 
     /**
+     * Returns the number of changed pages
+     *
      * @param int $pageId
      * @param int $languageId
      * @param string $slug
      * @param string $previousSlug
+     * @return int
      * @throws SiteNotFoundException
      */
     protected function renameChildSlugsAndCreateRedirects(
@@ -327,21 +336,34 @@ class DatamapHook
         int $languageId,
         string $slug,
         string $previousSlug
-    ): void {
+    ): int {
         $slug = rtrim($slug, '/') . '/';
         $previousSlug = rtrim($previousSlug, '/') . '/';
+        $changeCount = 0;
         if (!empty($previousSlug) && $slug !== $previousSlug) {
             $childPages = $this->getChildPages($pageId, $languageId);
             if (count($childPages)) {
                 // Replace slug segments for all child pages recursively
                 foreach ($childPages as $page) {
+                    if (PermissionHelper::isLocked($page)) {
+                        continue;
+                    }
+
                     $updatedSlug = str_replace($previousSlug, $slug, $page['slug']);
                     $this->updateRedirect((int)$page['uid'], $updatedSlug, $languageId);
                     $this->updateSlug((int)$page['uid'], $updatedSlug);
-                    $this->renameChildSlugsAndCreateRedirects((int)$page['uid'], $languageId, $slug, $previousSlug);
+                    ++$changeCount;
+                    $changeCount += $this->renameChildSlugsAndCreateRedirects(
+                        (int)$page['uid'],
+                        $languageId,
+                        $slug,
+                        $previousSlug
+                    );
                 }
             }
         }
+
+        return $changeCount;
     }
 
     /**
@@ -372,7 +394,17 @@ class DatamapHook
     {
         $renameRecursively = (bool)Configuration::get('recursively');
         if ($renameRecursively) {
-            $this->renameChildSlugsAndCreateRedirects($id, $languageId, $slug, $previousSlug);
+            $childPagesCount = $this->getChildPagesCount($id, $languageId);
+            $changeCount = $this->renameChildSlugsAndCreateRedirects($id, $languageId, $slug, $previousSlug);
+            if ($childPagesCount > 0) {
+                $this->setFlashMessage(
+                    sprintf(
+                        LocalizationUtility::translate('message.changed', 'sluggi'),
+                        $changeCount,
+                        $childPagesCount
+                    ), FlashMessage::INFO
+                );
+            }
         }
 
         $redirectsActive = (bool)Configuration::get('redirects');
@@ -391,8 +423,8 @@ class DatamapHook
     protected function getChildPages(int $pageId, int $languageId): array
     {
         if ($languageId > 0) {
-            $pageId = BackendUtility::getRecord('pages', $pageId, 'l10n_parent')['l10n_parent'] ?? null;
-            if ($pageId === null) {
+            $pageId = BackendUtility::getRecord('pages', $pageId, 'l10n_parent')['l10n_parent'] ?? 0;
+            if (!$pageId) {
                 throw new RuntimeException(sprintf('No l10n_parent set for page "%d"', $pageId));
             }
         }
@@ -401,12 +433,58 @@ class DatamapHook
             ->getQueryBuilderForTable('pages');
         $queryBuilder->getRestrictions()->removeByType(HiddenRestriction::class);
 
-        return $queryBuilder->select('uid', 'slug')
+        return $queryBuilder->select('uid', 'slug', 'tx_sluggi_lock')
             ->from('pages')
             ->where(
                 $queryBuilder->expr()->eq('pid', $pageId),
                 $queryBuilder->expr()->eq('sys_language_uid', $languageId)
-            )->execute()->fetchAll(\PDO::FETCH_ASSOC);
+            )->execute()
+            ->fetchAll(\PDO::FETCH_ASSOC);
+    }
+
+    /**
+     * @param int $pageId
+     * @param int $languageId
+     * @return int
+     */
+    protected function getChildPagesCount(int $pageId, int $languageId): int
+    {
+        if ($languageId > 0) {
+            $pageId = BackendUtility::getRecord('pages', $pageId, 'l10n_parent')['l10n_parent'] ?? 0;
+            if (!$pageId) {
+                throw new RuntimeException(sprintf('No l10n_parent set for page "%d"', $pageId));
+            }
+        }
+
+        return $this->countChildPagesRecursively([$pageId], $languageId);
+    }
+
+    /**
+     * @param int[] $pageIds
+     * @param int $languageId
+     * @return int
+     */
+    protected function countChildPagesRecursively(array $pageIds, int $languageId): int
+    {
+        /** @var QueryBuilder $queryBuilder */
+        $queryBuilder = GeneralUtility::makeInstance(ConnectionPool::class)
+            ->getQueryBuilderForTable('pages');
+        $queryBuilder->getRestrictions()->removeByType(HiddenRestriction::class);
+
+        $records = $queryBuilder->select('uid')
+            ->from('pages')
+            ->where(
+                $queryBuilder->expr()->in('pid', $pageIds),
+                $queryBuilder->expr()->eq('sys_language_uid', $languageId)
+            )->execute()
+            ->fetchAll(\PDO::FETCH_COLUMN);
+
+        $count = count($records);
+        if (!empty($records)) {
+            $count += $this->countChildPagesRecursively($records, $languageId);
+        }
+
+        return $count;
     }
 
     /**
