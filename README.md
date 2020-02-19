@@ -1,5 +1,7 @@
 # sluggi — The little TYPO3 CMS slug helper
 
+:fire: **You have to update _sluggi_ to >= 1.9.1 if you update TYPO3 Core to 9.5.14, as this introduced a core bug where it's impossible to add additional fields for fetching the page root line**
+
 ## What does it do?
 
 The latest version of the extension … 
