@@ -59,6 +59,8 @@ class PermissionHelper
             $pageId,
             '',
             false,
+            // Does not work anymore since TYPO3 9.5.14
+            // see https://forge.typo3.org/issues/90104 which introduced this bug
             [
                 'perms_userid',
                 'perms_groupid',
@@ -70,7 +72,23 @@ class PermissionHelper
         $rootLine = array_reverse($rootLine);
 
         foreach ($rootLine as $page) {
-            if ($backendUser->doesUserHaveAccess($page, Permission::PAGE_EDIT)) {
+            // Add missing fields (see above)
+            if (!isset($page['perms_userid'])) {
+                $missingFields = BackendUtility::getRecord('pages', $page['uid'],
+                    implode(',', [
+                        'perms_userid',
+                        'perms_groupid',
+                        'perms_user',
+                        'perms_group',
+                        'perms_everybody',
+                    ])
+                );
+                if (is_array($missingFields)) {
+                    $page = array_merge($page, $missingFields);
+                }
+            }
+            // The root line includes the page with ID 0 now, so we kick that out
+            if (($page['uid'] > 0) && $backendUser->doesUserHaveAccess($page, Permission::PAGE_EDIT)) {
                 return $page;
             }
         }

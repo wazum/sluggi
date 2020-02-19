@@ -104,9 +104,11 @@ class FormSlugAjaxController extends \TYPO3\CMS\Backend\Controller\FormSlugAjaxC
         }
 
         $mountRootPage = PermissionHelper::getTopmostAccessiblePage($pid);
-        $inaccessibleSlugSegments = SluggiSlugHelper::getSlug($mountRootPage['pid'], $languageId);
-        if (!empty($inaccessibleSlugSegments) && strpos($proposal, $inaccessibleSlugSegments) === 0) {
-            $proposal = substr($proposal, strlen($inaccessibleSlugSegments));
+        if ($mountRootPage !== null) {
+            $inaccessibleSlugSegments = SluggiSlugHelper::getSlug($mountRootPage['pid'], $languageId);
+            if (!empty($inaccessibleSlugSegments) && strpos($proposal, $inaccessibleSlugSegments) === 0) {
+                $proposal = substr($proposal, strlen($inaccessibleSlugSegments));
+            }
         }
 
         return new JsonResponse([
