@@ -30,6 +30,9 @@
             <trans-unit id="message.changed">
                 <target>URL-Segment auf dieser Seite und auf %d/%d Unterseiten geändert!</target>
             </trans-unit>
+            <trans-unit id="message.slashesNotAllowed">
+                <target>Sie sind nicht berechtigt einen Schrägstrich in die URL einzufügen!</target>
+            </trans-unit>
         </body>
     </file>
 </xliff>

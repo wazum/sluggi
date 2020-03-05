@@ -7,6 +7,7 @@ namespace Wazum\Sluggi\Backend\Form;
 use DOMDocument;
 use DOMNode;
 use DOMXPath;
+use Wazum\Sluggi\Helper\Configuration;
 use Wazum\Sluggi\Helper\PermissionHelper;
 use Wazum\Sluggi\Helper\SlugHelper as SluggiSlugHelper;
 
@@ -45,9 +46,14 @@ class InputSlugElement extends \TYPO3\CMS\Backend\Form\Element\InputSlugElement
             $inaccessibleSlugSegments = SluggiSlugHelper::getSlug((int)$mountRootPage['pid'], $languageId);
             $prefix = $this->getPrefix($this->data['site'], $languageId) . $inaccessibleSlugSegments;
             $editableSlugSegments = $this->data['databaseRow']['slug'];
-            if (!empty($inaccessibleSlugSegments) && strpos($this->data['databaseRow']['slug'],
-                    $inaccessibleSlugSegments) === 0) {
-                $editableSlugSegments = substr($this->data['databaseRow']['slug'], strlen($inaccessibleSlugSegments));
+            $allowOnlyLastSegment = (bool)Configuration::get('last_segment_only');
+            if (!empty($inaccessibleSlugSegments) && strpos($editableSlugSegments, $inaccessibleSlugSegments) === 0) {
+                $editableSlugSegments = substr($editableSlugSegments, strlen($inaccessibleSlugSegments));
+            }
+            if ($allowOnlyLastSegment) {
+                $segments  = explode('/', $editableSlugSegments);
+                $editableSlugSegments = '/' . array_pop($segments);
+                $prefix .= implode('/', $segments);
             }
 
             $result['html'] = $this->replaceValues($result['html'], $prefix, $editableSlugSegments);

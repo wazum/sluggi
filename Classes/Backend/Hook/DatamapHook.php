@@ -106,6 +106,7 @@ class DatamapHook
 
         $id = (int)$id; // not a new record, so definitely an integer
         $page = BackendUtility::getRecord('pages', $id);
+        $allowOnlyLastSegment = (bool)Configuration::get('last_segment_only');
 
         if (PermissionHelper::isLocked($page)) {
             return;
@@ -113,12 +114,26 @@ class DatamapHook
 
         $languageId = $page['sys_language_uid'];
         $synchronize = (bool)Configuration::get('synchronize');
-        // If we synchronized in processDatamap_preProcessFieldArray
-        // we don't need to modify the slug here
-        if (!$synchronize && !PermissionHelper::hasFullPermission()) {
+        if (!PermissionHelper::hasFullPermission()) {
             $mountRootPage = PermissionHelper::getTopmostAccessiblePage($id);
             $inaccessibleSlugSegments = SluggiSlugHelper::getSlug($mountRootPage['pid'], $languageId);
-            $fieldArray['slug'] = $inaccessibleSlugSegments . $fieldArray['slug'];
+            // Prepend the parent page slug
+            if ($allowOnlyLastSegment) {
+                $parentSlug = SluggiSlugHelper::getSlug($page['pid'], $languageId);
+                if (strpos(substr($fieldArray['slug'], 1), '/') !== false) {
+                    $this->setFlashMessage(
+                        LocalizationUtility::translate('message.slashesNotAllowed', 'sluggi'),
+                        FlashMessage::WARNING
+                    );
+                }
+                $fieldArray['slug'] = $inaccessibleSlugSegments .
+                    str_replace($inaccessibleSlugSegments, '', $parentSlug) .
+                    '/' . str_replace('/', '-', substr($fieldArray['slug'], 1));
+            } elseif (!$synchronize) {
+                // If we synchronized in processDatamap_preProcessFieldArray
+                // we don't need to modify the slug here
+                $fieldArray['slug'] = $inaccessibleSlugSegments . $fieldArray['slug'];
+            }
         }
 
         $previousSlug = $page['slug'] ?? '';

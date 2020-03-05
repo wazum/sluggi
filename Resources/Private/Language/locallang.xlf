@@ -30,6 +30,9 @@
             <trans-unit id="message.changed">
                 <source>URL segment on this page and on %d/%d child pages changed!</source>
             </trans-unit>
+            <trans-unit id="message.slashesNotAllowed">
+                <source>You are not allowed to insert slashes into the URL!</source>
+            </trans-unit>
         </body>
     </file>
 </xliff>

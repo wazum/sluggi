@@ -6,6 +6,8 @@ slash_replacement = 1
 pages_fields = nav_title,title
 # cat=basic; type=boolean; label=Enable synchronization of slug segment with configured page fields
 synchronize = 1
+# cat=basic; type=boolean; label=Only allow editing of the last segment of the URL (single page)
+last_segment_only = 0
 # cat=basic; type=boolean; label=Enable renaming slug segments recursively
 recursively = 1
 # cat=basic; type=boolean; label=Enable redirects (requires active 'typo3/cms-redirects' extension)
@@ -14,5 +16,5 @@ redirects = 1
 redirect_lifetime = +1 month
 # cat=basic; type=options[307 Temporary Redirect=307,301 Moved Permanently=301]; label=Use HTTP redirect code
 redirect_code = 307
-# cat=basic; type=boolean; label=Use doctrine transactions
+# cat=basic; type=boolean; label=Use Doctrine transactions
 use_transactions = 1

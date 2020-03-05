@@ -11,6 +11,7 @@ use TYPO3\CMS\Core\DataHandling\SlugHelper;
 use TYPO3\CMS\Core\Exception\SiteNotFoundException;
 use TYPO3\CMS\Core\Http\JsonResponse;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
+use Wazum\Sluggi\Helper\Configuration;
 use Wazum\Sluggi\Helper\PermissionHelper;
 use Wazum\Sluggi\Helper\SlugHelper as SluggiSlugHelper;
 
@@ -49,6 +50,7 @@ class FormSlugAjaxController extends \TYPO3\CMS\Backend\Controller\FormSlugAjaxC
      */
     protected function modifiedSuggestAction(ServerRequestInterface $request): ResponseInterface
     {
+        $allowOnlyLastSegment = (bool)Configuration::get('last_segment_only');
         $queryParameters = $request->getParsedBody() ?? [];
         $values = $queryParameters['values'];
         $mode = $queryParameters['mode'];
@@ -88,6 +90,9 @@ class FormSlugAjaxController extends \TYPO3\CMS\Backend\Controller\FormSlugAjaxC
         } elseif ($mode === 'manual') {
             // Existing record - Fetch full record and only validate against the new "slug" field.
             $proposal = $slug->sanitize($values['manual']);
+            if ($proposal !== '' && $allowOnlyLastSegment) {
+                $proposal = '/' . str_replace('/', '-', substr($proposal, 1));
+            }
         } else {
             throw new RuntimeException('mode must be either "auto", "recreate" or "manual"', 1535835666);
         }
@@ -109,6 +114,9 @@ class FormSlugAjaxController extends \TYPO3\CMS\Backend\Controller\FormSlugAjaxC
             if (!empty($inaccessibleSlugSegments) && strpos($proposal, $inaccessibleSlugSegments) === 0) {
                 $proposal = substr($proposal, strlen($inaccessibleSlugSegments));
             }
+        }
+        if ($allowOnlyLastSegment) {
+            $proposal = '/' . array_pop(explode('/', $proposal));
         }
 
         return new JsonResponse([
