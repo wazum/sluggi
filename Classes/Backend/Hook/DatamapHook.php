@@ -72,6 +72,9 @@ class DatamapHook
         // but if the connection is too slow it could happen,
         // that the save request contains the old slug
         // so we have to do this on the server too
+        if (isset($incomingFieldArray['tx_sluggi_sync']) && (bool)$incomingFieldArray['tx_sluggi_sync'] === false) {
+            $synchronize = false;
+        }
         if ($synchronize) {
             $data = array_merge(BackendUtility::getRecord('pages', $id), $incomingFieldArray);
             if ((bool)$data['tx_sluggi_sync']) {
@@ -114,6 +117,9 @@ class DatamapHook
 
         $languageId = $page['sys_language_uid'];
         $synchronize = (bool)Configuration::get('synchronize');
+        if (isset($page['tx_sluggi_sync']) && (bool)$page['tx_sluggi_sync'] === false) {
+            $synchronize = false;
+        }
         if (!PermissionHelper::hasFullPermission()) {
             $mountRootPage = PermissionHelper::getTopmostAccessiblePage($id);
             $inaccessibleSlugSegments = SluggiSlugHelper::getSlug($mountRootPage['pid'], $languageId);
