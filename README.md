@@ -12,6 +12,7 @@ The latest version of the extension …
 * allows to synchronize the slug segment with the configured (title) fields automatically (behaviour like with RealURL)
 * sets a fallback chain for page slug calculation as follows (the first nonempty value is used): Alternative page title > Page title (you can change the fields used in the extension configuration)
 * configures a replacement of forward slashes (`/`) in the page slug with a hyphen (`-`) for new pages (existing pages are not affected as long as you don't recalculate the slugs)
+* allows to set a flag to allow editing only for the last part of the URL
 
 # Extension settings
 
@@ -50,6 +51,11 @@ _sluggi_ will do the hard work for you and keep the URL in sync with your config
 ![sluggi Synchronization](Resources/Public/Screenshots/sluggi_sync.png)
 
 This feature is enabled by default, but you can switch it off in the extension configuration completely or on every single page if you need a different URL.
+
+# Allow editing only for the last part of the URL
+
+As of version 1.9.3, a flag can be set to allow editing only for the last part of the URL.
+So editors can only change the path for the current page and not change the complete URL structure.
 
 ## Requirements
 
