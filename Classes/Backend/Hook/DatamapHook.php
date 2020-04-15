@@ -286,6 +286,9 @@ class DatamapHook
             if (($generatedPath !== $currentSlug) && strpos($generatedPath, $currentSlug) !== false) {
                 $variant = str_replace($currentSlug, '', $generatedPath);
             }
+            if ($variant === $sitePath) {
+                $variant = null;
+            }
             if ($currentSlug !== $slug) {
                 // Remove old redirects matching the previous slug
                 $this->deleteRedirect($siteHost, $sitePath . $currentSlug);
