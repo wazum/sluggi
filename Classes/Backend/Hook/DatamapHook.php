@@ -39,6 +39,11 @@ class DatamapHook
      */
     protected $connection;
 
+    /**
+     * @var array
+     */
+    protected $flashMessages = [];
+
     public function __construct()
     {
         $this->connection = GeneralUtility::makeInstance(ConnectionPool::class)
@@ -67,6 +72,9 @@ class DatamapHook
             $incomingFieldArray['slug'] = rtrim($incomingFieldArray['slug'], '/');
         }
 
+        $page = BackendUtility::getRecord('pages', $id);
+        $languageId = $page['sys_language_uid'];
+        $allowOnlyLastSegment = (bool)Configuration::get('last_segment_only');
         $synchronize = (bool)Configuration::get('synchronize');
         // Synchronization happens already via Javascript (Ajax)
         // but if the connection is too slow it could happen,
@@ -81,8 +89,34 @@ class DatamapHook
                 $fieldConfig = $GLOBALS['TCA']['pages']['columns']['slug']['config'] ?? [];
                 /** @var SlugHelper $helper */
                 $helper = GeneralUtility::makeInstance(SlugHelper::class, 'pages', 'slug', $fieldConfig);
-                $incomingFieldArray['slug'] = $helper->generate($data, $data['pid']);
+                $generatedSlug = $slugToCompare = $helper->generate($data, $data['pid']);
+                if ($allowOnlyLastSegment) {
+                    $slugToCompare = $this->getLastSlugSegment($generatedSlug);
+                } else {
+                    $inaccessibleSlugSegments = $this->getInaccessibleSlugSegments($id, $languageId);
+                    $slugToCompare = str_replace($inaccessibleSlugSegments, '', $generatedSlug);
+                }
+                if (isset($incomingFieldArray['slug']) && $slugToCompare !== $incomingFieldArray['slug']) {
+                    $this->setFlashMessage(
+                        LocalizationUtility::translate('message.slugSynchronized', 'sluggi'),
+                        FlashMessage::INFO
+                    );
+                }
+                $incomingFieldArray['slug'] = $generatedSlug;
             }
+        } elseif (isset($incomingFieldArray['slug']) && $allowOnlyLastSegment) {
+            $inaccessibleSlugSegments = $this->getInaccessibleSlugSegments($id, $languageId);
+            // Prepend the parent page slug
+            $parentSlug = SluggiSlugHelper::getSlug($page['pid'], $languageId);
+            if (strpos(substr($incomingFieldArray['slug'], 1), '/') !== false) {
+                $this->setFlashMessage(
+                    LocalizationUtility::translate('message.slashesNotAllowed', 'sluggi'),
+                    FlashMessage::WARNING
+                );
+            }
+            $incomingFieldArray['slug'] = $inaccessibleSlugSegments .
+                str_replace($inaccessibleSlugSegments, '', $parentSlug) .
+                '/' . str_replace('/', '-', substr($incomingFieldArray['slug'], 1));
         }
     }
 
@@ -109,7 +143,6 @@ class DatamapHook
 
         $id = (int)$id; // not a new record, so definitely an integer
         $page = BackendUtility::getRecord('pages', $id);
-        $allowOnlyLastSegment = (bool)Configuration::get('last_segment_only');
 
         if (PermissionHelper::isLocked($page)) {
             return;
@@ -121,23 +154,10 @@ class DatamapHook
             $synchronize = false;
         }
         if (!PermissionHelper::hasFullPermission()) {
-            $mountRootPage = PermissionHelper::getTopmostAccessiblePage($id);
-            $inaccessibleSlugSegments = SluggiSlugHelper::getSlug($mountRootPage['pid'], $languageId);
-            // Prepend the parent page slug
-            if ($allowOnlyLastSegment) {
-                $parentSlug = SluggiSlugHelper::getSlug($page['pid'], $languageId);
-                if (strpos(substr($fieldArray['slug'], 1), '/') !== false) {
-                    $this->setFlashMessage(
-                        LocalizationUtility::translate('message.slashesNotAllowed', 'sluggi'),
-                        FlashMessage::WARNING
-                    );
-                }
-                $fieldArray['slug'] = $inaccessibleSlugSegments .
-                    str_replace($inaccessibleSlugSegments, '', $parentSlug) .
-                    '/' . str_replace('/', '-', substr($fieldArray['slug'], 1));
-            } elseif (!$synchronize) {
-                // If we synchronized in processDatamap_preProcessFieldArray
-                // we don't need to modify the slug here
+            $inaccessibleSlugSegments = $this->getInaccessibleSlugSegments($id, $languageId);
+            // If we synchronized in processDatamap_preProcessFieldArray
+            // we don't need to modify the slug here
+            if (!$synchronize) {
                 $fieldArray['slug'] = $inaccessibleSlugSegments . $fieldArray['slug'];
             }
         }
@@ -225,11 +245,10 @@ class DatamapHook
         $currentPage = BackendUtility::getRecord('pages', $id, 'uid, slug, sys_language_uid');
         if (!empty($currentPage)) {
             $languageId = $currentPage['sys_language_uid'];
-            $currentSlugParts = explode('/', $currentPage['slug']);
-            $currentSlugSegment = array_pop($currentSlugParts);
+            $currentSlugSegment = $this->getLastSlugSegment($currentPage['slug']);
             $targetPage = $this->getPageOrTranslatedPage($targetId, $languageId);
             if (!empty($targetPage)) {
-                $newSlug = rtrim($targetPage['slug'], '/') . '/' . $currentSlugSegment;
+                $newSlug = rtrim($targetPage['slug'], '/') . $currentSlugSegment;
 
                 $useTransactions = (bool)Configuration::get('use_transactions');
                 try {
@@ -589,11 +608,37 @@ class DatamapHook
      */
     protected function setFlashMessage(string $text, int $severity): void
     {
-        /** @var FlashMessage $message */
-        $message = GeneralUtility::makeInstance(FlashMessage::class, $text, '', $severity);
-        /** @var FlashMessageService $flashMessageService */
-        $flashMessageService = GeneralUtility::makeInstance(FlashMessageService::class);
-        $messageQueue = $flashMessageService->getMessageQueueByIdentifier();
-        $messageQueue->addMessage($message);
+        if (!isset($this->flashMessages[$text])) {
+            /** @var FlashMessage $message */
+            $message = GeneralUtility::makeInstance(FlashMessage::class, $text, '', $severity);
+            /** @var FlashMessageService $flashMessageService */
+            $flashMessageService = GeneralUtility::makeInstance(FlashMessageService::class);
+            $messageQueue = $flashMessageService->getMessageQueueByIdentifier();
+            $messageQueue->addMessage($message);
+        }
+        $this->flashMessages[$text] = true;
+    }
+
+    /**
+     * @param int $pageId
+     * @param int $languageId
+     * @return string
+     */
+    protected function getInaccessibleSlugSegments(int $pageId, int $languageId): string
+    {
+        $mountRootPage = PermissionHelper::getTopmostAccessiblePage($pageId);
+
+        return SluggiSlugHelper::getSlug($mountRootPage['pid'], $languageId);
+    }
+
+    /**
+     * @param string $slug
+     * @return string
+     */
+    protected function getLastSlugSegment(string $slug): string
+    {
+        $parts = explode('/', $slug);
+
+        return '/'. array_pop($parts);
     }
 }

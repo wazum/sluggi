@@ -33,6 +33,9 @@
             <trans-unit id="message.slashesNotAllowed">
                 <source>You are not allowed to insert slashes into the URL!</source>
             </trans-unit>
+            <trans-unit id="message.slugSynchronized">
+                <source>This page's URL segment is configured to sync with another field. This will overwrite your changes to the slug.</source>
+            </trans-unit>
         </body>
     </file>
 </xliff>

@@ -33,6 +33,9 @@
             <trans-unit id="message.slashesNotAllowed">
                 <target>Sie sind nicht berechtigt einen Schrägstrich in die URL einzufügen!</target>
             </trans-unit>
+            <trans-unit id="message.slugSynchronized">
+                <target>Das URL-Segment dieser Seite ist so konfiguriert, dass es mit einem anderen Feld synchron gehalten wird. Daher werden Ihre Änderungen überschrieben.</target>
+            </trans-unit>
         </body>
     </file>
 </xliff>
