@@ -246,29 +246,27 @@ class DatamapHook
         if (!empty($currentPage)) {
             $languageId = $currentPage['sys_language_uid'];
             $currentSlugSegment = $this->getLastSlugSegment($currentPage['slug']);
-            $targetPage = $this->getPageOrTranslatedPage($targetId, $languageId);
-            if (!empty($targetPage)) {
-                $newSlug = rtrim($targetPage['slug'], '/') . $currentSlugSegment;
+            $parentSlug = SluggiSlugHelper::getSlug($targetId, $languageId);
+            $newSlug = rtrim($parentSlug, '/') . $currentSlugSegment;
 
-                $useTransactions = (bool)Configuration::get('use_transactions');
+            $useTransactions = (bool)Configuration::get('use_transactions');
+            try {
+                if ($useTransactions) {
+                    $this->connection->beginTransaction();
+                }
+                $this->updateRedirect($id, $newSlug, $languageId);
+                $this->updateSlug($id, $newSlug);
+                $this->renameRecursively($id, $newSlug, $currentPage['slug'], $languageId);
+                if ($useTransactions) {
+                    $this->connection->commit();
+                }
+            } catch (ConnectionException $e) {
                 try {
-                    if ($useTransactions) {
-                        $this->connection->beginTransaction();
-                    }
-                    $this->updateRedirect($id, $newSlug, $languageId);
-                    $this->updateSlug($id, $newSlug);
-                    $this->renameRecursively($id, $newSlug, $currentPage['slug'], $languageId);
-                    if ($useTransactions) {
-                        $this->connection->commit();
-                    }
+                    $this->connection->rollBack();
                 } catch (ConnectionException $e) {
-                    try {
-                        $this->connection->rollBack();
-                    } catch (ConnectionException $e) {
-                        $this->setFlashMessage($e->getMessage(), FlashMessage::ERROR);
-                    }
                     $this->setFlashMessage($e->getMessage(), FlashMessage::ERROR);
                 }
+                $this->setFlashMessage($e->getMessage(), FlashMessage::ERROR);
             }
         }
     }
