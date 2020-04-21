@@ -286,7 +286,14 @@ class DatamapHook
 
         /** @var SiteFinder $siteFinder */
         $siteFinder = GeneralUtility::makeInstance(SiteFinder::class);
-        $site = $siteFinder->getSiteByPageId($pageId);
+        try {
+            $site = $siteFinder->getSiteByPageId($pageId);
+        } catch (SiteNotFoundException $exception) {
+            $site = current($siteFinder->getAllSites());
+            if (empty($site)) {
+                throw new SiteNotFoundException('No site found in root line of page ' . $pageId, 1587472422);
+            }
+        }
 
         [$siteHost, $sitePath] = $this->getBaseByPageId($site, $pageId, $languageId);
         $currentSlug = BackendUtility::getRecord('pages', $pageId, 'slug')['slug'] ?? '';
