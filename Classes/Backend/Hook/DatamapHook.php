@@ -339,7 +339,7 @@ class DatamapHook
                 'createdon' => time(),
                 'updatedon' => time(),
                 'createdby' => $this->getBackendUserId(),
-                'endtime' => $redirectLifetime !== false ? $redirectLifetime : '',
+                'endtime' => $redirectLifetime !== false ? $redirectLifetime : 0,
                 'source_host' => $siteHost,
                 'source_path' => $path,
                 'target_statuscode' => in_array($redirectHttpStatusCode, [301, 307],
