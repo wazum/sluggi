@@ -275,7 +275,6 @@ class DatamapHook
      * @param int $pageId
      * @param string $slug
      * @param int $languageId
-     * @throws SiteNotFoundException
      */
     protected function updateRedirect(int $pageId, string $slug, int $languageId): void
     {
@@ -286,7 +285,15 @@ class DatamapHook
 
         /** @var SiteFinder $siteFinder */
         $siteFinder = GeneralUtility::makeInstance(SiteFinder::class);
-        $site = $siteFinder->getSiteByPageId($pageId);
+        $site = null;
+        try {
+            $site = $siteFinder->getSiteByPageId($pageId);
+        } catch (SiteNotFoundException $e) {
+        }
+
+        if ($site === null) {
+            return;
+        }
 
         [$siteHost, $sitePath] = $this->getBaseByPageId($site, $pageId, $languageId);
         $currentSlug = BackendUtility::getRecord('pages', $pageId, 'slug')['slug'] ?? '';
