@@ -90,11 +90,13 @@ class DatamapHook
                 /** @var SlugHelper $helper */
                 $helper = GeneralUtility::makeInstance(SlugHelper::class, 'pages', 'slug', $fieldConfig);
                 $generatedSlug = $slugToCompare = $helper->generate($data, $data['pid']);
-                if ($allowOnlyLastSegment) {
-                    $slugToCompare = $this->getLastSlugSegment($generatedSlug);
-                } else {
-                    $inaccessibleSlugSegments = $this->getInaccessibleSlugSegments($id, $languageId);
-                    $slugToCompare = str_replace($inaccessibleSlugSegments, '', $generatedSlug);
+                if (!PermissionHelper::hasFullPermission()) {
+                    if ($allowOnlyLastSegment) {
+                        $slugToCompare = $this->getLastSlugSegment($generatedSlug);
+                    } else {
+                        $inaccessibleSlugSegments = $this->getInaccessibleSlugSegments($id, $languageId);
+                        $slugToCompare = str_replace($inaccessibleSlugSegments, '', $generatedSlug);
+                    }
                 }
                 if (isset($incomingFieldArray['slug']) && $slugToCompare !== $incomingFieldArray['slug']) {
                     $this->setFlashMessage(
@@ -104,7 +106,7 @@ class DatamapHook
                 }
                 $incomingFieldArray['slug'] = $generatedSlug;
             }
-        } elseif (isset($incomingFieldArray['slug']) && $allowOnlyLastSegment) {
+        } elseif (isset($incomingFieldArray['slug']) && $allowOnlyLastSegment && !PermissionHelper::hasFullPermission()) {
             $inaccessibleSlugSegments = $this->getInaccessibleSlugSegments($id, $languageId);
             // Prepend the parent page slug
             $parentSlug = SluggiSlugHelper::getSlug($page['pid'], $languageId);
