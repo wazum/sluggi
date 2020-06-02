@@ -37,18 +37,26 @@ class SlugHelper
             ->getQueryBuilderForTable('pages');
         $queryBuilder->getRestrictions()->removeByType(HiddenRestriction::class);
 
-        if ($languageId > 0) {
+        $slug = '';
+        if ($pageRecord['uid'] > 0) {
+            $pageUid = $pageRecord['uid'];
+            if ($languageId > 0) {
+                $pageUid = (int)$queryBuilder->select('uid')
+                    ->from('pages')
+                    ->where(
+                        $queryBuilder->expr()->eq('l10n_parent', $pageUid),
+                        $queryBuilder->expr()->eq('sys_language_uid', $languageId)
+                    )->execute()->fetchColumn();
+            }
+
+            if ($pageUid === 0) {
+                $pageUid = $pageRecord['uid'];
+            }
+
             $slug = (string)$queryBuilder->select('slug')
                 ->from('pages')
                 ->where(
-                    $queryBuilder->expr()->eq('l10n_parent', $pageRecord['uid']),
-                    $queryBuilder->expr()->eq('sys_language_uid', $languageId)
-                )->execute()->fetchColumn();
-        } else {
-            $slug = (string)$queryBuilder->select('slug')
-                ->from('pages')
-                ->where(
-                    $queryBuilder->expr()->in('uid', $pageRecord['uid'])
+                    $queryBuilder->expr()->in('uid', $pageUid)
                 )->execute()->fetchColumn();
         }
 
