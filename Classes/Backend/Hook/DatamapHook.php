@@ -152,15 +152,16 @@ class DatamapHook
 
         $languageId = $page['sys_language_uid'];
         $synchronize = (bool)Configuration::get('synchronize');
+        $allowOnlyLastSegment = (bool)Configuration::get('last_segment_only');
         if (isset($page['tx_sluggi_sync']) && (bool)$page['tx_sluggi_sync'] === false) {
             $synchronize = false;
         }
         if (!PermissionHelper::hasFullPermission()) {
-            $inaccessibleSlugSegments = $this->getInaccessibleSlugSegments($id, $languageId);
             // If we synchronized in processDatamap_preProcessFieldArray
+            // or only the last segment is editable
             // we don't need to modify the slug here
-            if (!$synchronize) {
-                $fieldArray['slug'] = $inaccessibleSlugSegments . $fieldArray['slug'];
+            if (!$synchronize && !$allowOnlyLastSegment) {
+                $fieldArray['slug'] = $this->getInaccessibleSlugSegments($id, $languageId) . $fieldArray['slug'];
             }
         }
 
