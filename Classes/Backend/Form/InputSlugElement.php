@@ -7,9 +7,12 @@ namespace Wazum\Sluggi\Backend\Form;
 use DOMDocument;
 use DOMNode;
 use DOMXPath;
+use TYPO3\CMS\Core\Utility\GeneralUtility;
 use Wazum\Sluggi\Helper\Configuration;
 use Wazum\Sluggi\Helper\PermissionHelper;
 use Wazum\Sluggi\Helper\SlugHelper as SluggiSlugHelper;
+use function array_keys;
+use function json_encode;
 
 /**
  * Class InputSlugElement
@@ -58,6 +61,10 @@ class InputSlugElement extends \TYPO3\CMS\Backend\Form\Element\InputSlugElement
 
             $result['html'] = $this->replaceValues($result['html'], $prefix, $editableSlugSegments);
         }
+
+        $result['requireJsModules'][0] = ['TYPO3/CMS/Sluggi/SlugElement' =>
+            $result['requireJsModules'][0]['TYPO3/CMS/Backend/FormEngine/Element/SlugElement']
+        ];
 
         return $result;
     }

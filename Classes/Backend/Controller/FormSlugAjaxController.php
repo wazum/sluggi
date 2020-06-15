@@ -14,6 +14,8 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
 use Wazum\Sluggi\Helper\Configuration;
 use Wazum\Sluggi\Helper\PermissionHelper;
 use Wazum\Sluggi\Helper\SlugHelper as SluggiSlugHelper;
+use function array_pop;
+use function explode;
 
 /**
  * Class FormSlugAjaxController
@@ -90,8 +92,10 @@ class FormSlugAjaxController extends \TYPO3\CMS\Backend\Controller\FormSlugAjaxC
         } elseif ($mode === 'manual') {
             // Existing record - Fetch full record and only validate against the new "slug" field.
             $proposal = $slug->sanitize($values['manual']);
-            if ($proposal !== '' && $allowOnlyLastSegment) {
-                $proposal = '/' . str_replace('/', '-', substr($proposal, 1));
+            if ($allowOnlyLastSegment) {
+                $generatedSegments = explode('/', $slug->generate($recordData, $parentPageId));
+                array_pop($generatedSegments);
+                $proposal = implode('/', $generatedSegments) . $proposal;
             }
         } else {
             throw new RuntimeException('mode must be either "auto", "recreate" or "manual"', 1535835666);
@@ -111,18 +115,14 @@ class FormSlugAjaxController extends \TYPO3\CMS\Backend\Controller\FormSlugAjaxC
         $mountRootPage = PermissionHelper::getTopmostAccessiblePage($pid);
         if ($mountRootPage !== null) {
             $inaccessibleSlugSegments = SluggiSlugHelper::getSlug($mountRootPage['pid'], $languageId);
-            if (!empty($inaccessibleSlugSegments) && strpos($proposal, $inaccessibleSlugSegments) === 0) {
-                $proposal = substr($proposal, strlen($inaccessibleSlugSegments));
-            }
-        }
-        if ($allowOnlyLastSegment) {
-            $proposal = '/' . array_pop(explode('/', $proposal));
         }
 
         return new JsonResponse([
             'hasConflicts' => !$mode && $hasConflict,
             'manual' => $values['manual'] ?? '',
             'proposal' => $proposal,
+            'inaccessibleSegments' => $inaccessibleSlugSegments,
+            'lastSegmentOnly' => $allowOnlyLastSegment
         ]);
     }
 }
