@@ -10,11 +10,17 @@ synchronize = 1
 last_segment_only = 0
 # cat=basic; type=boolean; label=Enable renaming slug segments recursively
 recursively = 1
-# cat=basic; type=boolean; label=Enable redirects (requires active 'typo3/cms-redirects' extension)
-redirects = 1
-# cat=basic; type=string; label=Redirect lifetime (strtotime)
-redirect_lifetime = +1 month
-# cat=basic; type=options[307 Temporary Redirect=307,301 Moved Permanently=301]; label=Use HTTP redirect code
-redirect_code = 307
 # cat=basic; type=boolean; label=Use Doctrine transactions
 use_transactions = 1
+# cat=basic; type=boolean; label=Enable redirects (requires active 'typo3/cms-redirects' extension)
+redirects = 1
+# cat=basic; type=string; label=Redirect lifetime (strtotime value)
+redirect_lifetime = +1 month
+# cat=basic; type=options[307 Temporary Redirect=307,301 Moved Permanently=301]; label=Redirect HTTP status code
+redirect_code = 307
+# cat=basic; type=boolean; label=Force HTTPS for redirects
+redirect_force_https = 0
+# cat=basic; type=boolean; label=Respect query parameters for redirects
+redirect_respect_query_parameters = 0
+# cat=basic; type=boolean; label=Keep query parameters for redirects
+redirect_keep_query_parameters = 0

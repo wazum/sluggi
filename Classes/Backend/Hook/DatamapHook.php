@@ -342,6 +342,9 @@ class DatamapHook
     {
         $redirectLifetime = strtotime((string)Configuration::get('redirect_lifetime'));
         $redirectHttpStatusCode = (int)Configuration::get('redirect_code');
+        $redirectForceHttps = (int)Configuration::get('redirect_force_https');
+        $redirectRespectQueryParameters = (int)Configuration::get('redirect_respect_query_parameters');
+        $redirectKeepQueryParameters = (int)Configuration::get('redirect_keep_query_parameters');
         $this->connection->insert(
             'sys_redirect',
             [
@@ -354,7 +357,10 @@ class DatamapHook
                 'source_path' => $path,
                 'target_statuscode' => in_array($redirectHttpStatusCode, [301, 307],
                     true) ? $redirectHttpStatusCode : 307,
-                'target' => 't3://page?uid=' . $pageId
+                'target' => 't3://page?uid=' . $pageId,
+                'force_https' => $redirectForceHttps,
+                'respect_query_parameters' => $redirectRespectQueryParameters,
+                'keep_query_parameters' => $redirectKeepQueryParameters
             ]
         );
     }
