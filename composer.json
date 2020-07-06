@@ -3,7 +3,7 @@
   "license": "GPL-3.0",
   "description": "The little TYPO3 9 slug helper",
   "require": {
-    "php": ">=7.0.0",
+    "php": ">=7.1",
     "ext-libxml": "*",
     "ext-dom": "*"
   },
