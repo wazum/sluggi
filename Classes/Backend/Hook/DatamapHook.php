@@ -89,7 +89,7 @@ class DatamapHook
                 $fieldConfig = $GLOBALS['TCA']['pages']['columns']['slug']['config'] ?? [];
                 /** @var SlugHelper $helper */
                 $helper = GeneralUtility::makeInstance(SlugHelper::class, 'pages', 'slug', $fieldConfig);
-                $generatedSlug = $slugToCompare = $helper->generate($data, $data['pid']);
+                $generatedSlug = $slugToCompare = $helper->generate($data, (int)$data['pid']);
                 if (!PermissionHelper::hasFullPermission()) {
                     if ($allowOnlyLastSegment) {
                         $slugToCompare = $this->getLastSlugSegment($generatedSlug);
