@@ -14,7 +14,6 @@ use TYPO3\CMS\Core\DataHandling\Model\CorrelationId;
 use TYPO3\CMS\Core\Routing\InvalidRouteArgumentsException;
 use TYPO3\CMS\Core\Routing\PageRouter;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
-use function filter_var;
 use function rtrim;
 
 /**
@@ -25,33 +24,36 @@ use function rtrim;
 class SlugService extends \TYPO3\CMS\Redirects\Service\SlugService
 {
     /**
-     * @var bool
+     * @var int
      */
-    protected $redirectForceHttps = false;
+    protected $redirectForceHttps;
 
     /**
-     * @var bool
+     * @var int
      */
-    protected $redirectRespectQueryParameters = false;
+    protected $redirectRespectQueryParameters;
 
     /**
-     * @var bool
+     * @var int
      */
-    protected $redirectKeepQueryParameters = false;
+    protected $redirectKeepQueryParameters;
 
     protected function initializeSettings(int $pageId): void
     {
         parent::initializeSettings($pageId);
 
         $settings = $this->site->getConfiguration()['settings']['redirects'] ?? [];
-        $this->redirectForceHttps = filter_var($settings['forceHttps'], FILTER_VALIDATE_BOOLEAN);
-        $this->redirectRespectQueryParameters = filter_var($settings['respectQueryParameters'],
-            FILTER_VALIDATE_BOOLEAN);
-        $this->redirectKeepQueryParameters = filter_var($settings['keepQueryParameters'], FILTER_VALIDATE_BOOLEAN);
+        $this->redirectForceHttps = (int)($settings['forceHttps'] ?? 0);
+        $this->redirectRespectQueryParameters = (int)($settings['respectQueryParameters'] ?? 0);
+        $this->redirectKeepQueryParameters = (int)($settings['keepQueryParameters'] ?? 0);
     }
 
-    public function rebuildSlugsForSlugChange(int $pageId, string $currentSlug, string $newSlug, CorrelationId $correlationId): void
-    {
+    public function rebuildSlugsForSlugChange(
+        int $pageId,
+        string $currentSlug,
+        string $newSlug,
+        CorrelationId $correlationId
+    ): void {
         $currentPageRecord = BackendUtility::getRecord('pages', $pageId);
         if ($currentPageRecord === null) {
             return;
@@ -60,7 +62,12 @@ class SlugService extends \TYPO3\CMS\Redirects\Service\SlugService
         if ($this->autoUpdateSlugs || $this->autoCreateRedirects) {
             $this->createCorrelationIds($pageId, $correlationId);
             if ($this->autoCreateRedirects) {
-                $this->createRedirectWithPageId($currentSlug, $newSlug, (int)$currentPageRecord['sys_language_uid'], (int)$currentPageRecord['uid']);
+                $this->createRedirectWithPageId(
+                    $currentSlug,
+                    $newSlug,
+                    (int)$currentPageRecord['sys_language_uid'],
+                    (int)$currentPageRecord['uid']
+                );
             }
             if ($this->autoUpdateSlugs) {
                 $this->checkSubPages($currentPageRecord, $currentSlug, $newSlug);
@@ -69,8 +76,11 @@ class SlugService extends \TYPO3\CMS\Redirects\Service\SlugService
         }
     }
 
-    protected function checkSubPages(array $currentPageRecord, string $oldSlugOfParentPage, string $newSlugOfParentPage): void
-    {
+    protected function checkSubPages(
+        array $currentPageRecord,
+        string $oldSlugOfParentPage,
+        string $newSlugOfParentPage
+    ): void {
         $languageUid = (int)$currentPageRecord['sys_language_uid'];
         // resolveSubPages needs the page id of the default language
         $pageId = $languageUid === 0 ? (int)$currentPageRecord['uid'] : (int)$currentPageRecord['l10n_parent'];
@@ -78,13 +88,22 @@ class SlugService extends \TYPO3\CMS\Redirects\Service\SlugService
         foreach ($subPageRecords as $subPageRecord) {
             $newSlug = $this->updateSlug($subPageRecord, $oldSlugOfParentPage, $newSlugOfParentPage);
             if ($newSlug !== null && $this->autoCreateRedirects) {
-                $this->createRedirectWithPageId($subPageRecord['slug'], $newSlug, $languageUid, (int)$subPageRecord['uid']);
+                $this->createRedirectWithPageId(
+                    $subPageRecord['slug'],
+                    $newSlug,
+                    $languageUid,
+                    (int)$subPageRecord['uid']
+                );
             }
         }
     }
 
-    protected function createRedirectWithPageId(string $originalSlug, string $newSlug, int $languageId, int $pageId): void
-    {
+    protected function createRedirectWithPageId(
+        string $originalSlug,
+        string $newSlug,
+        int $languageId,
+        int $pageId
+    ): void {
         $basePath = rtrim($this->site->getLanguageById($languageId)->getBase()->getPath(), '/');
         // Fetch possible route enhancer extension (PageTypeSuffix)
         $variant = $this->getVariant($originalSlug, $languageId, $pageId);
@@ -114,6 +133,7 @@ class SlugService extends \TYPO3\CMS\Redirects\Service\SlugService
             'is_regexp' => 0,
             'force_https' => $this->redirectForceHttps,
             'respect_query_parameters' => $this->redirectRespectQueryParameters,
+            'keep_query_parameters' => $this->redirectKeepQueryParameters,
             'target' => $targetPath,
             'target_statuscode' => $this->httpStatusCode,
             'hitcount' => 0,
@@ -132,7 +152,12 @@ class SlugService extends \TYPO3\CMS\Redirects\Service\SlugService
             $record['uid'] = $id;
         }
 
-        $this->getRecordHistoryStore()->addRecord('sys_redirect', $record['uid'], $record, $this->correlationIdRedirectCreation);
+        $this->getRecordHistoryStore()->addRecord(
+            'sys_redirect',
+            $record['uid'],
+            $record,
+            $this->correlationIdRedirectCreation
+        );
     }
 
     protected function deleteRedirect(string $sourcePath, string $sourceHost): void
