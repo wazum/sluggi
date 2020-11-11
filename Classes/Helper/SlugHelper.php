@@ -43,7 +43,7 @@ class SlugHelper
                     ->where(
                         $queryBuilder->expr()->eq('l10n_parent', $pageUid),
                         $queryBuilder->expr()->eq('sys_language_uid', $languageId)
-                    )->execute()->fetchOne();
+                    )->execute()->fetchColumn();
             }
 
             if ($pageUid === 0) {
@@ -54,7 +54,7 @@ class SlugHelper
                 ->from('pages')
                 ->where(
                     $queryBuilder->expr()->in('uid', $pageUid)
-                )->execute()->fetchOne();
+                )->execute()->fetchColumn();
         }
 
         return $slug === '/' ? '' : $slug;
