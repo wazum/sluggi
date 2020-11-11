@@ -36,8 +36,15 @@ class InputSlugElement extends \TYPO3\CMS\Backend\Form\Element\InputSlugElement
         if (!PermissionHelper::hasFullPermission()) {
             // Remove edit and recalculate buttons if slug segment is locked
             if (PermissionHelper::isLocked($page)) {
-                $result['html'] = $this->removeButtonsFields($result['html']);
                 $result['html'] .= '<script>var tx_sluggi_lock = true;</script>';
+            } else {
+                $synchronize = (bool)Configuration::get('synchronize');
+                if (isset($page['tx_sluggi_sync']) && false === (bool)$page['tx_sluggi_sync']) {
+                    $synchronize = false;
+                }
+                if ($synchronize) {
+                    $result['html'] .= '<script>var tx_sluggi_sync = true;</script>';
+                }
             }
 
             $mountRootPage = PermissionHelper::getTopmostAccessiblePage((int)$this->data['databaseRow']['uid']);
@@ -79,21 +86,6 @@ class InputSlugElement extends \TYPO3\CMS\Backend\Form\Element\InputSlugElement
         }
 
         return $languageId;
-    }
-
-    protected function removeButtonsFields(string $html): string
-    {
-        libxml_use_internal_errors(true);
-        $document = new DOMDocument();
-        $document->loadHTML($html, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
-        $xpath = new DOMXPath($document);
-        $nodes = $xpath->query("//*[contains(@class, 'input-group-btn') or contains(@class, 't3js-form-field-slug-input') or contains(@class, 't3js-form-field-slug-hidden')]");
-        /** @var DOMNode $node */
-        foreach ($nodes as $node) {
-            $node->parentNode->removeChild($node);
-        }
-
-        return $document->saveHTML();
     }
 
     protected function replaceValues(string $html, string $prefix, string $segments): string

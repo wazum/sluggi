@@ -1,16 +1,21 @@
 define([
     'jquery'
 ], function ($) {
+    var recreateTitle = $('button.t3js-form-field-slug-recreate').attr('title');
     var triggerRecreate = function () {
         $('.t3js-form-field-slug-recreate').trigger('click');
     };
-    var hideRecreate = function () {
-        $('.t3js-form-field-slug-toggle').hide();
-        $('.t3js-form-field-slug-recreate').hide();
+    var hideEdit = function (title) {
+        $('button.t3js-form-field-slug-toggle').hide();
+        $('button.t3js-form-field-slug-recreate')
+            .prop('disabled', true)
+            .attr('title', title);
     };
-    var showRecreate = function () {
+    var showEdit = function () {
         $('.t3js-form-field-slug-toggle').show();
-        $('.t3js-form-field-slug-recreate').show();
+        $('button.t3js-form-field-slug-recreate')
+            .prop('disabled', false)
+            .attr('title', recreateTitle);
     };
     var syncLabelSelector = 'label[for*="tx_sluggi_sync"]';
     var syncCheckboxId = $(syncLabelSelector).attr('for');
@@ -20,17 +25,34 @@ define([
     var lockCheckboxId = $(lockLabelSelector).attr('for');
     var lockCheckboxName = $('input[id="' + lockCheckboxId + '"]').data('formengine-input-name');
     var lockCheckboxSelector = 'input[name="' + lockCheckboxName + '"';
-    if ($(syncCheckboxSelector).val() === '1' || $(lockCheckboxSelector).val() === '1') {
-        hideRecreate();
+    if ($(lockCheckboxSelector).val() === '1') {
+        hideEdit('Lock active');
+    } else if ($(syncCheckboxSelector).val() === '1') {
+        hideEdit('Sync active');
     }
     $(document).ready(function () {
-        if (window && window.hasOwnProperty('tx_sluggi_lock') && window.tx_sluggi_lock === true) {
-            $(syncLabelSelector).parents('.form-group').hide();
+        if ('tx_sluggi_lock' in window && window.tx_sluggi_lock === true) {
+            $('button.t3js-form-field-slug-toggle').hide();
+            $('button.t3js-form-field-slug-recreate')
+                .prop('disabled', true)
+                .attr('title', 'Lock active');
+        } else if ($(syncCheckboxSelector).length === 0 && 'tx_sluggi_sync' in window && window.tx_sluggi_sync === true) {
+            $('button.t3js-form-field-slug-toggle').hide();
+            $('button.t3js-form-field-slug-recreate')
+                .prop('disabled', true)
+                .attr('title', 'Sync active');
         }
     });
     $(document).on('blur', '.slug-impact', function (e) {
-        if ($(syncCheckboxSelector).val() === '1') {
+        var syncGloballyActive = $(syncCheckboxSelector).length === 0 && 'tx_sluggi_sync' in window && window.tx_sluggi_sync === true;
+        if ($(syncCheckboxSelector).val() === '1' || syncGloballyActive) {
+            if (syncGloballyActive) {
+                $('button.t3js-form-field-slug-recreate').prop('disabled', false);
+            }
             triggerRecreate();
+            if (syncGloballyActive) {
+                $('button.t3js-form-field-slug-recreate').prop('disabled', true);
+            }
         }
     });
     $(document).on('click', syncLabelSelector, function (e) {
@@ -40,20 +62,24 @@ define([
             if ($(lockCheckboxSelector).val() === '1') {
                 $(lockLabelSelector).trigger('click');
             }
-            hideRecreate();
-        } else if ($(lockCheckboxSelector).val() === '0' || $(lockCheckboxSelector).val() === undefined) {
-            showRecreate();
+            hideEdit('Sync active');
+        } else if ($(lockCheckboxSelector).length === 0 || $(lockCheckboxSelector).val() === '0') {
+            showEdit();
         }
     });
     $(document).on('click', lockLabelSelector, function (e) {
         // 0 = activated (the value changes afterwards)
         if ($(lockCheckboxSelector).val() === '0') {
-            if ($(syncCheckboxSelector).val() === '1') {
+            if ($(syncCheckboxSelector).val() === '1' || ('tx_sluggi_sync' in window && window.tx_sluggi_sync === true)) {
                 $(syncLabelSelector).trigger('click');
             }
-            hideRecreate();
-        } else if ($(syncCheckboxSelector).val() === '0') {
-            showRecreate();
+            hideEdit('Lock active');
+        } else if ($(syncCheckboxSelector).length === 0 || $(syncCheckboxSelector).val() === '0') {
+            if (('tx_sluggi_sync' in window && window.tx_sluggi_sync === true)) {
+                triggerRecreate();
+            } else {
+                showEdit();
+            }
         }
     });
 });
