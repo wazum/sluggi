@@ -120,6 +120,10 @@ define(["require", "exports", "jquery"], function (require, exports, $) {
          * @param {ProposalModes} mode
          */
         SlugElement.prototype.sendSlugProposal = function (mode) {
+            // Return early when this is a new page (no suggestions, as this would lead to a wrong slug)
+            if (this.options.recordId.toString().substr(0,3) === 'NEW') {
+                return;
+            }
             var _this = this;
             var input = {};
             if (mode === ProposalModes.AUTO || mode === ProposalModes.RECREATE) {
