@@ -6,5 +6,5 @@ slash_replacement = 1
 pages_fields = nav_title,title
 # cat=basic; type=boolean; label=Enable synchronization of slug segment with configured page fields
 synchronize = 1
-# cat=basic; type=boolean; label=Only allow editing of the last segment of the URL (single page)
+# cat=basic; type=boolean; label=Allow standard editors only editing of the last segment of the URL (single page)
 last_segment_only = 0
