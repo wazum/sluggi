@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Wazum\Sluggi\Backend\Service;
 
+use PDO;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\Context\DateTimeAspect;
 use TYPO3\CMS\Core\Database\ConnectionPool;
@@ -164,7 +165,7 @@ class SlugService extends \TYPO3\CMS\Redirects\Service\SlugService
             ->where(
                 $queryBuilder->expr()->eq('source_host', $queryBuilder->createNamedParameter($sourceHost)),
                 $queryBuilder->expr()->eq('source_path', $queryBuilder->createNamedParameter($sourcePath))
-            )->execute()->fetchAssociative();
+            )->execute()->fetch(PDO::FETCH_ASSOC);
 
         return false !== $record ? $record : null;
     }
