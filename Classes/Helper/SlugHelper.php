@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Wazum\Sluggi\Helper;
@@ -19,10 +20,6 @@ class SlugHelper
 {
     /**
      * Return slug for given page ID
-     *
-     * @param int $pageId
-     * @param int $languageId
-     * @return string
      */
     public static function getSlug(int $pageId, int $languageId = 0): string
     {
@@ -46,7 +43,7 @@ class SlugHelper
                     ->where(
                         $queryBuilder->expr()->eq('l10n_parent', $pageUid),
                         $queryBuilder->expr()->eq('sys_language_uid', $languageId)
-                    )->execute()->fetchColumn();
+                    )->execute()->fetchOne();
             }
 
             if ($pageUid === 0) {
@@ -57,7 +54,7 @@ class SlugHelper
                 ->from('pages')
                 ->where(
                     $queryBuilder->expr()->in('uid', $pageUid)
-                )->execute()->fetchColumn();
+                )->execute()->fetchOne();
         }
 
         return $slug === '/' ? '' : $slug;

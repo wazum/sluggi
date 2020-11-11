@@ -1,14 +1,15 @@
 {
   "name": "wazum/sluggi",
   "license": "GPL-3.0",
-  "description": "The little TYPO3 9 slug helper",
+  "description": "The little TYPO3 slug helper",
   "require": {
-    "php": ">=7.0.0",
+    "php": ">=7.2.0",
     "ext-libxml": "*",
     "ext-dom": "*"
   },
   "suggest": {
-    "typo3/cms-redirects": "^9.5.5"
+    "typo3/cms-core": "^10.4",
+    "typo3/cms-redirects": "^10.4"
   },
   "type": "typo3-cms-extension",
   "autoload": {

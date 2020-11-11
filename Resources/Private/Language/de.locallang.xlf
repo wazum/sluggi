@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
 <xliff version="1.0">
-    <file target-language="en" datatype="plaintext" original="messages" product-name="sluggi">
+    <file target-language="de" datatype="plaintext" product-name="sluggi">
         <header/>
         <body>
             <trans-unit id="pages.tx_sluggi_lock">
@@ -27,14 +27,8 @@
             <trans-unit id="pages.tx_sluggi_sync.disabled">
                 <target>Deaktiviert</target>
             </trans-unit>
-            <trans-unit id="message.changed">
-                <target>URL-Segment auf dieser Seite und auf %d/%d Unterseiten geändert!</target>
-            </trans-unit>
             <trans-unit id="message.slashesNotAllowed">
                 <target>Sie sind nicht berechtigt einen Schrägstrich in die URL einzufügen!</target>
-            </trans-unit>
-            <trans-unit id="message.slugSynchronized">
-                <target>Das URL-Segment dieser Seite ist so konfiguriert, dass es mit einem anderen Feld synchron gehalten wird. Daher werden Ihre Änderungen überschrieben.</target>
             </trans-unit>
         </body>
     </file>

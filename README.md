@@ -1,18 +1,18 @@
 # sluggi — The little TYPO3 CMS slug helper
 
-:fire: **You have to update _sluggi_ to >= 1.9.1 if you update TYPO3 Core to 9.5.14, as this introduced a core bug where it's impossible to add additional fields for fetching the page root line**
+:fire: **Use sluggi < 2.0 for TYPO3 9 and sluggi >= 2.0 for TYPO3 10 **
 
 ## What does it do?
 
 The latest version of the extension … 
 * modifies the page slug field, so normal users can only edit the part of the page slug they have appropriate permissions on the related pages (see screenshot and example below)
 * allows administrators to restrict editing the page slug on certain pages
-* renames slug segments recursively, so if you change the slug of a parent page, the segments of this page are updated in all slugs on child pages. [Redirects](https://docs.typo3.org/typo3cms/extensions/core/Changelog/9.1/Feature-83631-SystemExtensionRedirectsHasBeenAdded.html) are created for all renamed pages if the `typo3/cms-redirects` extension is active
-* renames slug segments when moving a page (including child pages recursively)
+* updates slug segments when moving a page (including child pages recursively)
 * allows to synchronize the slug segment with the configured (title) fields automatically (behaviour like with RealURL)
 * sets a fallback chain for page slug calculation as follows (the first nonempty value is used): Alternative page title > Page title (you can change the fields used in the extension configuration)
 * configures a replacement of forward slashes (`/`) in the page slug with a hyphen (`-`) for new pages (existing pages are not affected as long as you don't recalculate the slugs)
-* allows to set a flag to allow editing only for the last part of the URL
+* allows to set a flag to allow editing only for the last part of the URL (like with RealURL)
+* respects any PageTypeSuffix route enhancer configuration (e.g. a '.html' suffix)
 
 # Extension settings
 
@@ -22,6 +22,22 @@ You can configure all options for the extension via Admin Tools > Settings > Ext
 
 Clear all caches after you change these settings.
 
+# Site Configuration
+
+If you need to change the default settings for the created redirects you have to add this you your site configuration (`config.yaml`):
+
+```yaml
+settings:
+  redirects:
+    autoUpdateSlugs: true
+    autoCreateRedirects: true
+    redirectTTL: 3600
+    forceHttps: true
+    respectQueryParameters: true
+    keepQueryParameters: true
+    httpStatusCode: 301
+```
+
 # Backend editor example
 
 ![sluggi Features](Resources/Public/Screenshots/sluggi_features.png)
@@ -30,20 +46,10 @@ In this example the editor has no rights to edit the _About_ page of the website
 
 You can set a whitelist with backend user group IDs in the extension configuration. Members of these groups will still be able to edit the whole slug.
 
-# Redirects
-
-_sluggi_ will automatically create redirects for all renamed pages if the extension `typo3/cms-redirects` is active. See the extension settings for further options (like redirect HTTP status code).
-
-# Recursive update of URLs
-
-If the feature is enabled in the extension configuration (see above), whenever you move a page or change the URL of a page with subpages,
-the URL part that matches the affected page is recursively updated (or replaced) on all these pages.
-
-Of course, if your subpages have custom URLs that are not related to the parent pages, nothing will change on these pages!
-
 # Synchronize the URL with the configured fields
 
 The most awaited feature is here!
+(and this is still true for TYPO3 10 …)
 
 No more URLs like '/about/translate-to-english-ueber-uns' because you forgot to press the re-generate button while translating a page.
 _sluggi_ will do the hard work for you and keep the URL in sync with your configured (e.g. the title) field.
@@ -57,13 +63,6 @@ This feature is enabled by default, but you can switch it off in the extension c
 As of version 1.9.3, a flag can be set to allow editing only for the last part of the URL.
 So editors can only change the path for the current page and not change the complete URL structure.
 
-## Requirements
-
-You need at least TYPO3 CMS version 9.5.5 including the following features:
-
-* https://docs.typo3.org/typo3cms/extensions/core/Changelog/9.5.x/Feature-86740-AllowRemovalOfSlashInSlug.html
-* https://docs.typo3.org/typo3cms/extensions/core/Changelog/9.5.x/Feature-87085-FallbackOptionsForSlugFields.html
-
 ## Installation
 
 Require the latest package:
@@ -73,21 +72,9 @@ Require the latest package:
 Available on TER and packagist:
 https://packagist.org/packages/wazum/sluggi
 
-## Updates
+## Sponsors
 
-- Read the important changes section in this README.md
-- Go to _Analyze Database Structure_ in the _Admin tools_ > _Maintenance_ backend module and update the database structure.
-
-## Important changes
-
-The field `tx_sluggi_locked` in the pages table has been renamed to `tx_sluggi_lock` in version 1.4.0. If you used this feature, update your table:
-
-    ALTER TABLE `pages` CHANGE `tx_sluggi_locked` `tx_sluggi_lock` SMALLINT(5) UNSIGNED DEFAULT '0' NOT NULL;
-    
-## Required core patch
-
-You have to apply the patch from https://review.typo3.org/c/Packages/TYPO3.CMS/+/60263
-before TYPO3 CMS 9.5.6 or 10.0.1
+Thanks to [plan2net GmbH](https://www.plan2.net/) to let me work on the update for TYPO3 CMS 10 during working hours.
 
 ## Say thanks! and support me
 

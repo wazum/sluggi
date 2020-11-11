@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Wazum\Sluggi\Backend\Controller;
@@ -16,6 +17,8 @@ use Wazum\Sluggi\Helper\PermissionHelper;
 use Wazum\Sluggi\Helper\SlugHelper as SluggiSlugHelper;
 use function array_pop;
 use function explode;
+use function str_replace;
+use function substr;
 
 /**
  * Class FormSlugAjaxController
@@ -26,9 +29,6 @@ use function explode;
 class FormSlugAjaxController extends \TYPO3\CMS\Backend\Controller\FormSlugAjaxController
 {
     /**
-     *
-     * @param ServerRequestInterface $request
-     * @return ResponseInterface
      * @throws RuntimeException
      * @throws SiteNotFoundException
      */
@@ -46,8 +46,6 @@ class FormSlugAjaxController extends \TYPO3\CMS\Backend\Controller\FormSlugAjaxC
     }
 
     /**
-     * @param ServerRequestInterface $request
-     * @return ResponseInterface
      * @throws SiteNotFoundException
      */
     protected function modifiedSuggestAction(ServerRequestInterface $request): ResponseInterface
@@ -83,6 +81,7 @@ class FormSlugAjaxController extends \TYPO3\CMS\Backend\Controller\FormSlugAjaxC
             $recordData[$GLOBALS['TCA'][$tableName]['ctrl']['languageField']] = $languageId;
         }
 
+        /** @var SlugHelper $slug */
         $slug = GeneralUtility::makeInstance(SlugHelper::class, $tableName, $fieldName, $fieldConfig);
         if ($mode === 'auto') {
             // New page - Feed incoming values to generator
@@ -95,7 +94,7 @@ class FormSlugAjaxController extends \TYPO3\CMS\Backend\Controller\FormSlugAjaxC
             if ($allowOnlyLastSegment) {
                 $generatedSegments = explode('/', $slug->generate($recordData, $parentPageId));
                 array_pop($generatedSegments);
-                $proposal = implode('/', $generatedSegments) . $proposal;
+                $proposal = implode('/', $generatedSegments) . str_replace('/', '-', substr($proposal, 1));
             }
         } else {
             throw new RuntimeException('mode must be either "auto", "recreate" or "manual"', 1535835666);
@@ -113,6 +112,7 @@ class FormSlugAjaxController extends \TYPO3\CMS\Backend\Controller\FormSlugAjaxC
         }
 
         $mountRootPage = PermissionHelper::getTopmostAccessiblePage($pid);
+        $inaccessibleSlugSegments = null;
         if ($mountRootPage !== null) {
             $inaccessibleSlugSegments = SluggiSlugHelper::getSlug($mountRootPage['pid'], $languageId);
         }

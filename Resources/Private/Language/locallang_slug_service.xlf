@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xliff version="1.0">
+	<file source-language="en" datatype="plaintext" product-name="sluggi">
+		<header/>
+		<body>
+			<trans-unit id="revert_update_success_message" resname="revert_update_success_message">
+				<source>Created redirect for this page and slugs and redirects on child pages have been reverted.</source>
+			</trans-unit>
+			<trans-unit id="revert_redirects_success_message" resname="revert_redirects_success_message">
+				<source>All created redirects (for this page and child pages) have been reverted.</source>
+			</trans-unit>
+		</body>
+	</file>
+</xliff>

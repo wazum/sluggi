@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
 <xliff version="1.0">
-    <file source-language="en" datatype="plaintext" original="messages" product-name="sluggi">
+    <file source-language="en" datatype="plaintext" product-name="sluggi">
         <header/>
         <body>
             <trans-unit id="pages.tx_sluggi_lock">
@@ -27,14 +27,8 @@
             <trans-unit id="pages.tx_sluggi_sync.disabled">
                 <source>Disabled</source>
             </trans-unit>
-            <trans-unit id="message.changed">
-                <source>URL segment on this page and on %d/%d child pages changed!</source>
-            </trans-unit>
             <trans-unit id="message.slashesNotAllowed">
                 <source>You are not allowed to insert slashes into the URL!</source>
-            </trans-unit>
-            <trans-unit id="message.slugSynchronized">
-                <source>This page's URL segment is configured to sync with another field. This will overwrite your changes to the slug.</source>
             </trans-unit>
         </body>
     </file>

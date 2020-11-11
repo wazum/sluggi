@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Wazum\Sluggi\Backend\Form;
@@ -13,9 +14,6 @@ use TYPO3\CMS\Backend\Form\Element\InputTextElement;
  */
 class InputTextWithSlugImpactElement extends InputTextElement
 {
-    /**
-     * @return array
-     */
     public function render(): array
     {
         $result = parent::render();

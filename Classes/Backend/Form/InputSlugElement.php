@@ -24,8 +24,6 @@ class InputSlugElement extends \TYPO3\CMS\Backend\Form\Element\InputSlugElement
 {
     /**
      * Additional group/admin check for slug edit button
-     *
-     * @return array
      */
     public function render(): array
     {
@@ -47,7 +45,7 @@ class InputSlugElement extends \TYPO3\CMS\Backend\Form\Element\InputSlugElement
 
             $mountRootPage = PermissionHelper::getTopmostAccessiblePage((int)$this->data['databaseRow']['uid']);
             $inaccessibleSlugSegments = SluggiSlugHelper::getSlug((int)$mountRootPage['pid'], $languageId);
-            $prefix = $this->getPrefix($this->data['site'], $languageId) . $inaccessibleSlugSegments;
+            $prefix = ($this->data['customData'][$this->data['fieldName']]['slugPrefix'] ?? '') . $inaccessibleSlugSegments;
             $editableSlugSegments = $this->data['databaseRow']['slug'];
             $allowOnlyLastSegment = (bool)Configuration::get('last_segment_only');
             if (!empty($inaccessibleSlugSegments) && strpos($editableSlugSegments, $inaccessibleSlugSegments) === 0) {
@@ -69,11 +67,6 @@ class InputSlugElement extends \TYPO3\CMS\Backend\Form\Element\InputSlugElement
         return $result;
     }
 
-    /**
-     * @param string $table
-     * @param array $row
-     * @return int
-     */
     protected function getLanguageId(string $table, array $row): int
     {
         $languageId = 0;
@@ -90,10 +83,6 @@ class InputSlugElement extends \TYPO3\CMS\Backend\Form\Element\InputSlugElement
         return $languageId;
     }
 
-    /**
-     * @param string $html
-     * @return string
-     */
     protected function removeButtonsFields(string $html): string
     {
         libxml_use_internal_errors(true);
@@ -109,15 +98,9 @@ class InputSlugElement extends \TYPO3\CMS\Backend\Form\Element\InputSlugElement
         return $document->saveHTML();
     }
 
-    /**
-     * @param string $html
-     * @param string $prefix
-     * @param string $segments
-     * @return string
-     */
     protected function replaceValues(string $html, string $prefix, string $segments): string
     {
-        $result = preg_replace(
+        return preg_replace(
             [
                 '/(<input.*?class=".*?t3js-form-field-slug-input.*?".*?)placeholder="(.*?)"(.*?>)/ius',
                 '/(<input.*?class=".*?t3js-form-field-slug-readonly.*?".*?)data-title="(.*?)"(.*?)value="(.*?)"(.*?>)/ius',
@@ -136,7 +119,5 @@ class InputSlugElement extends \TYPO3\CMS\Backend\Form\Element\InputSlugElement
             ],
             $html
         );
-
-        return $result;
     }
 }
