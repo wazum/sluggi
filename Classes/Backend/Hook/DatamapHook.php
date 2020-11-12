@@ -72,7 +72,7 @@ class DatamapHook
         $currentPage = BackendUtility::getRecord('pages', $id, 'uid, slug, sys_language_uid');
         if (!empty($currentPage)) {
             $languageId = $currentPage['sys_language_uid'];
-            $currentSlugSegment = $this->getLastSlugSegment($currentPage['slug']);
+            $currentSlugSegment = SlugHelper::getLastSlugSegment($currentPage['slug']);
             $parentSlug = SlugHelper::getSlug($targetId, $languageId);
             $newSlug = rtrim($parentSlug, '/') . $currentSlugSegment;
 
@@ -84,12 +84,5 @@ class DatamapHook
             $dataHandler->setCorrelationId($dataHandler->getCorrelationId());
             $dataHandler->process_datamap();
         }
-    }
-
-    protected function getLastSlugSegment(string $slug): string
-    {
-        $parts = explode('/', $slug);
-
-        return '/' . array_pop($parts);
     }
 }
