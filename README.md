@@ -7,7 +7,7 @@
 The latest version of the extension … 
 * modifies the page slug field, so normal users can only edit the part of the page slug they have appropriate permissions on the related pages (see screenshot and example below)
 * allows administrators to restrict editing the page slug on certain pages
-* updates slug segments when moving a page (including child pages recursively)
+* updates slug segments when moving or copying a page (including child pages recursively)
 * allows to synchronize the slug segment with the configured (title) fields automatically (behaviour like with RealURL)
 * sets a fallback chain for page slug calculation as follows (the first nonempty value is used): Alternative page title > Page title (you can change the fields used in the extension configuration)
 * configures a replacement of forward slashes (`/`) in the page slug with a hyphen (`-`) for new pages (existing pages are not affected as long as you don't recalculate the slugs)
