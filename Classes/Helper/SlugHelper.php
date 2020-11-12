@@ -8,6 +8,8 @@ use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Database\Query\QueryBuilder;
 use TYPO3\CMS\Core\Database\Query\Restriction\HiddenRestriction;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
+use function array_pop;
+use function explode;
 
 /**
  * Class SlugHelper
@@ -61,5 +63,16 @@ class SlugHelper
         }
 
         return $slug === '/' ? '' : $slug;
+    }
+
+    /**
+     * @param string $slug
+     * @return string
+     */
+    public static function getLastSlugSegment(string $slug): string
+    {
+        $parts = explode('/', $slug);
+
+        return '/'. array_pop($parts);
     }
 }

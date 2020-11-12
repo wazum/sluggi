@@ -22,5 +22,7 @@ defined('TYPO3_MODE') or die();
             \Wazum\Sluggi\Backend\Hook\DatamapHook::class;
         $GLOBALS ['TYPO3_CONF_VARS']['SC_OPTIONS']['t3lib/class.t3lib_tcemain.php']['moveRecordClass'][] =
             \Wazum\Sluggi\Backend\Hook\DatamapHook::class;
+        $GLOBALS ['TYPO3_CONF_VARS']['SC_OPTIONS']['t3lib/class.t3lib_tcemain.php']['processCmdmapClass'][]
+            = \Wazum\Sluggi\Backend\Hook\CommandMapHook::class;
     }
 })();

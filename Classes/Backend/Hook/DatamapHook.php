@@ -92,7 +92,7 @@ class DatamapHook
                 $generatedSlug = $slugToCompare = $helper->generate($data, $data['pid']);
                 if (!PermissionHelper::hasFullPermission()) {
                     if ($allowOnlyLastSegment) {
-                        $slugToCompare = $this->getLastSlugSegment($generatedSlug);
+                        $slugToCompare = SluggiSlugHelper::getLastSlugSegment($generatedSlug);
                     } else {
                         $inaccessibleSlugSegments = $this->getInaccessibleSlugSegments($id, $languageId);
                         $slugToCompare = str_replace($inaccessibleSlugSegments, '', $generatedSlug);
@@ -161,7 +161,10 @@ class DatamapHook
             // or only the last segment is editable
             // we don't need to modify the slug here
             if (!$synchronize && !$allowOnlyLastSegment) {
-                $fieldArray['slug'] = $this->getInaccessibleSlugSegments($id, $languageId) . $fieldArray['slug'];
+                $inaccessibleSlugSegments = $this->getInaccessibleSlugSegments($id, $languageId);
+                if (strpos($fieldArray['slug'], $inaccessibleSlugSegments) !== 0) {
+                    $fieldArray['slug'] = $inaccessibleSlugSegments . $fieldArray['slug'];
+                }
             }
         }
 
@@ -248,7 +251,7 @@ class DatamapHook
         $currentPage = BackendUtility::getRecord('pages', $id, 'uid, slug, sys_language_uid');
         if (!empty($currentPage)) {
             $languageId = $currentPage['sys_language_uid'];
-            $currentSlugSegment = $this->getLastSlugSegment($currentPage['slug']);
+            $currentSlugSegment = SluggiSlugHelper::getLastSlugSegment($currentPage['slug']);
             $parentSlug = SluggiSlugHelper::getSlug($targetId, $languageId);
             $newSlug = rtrim($parentSlug, '/') . $currentSlugSegment;
 
@@ -643,16 +646,5 @@ class DatamapHook
         $mountRootPage = PermissionHelper::getTopmostAccessiblePage($pageId);
 
         return SluggiSlugHelper::getSlug($mountRootPage['pid'], $languageId);
-    }
-
-    /**
-     * @param string $slug
-     * @return string
-     */
-    protected function getLastSlugSegment(string $slug): string
-    {
-        $parts = explode('/', $slug);
-
-        return '/'. array_pop($parts);
     }
 }
