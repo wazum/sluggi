@@ -7,7 +7,6 @@ namespace Wazum\Sluggi\Backend\Hook;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\DataHandling\DataHandler;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
-use TYPO3\CMS\Redirects\Service\SlugService;
 use Wazum\Sluggi\Helper\SlugHelper;
 
 /**
@@ -18,19 +17,6 @@ use Wazum\Sluggi\Helper\SlugHelper;
  */
 class DatamapHook
 {
-    /**
-     * @var SlugService
-     */
-    protected $slugService;
-
-    /**
-     * @param SlugService $slugService
-     */
-    public function __construct(SlugService $slugService)
-    {
-        $this->slugService = $slugService;
-    }
-
     /**
      * @param string $table
      * @param int $id
@@ -104,6 +90,6 @@ class DatamapHook
     {
         $parts = explode('/', $slug);
 
-        return '/'. array_pop($parts);
+        return '/' . array_pop($parts);
     }
 }
