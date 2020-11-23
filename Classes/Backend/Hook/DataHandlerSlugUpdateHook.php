@@ -30,6 +30,24 @@ use function substr;
 class DataHandlerSlugUpdateHook
 {
     /**
+     * @var SlugService
+     */
+    protected $slugService;
+
+    /**
+     * @var string[]
+     */
+    protected $slugSetIncoming;
+
+    /**
+     * @param SlugService $slugService
+     */
+    public function __construct(SlugService $slugService)
+    {
+        $this->slugService = $slugService;
+    }
+
+    /**
      * @param string|int $id (id could be string, for this reason no type hint)
      */
     public function processDatamap_preProcessFieldArray(
@@ -48,6 +66,10 @@ class DataHandlerSlugUpdateHook
             || $this->isNestedHookInvocation($dataHandler)
         ) {
             return;
+        }
+
+        if (!empty($incomingFieldArray['slug'])) {
+            $this->slugSetIncoming[(int)$id] = true;
         }
 
         $synchronize = (bool)Configuration::get('synchronize');
@@ -80,6 +102,53 @@ class DataHandlerSlugUpdateHook
             $incomingFieldArray['slug'] = $inaccessibleSlugSegments .
                 str_replace($inaccessibleSlugSegments, '', $parentSlug) .
                 '/' . str_replace('/', '-', substr($incomingFieldArray['slug'], 1));
+        }
+    }
+
+    /**
+     * @param int|string $id
+     */
+    public function processDatamap_postProcessFieldArray(
+        string $status,
+        string $table,
+        $id,
+        array $incomingFieldArray,
+        DataHandler $dataHandler
+    ): void {
+        if (
+            $table !== 'pages'
+            || $status !== 'update'
+            || $this->isNestedHookInvocation($dataHandler)
+        ) {
+            return;
+        }
+
+        // We have to double check again here,
+        // as the slug is empty e.g. if the title is changed via inline editing in page tree
+        if (!isset($this->slugSetIncoming[(int)$id])) {
+            $synchronize = (bool)Configuration::get('synchronize');
+
+            if (isset($incomingFieldArray['tx_sluggi_sync']) && (bool)$incomingFieldArray['tx_sluggi_sync'] === false) {
+                $synchronize = false;
+            }
+            if ($synchronize) {
+                $record = BackendUtility::getRecordWSOL($table, (int)$id);
+                $data = array_merge($record, $incomingFieldArray);
+                if ((bool)$data['tx_sluggi_sync']) {
+                    $fieldConfig = $GLOBALS['TCA']['pages']['columns']['slug']['config'] ?? [];
+                    /** @var SlugHelper $helper */
+                    $helper = GeneralUtility::makeInstance(SlugHelper::class, 'pages', 'slug', $fieldConfig);
+                    $incomingFieldArray['slug'] = $helper->generate($data, (int)$data['pid']);
+                }
+                if (!empty($incomingFieldArray['slug'])) {
+                    $this->slugService->rebuildSlugsForSlugChange(
+                        $id,
+                        $record['slug'],
+                        $incomingFieldArray['slug'],
+                        $dataHandler->getCorrelationId()
+                    );
+                }
+            }
         }
     }
 

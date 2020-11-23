@@ -7,5 +7,7 @@ services:
   Wazum\Sluggi\:
     resource: '../Classes/*'
 
+  Wazum\Sluggi\Backend\Hook\DataHandlerSlugUpdateHook:
+    public: true
   Wazum\Sluggi\Backend\Hook\DatamapHook:
     public: true
