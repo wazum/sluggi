@@ -43,7 +43,6 @@ class DataHandlerSlugUpdateHook
             // This is set in \TYPO3\CMS\Backend\History\RecordHistoryRollback::performRollback
             // so we use it as a flag to ignore the update
             || $dataHandler->dontProcessTransformations
-            || empty($incomingFieldArray['slug'])
             || !MathUtility::canBeInterpretedAsInteger($id)
             || !$dataHandler->checkRecordUpdateAccess($table, $id, $incomingFieldArray)
             || $this->isNestedHookInvocation($dataHandler)
@@ -51,8 +50,6 @@ class DataHandlerSlugUpdateHook
             return;
         }
 
-        $record = BackendUtility::getRecordWSOL($table, (int)$id);
-        $languageId = $record['sys_language_uid'];
         $synchronize = (bool)Configuration::get('synchronize');
         $allowOnlyLastSegment = (bool)Configuration::get('last_segment_only');
 
@@ -60,6 +57,7 @@ class DataHandlerSlugUpdateHook
             $synchronize = false;
         }
         if ($synchronize) {
+            $record = BackendUtility::getRecordWSOL($table, (int)$id);
             $data = array_merge($record, $incomingFieldArray);
             if ((bool)$data['tx_sluggi_sync']) {
                 $fieldConfig = $GLOBALS['TCA']['pages']['columns']['slug']['config'] ?? [];
@@ -68,6 +66,8 @@ class DataHandlerSlugUpdateHook
                 $incomingFieldArray['slug'] = $helper->generate($data, (int)$data['pid']);
             }
         } elseif (isset($incomingFieldArray['slug']) && $allowOnlyLastSegment && !PermissionHelper::hasFullPermission()) {
+            $record = BackendUtility::getRecordWSOL($table, (int)$id);
+            $languageId = $record['sys_language_uid'];
             $inaccessibleSlugSegments = $this->getInaccessibleSlugSegments($id, $languageId);
             // Prepend the parent page slug
             $parentSlug = SluggiSlugHelper::getSlug($record['pid'], $languageId);
