@@ -14,6 +14,7 @@ use TYPO3\CMS\Core\DataHandling\Model\CorrelationId;
 use TYPO3\CMS\Core\Routing\InvalidRouteArgumentsException;
 use TYPO3\CMS\Core\Routing\PageRouter;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
+use TYPO3\CMS\Redirects\Service\RedirectCacheService;
 use function rtrim;
 
 /**
@@ -73,6 +74,8 @@ class SlugService extends \TYPO3\CMS\Redirects\Service\SlugService
                 $this->checkSubPages($currentPageRecord, $currentSlug, $newSlug);
             }
             $this->sendNotification();
+
+            GeneralUtility::makeInstance(RedirectCacheService::class)->rebuild();
         }
     }
 
