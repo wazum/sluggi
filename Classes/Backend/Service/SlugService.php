@@ -13,7 +13,10 @@ use TYPO3\CMS\Core\Database\Query\Restriction\DeletedRestriction;
 use TYPO3\CMS\Core\DataHandling\Model\CorrelationId;
 use TYPO3\CMS\Core\Routing\InvalidRouteArgumentsException;
 use TYPO3\CMS\Core\Routing\PageRouter;
+use TYPO3\CMS\Core\Utility\ExtensionManagementUtility;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
+use TYPO3\CMS\Redirects\Service\RedirectCacheService;
+
 use function rtrim;
 
 /**
@@ -73,6 +76,11 @@ class SlugService extends \TYPO3\CMS\Redirects\Service\SlugService
                 $this->checkSubPages($currentPageRecord, $currentSlug, $newSlug);
             }
             $this->sendNotification();
+        }
+
+        if ($this->autoCreateRedirects && ExtensionManagementUtility::isLoaded('redirects')) {
+            // Rebuild redirect cache
+            GeneralUtility::makeInstance(RedirectCacheService::class)->rebuild();
         }
     }
 
