@@ -140,7 +140,7 @@ class DataHandlerSlugUpdateHook
                     $helper = GeneralUtility::makeInstance(SlugHelper::class, 'pages', 'slug', $fieldConfig);
                     $incomingFieldArray['slug'] = $helper->generate($data, (int)$data['pid']);
                 }
-                if (!empty($incomingFieldArray['slug'])) {
+                if (!empty($incomingFieldArray['slug']) && $incomingFieldArray['slug'] !== $record['slug']) {
                     $this->slugService->rebuildSlugsForSlugChange(
                         $id,
                         $record['slug'],
