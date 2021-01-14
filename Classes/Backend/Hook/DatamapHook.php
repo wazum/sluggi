@@ -78,11 +78,11 @@ class DatamapHook
 
             $data = [];
             $data['pages'][$id]['slug'] = $newSlug;
-            /** @var DataHandler $dataHandler */
-            $dataHandler = GeneralUtility::makeInstance(DataHandler::class);
-            $dataHandler->start($data, []);
-            $dataHandler->setCorrelationId($dataHandler->getCorrelationId());
-            $dataHandler->process_datamap();
+            /** @var DataHandler $localDataHandler */
+            $localDataHandler = GeneralUtility::makeInstance(DataHandler::class);
+            $localDataHandler->start($data, []);
+            $localDataHandler->setCorrelationId($dataHandler->getCorrelationId());
+            $localDataHandler->process_datamap();
         }
     }
 }
