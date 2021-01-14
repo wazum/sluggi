@@ -24,7 +24,7 @@ Clear all caches after you change these settings.
 
 # Site Configuration
 
-If you need to change the default settings for the created redirects you have to add this you your site configuration (`config.yaml`):
+If you need to change the default settings for the created redirects (or you want to disable them) you have to add this you your site configuration (`config.yaml`):
 
 ```yaml
 settings:
