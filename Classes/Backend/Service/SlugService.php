@@ -11,6 +11,7 @@ use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Database\Query\QueryBuilder;
 use TYPO3\CMS\Core\Database\Query\Restriction\DeletedRestriction;
 use TYPO3\CMS\Core\DataHandling\Model\CorrelationId;
+use TYPO3\CMS\Core\Exception\SiteNotFoundException;
 use TYPO3\CMS\Core\Routing\InvalidRouteArgumentsException;
 use TYPO3\CMS\Core\Routing\PageRouter;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
@@ -55,11 +56,18 @@ class SlugService extends \TYPO3\CMS\Redirects\Service\SlugService
         string $newSlug,
         CorrelationId $correlationId
     ): void {
+        try {
+            $this->initializeSettings($pageId);
+        } catch(SiteNotFoundException $e)
+        {
+            // Without a site configuration no settings, so we can't do anything here
+            return;
+        }
+
         $currentPageRecord = BackendUtility::getRecord('pages', $pageId);
         if ($currentPageRecord === null) {
             return;
         }
-        $this->initializeSettings($pageId);
         if ($this->autoUpdateSlugs || $this->autoCreateRedirects) {
             $this->createCorrelationIds($pageId, $correlationId);
             if ($this->autoCreateRedirects) {
