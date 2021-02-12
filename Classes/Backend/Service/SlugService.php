@@ -208,7 +208,7 @@ class SlugService extends \TYPO3\CMS\Redirects\Service\SlugService
         return false !== $record ? $record : null;
     }
 
-    protected function getVariant(string $originalSlug, int $languageId, int $pageId): ?string
+    protected function getVariant(string $slug, int $languageId, int $pageId): ?string
     {
         $basePath = rtrim($this->site->getLanguageById($languageId)->getBase()->getPath(), '/');
 
@@ -225,8 +225,8 @@ class SlugService extends \TYPO3\CMS\Redirects\Service\SlugService
         }
         $variant = null;
         // There must be some kind of route enhancer involved
-        if (($generatedPath !== $originalSlug) && strpos($generatedPath, $originalSlug) !== false) {
-            $variant = str_replace($originalSlug, '', $generatedPath);
+        if (($generatedPath !== $slug) && strpos($generatedPath, $slug) !== false) {
+            $variant = str_replace($slug, '', $generatedPath);
         }
         if ($variant === $basePath) {
             $variant = null;
