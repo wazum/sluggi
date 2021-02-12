@@ -103,7 +103,8 @@ class SlugService extends \TYPO3\CMS\Redirects\Service\SlugService
                     $subPageRecord['slug'],
                     $newSlug,
                     $languageUid,
-                    (int)$subPageRecord['uid']
+                    (int)$subPageRecord['uid'],
+                    true
                 );
             }
         }
@@ -113,11 +114,12 @@ class SlugService extends \TYPO3\CMS\Redirects\Service\SlugService
         string $originalSlug,
         string $newSlug,
         int $languageId,
-        int $pageId
+        int $pageId,
+        bool $isSubpage = false
     ): void {
         $basePath = rtrim($this->site->getLanguageById($languageId)->getBase()->getPath(), '/');
         // Fetch possible route enhancer extension (PageTypeSuffix)
-        $variant = $this->getVariant($originalSlug, $languageId, $pageId);
+        $variant = $this->getVariant($isSubpage ? $newSlug : $originalSlug, $languageId, $pageId);
 
         /** @var DateTimeAspect $date */
         $date = $this->context->getAspect('date');
@@ -214,6 +216,10 @@ class SlugService extends \TYPO3\CMS\Redirects\Service\SlugService
         $pageRouter = GeneralUtility::makeInstance(PageRouter::class, $this->site);
         try {
             $generatedPath = $pageRouter->generateUri($pageId, ['_language' => $languageId])->getPath();
+
+            if (!empty($basePath) && !empty($generatedPath)) {
+                $generatedPath = preg_replace('!^' . $basePath . '!', '', $generatedPath);
+            }
         } catch (InvalidRouteArgumentsException $e) {
             $generatedPath = '';
         }
