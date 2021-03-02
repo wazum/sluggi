@@ -213,11 +213,13 @@ class SlugService extends \TYPO3\CMS\Redirects\Service\SlugService
         // Check for possibly different URL (e.g. with /index.html appended)
         $pageRouter = GeneralUtility::makeInstance(PageRouter::class, $this->site);
         try {
-            $generatedPath = $pageRouter->generateUri($pageId, ['_language' => $languageId, 'MP' => $basePath])->getPath();
+            $generatedPath = $pageRouter->generateUri($pageId, ['_language' => $languageId])->getPath();
+            $generatedPath = substr($generatedPath, strlen($basePath));
         } catch (InvalidRouteArgumentsException $e) {
             $generatedPath = '';
         }
         $variant = null;
+
         // There must be some kind of route enhancer involved
         if (($generatedPath !== $originalSlug) && strpos($generatedPath, $originalSlug) !== false) {
             $variant = str_replace($originalSlug, '', $generatedPath);
