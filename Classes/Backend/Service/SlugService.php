@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Wazum\Sluggi\Backend\Service;
 
+use Exception;
 use PDO;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\Context\DateTimeAspect;
@@ -115,9 +116,14 @@ class SlugService extends \TYPO3\CMS\Redirects\Service\SlugService
         int $languageId,
         int $pageId
     ): void {
-        $basePath = rtrim($this->site->getLanguageById($languageId)->getBase()->getPath(), '/');
+        try {
+            $basePath = rtrim($this->site->getLanguageById($languageId)->getBase()->getPath(), '/');
+        } catch (Exception $e) {
+            return;
+        }
+
         // Fetch possible route enhancer extension (PageTypeSuffix)
-        $variant = $this->getVariant($originalSlug, $languageId, $pageId);
+        $variant = $this->getVariant($basePath, $originalSlug, $languageId, $pageId);
 
         /** @var DateTimeAspect $date */
         $date = $this->context->getAspect('date');
@@ -206,10 +212,8 @@ class SlugService extends \TYPO3\CMS\Redirects\Service\SlugService
         return false !== $record ? $record : null;
     }
 
-    protected function getVariant(string $originalSlug, int $languageId, int $pageId): ?string
+    protected function getVariant(string $basePath, string $slug, int $languageId, int $pageId): ?string
     {
-        $basePath = rtrim($this->site->getLanguageById($languageId)->getBase()->getPath(), '/');
-
         // Check for possibly different URL (e.g. with /index.html appended)
         $pageRouter = GeneralUtility::makeInstance(PageRouter::class, $this->site);
         try {
@@ -219,8 +223,8 @@ class SlugService extends \TYPO3\CMS\Redirects\Service\SlugService
         }
         $variant = null;
         // There must be some kind of route enhancer involved
-        if (($generatedPath !== $originalSlug) && strpos($generatedPath, $originalSlug) !== false) {
-            $variant = str_replace($originalSlug, '', $generatedPath);
+        if (($generatedPath !== $slug) && strpos($generatedPath, $slug) !== false) {
+            $variant = str_replace($slug, '', $generatedPath);
         }
         if ($variant === $basePath) {
             $variant = null;
