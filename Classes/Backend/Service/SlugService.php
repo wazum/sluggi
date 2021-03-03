@@ -104,7 +104,8 @@ class SlugService extends \TYPO3\CMS\Redirects\Service\SlugService
                     $subPageRecord['slug'],
                     $newSlug,
                     $languageUid,
-                    (int)$subPageRecord['uid']
+                    (int)$subPageRecord['uid'],
+                    true
                 );
             }
         }
@@ -114,7 +115,8 @@ class SlugService extends \TYPO3\CMS\Redirects\Service\SlugService
         string $originalSlug,
         string $newSlug,
         int $languageId,
-        int $pageId
+        int $pageId,
+        bool $isSubPage = false
     ): void {
         try {
             $basePath = rtrim($this->site->getLanguageById($languageId)->getBase()->getPath(), '/');
@@ -123,7 +125,7 @@ class SlugService extends \TYPO3\CMS\Redirects\Service\SlugService
         }
 
         // Fetch possible route enhancer extension (PageTypeSuffix)
-        $variant = $this->getVariant($basePath, $originalSlug, $languageId, $pageId);
+        $variant = $this->getVariant($basePath, $isSubPage ? $newSlug : $originalSlug, $languageId, $pageId);
 
         /** @var DateTimeAspect $date */
         $date = $this->context->getAspect('date');
