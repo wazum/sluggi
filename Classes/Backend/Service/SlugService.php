@@ -220,6 +220,10 @@ class SlugService extends \TYPO3\CMS\Redirects\Service\SlugService
         $pageRouter = GeneralUtility::makeInstance(PageRouter::class, $this->site);
         try {
             $generatedPath = $pageRouter->generateUri($pageId, ['_language' => $languageId])->getPath();
+
+            if (!empty($basePath) && !empty($generatedPath)) {
+                $generatedPath = preg_replace('/^' . preg_quote($basePath, '/') . '/', '', $generatedPath);
+            }
         } catch (InvalidRouteArgumentsException $e) {
             $generatedPath = '';
         }
