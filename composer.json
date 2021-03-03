@@ -19,7 +19,7 @@
   },
   "extra": {
     "typo3/cms": {
-      "extension-key": "sluggi",
+      "extension-key": "sluggi"
     }
   }
 }
