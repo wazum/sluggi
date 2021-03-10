@@ -16,5 +16,10 @@
     "psr-4": {
       "Wazum\\Sluggi\\": "Classes"
     }
+  },
+  "extra": {
+    "typo3/cms": {
+      "extension-key": "sluggi"
+    }
   }
 }
