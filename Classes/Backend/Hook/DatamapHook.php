@@ -303,6 +303,7 @@ class DatamapHook
 
         [$siteHost, $sitePath] = $this->getBaseByPageId($site, $pageId, $languageId);
         $currentSlug = BackendUtility::getRecord('pages', $pageId, 'slug')['slug'] ?? '';
+        $variant = null;
         if (!empty($currentSlug)) {
             // Check for possibly different URL (e.g. with /index.html appended)
             $pageRouter = GeneralUtility::makeInstance(PageRouter::class, $site);
@@ -311,7 +312,6 @@ class DatamapHook
                 $generatedPath = $pageRouter->generateUri($pageId, ['_language' => $languageId])->getPath();
             } catch (InvalidRouteArgumentsException $e) {
             }
-            $variant = null;
             // There must be some kind of route enhancer involved
             if (($generatedPath !== $currentSlug) && strpos($generatedPath, $currentSlug) !== false) {
                 $variant = str_replace($currentSlug, '', $generatedPath);
@@ -321,19 +321,12 @@ class DatamapHook
             }
             if ($currentSlug !== $slug) {
                 // Remove old redirects matching the previous slug
-                $this->deleteRedirect($siteHost, $sitePath . $currentSlug);
-                $this->createRedirect($siteHost, $sitePath . $currentSlug, $pageId);
-                if (!empty($variant)) {
-                    $this->deleteRedirect($siteHost, $sitePath . $currentSlug . $variant);
-                    $this->createRedirect($siteHost, $sitePath . $currentSlug . $variant, $pageId);
-                }
+                $this->deleteRedirect($siteHost, $sitePath . $currentSlug . $variant);
+                $this->createRedirect($siteHost, $sitePath . $currentSlug . $variant, $pageId);
             }
         }
         // Remove redirects matching the new slug
-        $this->deleteRedirect($siteHost, $sitePath . $slug);
-        if (!empty($variant)) {
-            $this->deleteRedirect($siteHost, $sitePath . $slug . $variant);
-        }
+        $this->deleteRedirect($siteHost, $sitePath . $slug . $variant);
     }
 
     /**
