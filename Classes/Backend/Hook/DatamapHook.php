@@ -310,6 +310,10 @@ class DatamapHook
             $generatedPath = '';
             try {
                 $generatedPath = $pageRouter->generateUri($pageId, ['_language' => $languageId])->getPath();
+
+                if (!empty($sitePath) && !empty($generatedPath)) {
+                    $generatedPath = preg_replace('/^' . preg_quote($sitePath, '/') . '/', '', $generatedPath);
+                }
             } catch (InvalidRouteArgumentsException $e) {
             }
             // There must be some kind of route enhancer involved
