@@ -1,6 +1,6 @@
 <?php
 
-$EM_CONF[$_EXTKEY] = [
+$EM_CONF['sluggi'] = [
     'title' => 'sluggi',
     'description' => 'The little TYPO3 9 slug helper',
     'category' => 'backend',
@@ -9,7 +9,7 @@ $EM_CONF[$_EXTKEY] = [
     'state' => 'stable',
     'clearCacheOnLoad' => true,
     'author_company' => 'wazum.com',
-    'version' => '1.10.3',
+    'version' => '1.11.0',
     'constraints' => [
         'depends' => [
             'typo3' => '9.5.5-9.5.99',
