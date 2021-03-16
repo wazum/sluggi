@@ -8,3 +8,7 @@ pages_fields = nav_title,title
 synchronize = 1
 # cat=basic; type=boolean; label=Allow standard editors only editing of the last segment of the URL (single page)
 last_segment_only = 0
+# cat=basic; type=boolean; label=For published pages, the slug becomes readonly on offline workspaces
+readonly_slug_offline_workspace = 0
+# cat=basic; type=boolean; label=Disable notifications on autoUpdateSlugs and autoCreateRedirects for users other than administrators
+disable_notifications = 0

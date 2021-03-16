@@ -1,40 +1,40 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
 <xliff version="1.0">
-    <file source-language="en" datatype="plaintext" product-name="sluggi">
+    <file target-language="fr" datatype="plaintext" product-name="sluggi">
         <header/>
         <body>
             <trans-unit id="pages.tx_sluggi_lock">
-                <source>Lock URL Segment</source>
+                <target>Bloquer le segment d'URL</target>
             </trans-unit>
             <trans-unit id="pages.tx_sluggi_lock.description">
-                <source>Restrict editing of the URL Segment</source>
+                <target>Restreindre l'édition de segment d'URL</target>
             </trans-unit>
             <trans-unit id="pages.tx_sluggi_lock.enabled">
-                <source>Locked</source>
+                <target>Bloqué</target>
             </trans-unit>
             <trans-unit id="pages.tx_sluggi_lock.disabled">
-                <source>Unlocked</source>
+                <target>Débloqué</target>
             </trans-unit>
             <trans-unit id="pages.tx_sluggi_sync">
-                <source>Synchronize URL Segment</source>
+                <target>Synchroniser le segment d'URL</target>
             </trans-unit>
             <trans-unit id="pages.tx_sluggi_sync.description">
-                <source>Synchronize URL Segment with the configured fields</source>
+                <target>Synchroniser le segment d'URL avec les champs configurés</target>
             </trans-unit>
             <trans-unit id="pages.tx_sluggi_sync.enabled">
-                <source>Active</source>
+                <target>Actif</target>
             </trans-unit>
             <trans-unit id="pages.tx_sluggi_sync.disabled">
-                <source>Disabled</source>
+                <target>Inactif</target>
             </trans-unit>
             <trans-unit id="message.slashesNotAllowed">
-                <source>You are not allowed to insert slashes into the URL!</source>
+                <target>Vous n'avez pas la permission d'insérer de barres obliques dans le segment d'URL!</target>
             </trans-unit>
             <trans-unit id="message.pagePublishedSlugReadonly">
-                <source>This page has been published. The URL Segment cannot be modified on offline workspaces</source>
+                <target>Cette page a déjà été publiée, il n'est donc pas possible de modifier le segment d'URL dans un espace de travail de révision</target>
             </trans-unit>
             <trans-unit id="message.publishedSlug">
-                <source>Published URL segment</source>
+                <target>Segment d'URL publié</target>
             </trans-unit>
         </body>
     </file>

@@ -7,9 +7,13 @@ namespace Wazum\Sluggi\Backend\Form;
 use DOMDocument;
 use DOMNode;
 use DOMXPath;
+use TYPO3\CMS\Core\Localization\LanguageService;
 use Wazum\Sluggi\Helper\Configuration;
 use Wazum\Sluggi\Helper\PermissionHelper;
 use Wazum\Sluggi\Helper\SlugHelper as SluggiSlugHelper;
+use TYPO3\CMS\Core\Context\Context;
+use TYPO3\CMS\Core\Utility\GeneralUtility;
+use TYPO3\CMS\Core\Versioning\VersionState;
 
 /**
  * Class InputSlugElement
@@ -28,6 +32,21 @@ class InputSlugElement extends \TYPO3\CMS\Backend\Form\Element\InputSlugElement
 
         if ($this->data['tableName'] !== 'pages') {
             return $result;
+        }
+
+        $readonlySlugOnOfflineWorspace = (bool)Configuration::get('readonly_slug_offline_workspace');
+        if( $readonlySlugOnOfflineWorspace ) {
+            $context = GeneralUtility::makeInstance(Context::class);
+            if( $context->getPropertyFromAspect('workspace', 'isOffline') ) {
+                if ($this->data['databaseRow']['t3ver_state'] !== VersionState::NEW_PLACEHOLDER_VERSION) {
+                    $languageService = $this->getLanguageService();
+                    $languageFile = 'LLL:EXT:sluggi/Resources/Private/Language/locallang.xlf';
+                    $messagePagePublished = $languageService->sL($languageFile .':message.pagePublishedSlugReadonly');
+                    $messagePublishedSlug = $languageService->sL($languageFile .':message.publishedSlug');
+                    $result['html'] = "<p>$messagePagePublished</p><p>$messagePublishedSlug: " . $this->data['databaseRow']['slug'] ."</p>";
+                    return $result;
+                }
+            }
         }
 
         $languageId = $this->getLanguageId($this->data['tableName'], $this->data['databaseRow']);
@@ -109,5 +128,13 @@ class InputSlugElement extends \TYPO3\CMS\Backend\Form\Element\InputSlugElement
             ],
             $html
         );
+    }
+
+    /**
+     * @return LanguageService
+     */
+    protected function getLanguageService(): LanguageService
+    {
+      return $GLOBALS['LANG'];
     }
 }
