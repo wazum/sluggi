@@ -55,7 +55,7 @@ class SlugService extends \TYPO3\CMS\Redirects\Service\SlugService
         string $newSlug,
         CorrelationId $correlationId
     ): void {
-        $currentPageRecord = BackendUtility::getRecord('pages', $pageId);
+        $currentPageRecord = BackendUtility::getRecordWSOL('pages', $pageId);
         if ($currentPageRecord === null) {
             return;
         }
