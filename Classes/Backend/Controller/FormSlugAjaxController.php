@@ -94,7 +94,7 @@ class FormSlugAjaxController extends \TYPO3\CMS\Backend\Controller\FormSlugAjaxC
             if ($allowOnlyLastSegment) {
                 $generatedSegments = explode('/', $slug->generate($recordData, $parentPageId));
                 array_pop($generatedSegments);
-                $proposal = implode('/', $generatedSegments) . str_replace('/', '-', substr($proposal, 1));
+                $proposal = implode('/', $generatedSegments) . '/' . str_replace('/', '-', substr($proposal, 1));
             }
         } else {
             throw new RuntimeException('mode must be either "auto", "recreate" or "manual"', 1535835666);
