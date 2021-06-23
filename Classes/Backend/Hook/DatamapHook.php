@@ -301,6 +301,11 @@ class DatamapHook
             return;
         }
 
+        $langauges = $site->getAllLanguages();
+        if (!array_key_exists($languageId, $langauges)) {
+            return;
+        }
+
         [$siteHost, $sitePath] = $this->getBaseByPageId($site, $pageId, $languageId);
         $currentSlug = BackendUtility::getRecord('pages', $pageId, 'slug')['slug'] ?? '';
         $variant = null;
