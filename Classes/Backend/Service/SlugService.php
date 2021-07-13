@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Wazum\Sluggi\Backend\Service;
 
+use Exception;
 use PDO;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\Context\DateTimeAspect;
@@ -11,6 +12,7 @@ use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Database\Query\QueryBuilder;
 use TYPO3\CMS\Core\Database\Query\Restriction\DeletedRestriction;
 use TYPO3\CMS\Core\DataHandling\Model\CorrelationId;
+use TYPO3\CMS\Core\Exception\SiteNotFoundException;
 use TYPO3\CMS\Core\Routing\InvalidRouteArgumentsException;
 use TYPO3\CMS\Core\Routing\PageRouter;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
@@ -55,11 +57,18 @@ class SlugService extends \TYPO3\CMS\Redirects\Service\SlugService
         string $newSlug,
         CorrelationId $correlationId
     ): void {
-        $currentPageRecord = BackendUtility::getRecordWSOL('pages', $pageId);
+        try {
+            $this->initializeSettings($pageId);
+        } catch(SiteNotFoundException $e)
+        {
+            // Without a site configuration no settings, so we can't do anything here
+            return;
+        }
+
+	$currentPageRecord = BackendUtility::getRecordWSOL('pages', $pageId);
         if ($currentPageRecord === null) {
             return;
         }
-        $this->initializeSettings($pageId);
         if ($this->autoUpdateSlugs || $this->autoCreateRedirects) {
             $this->createCorrelationIds($pageId, $correlationId);
             if ($this->autoCreateRedirects) {
@@ -95,7 +104,8 @@ class SlugService extends \TYPO3\CMS\Redirects\Service\SlugService
                     $subPageRecord['slug'],
                     $newSlug,
                     $languageUid,
-                    (int)$subPageRecord['uid']
+                    (int)$subPageRecord['uid'],
+                    true
                 );
             }
         }
@@ -105,11 +115,17 @@ class SlugService extends \TYPO3\CMS\Redirects\Service\SlugService
         string $originalSlug,
         string $newSlug,
         int $languageId,
-        int $pageId
+        int $pageId,
+        bool $isSubPage = false
     ): void {
-        $basePath = rtrim($this->site->getLanguageById($languageId)->getBase()->getPath(), '/');
+        try {
+            $basePath = rtrim($this->site->getLanguageById($languageId)->getBase()->getPath(), '/');
+        } catch (Exception $e) {
+            return;
+        }
+
         // Fetch possible route enhancer extension (PageTypeSuffix)
-        $variant = $this->getVariant($originalSlug, $languageId, $pageId);
+        $variant = $this->getVariant($basePath, $isSubPage ? $newSlug : $originalSlug, $languageId, $pageId);
 
         /** @var DateTimeAspect $date */
         $date = $this->context->getAspect('date');
@@ -198,21 +214,23 @@ class SlugService extends \TYPO3\CMS\Redirects\Service\SlugService
         return false !== $record ? $record : null;
     }
 
-    protected function getVariant(string $originalSlug, int $languageId, int $pageId): ?string
+    protected function getVariant(string $basePath, string $slug, int $languageId, int $pageId): ?string
     {
-        $basePath = rtrim($this->site->getLanguageById($languageId)->getBase()->getPath(), '/');
-
         // Check for possibly different URL (e.g. with /index.html appended)
         $pageRouter = GeneralUtility::makeInstance(PageRouter::class, $this->site);
         try {
             $generatedPath = $pageRouter->generateUri($pageId, ['_language' => $languageId])->getPath();
+
+            if (!empty($basePath) && !empty($generatedPath)) {
+                $generatedPath = preg_replace('/^' . preg_quote($basePath, '/') . '/', '', $generatedPath);
+            }
         } catch (InvalidRouteArgumentsException $e) {
             $generatedPath = '';
         }
         $variant = null;
         // There must be some kind of route enhancer involved
-        if (($generatedPath !== $originalSlug) && strpos($generatedPath, $originalSlug) !== false) {
-            $variant = str_replace($originalSlug, '', $generatedPath);
+        if (($generatedPath !== $slug) && strpos($generatedPath, $slug) !== false) {
+            $variant = str_replace($slug, '', $generatedPath);
         }
         if ($variant === $basePath) {
             $variant = null;
