@@ -2,8 +2,8 @@
 whitelist =
 # cat=basic; type=boolean; label=Replace / in slug segment with -
 slash_replacement = 1
-# cat=basic; type=string; label=Use the following page fields for slug generation
-pages_fields = nav_title,title
+# cat=basic; type=string; label=Use the following page fields for slug generation (valid JSON array!)
+pages_fields = [["nav_title","title"]]
 # cat=basic; type=boolean; label=Enable synchronization of slug segment with configured page fields
 synchronize = 1
 # cat=basic; type=boolean; label=Allow standard editors only editing of the last segment of the URL (single page)

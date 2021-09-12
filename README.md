@@ -2,6 +2,10 @@
 
 :fire: **Use sluggi < 2.0 for TYPO3 9 and sluggi >= 2.0 for TYPO3 10**
 
+## Important changes
+
+- with `2.1.0` the format for the `pages_fields` configuration option has changed to a JSON array string; see [TCA reference](https://docs.typo3.org/m/typo3/reference-tca/master/en-us/ColumnsConfig/Type/Slug/Properties/GeneratorOptions.html) for details
+
 ## What does it do?
 
 The latest version of the extension … 
@@ -9,7 +13,7 @@ The latest version of the extension …
 * allows administrators to restrict editing the page slug on certain pages
 * updates slug segments when moving or copying a page (including child pages recursively)
 * allows to synchronize the slug segment with the configured (title) fields automatically (behaviour like with RealURL)
-* sets a fallback chain for page slug calculation as follows (the first nonempty value is used): Alternative page title > Page title (you can change the fields used in the extension configuration)
+* sets a fallback chain for page slug calculation as follows (the first nonempty value is used): Alternative page title > Page title (you can [change the fields](https://docs.typo3.org/m/typo3/reference-tca/master/en-us/ColumnsConfig/Type/Slug/Properties/GeneratorOptions.html) used in the extension configuration as JSON array string)
 * configures a replacement of forward slashes (`/`) in the page slug with a hyphen (`-`) for new pages (existing pages are not affected as long as you don't recalculate the slugs)
 * allows to set a flag to allow editing only for the last part of the URL (like with RealURL)
 * respects any PageTypeSuffix route enhancer configuration (e.g. a '.html' suffix)
