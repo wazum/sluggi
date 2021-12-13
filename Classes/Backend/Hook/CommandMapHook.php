@@ -45,7 +45,7 @@ class CommandMapHook
             if ($value > 0) {
                 $parentPage = (int)$value;
             } else {
-                $parentPage = BackendUtility::getRecord('pages', abs($value), 'pid')['pid'] ?? 0;
+                $parentPage = BackendUtility::getRecord('pages', abs((int)$value), 'pid')['pid'] ?? 0;
                 // Negative value = paste after
             }
             $parentSlug = SlugHelper::getSlug($parentPage, $languageId);
