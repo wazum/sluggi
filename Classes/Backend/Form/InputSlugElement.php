@@ -64,10 +64,22 @@ class InputSlugElement extends \TYPO3\CMS\Backend\Form\Element\InputSlugElement
             $result['html'] = $this->replaceValues($result['html'], $prefix, $editableSlugSegments);
         }
 
-        $result['requireJsModules'][0] = [
-            'TYPO3/CMS/Sluggi/SlugElement' =>
-                $result['requireJsModules'][0]['TYPO3/CMS/Backend/FormEngine/Element/SlugElement']
-        ];
+        if ($result['requireJsModules'][0] instanceof \TYPO3\CMS\Core\Page\JavaScriptModuleInstruction) {
+            // v11
+            // @todo
+            /*$items = $result['requireJsModules'][0]->getItems();
+            DebuggerUtility::var_dump($items);
+            $result['requireJsModules'][0]->assign([
+                'TYPO3/CMS/Sluggi/SlugElement' =>
+                    $result['requireJsModules'][0]['TYPO3/CMS/Backend/FormEngine/Element/SlugElement']
+            ]);*/
+        } else {
+            // before v11
+            $result['requireJsModules'][0] = [
+                'TYPO3/CMS/Sluggi/SlugElement' =>
+                    $result['requireJsModules'][0]['TYPO3/CMS/Backend/FormEngine/Element/SlugElement']
+            ];
+        }
 
         return $result;
     }
