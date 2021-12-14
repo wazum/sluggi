@@ -7,6 +7,7 @@ namespace Wazum\Sluggi\Backend\Form;
 use DOMDocument;
 use DOMNode;
 use DOMXPath;
+use TYPO3\CMS\Core\Page\JavaScriptModuleInstruction;
 use Wazum\Sluggi\Helper\Configuration;
 use Wazum\Sluggi\Helper\PermissionHelper;
 use Wazum\Sluggi\Helper\SlugHelper as SluggiSlugHelper;
@@ -64,15 +65,13 @@ class InputSlugElement extends \TYPO3\CMS\Backend\Form\Element\InputSlugElement
             $result['html'] = $this->replaceValues($result['html'], $prefix, $editableSlugSegments);
         }
 
-        if ($result['requireJsModules'][0] instanceof \TYPO3\CMS\Core\Page\JavaScriptModuleInstruction) {
+        if ($result['requireJsModules'][0] ?? null instanceof JavaScriptModuleInstruction) {
             // v11
-            // @todo
-            /*$items = $result['requireJsModules'][0]->getItems();
-            DebuggerUtility::var_dump($items);
-            $result['requireJsModules'][0]->assign([
-                'TYPO3/CMS/Sluggi/SlugElement' =>
-                    $result['requireJsModules'][0]['TYPO3/CMS/Backend/FormEngine/Element/SlugElement']
-            ]);*/
+            $res = avaScriptModuleInstruction::forRequireJS('TYPO3/CMS/Sluggi/SlugElement');
+            foreach ($result['requireJsModules'][0]->getItems() as $item) {
+                $res->instance(...$item['args']);
+            }
+            $result['requireJsModules'][0] = $res;
         } else {
             // before v11
             $result['requireJsModules'][0] = [
