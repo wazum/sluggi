@@ -67,7 +67,7 @@ class InputSlugElement extends \TYPO3\CMS\Backend\Form\Element\InputSlugElement
 
         if ($result['requireJsModules'][0] ?? null instanceof JavaScriptModuleInstruction) {
             // v11
-            $res = avaScriptModuleInstruction::forRequireJS('TYPO3/CMS/Sluggi/SlugElement');
+            $res = JavaScriptModuleInstruction::forRequireJS('TYPO3/CMS/Sluggi/SlugElement');
             foreach ($result['requireJsModules'][0]->getItems() as $item) {
                 $res->instance(...$item['args']);
             }
