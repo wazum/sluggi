@@ -55,7 +55,7 @@ define([
             }
         }
     });
-    $(document).on('click', syncLabelSelector, function (e) {
+    $(document).on('click', syncLabelSelector + ',#' + syncCheckboxId, function (e) {
         // 0 = activated (the value changes afterwards)
         if ($(syncCheckboxSelector).val() === '0') {
             triggerRecreate();
@@ -67,7 +67,7 @@ define([
             showEdit();
         }
     });
-    $(document).on('click', lockLabelSelector, function (e) {
+    $(document).on('click', lockLabelSelector + ',#' + lockCheckboxId, function (e) {
         // 0 = activated (the value changes afterwards)
         if ($(lockCheckboxSelector).val() === '0') {
             if ($(syncCheckboxSelector).val() === '1' || ('tx_sluggi_sync' in window && window.tx_sluggi_sync === true)) {
