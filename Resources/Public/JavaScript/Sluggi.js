@@ -46,13 +46,9 @@ define([
     $(document).on('blur', '.slug-impact', function (e) {
         var syncGloballyActive = $(syncCheckboxSelector).length === 0 && 'tx_sluggi_sync' in window && window.tx_sluggi_sync === true;
         if ($(syncCheckboxSelector).val() === '1' || syncGloballyActive) {
-            if (syncGloballyActive) {
-                $('button.t3js-form-field-slug-recreate').prop('disabled', false);
-            }
+            $('button.t3js-form-field-slug-recreate').prop('disabled', false);
             triggerRecreate();
-            if (syncGloballyActive) {
-                $('button.t3js-form-field-slug-recreate').prop('disabled', true);
-            }
+            $('button.t3js-form-field-slug-recreate').prop('disabled', true);
         }
     });
     $(document).on('click', syncLabelSelector + ',#' + syncCheckboxId, function (e) {
