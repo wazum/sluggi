@@ -21,7 +21,6 @@ class BackendControllerHook
     public function registerClientSideEventHandler(): void
     {
         $pageRenderer = GeneralUtility::makeInstance(PageRenderer::class);
-        $pageRenderer->loadRequireJsModule('TYPO3/CMS/Sluggi/EventHandler');
         $pageRenderer->addInlineLanguageLabelFile('EXT:redirects/Resources/Private/Language/locallang_slug_service.xlf');
     }
 }

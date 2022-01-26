@@ -1,22 +1,24 @@
 <?php
 
-defined('TYPO3_MODE') or die ('Access denied.');
+defined('TYPO3_MODE') || die ('Access denied.');
 
 if (!function_exists('array_flatten')) {
-    function array_flatten($array): array {
+    function array_flatten($array): array
+    {
         $merged = [[]];
         foreach ($array as $value) {
             if (is_array($value)) {
                 $merged[] = array_flatten($value);
+            } else {
+                $merged[] = [$value];
             }
-            else {$merged[] = [$value];}
         }
 
         return array_merge([], ...$merged);
     }
 }
 
-(static function () {
+(static function (): void {
     if (Wazum\Sluggi\Helper\Configuration::get('slash_replacement') &&
         !isset($GLOBALS['TCA']['pages']['columns']['slug']['config']['generatorOptions']['replacements']['/'])) {
         // Replace / in slugs with -
@@ -25,7 +27,7 @@ if (!function_exists('array_flatten')) {
 
     try {
         $pagesFieldsForSlug = json_decode(
-            (string)Wazum\Sluggi\Helper\Configuration::get('pages_fields'),
+            (string) Wazum\Sluggi\Helper\Configuration::get('pages_fields'),
             true,
             3,
             JSON_THROW_ON_ERROR
@@ -88,7 +90,7 @@ if (!function_exists('array_flatten')) {
         ]
     ];
     $showItems = ['--linebreak--', 'tx_sluggi_lock', 'tx_sluggi_sync'];
-    if (!(bool)Wazum\Sluggi\Helper\Configuration::get('synchronize')) {
+    if (!(bool) Wazum\Sluggi\Helper\Configuration::get('synchronize')) {
         unset($fields['tx_sluggi_sync'], $showItems['tx_sluggi_sync']);
     }
 

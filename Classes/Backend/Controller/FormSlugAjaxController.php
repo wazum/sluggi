@@ -17,6 +17,8 @@ use Wazum\Sluggi\Helper\PermissionHelper;
 use Wazum\Sluggi\Helper\SlugHelper as SluggiSlugHelper;
 use function array_pop;
 use function explode;
+use function implode;
+use function in_array;
 use function str_replace;
 use function substr;
 
@@ -50,15 +52,15 @@ class FormSlugAjaxController extends \TYPO3\CMS\Backend\Controller\FormSlugAjaxC
      */
     protected function modifiedSuggestAction(ServerRequestInterface $request): ResponseInterface
     {
-        $allowOnlyLastSegment = (bool)Configuration::get('last_segment_only');
+        $allowOnlyLastSegment = (bool) Configuration::get('last_segment_only');
         $queryParameters = $request->getParsedBody() ?? [];
         $values = $queryParameters['values'];
         $mode = $queryParameters['mode'];
         $tableName = $queryParameters['tableName'];
-        $pid = (int)$queryParameters['pageId'];
-        $parentPageId = (int)$queryParameters['parentPageId'];
-        $recordId = (int)$queryParameters['recordId'];
-        $languageId = (int)$queryParameters['language'];
+        $pid = (int) $queryParameters['pageId'];
+        $parentPageId = (int) $queryParameters['parentPageId'];
+        $recordId = (int) $queryParameters['recordId'];
+        $languageId = (int) $queryParameters['language'];
         $fieldName = $queryParameters['fieldName'];
 
         $fieldConfig = $GLOBALS['TCA'][$tableName]['columns'][$fieldName]['config'] ?? [];

@@ -58,7 +58,7 @@ class DataHandlerSlugUpdateHook
     ): void {
         if (
             $table !== 'pages'
-            // This is set in \TYPO3\CMS\Backend\History\RecordHistoryRollback::performRollback
+            // This is set in \TYPO3\CMS\Backend\History\RecordHistoryRollback::performRollback,
             // so we use it as a flag to ignore the update
             || $dataHandler->dontProcessTransformations
             || !MathUtility::canBeInterpretedAsInteger($id)
@@ -69,26 +69,26 @@ class DataHandlerSlugUpdateHook
         }
 
         if (!empty($incomingFieldArray['slug'])) {
-            $this->slugSetIncoming[(int)$id] = true;
+            $this->slugSetIncoming[(int) $id] = true;
         }
 
-        $synchronize = (bool)Configuration::get('synchronize');
-        $allowOnlyLastSegment = (bool)Configuration::get('last_segment_only');
+        $synchronize = (bool) Configuration::get('synchronize');
+        $allowOnlyLastSegment = (bool) Configuration::get('last_segment_only');
 
-        if (isset($incomingFieldArray['tx_sluggi_sync']) && (bool)$incomingFieldArray['tx_sluggi_sync'] === false) {
+        if (isset($incomingFieldArray['tx_sluggi_sync']) && (bool) $incomingFieldArray['tx_sluggi_sync'] === false) {
             $synchronize = false;
         }
         if ($synchronize) {
-            $record = BackendUtility::getRecordWSOL($table, (int)$id);
+            $record = BackendUtility::getRecordWSOL($table, (int) $id);
             $data = array_merge($record, $incomingFieldArray);
-            if ((bool)$data['tx_sluggi_sync']) {
+            if ((bool) $data['tx_sluggi_sync']) {
                 $fieldConfig = $GLOBALS['TCA']['pages']['columns']['slug']['config'] ?? [];
                 /** @var SlugHelper $helper */
                 $helper = GeneralUtility::makeInstance(SlugHelper::class, 'pages', 'slug', $fieldConfig);
-                $incomingFieldArray['slug'] = $helper->generate($data, (int)$data['pid']);
+                $incomingFieldArray['slug'] = $helper->generate($data, (int) $data['pid']);
             }
         } elseif (isset($incomingFieldArray['slug']) && $allowOnlyLastSegment && !PermissionHelper::hasFullPermission()) {
-            $record = BackendUtility::getRecordWSOL($table, (int)$id);
+            $record = BackendUtility::getRecordWSOL($table, (int) $id);
             $languageId = $record['sys_language_uid'];
             $inaccessibleSlugSegments = $this->getInaccessibleSlugSegments($id, $languageId);
             // Prepend the parent page slug
@@ -106,50 +106,15 @@ class DataHandlerSlugUpdateHook
     }
 
     /**
-     * @param int|string $id
+     * Determines whether our identifier is part of correlation id aspects.
+     * In that case it would be a nested call which has to be ignored.
      */
-    public function processDatamap_postProcessFieldArray(
-        string $status,
-        string $table,
-        $id,
-        array $incomingFieldArray,
-        DataHandler $dataHandler
-    ): void {
-        if (
-            $table !== 'pages'
-            || $status !== 'update'
-            || $this->isNestedHookInvocation($dataHandler)
-        ) {
-            return;
-        }
+    protected function isNestedHookInvocation(DataHandler $dataHandler): bool
+    {
+        $correlationId = $dataHandler->getCorrelationId();
+        $correlationIdAspects = $correlationId ? $correlationId->getAspects() ?? [] : [];
 
-        // We have to double check again here,
-        // as the slug is empty e.g. if the title is changed via inline editing in page tree
-        if (!isset($this->slugSetIncoming[(int)$id])) {
-            $synchronize = (bool)Configuration::get('synchronize');
-
-            if (isset($incomingFieldArray['tx_sluggi_sync']) && (bool)$incomingFieldArray['tx_sluggi_sync'] === false) {
-                $synchronize = false;
-            }
-            if ($synchronize) {
-                $record = BackendUtility::getRecordWSOL($table, (int)$id);
-                $data = array_merge($record, $incomingFieldArray);
-                if ($data['tx_sluggi_sync']) {
-                    $fieldConfig = $GLOBALS['TCA']['pages']['columns']['slug']['config'] ?? [];
-                    /** @var SlugHelper $helper */
-                    $helper = GeneralUtility::makeInstance(SlugHelper::class, 'pages', 'slug', $fieldConfig);
-                    $incomingFieldArray['slug'] = $helper->generate($data, (int)$data['pid']);
-                }
-                if (!empty($incomingFieldArray['slug']) && $incomingFieldArray['slug'] !== $record['slug']) {
-                    $this->slugService->rebuildSlugsForSlugChange(
-                        $id,
-                        (string) $record['slug'],
-                        $incomingFieldArray['slug'],
-                        $dataHandler->getCorrelationId()
-                    );
-                }
-            }
-        }
+        return in_array(SlugService::CORRELATION_ID_IDENTIFIER, $correlationIdAspects, true);
     }
 
     protected function getInaccessibleSlugSegments(int $pageId, int $languageId): string
@@ -170,14 +135,49 @@ class DataHandlerSlugUpdateHook
     }
 
     /**
-     * Determines whether our identifier is part of correlation id aspects.
-     * In that case it would be a nested call which has to be ignored.
+     * @param int|string $id
      */
-    protected function isNestedHookInvocation(DataHandler $dataHandler): bool
-    {
-        $correlationId = $dataHandler->getCorrelationId();
-        $correlationIdAspects = $correlationId ? $correlationId->getAspects() ?? [] : [];
+    public function processDatamap_postProcessFieldArray(
+        string $status,
+        string $table,
+        $id,
+        array $incomingFieldArray,
+        DataHandler $dataHandler
+    ): void {
+        if (
+            $table !== 'pages'
+            || $status !== 'update'
+            || $this->isNestedHookInvocation($dataHandler)
+        ) {
+            return;
+        }
 
-        return in_array(SlugService::CORRELATION_ID_IDENTIFIER, $correlationIdAspects, true);
+        // We have to double-check again here,
+        // as the slug is empty e.g. if the title is changed via inline editing in page tree
+        if (!isset($this->slugSetIncoming[(int) $id])) {
+            $synchronize = (bool) Configuration::get('synchronize');
+
+            if (isset($incomingFieldArray['tx_sluggi_sync']) && (bool) $incomingFieldArray['tx_sluggi_sync'] === false) {
+                $synchronize = false;
+            }
+            if ($synchronize) {
+                $record = BackendUtility::getRecordWSOL($table, (int) $id);
+                $data = array_merge($record, $incomingFieldArray);
+                if ($data['tx_sluggi_sync']) {
+                    $fieldConfig = $GLOBALS['TCA']['pages']['columns']['slug']['config'] ?? [];
+                    /** @var SlugHelper $helper */
+                    $helper = GeneralUtility::makeInstance(SlugHelper::class, 'pages', 'slug', $fieldConfig);
+                    $incomingFieldArray['slug'] = $helper->generate($data, (int) $data['pid']);
+                }
+                if (!empty($incomingFieldArray['slug']) && $incomingFieldArray['slug'] !== $record['slug']) {
+                    $this->slugService->rebuildSlugsForSlugChange(
+                        $id,
+                        (string) $record['slug'],
+                        $incomingFieldArray['slug'],
+                        $dataHandler->getCorrelationId()
+                    );
+                }
+            }
+        }
     }
 }

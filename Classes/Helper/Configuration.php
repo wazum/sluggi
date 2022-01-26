@@ -23,17 +23,15 @@ class Configuration
      */
     public static function get(string $key)
     {
-        $value = null;
         try {
-            $value = GeneralUtility::makeInstance(ExtensionConfiguration::class)->get(
+            return GeneralUtility::makeInstance(ExtensionConfiguration::class)->get(
                 'sluggi',
                 $key
             );
-        } catch (ExtensionConfigurationExtensionNotConfiguredException $e) {
-        } catch
-        (ExtensionConfigurationPathDoesNotExistException $e) {
+        } catch (ExtensionConfigurationExtensionNotConfiguredException|ExtensionConfigurationPathDoesNotExistException $e) {
+            // Ignore
         }
 
-        return $value;
+        return null;
     }
 }

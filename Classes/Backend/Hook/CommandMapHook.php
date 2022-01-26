@@ -7,6 +7,7 @@ namespace Wazum\Sluggi\Backend\Hook;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\DataHandling\DataHandler;
 use Wazum\Sluggi\Helper\SlugHelper;
+use function abs;
 use function rtrim;
 
 /**
@@ -43,7 +44,7 @@ class CommandMapHook
             $currentSlugSegment = SlugHelper::getLastSlugSegment($currentPage['slug']);
             // Positive value = paste into
             if ($value > 0) {
-                $parentPage = (int)$value;
+                $parentPage = (int) $value;
             } else {
                 $parentPage = BackendUtility::getRecord('pages', abs((int) $value), 'pid')['pid'] ?? 0;
                 // Negative value = paste after

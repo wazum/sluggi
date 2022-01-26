@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Wazum\Sluggi\Backend\Form;
 
 use TYPO3\CMS\Backend\Form\Element\InputTextElement;
+use function preg_replace;
 
 /**
  * Class InputTextWithSlugImpactElement
@@ -17,9 +18,7 @@ class InputTextWithSlugImpactElement extends InputTextElement
     public function render(): array
     {
         $result = parent::render();
-        // Fix core bug and add space between attributes
-        $result['html'] = str_replace('type="text"id=', 'type="text" id=', $result['html']);
-        // Add a CSS class
+        // Add a special CSS class to identify these fields in JavaScript
         $result['html'] = preg_replace('/(<input.*?class=")(.*?)"/im', '$1$2 slug-impact"', $result['html']);
 
         return $result;

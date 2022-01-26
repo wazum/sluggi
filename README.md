@@ -1,6 +1,6 @@
 # sluggi — The little TYPO3 CMS slug helper
 
-:fire: **Use sluggi < 2.0 for TYPO3 9 and sluggi >= 2.0 for TYPO3 10**
+:fire: **Use sluggi < 2.0 for TYPO3 9, sluggi < 3.0 for TYPO3 10**
 
 ## Important changes
 

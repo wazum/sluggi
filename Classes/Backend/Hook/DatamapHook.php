@@ -46,6 +46,31 @@ class DatamapHook
         $this->updateSlugForMovedPage($id, $targetId, $dataHandler);
     }
 
+    protected function updateSlugForMovedPage(int $id, int $targetId, DataHandler $dataHandler): void
+    {
+        $currentPage = BackendUtility::getRecord('pages', $id, 'uid, slug, sys_language_uid');
+        if (!empty($currentPage)) {
+            $allowOnlyLastSegment = (bool) Configuration::get('last_segment_only');
+
+            $currentSlugSegment = SlugHelper::getLastSlugSegment($currentPage['slug']);
+            if ($allowOnlyLastSegment && !PermissionHelper::hasFullPermission()) {
+                $newSlug = $currentSlugSegment;
+            } else {
+                $languageId = $currentPage['sys_language_uid'];
+                $parentSlug = SlugHelper::getSlug($targetId, $languageId);
+                $newSlug = rtrim($parentSlug, '/') . $currentSlugSegment;
+            }
+
+            $data = [];
+            $data['pages'][$id]['slug'] = $newSlug;
+            /** @var DataHandler $localDataHandler */
+            $localDataHandler = GeneralUtility::makeInstance(DataHandler::class);
+            $localDataHandler->start($data, []);
+            $localDataHandler->setCorrelationId($dataHandler->getCorrelationId());
+            $localDataHandler->process_datamap();
+        }
+    }
+
     /**
      * @param string $table
      * @param int $id
@@ -68,30 +93,5 @@ class DatamapHook
         }
 
         $this->updateSlugForMovedPage($id, $targetId, $dataHandler);
-    }
-
-    protected function updateSlugForMovedPage(int $id, int $targetId, DataHandler $dataHandler): void
-    {
-        $currentPage = BackendUtility::getRecord('pages', $id, 'uid, slug, sys_language_uid');
-        if (!empty($currentPage)) {
-            $allowOnlyLastSegment = (bool)Configuration::get('last_segment_only');
-
-            $currentSlugSegment = SlugHelper::getLastSlugSegment($currentPage['slug']);
-            if ($allowOnlyLastSegment && !PermissionHelper::hasFullPermission()) {
-                $newSlug = $currentSlugSegment;
-            } else {
-                $languageId = $currentPage['sys_language_uid'];
-                $parentSlug = SlugHelper::getSlug($targetId, $languageId);
-                $newSlug = rtrim($parentSlug, '/') . $currentSlugSegment;
-            }
-
-            $data = [];
-            $data['pages'][$id]['slug'] = $newSlug;
-            /** @var DataHandler $localDataHandler */
-            $localDataHandler = GeneralUtility::makeInstance(DataHandler::class);
-            $localDataHandler->start($data, []);
-            $localDataHandler->setCorrelationId($dataHandler->getCorrelationId());
-            $localDataHandler->process_datamap();
-        }
     }
 }
