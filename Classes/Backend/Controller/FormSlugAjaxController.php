@@ -25,7 +25,6 @@ use function substr;
 /**
  * Class FormSlugAjaxController
  *
- * @package Wazum\Sluggi\Backend\Controller
  * @author Wolfgang Klinger <wolfgang@wazum.com>
  */
 class FormSlugAjaxController extends \TYPO3\CMS\Backend\Controller\FormSlugAjaxController
@@ -40,7 +39,7 @@ class FormSlugAjaxController extends \TYPO3\CMS\Backend\Controller\FormSlugAjaxC
         $queryParameters = $request->getParsedBody() ?? [];
         $tableName = $queryParameters['tableName'];
 
-        if ($tableName !== 'pages' || PermissionHelper::hasFullPermission()) {
+        if ('pages' !== $tableName || PermissionHelper::hasFullPermission()) {
             return parent::suggestAction($request);
         }
 
@@ -65,10 +64,7 @@ class FormSlugAjaxController extends \TYPO3\CMS\Backend\Controller\FormSlugAjaxC
 
         $fieldConfig = $GLOBALS['TCA'][$tableName]['columns'][$fieldName]['config'] ?? [];
         if (empty($fieldConfig)) {
-            throw new RuntimeException(
-                'No valid field configuration for table ' . $tableName . ' field name ' . $fieldName . ' found.',
-                1535379534
-            );
+            throw new RuntimeException('No valid field configuration for table ' . $tableName . ' field name ' . $fieldName . ' found.', 1535379534);
         }
 
         $evalInfo = !empty($fieldConfig['eval']) ? GeneralUtility::trimExplode(',', $fieldConfig['eval'], true) : [];
@@ -85,12 +81,12 @@ class FormSlugAjaxController extends \TYPO3\CMS\Backend\Controller\FormSlugAjaxC
 
         /** @var SlugHelper $slug */
         $slug = GeneralUtility::makeInstance(SlugHelper::class, $tableName, $fieldName, $fieldConfig);
-        if ($mode === 'auto') {
+        if ('auto' === $mode) {
             // New page - Feed incoming values to generator
             $proposal = $slug->generate($recordData, $pid);
-        } elseif ($mode === 'recreate') {
+        } elseif ('recreate' === $mode) {
             $proposal = $slug->generate($recordData, $parentPageId);
-        } elseif ($mode === 'manual') {
+        } elseif ('manual' === $mode) {
             // Existing record - Fetch full record and only validate against the new "slug" field.
             $proposal = $slug->sanitize($values['manual']);
             if ($allowOnlyLastSegment) {
@@ -115,7 +111,7 @@ class FormSlugAjaxController extends \TYPO3\CMS\Backend\Controller\FormSlugAjaxC
 
         $mountRootPage = PermissionHelper::getTopmostAccessiblePage($pid);
         $inaccessibleSlugSegments = null;
-        if ($mountRootPage !== null) {
+        if (null !== $mountRootPage) {
             $inaccessibleSlugSegments = SluggiSlugHelper::getSlug($mountRootPage['pid'], $languageId);
         }
 

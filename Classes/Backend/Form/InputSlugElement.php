@@ -20,7 +20,6 @@ use function substr;
 /**
  * Class InputSlugElement
  *
- * @package Wazum\Sluggi\Backend\Form
  * @author Wolfgang Klinger <wolfgang@wazum.com>
  */
 class InputSlugElement extends \TYPO3\CMS\Backend\Form\Element\InputSlugElement
@@ -32,7 +31,7 @@ class InputSlugElement extends \TYPO3\CMS\Backend\Form\Element\InputSlugElement
     {
         $result = parent::render();
 
-        if ($this->data['tableName'] !== 'pages') {
+        if ('pages' !== $this->data['tableName']) {
             return $result;
         }
 
@@ -66,7 +65,7 @@ class InputSlugElement extends \TYPO3\CMS\Backend\Form\Element\InputSlugElement
         $prefix = ($this->data['customData'][$this->data['fieldName']]['slugPrefix'] ?? '') . $inaccessibleSlugSegments;
         $editableSlugSegments = $this->data['databaseRow']['slug'];
         $allowOnlyLastSegment = (bool) Configuration::get('last_segment_only');
-        if (!empty($inaccessibleSlugSegments) && strpos($editableSlugSegments, $inaccessibleSlugSegments) === 0) {
+        if (!empty($inaccessibleSlugSegments) && 0 === strpos($editableSlugSegments, $inaccessibleSlugSegments)) {
             $editableSlugSegments = substr($editableSlugSegments, strlen($inaccessibleSlugSegments));
         }
         if ($allowOnlyLastSegment && !empty($editableSlugSegments)) {

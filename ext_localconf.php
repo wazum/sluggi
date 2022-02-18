@@ -1,6 +1,6 @@
 <?php
 
-defined('TYPO3_MODE') || die();
+defined('TYPO3_MODE') || exit();
 
 (static function (): void {
     $GLOBALS['TYPO3_CONF_VARS']['SYS']['locallangXMLOverride']['EXT:redirects/Resources/Private/Language/locallang_slug_service.xlf'][]
@@ -18,10 +18,10 @@ defined('TYPO3_MODE') || die();
     $GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['t3lib/class.t3lib_tcemain.php']['processDatamapClass']['sluggi']
         = \Wazum\Sluggi\Backend\Hook\DataHandlerSlugUpdateHook::class;
 
-    $GLOBALS ['TYPO3_CONF_VARS']['SC_OPTIONS']['t3lib/class.t3lib_tcemain.php']['moveRecordClass'][]
+    $GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['t3lib/class.t3lib_tcemain.php']['moveRecordClass'][]
         = \Wazum\Sluggi\Backend\Hook\DatamapHook::class;
 
-    $GLOBALS ['TYPO3_CONF_VARS']['SC_OPTIONS']['t3lib/class.t3lib_tcemain.php']['processCmdmapClass'][]
+    $GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['t3lib/class.t3lib_tcemain.php']['processCmdmapClass'][]
         = \Wazum\Sluggi\Backend\Hook\CommandMapHook::class;
 
     // Add a custom handler without injecting the JavaScript module (already loaded by DispatchNotificationHook (see below)

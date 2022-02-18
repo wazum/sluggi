@@ -15,22 +15,12 @@ use function rtrim;
 /**
  * Class DatamapHook
  *
- * @package Wazum\Sluggi\Backend\Hook
  * @author Wolfgang Klinger <wolfgang@wazum.com>
  */
 class DatamapHook
 {
-    /**
-     * @param string $table
-     * @param int $id
-     * @param int $targetId
-     * @param int $siblingTargetId
-     * @param array $moveRecord
-     * @param array $updateFields
-     * @param DataHandler $dataHandler
-     */
     public function moveRecord_afterAnotherElementPostProcess(
-        /** @noinspection PhpUnusedParameterInspection */
+        /* @noinspection PhpUnusedParameterInspection */
         string $table,
         int $id,
         int $targetId,
@@ -39,7 +29,7 @@ class DatamapHook
         array $updateFields,
         DataHandler $dataHandler
     ): void {
-        if ($table !== 'pages') {
+        if ('pages' !== $table) {
             return;
         }
 
@@ -72,16 +62,8 @@ class DatamapHook
         }
     }
 
-    /**
-     * @param string $table
-     * @param int $id
-     * @param int $targetId
-     * @param array $moveRecord
-     * @param array $updateFields
-     * @param DataHandler $dataHandler
-     */
     public function moveRecord_firstElementPostProcess(
-        /** @noinspection PhpUnusedParameterInspection */
+        /* @noinspection PhpUnusedParameterInspection */
         string $table,
         int $id,
         int $targetId,
@@ -89,7 +71,7 @@ class DatamapHook
         array $updateFields,
         DataHandler $dataHandler
     ): void {
-        if ($table !== 'pages') {
+        if ('pages' !== $table) {
             return;
         }
 

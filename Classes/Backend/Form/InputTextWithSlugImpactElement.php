@@ -10,7 +10,6 @@ use function preg_replace;
 /**
  * Class InputTextWithSlugImpactElement
  *
- * @package Wazum\Sluggi\Backend\Form
  * @author Wolfgang Klinger <wolfgang@wazum.com>
  */
 class InputTextWithSlugImpactElement extends InputTextElement

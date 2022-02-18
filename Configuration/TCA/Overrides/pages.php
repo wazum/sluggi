@@ -1,6 +1,8 @@
 <?php
 
-defined('TYPO3_MODE') || die ('Access denied.');
+declare(strict_types=1);
+
+defined('TYPO3_MODE') || exit('Access denied.');
 
 if (!function_exists('array_flatten')) {
     function array_flatten($array): array

@@ -12,13 +12,11 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
 /**
  * Class Configuration
  *
- * @package Wazum\Sluggi\Helper
  * @author Wolfgang Klinger <wolfgang@wazum.com>
  */
 class Configuration
 {
     /**
-     * @param string $key
      * @return mixed|null
      */
     public static function get(string $key)

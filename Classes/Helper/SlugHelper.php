@@ -16,7 +16,6 @@ use function explode;
 /**
  * Class SlugHelper
  *
- * @package Wazum\Sluggi\Helper
  * @author  Wolfgang Klinger <wolfgang@wazum.com>
  */
 class SlugHelper
@@ -49,7 +48,7 @@ class SlugHelper
                     )->execute()->fetchOne();
             }
 
-            if ($pageUid === 0) {
+            if (0 === $pageUid) {
                 $pageUid = $pageRecord['uid'];
             }
 
@@ -60,7 +59,7 @@ class SlugHelper
                 )->execute()->fetchColumn();
         }
 
-        return $slug === '/' ? '' : $slug;
+        return '/' === $slug ? '' : $slug;
     }
 
     public static function getLastSlugSegment(string $slug): string

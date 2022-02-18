@@ -39,9 +39,6 @@ class DataHandlerSlugUpdateHook
      */
     protected $slugSetIncoming;
 
-    /**
-     * @param SlugService $slugService
-     */
     public function __construct(SlugService $slugService)
     {
         $this->slugService = $slugService;
@@ -57,7 +54,7 @@ class DataHandlerSlugUpdateHook
         DataHandler $dataHandler
     ): void {
         if (
-            $table !== 'pages'
+            'pages' !== $table
             // This is set in \TYPO3\CMS\Backend\History\RecordHistoryRollback::performRollback,
             // so we use it as a flag to ignore the update
             || $dataHandler->dontProcessTransformations
@@ -75,7 +72,7 @@ class DataHandlerSlugUpdateHook
         $synchronize = (bool) Configuration::get('synchronize');
         $allowOnlyLastSegment = (bool) Configuration::get('last_segment_only');
 
-        if (isset($incomingFieldArray['tx_sluggi_sync']) && (bool) $incomingFieldArray['tx_sluggi_sync'] === false) {
+        if (isset($incomingFieldArray['tx_sluggi_sync']) && false === (bool) $incomingFieldArray['tx_sluggi_sync']) {
             $synchronize = false;
         }
         if ($synchronize) {
@@ -93,7 +90,7 @@ class DataHandlerSlugUpdateHook
             $inaccessibleSlugSegments = $this->getInaccessibleSlugSegments($id, $languageId);
             // Prepend the parent page slug
             $parentSlug = SluggiSlugHelper::getSlug($record['pid'], $languageId);
-            if (strpos(substr($incomingFieldArray['slug'], 1), '/') !== false) {
+            if (false !== strpos(substr($incomingFieldArray['slug'], 1), '/')) {
                 $this->setFlashMessage(
                     LocalizationUtility::translate('message.slashesNotAllowed', 'sluggi'),
                     FlashMessage::WARNING
@@ -145,8 +142,8 @@ class DataHandlerSlugUpdateHook
         DataHandler $dataHandler
     ): void {
         if (
-            $table !== 'pages'
-            || $status !== 'update'
+            'pages' !== $table
+            || 'update' !== $status
             || $this->isNestedHookInvocation($dataHandler)
         ) {
             return;
@@ -157,7 +154,7 @@ class DataHandlerSlugUpdateHook
         if (!isset($this->slugSetIncoming[(int) $id])) {
             $synchronize = (bool) Configuration::get('synchronize');
 
-            if (isset($incomingFieldArray['tx_sluggi_sync']) && (bool) $incomingFieldArray['tx_sluggi_sync'] === false) {
+            if (isset($incomingFieldArray['tx_sluggi_sync']) && false === (bool) $incomingFieldArray['tx_sluggi_sync']) {
                 $synchronize = false;
             }
             if ($synchronize) {

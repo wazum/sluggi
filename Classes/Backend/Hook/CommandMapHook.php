@@ -13,14 +13,13 @@ use function rtrim;
 /**
  * Class CommandMapHook
  *
- * @package Wazum\Sluggi\Backend\Hook
  * @author Wolfgang Klinger <wolfgang@wazum.com>
  */
 class CommandMapHook
 {
     /**
-     * @param int|string $id
-     * @param bool|array $pasteUpdate
+     * @param int|string   $id
+     * @param bool|array   $pasteUpdate
      * @param string|array $value
      */
     public function processCmdmap_postProcess(
@@ -32,8 +31,8 @@ class CommandMapHook
         $pasteUpdate,
         array &$pasteDatamap
     ): void {
-        if ($command !== 'copy' ||
-            $table !== 'pages'
+        if ('copy' !== $command ||
+            'pages' !== $table
         ) {
             return;
         }

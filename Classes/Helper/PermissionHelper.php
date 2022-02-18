@@ -13,7 +13,6 @@ use function explode;
 /**
  * Class PermissionHelper
  *
- * @package Wazum\Sluggi\Helper
  * @author  Wolfgang Klinger <wolfgang@wazum.com>
  */
 class PermissionHelper

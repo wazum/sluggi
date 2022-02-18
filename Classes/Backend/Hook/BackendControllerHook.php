@@ -10,7 +10,6 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
 /**
  * Class BackendControllerHook
  *
- * @package Wazum\Sluggi\Backend
  * @author Wolfgang Klinger <wolfgang@wazum.com>
  */
 class BackendControllerHook
