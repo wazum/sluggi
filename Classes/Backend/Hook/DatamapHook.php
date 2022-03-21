@@ -40,7 +40,7 @@ class DatamapHook
     {
         // Important: No spaces in the fields list!!
         $currentPage = BackendUtility::getRecordWSOL('pages', $id, 'uid,slug,sys_language_uid');
-        if (!empty($currentPage)) {
+        if (!empty($currentPage) && !PermissionHelper::isLocked($currentPage)) {
             $allowOnlyLastSegment = (bool) Configuration::get('last_segment_only');
 
             $currentSlugSegment = SlugHelper::getLastSlugSegment($currentPage['slug']);

@@ -69,23 +69,28 @@ class DataHandlerSlugUpdateHook
             $this->slugSetIncoming[(int) $id] = true;
         }
 
+        $record = BackendUtility::getRecordWSOL($table, (int) $id);
+
+        $locked = (bool) $record['tx_sluggi_lock'];
+        if (isset($incomingFieldArray['tx_sluggi_lock'])) {
+            $locked = (bool) $incomingFieldArray['tx_sluggi_lock'];
+        }
+
         $synchronize = (bool) Configuration::get('synchronize');
         $allowOnlyLastSegment = (bool) Configuration::get('last_segment_only');
 
         if (isset($incomingFieldArray['tx_sluggi_sync']) && false === (bool) $incomingFieldArray['tx_sluggi_sync']) {
             $synchronize = false;
         }
-        if ($synchronize) {
-            $record = BackendUtility::getRecordWSOL($table, (int) $id);
+        if (!$locked && $synchronize) {
             $data = array_merge($record, $incomingFieldArray);
-            if ((bool) $data['tx_sluggi_sync']) {
+            if ($data['tx_sluggi_sync']) {
                 $fieldConfig = $GLOBALS['TCA']['pages']['columns']['slug']['config'] ?? [];
                 /** @var SlugHelper $helper */
                 $helper = GeneralUtility::makeInstance(SlugHelper::class, 'pages', 'slug', $fieldConfig);
                 $incomingFieldArray['slug'] = $helper->generate($data, (int) $data['pid']);
             }
         } elseif (isset($incomingFieldArray['slug']) && $allowOnlyLastSegment && !PermissionHelper::hasFullPermission()) {
-            $record = BackendUtility::getRecordWSOL($table, (int) $id);
             $languageId = $record['sys_language_uid'];
             $inaccessibleSlugSegments = $this->getInaccessibleSlugSegments($id, $languageId);
             // Prepend the parent page slug
