@@ -39,9 +39,6 @@ class DataHandlerSlugUpdateHook
      */
     protected $slugSetIncoming;
 
-    /**
-     * @param SlugService $slugService
-     */
     public function __construct(SlugService $slugService)
     {
         $this->slugService = $slugService;
@@ -57,8 +54,8 @@ class DataHandlerSlugUpdateHook
         DataHandler $dataHandler
     ): void {
         if (
-            $table !== 'pages'
-            // This is set in \TYPO3\CMS\Backend\History\RecordHistoryRollback::performRollback
+            'pages' !== $table
+            // This is set in \TYPO3\CMS\Backend\History\RecordHistoryRollback::performRollback,
             // so we use it as a flag to ignore the update
             || $dataHandler->dontProcessTransformations
             || !MathUtility::canBeInterpretedAsInteger($id)
@@ -69,7 +66,14 @@ class DataHandlerSlugUpdateHook
         }
 
         if (!empty($incomingFieldArray['slug'])) {
-            $this->slugSetIncoming[(int)$id] = true;
+            $this->slugSetIncoming[(int) $id] = true;
+        }
+
+        $record = BackendUtility::getRecordWSOL($table, (int) $id);
+
+        $locked = (bool) $record['tx_sluggi_lock'];
+        if (isset($incomingFieldArray['tx_sluggi_lock'])) {
+            $locked = (bool) $incomingFieldArray['tx_sluggi_lock'];
         }
 
         $synchronize = (bool)Configuration::get('synchronize');
@@ -78,22 +82,20 @@ class DataHandlerSlugUpdateHook
         if (isset($incomingFieldArray['tx_sluggi_sync']) && (bool)$incomingFieldArray['tx_sluggi_sync'] === false) {
             $synchronize = false;
         }
-        if ($synchronize) {
-            $record = BackendUtility::getRecordWSOL($table, (int)$id);
+        if (!$locked && $synchronize) {
             $data = array_merge($record, $incomingFieldArray);
-            if ((bool)$data['tx_sluggi_sync']) {
+            if ($data['tx_sluggi_sync']) {
                 $fieldConfig = $GLOBALS['TCA']['pages']['columns']['slug']['config'] ?? [];
                 /** @var SlugHelper $helper */
                 $helper = GeneralUtility::makeInstance(SlugHelper::class, 'pages', 'slug', $fieldConfig);
                 $incomingFieldArray['slug'] = $helper->generate($data, (int)$data['pid']);
             }
         } elseif (isset($incomingFieldArray['slug']) && $allowOnlyLastSegment && !PermissionHelper::hasFullPermission()) {
-            $record = BackendUtility::getRecordWSOL($table, (int)$id);
             $languageId = $record['sys_language_uid'];
             $inaccessibleSlugSegments = $this->getInaccessibleSlugSegments($id, $languageId);
             // Prepend the parent page slug
             $parentSlug = SluggiSlugHelper::getSlug($record['pid'], $languageId);
-            if (strpos(substr($incomingFieldArray['slug'], 1), '/') !== false) {
+            if (false !== strpos(substr($incomingFieldArray['slug'], 1), '/')) {
                 $this->setFlashMessage(
                     LocalizationUtility::translate('message.slashesNotAllowed', 'sluggi'),
                     FlashMessage::WARNING

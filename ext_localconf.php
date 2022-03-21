@@ -44,5 +44,11 @@ defined('TYPO3_MODE') or die();
         $GLOBALS['TYPO3_CONF_VARS']['SYS']['Objects'][\TYPO3\CMS\Backend\Controller\FormSlugAjaxController::class] = [
             'className' => \Wazum\Sluggi\Backend\Controller\FormSlugAjaxController::class
         ];
+
+        $GLOBALS['TYPO3_CONF_VARS']['SYS']['formEngine']['formDataGroup']['tcaDatabaseRecord'][\Wazum\Sluggi\Backend\FormDataProvider\SanitizeSlugOptionsTca::class] = [
+            'depends' => [
+                \TYPO3\CMS\Backend\Form\FormDataProvider\InitializeProcessedTca::class
+            ]
+        ];
     }
 })();
