@@ -18,9 +18,9 @@ use function rtrim;
 class CommandMapHook
 {
     /**
-     * @param int|string   $id
-     * @param bool|array   $pasteUpdate
-     * @param string|array $value
+     * @param int|string $id
+     * @param bool|array $pasteUpdate
+     * @param string $value
      */
     public function processCmdmap_postProcess(
         string $command,
@@ -36,17 +36,18 @@ class CommandMapHook
         ) {
             return;
         }
+        $value = (int) $value;
 
-        $currentPage = BackendUtility::getRecord('pages', $id, 'uid, slug, sys_language_uid');
+        $currentPage = BackendUtility::getRecord('pages', $id, 'uid,slug,sys_language_uid');
         if (!empty($currentPage)) {
             $languageId = $currentPage['sys_language_uid'];
             $currentSlugSegment = SlugHelper::getLastSlugSegment($currentPage['slug']);
             // Positive value = paste into
             if ($value > 0) {
-                $parentPage = (int) $value;
+                $parentPage = $value;
             } else {
-                $parentPage = BackendUtility::getRecord('pages', abs((int) $value), 'pid')['pid'] ?? 0;
                 // Negative value = paste after
+                $parentPage = BackendUtility::getRecord('pages', abs($value), 'pid')['pid'] ?? 0;
             }
             $parentSlug = SlugHelper::getSlug($parentPage, $languageId);
             $newSlug = rtrim($parentSlug, '/') . $currentSlugSegment;
