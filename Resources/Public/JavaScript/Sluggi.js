@@ -57,6 +57,7 @@ define([
             triggerRecreate();
             if ($(lockCheckboxSelector).val() === '1') {
                 $(lockLabelSelector).trigger('click');
+                $(lockCheckboxSelector).val(0);
             }
             hideEdit('Sync active');
         } else if ($(lockCheckboxSelector).length === 0 || $(lockCheckboxSelector).val() === '0') {
@@ -68,6 +69,7 @@ define([
         if ($(lockCheckboxSelector).val() === '0') {
             if ($(syncCheckboxSelector).val() === '1' || ('tx_sluggi_sync' in window && window.tx_sluggi_sync === true)) {
                 $(syncLabelSelector).trigger('click');
+                $(syncCheckboxSelector).val(0);
             }
             hideEdit('Lock active');
         } else if ($(syncCheckboxSelector).length === 0 || $(syncCheckboxSelector).val() === '0') {
