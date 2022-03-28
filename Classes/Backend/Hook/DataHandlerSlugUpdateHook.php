@@ -12,7 +12,7 @@ use TYPO3\CMS\Core\Messaging\FlashMessageService;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Core\Utility\MathUtility;
 use TYPO3\CMS\Extbase\Utility\LocalizationUtility;
-use TYPO3\CMS\Redirects\Service\SlugService;
+use Wazum\Sluggi\Backend\Service\SlugService;
 use Wazum\Sluggi\Helper\Configuration;
 use Wazum\Sluggi\Helper\PermissionHelper;
 use Wazum\Sluggi\Helper\SlugHelper as SluggiSlugHelper;
@@ -180,6 +180,6 @@ class DataHandlerSlugUpdateHook
         $correlationId = $dataHandler->getCorrelationId();
         $correlationIdAspects = $correlationId ? $correlationId->getAspects() ?? [] : [];
 
-        return in_array(SlugService::CORRELATION_ID_IDENTIFIER, $correlationIdAspects, true);
+        return in_array(\TYPO3\CMS\Redirects\Service\SlugService::CORRELATION_ID_IDENTIFIER, $correlationIdAspects, true);
     }
 }

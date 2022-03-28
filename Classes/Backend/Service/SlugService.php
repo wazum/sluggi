@@ -17,6 +17,7 @@ use TYPO3\CMS\Core\Routing\InvalidRouteArgumentsException;
 use TYPO3\CMS\Core\Routing\PageRouter;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Redirects\Service\RedirectCacheService;
+use Wazum\Sluggi\Helper\PermissionHelper;
 use function rtrim;
 
 /**
@@ -98,6 +99,10 @@ class SlugService extends \TYPO3\CMS\Redirects\Service\SlugService
         $pageId = $languageUid === 0 ? (int)$currentPageRecord['uid'] : (int)$currentPageRecord['l10n_parent'];
         $subPageRecords = $this->resolveSubPages($pageId, $languageUid);
         foreach ($subPageRecords as $subPageRecord) {
+            if (PermissionHelper::isLocked($subPageRecord)) {
+                continue;
+            }
+
             $newSlug = $this->updateSlug($subPageRecord, $oldSlugOfParentPage, $newSlugOfParentPage);
             if ($newSlug !== null && $this->autoCreateRedirects) {
                 $this->createRedirectWithPageId(
