@@ -49,7 +49,7 @@ class DatamapHook
     protected function updateSlugForMovedPage(int $id, int $targetId, DataHandler $dataHandler): void
     {
         // Important: No spaces in the fields list!!
-        $currentPage = BackendUtility::getRecordWSOL('pages', $id, 'uid,slug,sys_language_uid');
+        $currentPage = BackendUtility::getRecordWSOL('pages', $id, 'uid,slug,sys_language_uid,tx_sluggi_lock');
         if (!empty($currentPage) && !PermissionHelper::isLocked($currentPage)) {
             $allowOnlyLastSegment = (bool) Configuration::get('last_segment_only');
 
