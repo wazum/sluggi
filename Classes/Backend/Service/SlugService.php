@@ -144,6 +144,12 @@ class SlugService extends \TYPO3\CMS\Redirects\Service\SlugService
         $endtime = $date->getDateTime()->modify('+' . $this->redirectTTL . ' days');
 
         $targetPath = $basePath . $newSlug . ($variant ?? '');
+        $targetLink = $this->linkService->asString([
+            'type' => 'page',
+            'pageuid' => $pageId,
+            'parameters' => '_language=' . $languageId
+        ]);
+
         $sourceHost = $this->site->getBase()->getHost() ?: '*';
         $sourcePath = $basePath . $originalSlug . ($variant ?? '');
 
@@ -165,7 +171,7 @@ class SlugService extends \TYPO3\CMS\Redirects\Service\SlugService
             'force_https' => $this->redirectForceHttps,
             'respect_query_parameters' => $this->redirectRespectQueryParameters,
             'keep_query_parameters' => $this->redirectKeepQueryParameters,
-            'target' => $targetPath,
+            'target' => $targetLink,
             'target_statuscode' => $this->httpStatusCode,
             'hitcount' => 0,
             'lasthiton' => 0,
