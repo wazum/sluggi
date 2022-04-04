@@ -60,8 +60,7 @@ class SlugService extends \TYPO3\CMS\Redirects\Service\SlugService
     ): void {
         try {
             $this->initializeSettings($pageId);
-        } catch(SiteNotFoundException $e)
-        {
+        } catch (SiteNotFoundException $e) {
             // Without a site configuration no settings, so we can't do anything here
             return;
         }
@@ -114,6 +113,14 @@ class SlugService extends \TYPO3\CMS\Redirects\Service\SlugService
                 );
             }
         }
+    }
+
+    protected function disableHook(): void
+    {
+        unset(
+            $GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['t3lib/class.t3lib_tcemain.php']['processDatamapClass']['redirects'],
+            $GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['t3lib/class.t3lib_tcemain.php']['processDatamapClass']['sluggi']
+        );
     }
 
     protected function createRedirectWithPageId(
