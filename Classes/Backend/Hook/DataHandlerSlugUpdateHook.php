@@ -120,6 +120,9 @@ class DataHandlerSlugUpdateHook
         if (
             $table !== 'pages'
             || $status !== 'update'
+            // This is set in \TYPO3\CMS\Backend\History\RecordHistoryRollback::performRollback,
+            // so we use it as a flag to ignore the update
+            || $dataHandler->dontProcessTransformations
             || $this->isNestedHookInvocation($dataHandler)
         ) {
             return;
