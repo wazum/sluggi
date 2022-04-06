@@ -150,7 +150,7 @@ class SlugService extends \TYPO3\CMS\Redirects\Service\SlugService
             'parameters' => '_language=' . $languageId
         ]);
 
-        $sourceHost = $this->site->getBase()->getHost() ?: '*';
+        $sourceHost = $this->site->getLanguageById($languageId)->getBase()->getHost() ?: '*';
         $sourcePath = $basePath . $originalSlug . ($variant ?? '');
 
         // Delete redirects with this new slug, as this would lead to endless redirect recursion
