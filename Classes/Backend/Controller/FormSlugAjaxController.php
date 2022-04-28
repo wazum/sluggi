@@ -7,6 +7,7 @@ namespace Wazum\Sluggi\Backend\Controller;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use RuntimeException;
+use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\DataHandling\Model\RecordStateFactory;
 use TYPO3\CMS\Core\DataHandling\SlugHelper;
 use TYPO3\CMS\Core\Exception\SiteNotFoundException;
@@ -114,7 +115,7 @@ class FormSlugAjaxController extends \TYPO3\CMS\Backend\Controller\FormSlugAjaxC
         $mountRootPage = PermissionHelper::getTopmostAccessiblePage($pid);
         $inaccessibleSlugSegments = null;
         if ($mountRootPage !== null) {
-            $inaccessibleSlugSegments = SluggiSlugHelper::getSlug($mountRootPage['pid'], $languageId);
+            $inaccessibleSlugSegments = SluggiSlugHelper::getSlugPath(BackendUtility::getRecordWSOL($tableName, $pid));
         }
 
         return new JsonResponse([

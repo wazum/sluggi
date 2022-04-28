@@ -7,6 +7,7 @@ namespace Wazum\Sluggi\Backend\Form;
 use DOMDocument;
 use DOMNode;
 use DOMXPath;
+use TYPO3\CMS\Backend\Utility\BackendUtility;
 use Wazum\Sluggi\Helper\Configuration;
 use Wazum\Sluggi\Helper\PermissionHelper;
 use Wazum\Sluggi\Helper\SlugHelper as SluggiSlugHelper;
@@ -48,7 +49,7 @@ class InputSlugElement extends \TYPO3\CMS\Backend\Form\Element\InputSlugElement
             }
 
             $mountRootPage = PermissionHelper::getTopmostAccessiblePage((int)$this->data['databaseRow']['uid']);
-            $inaccessibleSlugSegments = SluggiSlugHelper::getSlug((int)$mountRootPage['pid'], $languageId);
+            $inaccessibleSlugSegments = SluggiSlugHelper::getSlugPath($page);
             $prefix = ($this->data['customData'][$this->data['fieldName']]['slugPrefix'] ?? '') . $inaccessibleSlugSegments;
             $editableSlugSegments = $this->data['databaseRow']['slug'];
             $allowOnlyLastSegment = (bool)Configuration::get('last_segment_only');

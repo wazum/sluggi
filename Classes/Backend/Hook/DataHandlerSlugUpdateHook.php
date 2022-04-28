@@ -82,7 +82,7 @@ class DataHandlerSlugUpdateHook
         if (isset($incomingFieldArray['tx_sluggi_sync']) && (bool)$incomingFieldArray['tx_sluggi_sync'] === false) {
             $synchronize = false;
         }
-        if (!$locked && $synchronize) {
+        if (!$locked && !$allowOnlyLastSegment && $synchronize) {
             $data = array_merge($record, $incomingFieldArray);
             if ($data['tx_sluggi_sync']) {
                 $fieldConfig = $GLOBALS['TCA']['pages']['columns']['slug']['config'] ?? [];
@@ -94,13 +94,18 @@ class DataHandlerSlugUpdateHook
             $languageId = $record['sys_language_uid'];
             $inaccessibleSlugSegments = $this->getInaccessibleSlugSegments($id, $languageId);
             // Prepend the parent page slug
-            $parentSlug = SluggiSlugHelper::getSlug($record['pid'], $languageId);
+            $parentSlug = SluggiSlugHelper::getSlugPath($record);
             if (false !== strpos(substr($incomingFieldArray['slug'], 1), '/')) {
                 $this->setFlashMessage(
                     LocalizationUtility::translate('message.slashesNotAllowed', 'sluggi'),
                     FlashMessage::WARNING
                 );
             }
+            // make sure manually edited slug starts with /
+            if (strncmp($incomingFieldArray['slug'], '/', 1) !== 0) {
+                $incomingFieldArray['slug'] = '/' . $incomingFieldArray['slug'];
+            }
+
             $incomingFieldArray['slug'] = $inaccessibleSlugSegments .
                 str_replace($inaccessibleSlugSegments, '', $parentSlug) .
                 '/' . str_replace('/', '-', substr($incomingFieldArray['slug'], 1));
@@ -161,7 +166,7 @@ class DataHandlerSlugUpdateHook
     {
         $mountRootPage = PermissionHelper::getTopmostAccessiblePage($pageId);
 
-        return SluggiSlugHelper::getSlug($mountRootPage['pid'], $languageId);
+        return SluggiSlugHelper::getSlugPath(BackendUtility::getRecordWSOL('pages', $pageId));
     }
 
     protected function setFlashMessage(string $text, int $severity): void
