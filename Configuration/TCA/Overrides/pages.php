@@ -83,7 +83,7 @@ if (!function_exists('array_flatten')) {
                         'labelUnchecked' => 'LLL:EXT:sluggi/Resources/Private/Language/locallang.xlf:pages.tx_sluggi_sync.disabled'
                     ]
                 ],
-                'default' => 1
+                'default' => 0
             ]
         ]
     ];
