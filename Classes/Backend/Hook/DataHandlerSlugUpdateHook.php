@@ -54,6 +54,15 @@ class DataHandlerSlugUpdateHook
         DataHandler $dataHandler
     ): void {
         if (
+            'pages' === $table && !MathUtility::canBeInterpretedAsInteger($id)){
+                //new page was created
+                $synchronizeOn = (bool) Configuration::get('synchronize_on');
+                if ($synchronizeOn){
+                    $incomingFieldArray['tx_sluggi_sync'] = 1;
+                }
+                return;
+            }
+        if (
             'pages' !== $table
             // This is set in \TYPO3\CMS\Backend\History\RecordHistoryRollback::performRollback,
             // so we use it as a flag to ignore the update
