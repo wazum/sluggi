@@ -11,9 +11,6 @@ defined('TYPO3_MODE') || exit();
         'priority' => 40,
         'class' => \Wazum\Sluggi\Backend\Form\InputTextWithSlugImpactElement::class
     ];
-    /** @var \TYPO3\CMS\Core\Page\PageRenderer $pageRenderer */
-    $pageRenderer = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance(\TYPO3\CMS\Core\Page\PageRenderer::class);
-    $pageRenderer->loadRequireJsModule('TYPO3/CMS/Sluggi/Sluggi');
 
     $GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['t3lib/class.t3lib_tcemain.php']['processDatamapClass']['sluggi']
         = \Wazum\Sluggi\Backend\Hook\DataHandlerSlugUpdateHook::class;
@@ -23,6 +20,9 @@ defined('TYPO3_MODE') || exit();
 
     $GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['t3lib/class.t3lib_tcemain.php']['processCmdmapClass'][]
         = \Wazum\Sluggi\Backend\Hook\CommandMapHook::class;
+
+    $GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['t3lib/class.t3lib_pagerenderer.php']['render-preProcess'][]
+        = \Wazum\Sluggi\Backend\Hook\PageRendererRenderPreProcess::class . '->addRequireJsConfiguration';
 
     // Add a custom handler without injecting the JavaScript module (already loaded by DispatchNotificationHook (see below)
     foreach ($GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['typo3/backend.php']['constructPostProcess'] as $key => $handler) {
