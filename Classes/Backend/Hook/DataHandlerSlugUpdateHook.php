@@ -67,6 +67,9 @@ class DataHandlerSlugUpdateHook
 
         if (!empty($incomingFieldArray['slug'])) {
             $this->slugSetIncoming[(int) $id] = true;
+
+            // Make sure it starts with a slash
+            $incomingFieldArray['slug'] = '/' . ltrim($incomingFieldArray['slug'], '/');
         }
 
         $record = BackendUtility::getRecordWSOL($table, (int) $id);
