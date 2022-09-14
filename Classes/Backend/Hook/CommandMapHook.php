@@ -20,7 +20,7 @@ class CommandMapHook
     /**
      * @param int|string $id
      * @param bool|array $pasteUpdate
-     * @param string $value
+     * @param string|int $value
      */
     public function processCmdmap_postProcess(
         string $command,
@@ -38,7 +38,8 @@ class CommandMapHook
         }
         $value = (int) $value;
 
-        $currentPage = BackendUtility::getRecord('pages', $id, 'uid,slug,sys_language_uid');
+        // Important: No spaces in the fields list!!
+        $currentPage = BackendUtility::getRecord('pages', $id, 'uid,slug,sys_language_uid,tx_sluggi_lock,tx_sluggi_sync');
         if (!empty($currentPage)) {
             $languageId = $currentPage['sys_language_uid'];
             $currentSlugSegment = SlugHelper::getLastSlugSegment($currentPage['slug']);

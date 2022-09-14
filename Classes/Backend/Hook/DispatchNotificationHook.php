@@ -14,7 +14,7 @@ final class DispatchNotificationHook
      * Called as a hook in \TYPO3\CMS\Backend\Utility\BackendUtility::getUpdateSignalCode
      * calls a JS function to send the slug change notification
      */
-    public function dispatchNotification(array $params)
+    public function dispatchNotification(array $params): void
     {
         $javaScriptRenderer = GeneralUtility::makeInstance(PageRenderer::class)->getJavaScriptRenderer();
         $javaScriptRenderer->addJavaScriptModuleInstruction(
