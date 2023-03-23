@@ -74,7 +74,7 @@ class DataHandlerSlugUpdateHook
 
         $record = BackendUtility::getRecordWSOL($table, (int) $id);
 
-        $locked = (bool) $record['tx_sluggi_lock'];
+        $locked = (bool) ($record['tx_sluggi_lock'] ?? false);
         if (isset($incomingFieldArray['tx_sluggi_lock'])) {
             $locked = (bool) $incomingFieldArray['tx_sluggi_lock'];
         }
