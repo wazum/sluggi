@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<xliff version="1.0">
+    <file target-language="de" datatype="plaintext" product-name="sluggi">
+        <header/>
+        <body>
+            <trans-unit id="pages.slug_locked">
+                <target>Sperre URL Segment</target>
+            </trans-unit>
+            <trans-unit id="pages.slug_locked.description">
+                <target>Sperre die Bearbeitung des URL Segmentes</target>
+            </trans-unit>
+            <trans-unit id="pages.slug_locked.enabled">
+                <target>Gesperrt</target>
+            </trans-unit>
+            <trans-unit id="pages.slug_locked.disabled">
+                <target>Freigeschaltet</target>
+            </trans-unit>
+            <trans-unit id="pages.tx_sluggi_sync">
+                <target>Synchronisiere URL Segment</target>
+            </trans-unit>
+            <trans-unit id="pages.tx_sluggi_sync.description">
+                <target>Synchronisiere das URL Segment mit den konfigurierten Feldern (dem Seitentitel z.B.)</target>
+            </trans-unit>
+            <trans-unit id="pages.tx_sluggi_sync.enabled">
+                <target>Aktiv</target>
+            </trans-unit>
+            <trans-unit id="pages.tx_sluggi_sync.disabled">
+                <target>Deaktiviert</target>
+            </trans-unit>
+        </body>
+    </file>
+</xliff>

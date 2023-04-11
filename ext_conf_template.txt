@@ -1,0 +1,14 @@
+# cat=basic; type=boolean; label=Activate synchronization of slug segment with configured page fields (see below)
+synchronize=1
+# cat=basic; type=boolean; label=Allow standard editors to edit only the last segment of the URL slug
+last_segment_only = 0
+# cat=basic; type=string; label=Use the following page fields for slug generation (valid JSON array!)
+pages_fields=[["nav_title","title"]]
+# cat=basic; type=string; label=Backend user group ID list with extra permissions
+whitelist =
+# cat=basic; type=boolean; label=Replace slash (/) in slug segment with hyphen (-)
+slash_replacement = 1
+# cat=basic; type=string; label=Exclude page types (Spacer, Recycler, Folder by default)
+exclude_page_types=199,255,254
+# cat=basic; type=boolean; label=Disable the slug update and redirect information dialog
+disable_slug_update_information = 0

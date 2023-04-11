@@ -1,0 +1,66 @@
+<?xml version="1.0"?>
+<ruleset name="OEZAK">
+    <description>Additions to PSR12/Symfony not covered by Psalm and PHP Coding Standards Fixer</description>
+
+    <arg name="cache" value="../.Build/phpcs.json"/>
+    <arg name="extensions" value="php"/>
+    <arg name="error-severity" value="1"/>
+    <arg name="warning-severity" value="1"/>
+
+    <file>../</file>
+    <exclude-pattern>/Build</exclude-pattern>
+    <exclude-pattern>/.Build</exclude-pattern>
+
+    <!-- PSR1 -->
+    <rule ref="Generic.NamingConventions.UpperCaseConstantName"/>
+    <rule ref="PSR1.Classes.ClassDeclaration"/>
+    <rule ref="PSR1.Files.SideEffects"/>
+    <rule ref="PSR1.Methods.CamelCapsMethodName"/>
+    <rule ref="Squiz.Classes.ValidClassName"/><!-- PascalCase -->
+
+    <!-- PSR2 -->
+    <rule ref="Generic.ControlStructures.InlineControlStructure"/>
+    <rule ref="Generic.Files.LineLength">
+        <properties>
+            <property name="lineLimit" value="200"/>
+            <property name="absoluteLineLimit" value="0"/>
+        </properties>
+    </rule>
+    <rule ref="Generic.Formatting.DisallowMultipleStatements"/>
+    <rule ref="PEAR.Functions.ValidDefaultValue"/><!-- default function arguments must come last -->
+    <rule ref="PSR2.Files.ClosingTag"/>
+    <rule ref="Squiz.Scope.MethodScope"/>
+    <rule ref="PSR2.Methods.MethodDeclaration.Underscore"/>
+
+    <!-- PSR12 -->
+    <rule ref="PSR12.Files.DeclareStatement"/>
+    <rule ref="PSR12.Files.FileHeader"/>
+    <rule ref="PSR12.Namespaces.CompoundNamespaceDepth"/>
+    <rule ref="PSR12.Properties.ConstantVisibility"/>
+    <rule ref="PSR2.Methods.MethodDeclaration"/>
+    <rule ref="Squiz.Scope.MethodScope"/>
+    <rule ref="Squiz.WhiteSpace.SuperfluousWhitespace.EndFile"/>
+
+    <!-- Custom -->
+    <rule ref="Generic.Files.OneClassPerFile"/>
+    <rule ref="Generic.Files.OneInterfacePerFile"/>
+    <rule ref="Generic.Files.OneObjectStructurePerFile"/>
+    <rule ref="Generic.Files.OneTraitPerFile"/>
+    <rule ref="Generic.NamingConventions.ConstructorName"/><!-- no PHP4 style constructors -->
+    <rule ref="Generic.Strings.UnnecessaryStringConcat">
+        <properties>
+            <property name="allowMultiline" value="true"/>
+        </properties>
+    </rule>
+    <rule ref="SlevomatCodingStandard.TypeHints.ParameterTypeHint"/>
+    <rule ref="SlevomatCodingStandard.TypeHints.PropertyTypeHint"/>
+    <rule ref="SlevomatCodingStandard.TypeHints.ReturnTypeHint"/>
+    <rule ref="SlevomatCodingStandard.TypeHints.UselessConstantTypeHint"/>
+    <rule ref="SlevomatCodingStandard.Exceptions.ReferenceThrowableOnly"/>
+    <rule ref="SlevomatCodingStandard.ControlStructures.AssignmentInCondition"/>
+    <rule ref="SlevomatCodingStandard.Functions.StaticClosure"/>
+    <rule ref="Squiz.Classes.ClassFileName"/>
+    <rule ref="Squiz.PHP.DisallowSizeFunctionsInLoops"/>
+    <rule ref="Squiz.PHP.DiscouragedFunctions"/>
+    <rule ref="Squiz.PHP.Eval"/>
+</ruleset>

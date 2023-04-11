@@ -1,0 +1,5 @@
+/Build/node_modules/
+.Build/
+.idea/
+composer.lock
+*.swp

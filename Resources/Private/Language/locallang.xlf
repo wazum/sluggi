@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<xliff version="1.0">
+    <file source-language="en" datatype="plaintext" product-name="sluggi">
+        <header/>
+        <body>
+            <trans-unit id="pages.slug_locked">
+                <source>Lock URL slug</source>
+            </trans-unit>
+            <trans-unit id="pages.slug_locked.description">
+                <source>Lock editing the URL slug for this page.</source>
+            </trans-unit>
+            <trans-unit id="pages.slug_locked.enabled">
+                <source>Locked</source>
+            </trans-unit>
+            <trans-unit id="pages.slug_locked.disabled">
+                <source>Unlocked</source>
+            </trans-unit>
+            <trans-unit id="pages.tx_sluggi_sync">
+                <source>Synchronize URL segment</source>
+            </trans-unit>
+            <trans-unit id="pages.tx_sluggi_sync.description">
+                <source>Synchronize the URL segment with the configured fields (e.g. the page title).</source>
+            </trans-unit>
+            <trans-unit id="pages.tx_sluggi_sync.enabled">
+                <source>Active</source>
+            </trans-unit>
+            <trans-unit id="pages.tx_sluggi_sync.disabled">
+                <source>Inactive</source>
+            </trans-unit>
+        </body>
+    </file>
+</xliff>
