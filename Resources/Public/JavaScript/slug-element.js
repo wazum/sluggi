@@ -1,1 +1,84 @@
-import*as e from"@typo3/core/ajax/ajax-request.js";import*as t from"@typo3/core/document-service.js";import*as n from"@typo3/core/event/debounce-event.js";import*as l from"@typo3/core/event/regular-event.js";var i={d:(e,t)=>{for(var n in t)i.o(t,n)&&!i.o(e,n)&&Object.defineProperty(e,n,{enumerable:!0,get:t[n]})},o:(e,t)=>Object.prototype.hasOwnProperty.call(e,t)},o={};i.d(o,{Z:()=>h});const r=(s={default:()=>e.default},a={},i.d(a,s),a);var s,a;const u=(e=>{var t={};return i.d(t,e),t})({default:()=>t.default}),d=(e=>{var t={};return i.d(t,e),t})({default:()=>n.default}),c=(e=>{var t={};return i.d(t,e),t})({default:()=>l.default});var p,f;!function(e){e.toggleButton=".t3js-form-field-slug-toggle",e.recreateButton=".t3js-form-field-slug-recreate",e.inputField=".t3js-form-field-slug-input",e.readOnlyField=".t3js-form-field-slug-readonly",e.hiddenField=".t3js-form-field-slug-hidden"}(p||(p={})),function(e){e.AUTO="auto",e.RECREATE="recreate",e.MANUAL="manual"}(f||(f={}));const h=function(){function e(e,t){var n=this;this.options=null,this.fullElement=null,this.manuallyChanged=!1,this.readOnlyField=null,this.inputField=null,this.hiddenField=null,this.request=null,this.fieldsToListenOn={},this.options=t,this.fieldsToListenOn=this.options.listenerFieldNames||{},u.default.ready().then((function(t){n.fullElement=t.querySelector(e),n.inputField=n.fullElement.querySelector(p.inputField),n.readOnlyField=n.fullElement.querySelector(p.readOnlyField),n.hiddenField=n.fullElement.querySelector(p.hiddenField),n.registerEvents()}))}return e.prototype.registerEvents=function(){var e=this,t=Object.values(this.getAvailableFieldsForProposalGeneration()).map((function(e){return'[id="'.concat(e.id,'"]')})),n=this.fullElement.querySelector(p.recreateButton);t.length>0&&"new"===this.options.command&&new d.default("input",(function(){e.manuallyChanged||e.sendSlugProposal(f.AUTO)})).delegateTo(document,t.join(",")),t.length>0||this.hasPostModifiersDefined()?new c.default("click",(function(t){t.preventDefault(),e.readOnlyField.classList.contains("hidden")&&(e.readOnlyField.classList.toggle("hidden",!1),e.inputField.classList.toggle("hidden",!0)),e.sendSlugProposal(f.RECREATE)})).bindTo(n):(n.classList.add("disabled"),n.disabled=!0),new d.default("input",(function(){e.manuallyChanged=!0,e.sendSlugProposal(f.MANUAL)})).bindTo(this.inputField),this.readOnlyField.addEventListener("focus",(function(){e.readOnlyField.blur()}));var l=this.fullElement.querySelector(p.toggleButton);new c.default("click",(function(t){t.preventDefault();var n=e.readOnlyField.classList.contains("hidden");if(e.readOnlyField.classList.toggle("hidden",!n),e.inputField.classList.toggle("hidden",n),!n)return e.hiddenField.value=e.inputField.value,e.inputField.focus(),void e.inputField.select();e.inputField.value!==e.readOnlyField.value?e.readOnlyField.value=e.inputField.value:(e.manuallyChanged=!1,e.fullElement.querySelector(".t3js-form-proposal-accepted").classList.add("hidden"),e.fullElement.querySelector(".t3js-form-proposal-different").classList.add("hidden")),e.hiddenField.value=e.readOnlyField.value})).bindTo(l)},e.prototype.sendSlugProposal=function(e){var t=this,n={};e===f.AUTO||e===f.RECREATE?(Object.entries(this.getAvailableFieldsForProposalGeneration()).forEach((function(e){n[e[0]]=e[1].value})),!0===this.options.includeUidInValues&&(n.uid=this.options.recordId.toString())):n.manual=this.inputField.value,this.request instanceof r.default&&this.request.abort(),this.request=new r.default(TYPO3.settings.ajaxUrls.record_slug_suggest),this.request.post({values:n,mode:e,tableName:this.options.tableName,pageId:this.options.pageId,parentPageId:this.options.parentPageId,recordId:this.options.recordId,language:this.options.language,fieldName:this.options.fieldName,command:this.options.command,signature:this.options.signature}).then((function(n){return l=t,i=void 0,r=function(){var t,l,i,o;return function(e,t){var n,l,i,o,r={label:0,sent:function(){if(1&i[0])throw i[1];return i[1]},trys:[],ops:[]};return o={next:s(0),throw:s(1),return:s(2)},"function"==typeof Symbol&&(o[Symbol.iterator]=function(){return this}),o;function s(s){return function(a){return function(s){if(n)throw new TypeError("Generator is already executing.");for(;o&&(o=0,s[0]&&(r=0)),r;)try{if(n=1,l&&(i=2&s[0]?l.return:s[0]?l.throw||((i=l.return)&&i.call(l),0):l.next)&&!(i=i.call(l,s[1])).done)return i;switch(l=0,i&&(s=[2&s[0],i.value]),s[0]){case 0:case 1:i=s;break;case 4:return r.label++,{value:s[1],done:!1};case 5:r.label++,l=s[1],s=[0];continue;case 7:s=r.ops.pop(),r.trys.pop();continue;default:if(!((i=(i=r.trys).length>0&&i[i.length-1])||6!==s[0]&&2!==s[0])){r=0;continue}if(3===s[0]&&(!i||s[1]>i[0]&&s[1]<i[3])){r.label=s[1];break}if(6===s[0]&&r.label<i[1]){r.label=i[1],i=s;break}if(i&&r.label<i[2]){r.label=i[2],r.ops.push(s);break}i[2]&&r.ops.pop(),r.trys.pop();continue}s=t.call(e,r)}catch(e){s=[6,e],l=0}finally{n=i=0}if(5&s[0])throw s[1];return{value:s[0]?s[1]:void 0,done:!0}}([s,a])}}}(this,(function(r){switch(r.label){case 0:return[4,n.resolve()];case 1:return t=r.sent(),l="/"+t.proposal.replace(/^\//,""),i=this.fullElement.querySelector(".t3js-form-proposal-accepted"),o=this.fullElement.querySelector(".t3js-form-proposal-different"),t.inaccessibleSegments&&(t.proposal=t.proposal.substring(t.inaccessibleSegments.length)),t.lastSegmentOnly&&(t.proposal=t.proposal.substring(t.proposal.lastIndexOf("/"))),i.classList.toggle("hidden",t.hasConflicts),o.classList.toggle("hidden",!t.hasConflicts),(t.hasConflicts?o:i).querySelector("span").innerText=l,this.hiddenField.value!==t.proposal&&this.fullElement.querySelector("input[data-formengine-input-name]").dispatchEvent(new Event("change",{bubbles:!0,cancelable:!0})),e===f.AUTO||e===f.RECREATE?(this.readOnlyField.value=t.proposal,this.hiddenField.value=t.proposal,this.inputField.value=t.proposal):this.hiddenField.value=t.proposal,[2]}}))},new((o=void 0)||(o=Promise))((function(e,t){function n(e){try{a(r.next(e))}catch(e){t(e)}}function s(e){try{a(r.throw(e))}catch(e){t(e)}}function a(t){var l;t.done?e(t.value):(l=t.value,l instanceof o?l:new o((function(e){e(l)}))).then(n,s)}a((r=r.apply(l,i||[])).next())}));var l,i,o,r})).finally((function(){t.request=null}))},e.prototype.getAvailableFieldsForProposalGeneration=function(){for(var e={},t=0,n=Object.entries(this.fieldsToListenOn);t<n.length;t++){var l=n[t],i=l[0],o=l[1],r=document.querySelector('[data-formengine-input-name="'+o+'"]');null===r&&(r=document.querySelector('select[name="'+o+'"]')),null!==r&&(e[i]=r)}return e},e.prototype.hasPostModifiersDefined=function(){return Array.isArray(this.options.config.generatorOptions.postModifiers)&&this.options.config.generatorOptions.postModifiers.length>0},e}();var g=o.Z;export{g as default};
+define(['require', 'exports', 'TYPO3/CMS/Core/Ajax/AjaxRequest', 'TYPO3/CMS/Core/DocumentService', 'TYPO3/CMS/Core/Event/DebounceEvent', 'TYPO3/CMS/Core/Event/RegularEvent'], (function (e, t, i, s, l, n) {
+    'use strict';
+    var o, a;
+    !function (e) {
+        e.toggleButton = '.t3js-form-field-slug-toggle', e.recreateButton = '.t3js-form-field-slug-recreate', e.inputField = '.t3js-form-field-slug-input', e.readOnlyField = '.t3js-form-field-slug-readonly', e.hiddenField = '.t3js-form-field-slug-hidden';
+    }(o || (o = {})), function (e) {
+        e.AUTO = 'auto', e.RECREATE = 'recreate', e.MANUAL = 'manual';
+    }(a || (a = {}));
+    return class {
+        constructor (e, t) {
+            this.options = null, this.fullElement = null, this.manuallyChanged = !1, this.readOnlyField = null, this.inputField = null, this.hiddenField = null, this.request = null, this.fieldsToListenOn = {}, this.options = t, this.fieldsToListenOn = this.options.listenerFieldNames || {}, s.ready().then(t => {
+                this.fullElement = t.querySelector(e), this.inputField = this.fullElement.querySelector(o.inputField), this.readOnlyField = this.fullElement.querySelector(o.readOnlyField), this.hiddenField = this.fullElement.querySelector(o.hiddenField), this.registerEvents();
+            });
+        }
+
+        registerEvents () {
+            const e = Object.values(this.getAvailableFieldsForProposalGeneration()).map(e => `[data-formengine-input-name="${e}"]`),
+                t = this.fullElement.querySelector(o.recreateButton);
+            e.length > 0 && 'new' === this.options.command && new l('input', () => {
+                this.manuallyChanged || this.sendSlugProposal(a.AUTO);
+            }).delegateTo(document, e.join(',')), e.length > 0 || this.hasPostModifiersDefined() ? new n('click', e => {
+                e.preventDefault(), this.readOnlyField.classList.contains('hidden') && (this.readOnlyField.classList.toggle('hidden', !1), this.inputField.classList.toggle('hidden', !0)), this.sendSlugProposal(a.RECREATE);
+            }).bindTo(t) : (t.classList.add('disabled'), t.disabled = !0), new l('input', () => {
+                this.manuallyChanged = !0, this.sendSlugProposal(a.MANUAL);
+            }).bindTo(this.inputField);
+            const i = this.fullElement.querySelector(o.toggleButton);
+            new n('click', e => {
+                e.preventDefault();
+                const t = this.readOnlyField.classList.contains('hidden');
+                this.readOnlyField.classList.toggle('hidden', !t), this.inputField.classList.toggle('hidden', t), t ? (this.inputField.value !== this.readOnlyField.value ? this.readOnlyField.value = this.inputField.value : (this.manuallyChanged = !1, this.fullElement.querySelector('.t3js-form-proposal-accepted').classList.add('hidden'), this.fullElement.querySelector('.t3js-form-proposal-different').classList.add('hidden')), this.hiddenField.value = this.readOnlyField.value) : this.hiddenField.value = this.inputField.value;
+            }).bindTo(i);
+        }
+
+        sendSlugProposal (e) {
+            const t = {};
+            if (e === a.AUTO || e === a.RECREATE) {
+                for (const [e, i] of Object.entries(this.getAvailableFieldsForProposalGeneration())) t[e] = document.querySelector('[data-formengine-input-name="' + i + '"]').value;
+                !0 === this.options.includeUidInValues && (t.uid = this.options.recordId.toString());
+            } else t.manual = this.inputField.value;
+            this.request instanceof i && this.request.abort(), this.request = new i(TYPO3.settings.ajaxUrls.record_slug_suggest), this.request.post({
+                values: t,
+                mode: e,
+                tableName: this.options.tableName,
+                pageId: this.options.pageId,
+                parentPageId: this.options.parentPageId,
+                recordId: this.options.recordId,
+                language: this.options.language,
+                fieldName: this.options.fieldName,
+                command: this.options.command,
+                signature: this.options.signature
+            }).then(async t => {
+                let i = await t.resolve();
+                const s = '/' + i.proposal.replace(/^\//, ''),
+                    l = this.fullElement.querySelector('.t3js-form-proposal-accepted'),
+                    n = this.fullElement.querySelector('.t3js-form-proposal-different');
+                // Sluggi
+                if (i.inaccessibleSegments) {
+                    i.proposal = i.proposal.substring(i.inaccessibleSegments.length);
+                }
+                // Sluggi
+                if (i.lastSegmentOnly) {
+                    i.proposal = i.proposal.substring(i.proposal.lastIndexOf("/"));
+                }
+                l.classList.toggle('hidden', i.hasConflicts), n.classList.toggle('hidden', !i.hasConflicts), (i.hasConflicts ? n : l).querySelector('span').innerText = s;
+                this.hiddenField.value !== i.proposal && this.fullElement.querySelector('input[data-formengine-input-name]').dispatchEvent(new Event('change', {
+                    bubbles: !0,
+                    cancelable: !0
+                })), e === a.AUTO || e === a.RECREATE ? (this.readOnlyField.value = i.proposal, this.hiddenField.value = i.proposal, this.inputField.value = i.proposal) : this.hiddenField.value = i.proposal;
+            }).finally(() => {
+                this.request = null;
+            });
+        }
+
+        getAvailableFieldsForProposalGeneration () {
+            const e = {};
+            for (const [t, i] of Object.entries(this.fieldsToListenOn)) {null !== document.querySelector('[data-formengine-input-name="' + i + '"]') && (e[t] = i);}
+            return e;
+        }
+
+        hasPostModifiersDefined () {
+            return Array.isArray(this.options.config.generatorOptions.postModifiers) && this.options.config.generatorOptions.postModifiers.length > 0;
+        }
+    };
+}));

@@ -84,7 +84,7 @@ final class FormSlugAjaxController extends \TYPO3\CMS\Backend\Controller\FormSlu
 
                 $pageRecord = BackendUtility::getRecordWSOL('pages', $recordId);
                 $parentPageRecord = BackendUtility::getRecordWSOL('pages', $pageRecord['pid']);
-                if (!str_contains($pageRecord['slug'], $parentPageRecord['slug'])) {
+                if (false === strpos($pageRecord['slug'], $parentPageRecord['slug'])) {
                     $parts = \explode('/', $pageRecord['slug']);
                     array_pop($parts);
                     $proposal = rtrim(implode('/', $parts), '/') . '/' . ltrim($proposal, '/');

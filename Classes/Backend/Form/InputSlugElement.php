@@ -28,11 +28,11 @@ final class InputSlugElement extends \TYPO3\CMS\Backend\Form\Element\InputSlugEl
         }
 
         // Replace the core slug element JavaScript module
-        $target = JavaScriptModuleInstruction::create('@wazum/sluggi/slug-element.js');
-        foreach ($result['javaScriptModules'][0]->getItems() as $item) {
+        $target = JavaScriptModuleInstruction::forRequireJS('TYPO3/CMS/Sluggi/slug-element');
+        foreach ($result['requireJsModules'][0]->getItems() as $item) {
             $target->instance(...$item['args']);
         }
-        $result['javaScriptModules'][0] = $target;
+        $result['requireJsModules'][0] = $target;
 
         return $result;
     }
@@ -65,7 +65,7 @@ final class InputSlugElement extends \TYPO3\CMS\Backend\Form\Element\InputSlugEl
         $prefix = ($this->data['customData'][$this->data['fieldName']]['slugPrefix'] ?? '') . $inaccessibleSlugSegments;
         $editableSlugSegments = $this->data['databaseRow']['slug'];
         $allowOnlyLastSegment = (bool) Configuration::get('last_segment_only');
-        if (!empty($inaccessibleSlugSegments) && str_starts_with($editableSlugSegments, $inaccessibleSlugSegments)) {
+        if (!empty($inaccessibleSlugSegments) && 0 === strncmp($editableSlugSegments, $inaccessibleSlugSegments, strlen($inaccessibleSlugSegments))) {
             $editableSlugSegments = substr($editableSlugSegments, strlen($inaccessibleSlugSegments));
         }
         if ($allowOnlyLastSegment && !empty($editableSlugSegments)) {

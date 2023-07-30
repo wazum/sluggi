@@ -11,7 +11,10 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 class Configuration
 {
-    public static function get(string $key): mixed
+    /**
+     * @return mixed
+     */
+    public static function get(string $key)
     {
         try {
             return GeneralUtility::makeInstance(ExtensionConfiguration::class)->get(
@@ -21,7 +24,5 @@ class Configuration
         } catch (ExtensionConfigurationExtensionNotConfiguredException|ExtensionConfigurationPathDoesNotExistException $e) {
             // Ignore
         }
-
-        return null;
     }
 }

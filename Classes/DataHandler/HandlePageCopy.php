@@ -14,7 +14,12 @@ use Wazum\Sluggi\Helper\SlugHelper as SluggiSlugHelper;
 
 final class HandlePageCopy
 {
-    private readonly SlugHelper $slugHelper;
+    /**
+     * @readonly
+     *
+     * @var \TYPO3\CMS\Core\DataHandling\SlugHelper
+     */
+    private $slugHelper;
 
     public function __construct()
     {
@@ -26,10 +31,13 @@ final class HandlePageCopy
         );
     }
 
+    /**
+     * @param string|int $id
+     */
     public function processCmdmap_postProcess(
         string $command,
         string $table,
-        string|int $id,
+        $id,
         $value,
         DataHandler $dataHandler,
         $pasteUpdate,

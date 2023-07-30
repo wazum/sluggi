@@ -65,7 +65,7 @@ if (!function_exists('array_flatten')) {
                 (string) Configuration::get('pages_fields'),
                 true,
                 3,
-                JSON_THROW_ON_ERROR
+                0
             );
             if (!empty($pagesFieldsForSlug)) {
                 $GLOBALS['TCA']['pages']['columns']['slug']['config']['generatorOptions']['fields'] = $pagesFieldsForSlug;

@@ -16,7 +16,6 @@ use TYPO3\CMS\Core\Exception\SiteNotFoundException;
 use TYPO3\CMS\Core\Utility\ExtensionManagementUtility;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Core\Utility\MathUtility;
-use TYPO3\CMS\Redirects\RedirectUpdate\SlugRedirectChangeItemFactory;
 use Wazum\Sluggi\Helper\Configuration;
 use Wazum\Sluggi\Helper\PermissionHelper;
 use Wazum\Sluggi\Service\SlugService;
@@ -28,21 +27,27 @@ final class HandlePageUpdate implements LoggerAwareInterface
     /**
      * @var array<int, bool>
      */
-    private array $processedSlugForPage;
+    private $processedSlugForPage;
+
+    /**
+     * @var SlugService
+     */
+    private $slugService;
 
     public function __construct(
-        private readonly SlugService $slugService,
-        private SlugRedirectChangeItemFactory $slugRedirectChangeItemFactory
+        SlugService $slugService
     ) {
+        $this->slugService = $slugService;
     }
 
     /**
      * @param array<array-key, mixed> $fields
+     * @param string|int              $id
      */
     public function processDatamap_preProcessFieldArray(
         array &$fields,
         string $table,
-        string|int $id,
+        $id,
         DataHandler $dataHandler
     ): void {
         if (!$this->shouldRun($table, $id, $fields, $dataHandler)) {
@@ -69,10 +74,13 @@ final class HandlePageUpdate implements LoggerAwareInterface
         }
     }
 
+    /**
+     * @param string|int $id
+     */
     public function processDatamap_postProcessFieldArray(
         string $status,
         string $table,
-        string|int $id,
+        $id,
         array &$fields,
         DataHandler $dataHandler
     ): void {
@@ -102,11 +110,10 @@ final class HandlePageUpdate implements LoggerAwareInterface
             $fields = $this->synchronize($pageRecord, $fields);
 
             if (!empty($fields['slug']) && $fields['slug'] !== $pageRecord['slug']) {
-                $changeItem = $this->slugRedirectChangeItemFactory->create($pageRecord['uid'])
-                    ->withChanged(array_merge($pageRecord, $fields));
                 $this->slugService->rebuildSlugsForSlugChange(
                     $id,
-                    $changeItem,
+                    (string) $pageRecord['slug'],
+                    $fields['slug'],
                     $dataHandler->getCorrelationId()
                 );
             }
@@ -125,7 +132,7 @@ final class HandlePageUpdate implements LoggerAwareInterface
             $fields['slug'] = $this->regenerateSlug(
                 $this->mergePageRecordWithIncomingFields($pageRecord, $fields)
             );
-        } catch (\Throwable) {
+        } catch (\Throwable $exception) {
             // Ignore
         }
 
@@ -173,10 +180,12 @@ final class HandlePageUpdate implements LoggerAwareInterface
      * @param array<array-key, mixed> $fields
      *
      * @psalm-suppress InternalMethod
+     *
+     * @param string|int $id
      */
     private function shouldRun(
         string $table,
-        string|int $id,
+        $id,
         array $fields,
         DataHandler $dataHandler
     ): bool {
@@ -213,9 +222,10 @@ final class HandlePageUpdate implements LoggerAwareInterface
     }
 
     /**
+     * @param string|int              $id
      * @param array<array-key, mixed> $fields
      */
-    private function isExcludedPageType(string|int $id, array $fields): bool
+    private function isExcludedPageType($id, array $fields): bool
     {
         if (!isset($fields['doktype'])) {
             $pageRecord = BackendUtility::getRecordWSOL('pages', (int) $id, 'doktype');
@@ -301,7 +311,7 @@ final class HandlePageUpdate implements LoggerAwareInterface
 
         // In this case the slug is an abstract one with no relation to the page titles,
         // so leave it as-is
-        if (!str_contains($pageRecord['slug'], $parentPageRecord['slug'])) {
+        if (false === strpos($pageRecord['slug'], $parentPageRecord['slug'])) {
             $parts = \explode('/', $pageRecord['slug']);
             array_pop($parts);
             $fields['slug'] = implode('/', $parts) . $helper->sanitize($fields['slug']);

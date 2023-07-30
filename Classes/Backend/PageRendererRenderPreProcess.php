@@ -18,9 +18,7 @@ final class PageRendererRenderPreProcess
             return;
         }
 
-        $pageRenderer->loadJavaScriptModule(
-            '@wazum/sluggi/sluggi.js'
-        );
+        $pageRenderer->loadRequireJsModule('TYPO3/CMS/Sluggi/sluggi');
     }
 
     private function isBackend(): bool
