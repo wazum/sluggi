@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Wazum\Sluggi\Upgrade;
 
 use Doctrine\DBAL\DBALException;
+use Doctrine\DBAL\Driver\Exception;
 use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Database\Query\QueryBuilder;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
@@ -23,19 +24,19 @@ final class SlugLockUpgradeWizard implements UpgradeWizardInterface
         return 'Migrates the tx_sluggi_lock field to slug_locked field in the pages table.';
     }
 
-    /**
-     * @throws DBALException
-     */
     public function executeUpdate(): bool
     {
         $queryBuilder = $this->getPagesQueryBuilder();
         $queryBuilder->update('pages')
             ->set('slug_locked', $queryBuilder->quoteIdentifier('tx_sluggi_lock'), false)
-            ->executeStatement();
+            ->execute();
 
         return true;
     }
 
+    /**
+     * @throws Exception
+     */
     public function updateNecessary(): bool
     {
         $connection = GeneralUtility::makeInstance(ConnectionPool::class)->getConnectionForTable('pages');
@@ -46,7 +47,7 @@ final class SlugLockUpgradeWizard implements UpgradeWizardInterface
             return (bool) $queryBuilder->count('uid')
                 ->from('pages')
                 ->where('tx_sluggi_lock != slug_locked')
-                ->executeQuery()->fetchOne();
+                ->execute()->fetchOne();
         }
 
         return false;

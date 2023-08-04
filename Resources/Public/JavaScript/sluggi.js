@@ -52,9 +52,8 @@ define([
             $('button.t3js-form-field-slug-recreate').prop('disabled', true);
         }
     });
-    $(document).on('click', syncLabelSelector + ',#' + syncCheckboxId, function (e) {
-        // 0 = activated (the value changes afterwards)
-        if ($(syncCheckboxSelector).val() === '0') {
+    $(document).on('click', '#' + syncCheckboxId, function (e) {
+        if ($(syncCheckboxSelector).val() === '1') {
             triggerRecreate();
             if ($(lockCheckboxSelector).val() === '1') {
                 $(lockLabelSelector).trigger('click');
@@ -69,9 +68,8 @@ define([
             $(slugInputSelector)[0].dataset.txSluggiSync = '0';
         }
     });
-    $(document).on('click', lockLabelSelector + ',#' + lockCheckboxId, function (e) {
-        // 0 = activated (the value changes afterwards)
-        if ($(lockCheckboxSelector).val() === '0') {
+    $(document).on('click', '#' + lockCheckboxId, function (e) {
+        if ($(lockCheckboxSelector).val() === '1') {
             if ($(syncCheckboxSelector).val() === '1') {
                 $(syncLabelSelector).trigger('click');
                 $(syncCheckboxSelector).val(0);
@@ -81,11 +79,7 @@ define([
             }, 100);
             $(slugInputSelector)[0].dataset.txSluggiLock = '1';
         } else if ($(syncCheckboxSelector).length === 0 || $(syncCheckboxSelector).val() === '0') {
-            if (parseInt($(slugInputSelector)[0].dataset.txSluggiSync)) {
-                triggerRecreate();
-            } else {
-                showEdit();
-            }
+            showEdit();
             $(slugInputSelector)[0].dataset.txSluggiLock = '0';
         }
     });

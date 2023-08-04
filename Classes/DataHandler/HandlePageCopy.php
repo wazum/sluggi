@@ -110,6 +110,6 @@ final class HandlePageCopy
                 $queryBuilder->expr()->eq('deleted', 0),
                 $queryBuilder->expr()->eq('sys_language_uid', $queryBuilder->createNamedParameter($languageId, \PDO::PARAM_INT))
             )
-            ->executeQuery()->fetchAllAssociative();
+            ->execute()->fetchAllAssociative();
     }
 }

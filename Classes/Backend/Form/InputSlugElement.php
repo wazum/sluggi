@@ -28,11 +28,10 @@ final class InputSlugElement extends \TYPO3\CMS\Backend\Form\Element\InputSlugEl
         }
 
         // Replace the core slug element JavaScript module
-        $target = JavaScriptModuleInstruction::forRequireJS('TYPO3/CMS/Sluggi/slug-element');
-        foreach ($result['requireJsModules'][0]->getItems() as $item) {
-            $target->instance(...$item['args']);
-        }
-        $result['requireJsModules'][0] = $target;
+        $result['requireJsModules'][0] = [
+            'TYPO3/CMS/Sluggi/slug-element' =>
+                $result['requireJsModules'][0]['TYPO3/CMS/Backend/FormEngine/Element/SlugElement']
+        ];
 
         return $result;
     }

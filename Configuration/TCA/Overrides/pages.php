@@ -1,13 +1,6 @@
 <?php
 
 // phpcs:disable PSR1.Files.SideEffects
-
-declare(strict_types=1);
-
-use TYPO3\CMS\Core\Utility\ExtensionManagementUtility;
-use Wazum\Sluggi\Backend\SlugModifier;
-use Wazum\Sluggi\Helper\Configuration;
-
 defined('TYPO3') || exit;
 
 if (!function_exists('array_flatten')) {
@@ -33,7 +26,7 @@ if (!function_exists('array_flatten')) {
 
 (static function (): void {
     if (!isset($GLOBALS['TCA']['pages']['columns']['slug']['config']['generatorOptions']['replacements']['/'])
-        && Configuration::get('slash_replacement')) {
+        && \Wazum\Sluggi\Helper\Configuration::get('slash_replacement')) {
         // Replace / in slugs with - by default
         $GLOBALS['TCA']['pages']['columns']['slug']['config']['generatorOptions']['replacements']['/'] = '-';
     }
@@ -59,10 +52,10 @@ if (!function_exists('array_flatten')) {
     ];
     $showItems = ['--linebreak--', 'slug_locked'];
 
-    if (Configuration::get('synchronize')) {
+    if (\Wazum\Sluggi\Helper\Configuration::get('synchronize')) {
         try {
             $pagesFieldsForSlug = json_decode(
-                (string) Configuration::get('pages_fields'),
+                (string) \Wazum\Sluggi\Helper\Configuration::get('pages_fields'),
                 true,
                 3,
                 0
@@ -108,25 +101,25 @@ if (!function_exists('array_flatten')) {
         $showItems[] = 'tx_sluggi_sync';
     }
 
-    ExtensionManagementUtility::addTCAcolumns('pages', $fields);
-    ExtensionManagementUtility::addFieldsToPalette(
+    \TYPO3\CMS\Core\Utility\ExtensionManagementUtility::addTCAcolumns('pages', $fields);
+    \TYPO3\CMS\Core\Utility\ExtensionManagementUtility::addFieldsToPalette(
         'pages',
         'title',
         implode(',', $showItems),
         'after:slug'
     );
-    ExtensionManagementUtility::addFieldsToPalette(
+    \TYPO3\CMS\Core\Utility\ExtensionManagementUtility::addFieldsToPalette(
         'pages',
         'titleonly',
         implode(',', $showItems),
         'after:slug'
     );
 
-    if (ExtensionManagementUtility::isLoaded('masi')) {
+    if (\TYPO3\CMS\Core\Utility\ExtensionManagementUtility::isLoaded('masi')) {
         foreach ($GLOBALS['TCA']['pages']['columns']['slug']['config']['generatorOptions']['postModifiers'] as $key => $modifier) {
             if (\B13\Masi\SlugModifier::class . '->modifyGeneratedSlugForPage' === $modifier) {
                 $GLOBALS['TCA']['pages']['columns']['slug']['config']['generatorOptions']['postModifiers'][$key]
-                    = SlugModifier::class . '->modifyGeneratedSlugForPage';
+                    = \Wazum\Sluggi\Backend\SlugModifier::class . '->modifyGeneratedSlugForPage';
                 break;
             }
         }
