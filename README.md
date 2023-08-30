@@ -8,6 +8,12 @@ Require the latest package with _composer_:
 
 Available on [TER](https://extensions.typo3.org/extension/sluggi) and [packagist](https://packagist.org/packages/wazum/sluggi).
 
+## 2023 Update information
+
+- The extension version schema changed with the rewrite. It's now coupled to the TYPO3 CMS version. So _sluggi_ 12.x is for _TYPO3 CMS_ 12.x.
+- All the old versions/tags are still available.
+- The documentation is always for the latest version. It's possible that some features are not available in older versions.
+
 ## Features
 
 - Normal users can only edit the part of the page slug they have permission to edit. This means that administrators can restrict editing the page slug on certain pages.
