@@ -11,9 +11,6 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 class Configuration
 {
-    /**
-     * @return mixed
-     */
     public static function get(string $key)
     {
         try {
