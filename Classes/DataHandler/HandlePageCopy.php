@@ -16,10 +16,8 @@ final class HandlePageCopy
 {
     /**
      * @readonly
-     *
-     * @var \TYPO3\CMS\Core\DataHandling\SlugHelper
      */
-    private $slugHelper;
+    private \TYPO3\CMS\Core\DataHandling\SlugHelper $slugHelper;
 
     public function __construct()
     {

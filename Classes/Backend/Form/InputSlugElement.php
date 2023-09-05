@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Wazum\Sluggi\Backend\Form;
 
-use TYPO3\CMS\Core\Page\JavaScriptModuleInstruction;
 use Wazum\Sluggi\Helper\Configuration;
 use Wazum\Sluggi\Helper\PermissionHelper;
 use Wazum\Sluggi\Helper\SlugHelper as SluggiSlugHelper;
@@ -29,8 +28,7 @@ final class InputSlugElement extends \TYPO3\CMS\Backend\Form\Element\InputSlugEl
 
         // Replace the core slug element JavaScript module
         $result['requireJsModules'][0] = [
-            'TYPO3/CMS/Sluggi/slug-element' =>
-                $result['requireJsModules'][0]['TYPO3/CMS/Backend/FormEngine/Element/SlugElement']
+            'TYPO3/CMS/Sluggi/slug-element' => $result['requireJsModules'][0]['TYPO3/CMS/Backend/FormEngine/Element/SlugElement'],
         ];
 
         return $result;

@@ -27,12 +27,9 @@ final class HandlePageUpdate implements LoggerAwareInterface
     /**
      * @var array<int, bool>
      */
-    private $processedSlugForPage;
+    private array $processedSlugForPage;
 
-    /**
-     * @var SlugService
-     */
-    private $slugService;
+    private SlugService $slugService;
 
     public function __construct(
         SlugService $slugService

@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Wazum\Sluggi\Upgrade;
 
-use Doctrine\DBAL\DBALException;
 use Doctrine\DBAL\Driver\Exception;
 use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Database\Query\QueryBuilder;
