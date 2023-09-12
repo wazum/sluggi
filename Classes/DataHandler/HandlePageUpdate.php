@@ -39,11 +39,12 @@ final class HandlePageUpdate implements LoggerAwareInterface
 
     /**
      * @param array<array-key, mixed> $fields
+     * @param string|int              $id
      */
     public function processDatamap_preProcessFieldArray(
         array &$fields,
         string $table,
-        string|int $id,
+        $id,
         DataHandler $dataHandler
     ): void {
         if (!$this->shouldRun($table, $id, $fields, $dataHandler)) {
@@ -70,10 +71,13 @@ final class HandlePageUpdate implements LoggerAwareInterface
         }
     }
 
+    /**
+     * @param string|int $id
+     */
     public function processDatamap_postProcessFieldArray(
         string $status,
         string $table,
-        string|int $id,
+        $id,
         array &$fields,
         DataHandler $dataHandler
     ): void {
@@ -171,12 +175,13 @@ final class HandlePageUpdate implements LoggerAwareInterface
 
     /**
      * @param array<array-key, mixed> $fields
+     * @param string|int              $id
      *
      * @psalm-suppress InternalMethod
      */
     private function shouldRun(
         string $table,
-        string|int $id,
+        $id,
         array $fields,
         DataHandler $dataHandler
     ): bool {
@@ -213,9 +218,10 @@ final class HandlePageUpdate implements LoggerAwareInterface
     }
 
     /**
+     * @param string|int              $id
      * @param array<array-key, mixed> $fields
      */
-    private function isExcludedPageType(string|int $id, array $fields): bool
+    private function isExcludedPageType($id, array $fields): bool
     {
         if (!isset($fields['doktype'])) {
             $pageRecord = BackendUtility::getRecordWSOL('pages', (int) $id, 'doktype');

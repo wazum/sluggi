@@ -3,7 +3,7 @@
        cacheDirectory="../.Build/"
        errorLevel="5"
        hideExternalErrors="true"
-	   phpVersion="8.1">
+       phpVersion="8.1">
     <projectFiles>
 		<directory name="../" />
 		<ignoreFiles>

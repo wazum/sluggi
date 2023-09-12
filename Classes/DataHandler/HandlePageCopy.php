@@ -29,10 +29,13 @@ final class HandlePageCopy
         );
     }
 
+    /**
+     * @param string|int $id
+     */
     public function processCmdmap_postProcess(
         string $command,
         string $table,
-        string|int $id,
+        $id,
         $value,
         DataHandler $dataHandler,
         $pasteUpdate,
