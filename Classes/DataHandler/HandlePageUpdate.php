@@ -32,7 +32,7 @@ final class HandlePageUpdate implements LoggerAwareInterface
 
     public function __construct(
         private readonly SlugService $slugService,
-        private SlugRedirectChangeItemFactory $slugRedirectChangeItemFactory
+        private readonly SlugRedirectChangeItemFactory $slugRedirectChangeItemFactory
     ) {
     }
 
