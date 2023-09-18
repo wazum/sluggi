@@ -84,17 +84,17 @@ final class HandlePageUpdate implements LoggerAwareInterface
             return;
         }
 
+        // We have to double-check again here,
+        // as the slug is empty e.g. if the title has changed via inline editing in page tree
+        if (isset($this->processedSlugForPage[(int) $id])) {
+            return;
+        }
+
         $pageRecord = BackendUtility::getRecordWSOL($table, (int) $id);
         if (null === $pageRecord) {
             /* @psalm-suppress PossiblyNullReference */
             $this->logger->warning(sprintf('Unable to get page pageRecord with ID "%s"', $id));
 
-            return;
-        }
-
-        // We have to double-check again here,
-        // as the slug is empty e.g. if the title has changed via inline editing in page tree
-        if (isset($this->processedSlugForPage[(int) $id])) {
             return;
         }
 
