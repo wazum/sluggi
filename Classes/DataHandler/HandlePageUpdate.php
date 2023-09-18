@@ -103,7 +103,7 @@ final class HandlePageUpdate implements LoggerAwareInterface
 
             if (!empty($fields['slug']) && $fields['slug'] !== $pageRecord['slug']) {
                 $changeItem = $this->slugRedirectChangeItemFactory->create($pageRecord['uid'])
-                    ->withChanged(array_merge($pageRecord, $fields));
+                    ?->withChanged(array_merge($pageRecord, $fields));
                 $this->slugService->rebuildSlugsForSlugChange(
                     $id,
                     $changeItem,
