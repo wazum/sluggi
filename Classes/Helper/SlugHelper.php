@@ -14,18 +14,18 @@ final class SlugHelper
     public static function getSlug(int $pageId, int $languageId = 0): string
     {
         $excludedPageTypes = GeneralUtility::intExplode(',', Configuration::get('exclude_page_types') ?? '', true);
-        $rootLine = BackendUtility::BEgetRootLine($pageId, '', true, ['nav_title']);
+        $rootLine = BackendUtility::BEgetRootLine($pageId, '', true);
         // Exclude pages with an excluded page type by configuration
         do {
             $pageRecord = \array_shift($rootLine);
-        } while (!empty($rootLine) && !in_array((int) $pageRecord['doktype'], $excludedPageTypes, true));
+        } while (!empty($rootLine) && in_array((int) $pageRecord['doktype'], $excludedPageTypes, true));
 
         $queryBuilder = GeneralUtility::makeInstance(ConnectionPool::class)
             ->getQueryBuilderForTable('pages');
         $queryBuilder->getRestrictions()->removeByType(HiddenRestriction::class);
 
         $slug = '';
-        if ($pageRecord['uid'] > 0) {
+        if ($pageRecord && $pageRecord['uid'] > 0) {
             $pageUid = $pageRecord['uid'];
             if ($languageId > 0) {
                 $pageUid = (int) $queryBuilder->select('uid')
