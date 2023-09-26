@@ -61,6 +61,11 @@ final class InputSlugElement extends \TYPO3\CMS\Backend\Form\Element\InputSlugEl
     {
         $languageId = $this->getLanguageId($this->data['tableName'], $this->data['databaseRow']);
         $mountRootPage = PermissionHelper::getTopmostAccessiblePage((int) $this->data['databaseRow']['uid']);
+        // This is the case when a new page is generated through the context menu
+        if (null === $mountRootPage) {
+            return $result;
+        }
+
         $inaccessibleSlugSegments = SluggiSlugHelper::getSlug((int) $mountRootPage['pid'], $languageId);
         $prefix = ($this->data['customData'][$this->data['fieldName']]['slugPrefix'] ?? '') . $inaccessibleSlugSegments;
         $editableSlugSegments = $this->data['databaseRow']['slug'];
