@@ -161,7 +161,7 @@ Source: https://docs.typo3.org/c/typo3/cms-core/main/en-us/Changelog/10.1/Featur
 
 ### _masi_ (https://github.com/b13/masi)
 
-If you want to set slugs for folders too, you need _masi_.
+If you want to set slugs for folders or want to exclude certain pages, you need _masi_.
 The code is compatible with _masi_ (>= `2.0`) and there's a configuration option to set the excluded page types:
 
     # cat=basic; type=string; label=Exclude page types (Spacer, Recycler, Folder by default)
@@ -169,6 +169,9 @@ The code is compatible with _masi_ (>= `2.0`) and there's a configuration option
 
 The default is the list the core uses.
 If you want to use _masi_, set the value to `255` (recycler) only.
+
+When you change the "Exclude this page for slug generation of subpages" toggle, _sluggi_ will regenerate the slug for all the subpages of the current page.
+If you want to preserve slugs for certain subpages you have to _lock_ them before.
 
 ### _ig_slug_ (https://github.com/internetgalerie/ig_slug)
 
