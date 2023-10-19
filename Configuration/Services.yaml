@@ -9,3 +9,6 @@ services:
 
   Wazum\Sluggi\DataHandler\HandlePageUpdate:
     public: true
+
+  Wazum\Sluggi\DataHandler\HandleExcludeSlugForSubpages:
+    public: true

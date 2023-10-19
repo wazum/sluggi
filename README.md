@@ -164,6 +164,11 @@ The code is compatible with _masi_ (>= `2.0`) and there's a configuration option
 The default is the list the core uses.
 If you want to use _masi_, set the value to `255` (recycler) only.
 
+When you change the "Exclude this page for slug generation of subpages" toggle, _sluggi_ will regenerate the slug for all the subpages of the current page.
+If you want to preserve slugs for certain subpages you have to _lock_ them before.
+
+_sluggi_ removes the configuration for `['behaviour']['allowLanguageSynchronization']` and sets `'l10n_mode' = 'exclude'` for the `exclude_slug_for_subpages` field. Makes no sense in my eyes and I don't want to deal with the problems.
+
 ### _ig_slug_ (https://github.com/internetgalerie/ig_slug)
 
 The field `tx_sluggi_lock` has been renamed to `slug_locked` in version 12, so both extensions can work together.

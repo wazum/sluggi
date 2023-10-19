@@ -53,4 +53,9 @@ defined('TYPO3') || exit;
 
     $GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['ext/install']['update']['slug_lock_upgrade_wizard']
         = \Wazum\Sluggi\Upgrade\SlugLockUpgradeWizard::class;
+
+    if (\TYPO3\CMS\Core\Utility\ExtensionManagementUtility::isLoaded('masi')) {
+        $GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['t3lib/class.t3lib_tcemain.php']['processDatamapClass']['sluggi-exclude']
+            = \Wazum\Sluggi\DataHandler\HandleExcludeSlugForSubpages::class;
+    }
 })();
