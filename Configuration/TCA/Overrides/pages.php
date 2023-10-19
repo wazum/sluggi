@@ -130,5 +130,9 @@ if (!function_exists('array_flatten')) {
                 break;
             }
         }
+
+        // Makes no sense and only problems
+        unset($GLOBALS['TCA']['pages']['columns']['exclude_slug_for_subpages']['config']['behaviour']['allowLanguageSynchronization']);
+        $GLOBALS['TCA']['pages']['columns']['exclude_slug_for_subpages']['l10n_mode'] = 'exclude';
     }
 })();
