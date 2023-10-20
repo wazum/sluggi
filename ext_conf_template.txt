@@ -10,5 +10,3 @@ whitelist =
 slash_replacement = 1
 # cat=basic; type=string; label=Exclude page types (Spacer, Recycler, Folder by default)
 exclude_page_types=199,255,254
-# cat=basic; type=boolean; label=Disable the slug update and redirect information dialog
-disable_slug_update_information = 0

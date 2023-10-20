@@ -17,7 +17,6 @@ Available on [TER](https://extensions.typo3.org/extension/sluggi) and [packagist
 - Forward slashes in the page slug are replaced with hyphens for new pages by default, but existing pages are not affected unless you recalculate the slugs.
 - You can set a flag to allow editing only for the last part of the URL (the segment for the current page). This corresponds to the earlier "realurl" approach.
 - You can lock a slug from updates.
-- The user interface is more comfortable. E.g. the redirects info dialog can be hidden if needed and the slug field can be edited with a simple double click.
 
 Let's take a more detailed look at some of the features now.
 
@@ -57,14 +56,6 @@ Locking and synchronizing are mutually exclusive.
 You can now simply double-click on the slug field to edit it. The edit button is still available.
 
 ![Simple edit](./Resources/Private/Documentation/simple_edit.gif)
-
-### Disable the redirects info dialog
-
-You can now simply hide the redirects info dialog with a setting (see below), which informs you after saving that all slugs of all subpages have been changed and which offers the possibility to undo actions. It basically offers little added value. Either you want to create redirects automatically for the installation or not (see below). The offered possibilities to undo the last action (or only parts of it) is not used in practice from my experience and complicates the work in the backend.
-
-![Redirects info dialog](./Resources/Private/Documentation/redirects_info.png)
-
-Even if you do not deactivate the dialog, it will now close after a reasonable timeout. Previously, this dialog remained visible until eternity.
 
 ## Extension settings
 
@@ -117,12 +108,6 @@ _Default_: `199,255,254`
 This setting is relevant if you want to use _sluggi_ and _masi_ together (see below).
 
 All slug related fields are removed from the backend interface for these page types too.
-
-### Disable the slug update and redirect information dialog
-
-`disable_slug_update_information`
-
-_Default_: `0` (disabled)
 
 ## Dependencies and automatic redirects
 

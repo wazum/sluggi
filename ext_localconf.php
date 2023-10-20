@@ -45,10 +45,6 @@ defined('TYPO3') || exit;
         'className' => \Wazum\Sluggi\Backend\Controller\FormSlugAjaxController::class,
     ];
 
-    if (\Wazum\Sluggi\Helper\Configuration::get('disable_slug_update_information')) {
-        unset($GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['t3lib/class.t3lib_befunc.php']['updateSignalHook']['redirects:slugChanged']);
-    }
-
     $GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['ext/install']['update']['slug_lock_upgrade_wizard']
         = \Wazum\Sluggi\Upgrade\SlugLockUpgradeWizard::class;
 
