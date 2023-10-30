@@ -73,7 +73,7 @@ final class InputSlugElement extends \TYPO3\CMS\Backend\Form\Element\InputSlugEl
         if (!empty($inaccessibleSlugSegments) && 0 === strncmp($editableSlugSegments, $inaccessibleSlugSegments, strlen($inaccessibleSlugSegments))) {
             $editableSlugSegments = substr($editableSlugSegments, strlen($inaccessibleSlugSegments));
         }
-        if ($allowOnlyLastSegment && !empty($editableSlugSegments)) {
+        if ($allowOnlyLastSegment && !($this->data['databaseRow']['slug_locked']) && !empty($editableSlugSegments)) {
             $segments = explode('/', $editableSlugSegments);
             $editableSlugSegments = '/' . array_pop($segments);
             $prefix .= implode('/', $segments);
