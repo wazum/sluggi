@@ -66,7 +66,7 @@ final class HandlePageUpdate implements LoggerAwareInterface
 
         if ($this->shouldSynchronize($pageRecord, $fields)) {
             $fields = $this->synchronize($pageRecord, $fields);
-        } elseif ($this->isManualUpdateWithOnlyLastSegmentAllowed($fields)) {
+        } elseif ($this->isManualUpdateWithOnlyLastSegmentAllowed($fields) && !($pageRecord['slug_locked'])) {
             $fields = $this->updateLastSegment($pageRecord, $fields);
         }
     }
