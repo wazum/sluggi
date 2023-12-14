@@ -32,6 +32,11 @@ final class PermissionHelper
         return (bool) $page['slug_locked'];
     }
 
+    public static function hasSlugLockAccess(): bool
+    {
+        return self::getBackendUser()->check('non_exclude_fields', 'pages:slug_locked');
+    }
+
     public static function getTopmostAccessiblePage(int $pageId): ?array
     {
         $rootLine = BackendUtility::BEgetRootLine(
