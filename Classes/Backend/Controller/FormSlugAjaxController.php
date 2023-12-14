@@ -75,6 +75,14 @@ final class FormSlugAjaxController extends \TYPO3\CMS\Backend\Controller\FormSlu
             $proposal = $slug->generate($recordData, $pid);
         } elseif ('recreate' === $mode) {
             $proposal = $slug->generate($recordData, $parentPageId);
+            if ($allowOnlyLastSegment) {
+                $parts = \explode('/', $proposal);
+                $proposal = array_pop($parts);
+                $pageRecord = BackendUtility::getRecordWSOL('pages', $recordId);
+                $parts = \explode('/', $pageRecord['slug']);
+                array_pop($parts);
+                $proposal = rtrim(implode('/', $parts), '/') . '/' . ltrim($proposal, '/');
+            }
         } elseif ('manual' === $mode) {
             // Existing record - Fetch full record and only validate against the new "slug" field.
             $proposal = $slug->sanitize($values['manual']);
@@ -83,14 +91,9 @@ final class FormSlugAjaxController extends \TYPO3\CMS\Backend\Controller\FormSlu
                 $proposal = preg_replace('#(?<!^)/(?!$)#', '-', $proposal);
 
                 $pageRecord = BackendUtility::getRecordWSOL('pages', $recordId);
-                $parentPageRecord = BackendUtility::getRecordWSOL('pages', $pageRecord['pid']);
-                if (false === strpos($pageRecord['slug'], $parentPageRecord['slug'])) {
-                    $parts = \explode('/', $pageRecord['slug']);
-                    array_pop($parts);
-                    $proposal = rtrim(implode('/', $parts), '/') . '/' . ltrim($proposal, '/');
-                } else {
-                    $proposal = rtrim($parentPageRecord['slug'], '/') . '/' . ltrim($proposal, '/');
-                }
+                $parts = \explode('/', $pageRecord['slug']);
+                array_pop($parts);
+                $proposal = rtrim(implode('/', $parts), '/') . '/' . ltrim($proposal, '/');
             }
         } else {
             throw new \RuntimeException('mode must be either "auto", "recreate" or "manual"', 1535835666);
@@ -111,6 +114,9 @@ final class FormSlugAjaxController extends \TYPO3\CMS\Backend\Controller\FormSlu
         $inaccessibleSlugSegments = null;
         if (null !== $mountRootPage) {
             $inaccessibleSlugSegments = SluggiSlugHelper::getSlug($mountRootPage['pid'], $languageId);
+        }
+        if (!empty($inaccessibleSlugSegments)) {
+            $proposal = $inaccessibleSlugSegments . $proposal;
         }
 
         return new JsonResponse([

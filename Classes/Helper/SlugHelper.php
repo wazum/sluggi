@@ -47,7 +47,7 @@ final class SlugHelper
                 )->executeQuery()->fetchOne();
         }
 
-        return '/' === $slug ? '' : $slug;
+        return '/' === $slug ? '' : trim($slug);
     }
 
     public static function getLastSlugSegment(string $slug): string

@@ -18,6 +18,7 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Core\Utility\MathUtility;
 use Wazum\Sluggi\Helper\Configuration;
 use Wazum\Sluggi\Helper\PermissionHelper;
+use Wazum\Sluggi\Helper\SlugHelper as SluggiSlugHelper;
 use Wazum\Sluggi\Service\SlugService;
 
 final class HandlePageUpdate implements LoggerAwareInterface
@@ -53,7 +54,7 @@ final class HandlePageUpdate implements LoggerAwareInterface
 
         if (!empty($fields['slug'])) {
             $this->processedSlugForPage[(int) $id] = true;
-            $fields['slug'] = $this->alwaysPrependSlash($fields['slug']);
+            $fields['slug'] = $this->sanitizeSlug($fields['slug']);
         }
 
         $pageRecord = BackendUtility::getRecordWSOL($table, (int) $id);
@@ -64,11 +65,27 @@ final class HandlePageUpdate implements LoggerAwareInterface
             return;
         }
 
+        // If the slug is locked and the user has no access to the lock field, no update is allowed
+        if (PermissionHelper::isLocked($pageRecord) && !PermissionHelper::hasSlugLockAccess($pageRecord)) {
+            unset($fields['slug']);
+
+            return;
+        }
+
+        // Synchronize is the easiest case, as we just have to regenerate the slug from the page data
         if ($this->shouldSynchronize($pageRecord, $fields)) {
             $fields = $this->synchronize($pageRecord, $fields);
-        } elseif ($this->isManualUpdateWithOnlyLastSegmentAllowed($fields)) {
-            $fields = $this->updateLastSegment($pageRecord, $fields);
+
+            return;
         }
+
+        if ($this->isManualUpdateWithOnlyLastSegmentAllowed($fields)) {
+            $fields = $this->updateLastSegment($pageRecord, $fields);
+
+            return;
+        }
+
+        $fields = $this->prependInaccessibleSlugSegments($pageRecord, $fields);
     }
 
     /**
@@ -145,7 +162,7 @@ final class HandlePageUpdate implements LoggerAwareInterface
     private function mergePageRecordWithIncomingFields(array $pageRecord, array $fields): array
     {
         if (isset($fields['slug'])) {
-            $fields['slug'] = $this->alwaysPrependSlash($fields['slug']);
+            $fields['slug'] = $this->sanitizeSlug($fields['slug']);
         }
 
         return array_merge($pageRecord, $fields);
@@ -170,7 +187,7 @@ final class HandlePageUpdate implements LoggerAwareInterface
         $slug = $helper->generate($pageRecord, (int) $pageRecord['pid']);
         $newSlug = $helper->buildSlugForUniqueInSite($slug, $state);
 
-        return $this->alwaysPrependSlash($newSlug);
+        return $this->sanitizeSlug($newSlug);
     }
 
     /**
@@ -275,8 +292,10 @@ final class HandlePageUpdate implements LoggerAwareInterface
         return false !== (bool) $fields['tx_sluggi_sync'];
     }
 
-    private function alwaysPrependSlash(string $slug): string
+    private function sanitizeSlug(string $slug): string
     {
+        $slug = preg_replace('#/+#', '/', $slug);
+
         return '/' . ltrim($slug, '/');
     }
 
@@ -301,18 +320,34 @@ final class HandlePageUpdate implements LoggerAwareInterface
             $GLOBALS['TCA']['pages']['columns']['slug']['config'] ?? []
         );
 
-        $parentPageRecord = BackendUtility::getRecordWSOL('pages', (int) $pageRecord['pid']);
         // Slashes are not allowed here
-        $fields['slug'] = str_replace('/', '-', $fields['slug']);
+        $segment = ltrim($fields['slug'], '/');
+        $fields['slug'] = '/' . str_replace('/', '-', $segment);
 
-        // In this case the slug is an abstract one with no relation to the page titles,
-        // so leave it as-is
-        if (false === strpos($pageRecord['slug'], $parentPageRecord['slug'])) {
-            $parts = \explode('/', $pageRecord['slug']);
-            array_pop($parts);
-            $fields['slug'] = implode('/', $parts) . $helper->sanitize($fields['slug']);
-        } else {
-            $fields['slug'] = $parentPageRecord['slug'] . $helper->sanitize($fields['slug']);
+        // Only exchange the last segment
+        $parts = \explode('/', $pageRecord['slug']);
+        array_pop($parts);
+        $fields['slug'] = implode('/', $parts) . $helper->sanitize($fields['slug']);
+
+        return $fields;
+    }
+
+    /**
+     * @param array<array-key, mixed> $pageRecord
+     * @param array<array-key, mixed> $fields
+     *
+     * @return array<array-key, mixed>
+     */
+    private function prependInaccessibleSlugSegments(array $pageRecord, array $fields): array
+    {
+        $languageId = $pageRecord['sys_language_uid'];
+        $mountRootPage = PermissionHelper::getTopmostAccessiblePage($pageRecord['uid']);
+        $inaccessibleSlugSegments = null;
+        if (null !== $mountRootPage) {
+            $inaccessibleSlugSegments = SluggiSlugHelper::getSlug($mountRootPage['pid'], $languageId);
+        }
+        if (!empty($inaccessibleSlugSegments)) {
+            $fields['slug'] = $inaccessibleSlugSegments . '/' . ltrim($fields['slug'], '/');
         }
 
         return $fields;
