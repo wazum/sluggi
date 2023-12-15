@@ -28,6 +28,10 @@ final class HandleExcludeSlugForSubpages implements LoggerAwareInterface
     private Context $context;
     private PageRepository $pageRepository;
     private SlugService $slugService;
+    /**
+     * @var array<int, bool>
+     */
+    private static array $excludedSlugForSubpages = [];
 
     public function __construct(
         Context $context,
@@ -40,19 +44,16 @@ final class HandleExcludeSlugForSubpages implements LoggerAwareInterface
     }
 
     /**
-     * @param string|int $id
-     *
-     * @throws \Exception
-     * @throws \Doctrine\DBAL\Driver\Exception
+     * @param array<array-key, mixed> $fields
+     * @param string|int              $id
      */
-    public function processDatamap_afterDatabaseOperations(
-        string $status,
+    public function processDatamap_preProcessFieldArray(
+        array &$fields,
         string $table,
         $id,
-        array &$fields,
         DataHandler $dataHandler
     ): void {
-        if (!$this->shouldRun($status, $table, $fields)) {
+        if (!$this->shouldRun('update', $table, $fields)) {
             return;
         }
 
@@ -64,11 +65,47 @@ final class HandleExcludeSlugForSubpages implements LoggerAwareInterface
             return;
         }
 
-        // If the flag changed
-        if (($pageRecord['exclude_slug_for_subpages'] ?? false) !== $fields['exclude_slug_for_subpages']) {
-            // We update all child pages
+        if ($pageRecord['sys_language_uid'] > 0) {
+            $pageRecord = BackendUtility::getRecordWSOL($table, (int) $pageRecord['l10n_parent']);
+            // There's always a parent record for translated pages,
+            // as the exclude field is only available in the default language
+            self::$excludedSlugForSubpages[$id] = self::$excludedSlugForSubpages[(int) $pageRecord['uid']];
+
+            return;
+        }
+
+        self::$excludedSlugForSubpages[$id] = [
+            (bool) $pageRecord['exclude_slug_for_subpages'],
+            (bool) $fields['exclude_slug_for_subpages']
+        ];
+    }
+
+    /**
+     * @param string|int $id
+     *
+     * @throws \Exception
+     * @throws \Doctrine\DBAL\Driver\Exception
+     */
+    public function processDatamap_afterAllOperations(
+        DataHandler $dataHandler
+    ): void {
+        foreach (self::$excludedSlugForSubpages as $id => $excludeSlugForSubpages) {
+            [$pageExcludeSlugForSubpages, $fieldExcludeSlugForSubpages] = $excludeSlugForSubpages;
+            if ($pageExcludeSlugForSubpages === $fieldExcludeSlugForSubpages) {
+                continue;
+            }
+
+            $pageRecord = BackendUtility::getRecordWSOL('pages', $id);
+            if (null === $pageRecord) {
+                /* @psalm-suppress PossiblyNullReference */
+                $this->logger->warning(sprintf('Unable to get page record with ID "%s"', $id));
+
+                return;
+            }
+
+            // We update all child pages as the flag changed
             $fieldConfig = $GLOBALS['TCA']['pages']['columns']['slug']['config'] ?? [];
-            $slugHelper = GeneralUtility::makeInstance(SlugHelper::class, $table, 'slug', $fieldConfig);
+            $slugHelper = GeneralUtility::makeInstance(SlugHelper::class, 'pages', 'slug', $fieldConfig);
             $pageId = 0 === $pageRecord['sys_language_uid'] ? (int) $pageRecord['uid'] : (int) $pageRecord['l10n_parent'];
             $subPageRecords = $this->resolveSubPages($pageId, $pageRecord['sys_language_uid']);
             foreach ($subPageRecords as $subPageRecord) {
@@ -77,6 +114,8 @@ final class HandleExcludeSlugForSubpages implements LoggerAwareInterface
                     $this->persistNewSlug((int) $subPageRecord['uid'], $slug, $dataHandler->getCorrelationId());
                 }
             }
+
+            unset(self::$excludedSlugForSubpages[$id]);
         }
     }
 
