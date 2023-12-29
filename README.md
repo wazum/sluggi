@@ -80,7 +80,7 @@ You can configure all options for the extension via Admin Tools > Settings > Ext
 
 Clear the cache after changing settings!
 
-### Allow standard editors to edit only the last segment of the URL slug
+### Activate synchronization of slug segment with configured page fields (see below) 
 
 `synchronize`
 
