@@ -6,20 +6,21 @@ namespace Wazum\Sluggi\Helper;
 
 use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\Authentication\BackendUserAuthentication;
+use TYPO3\CMS\Core\Context\Context;
 use TYPO3\CMS\Core\Type\Bitmask\Permission;
+use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 final class PermissionHelper
 {
     public static function hasFullPermission(): bool
     {
-        $backendUser = self::getBackendUser();
-        if ($backendUser->isAdmin()) {
+        if (self::isAdmin()) {
             return true;
         }
 
         $groupWhitelist = \explode(',', (string) Configuration::get('whitelist'));
         foreach ($groupWhitelist as $groupId) {
-            if ($backendUser->isMemberOfGroup((int) $groupId)) {
+            if (self::isMemberOfGroup((int) $groupId)) {
                 return true;
             }
         }
@@ -64,5 +65,24 @@ final class PermissionHelper
     private static function getBackendUser(): BackendUserAuthentication
     {
         return $GLOBALS['BE_USER'];
+    }
+
+    private static function getContext(): Context
+    {
+        return GeneralUtility::makeInstance(Context::class);
+    }
+
+    private static function isAdmin(): bool
+    {
+        return self::getContext()->getPropertyFromAspect('backend.user', 'isAdmin');
+    }
+
+    private static function isMemberOfGroup(int $groupId): bool
+    {
+        return $groupId && in_array(
+            $groupId,
+            self::getContext()->getPropertyFromAspect('backend.user', 'groupIds') ?: [],
+            true
+        );
     }
 }
