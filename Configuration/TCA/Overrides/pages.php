@@ -70,7 +70,7 @@ if (!function_exists('array_flatten')) {
             if (!empty($pagesFieldsForSlug)) {
                 $GLOBALS['TCA']['pages']['columns']['slug']['config']['generatorOptions']['fields'] = $pagesFieldsForSlug;
             }
-        } catch (\Throwable $e) {
+        } catch (Throwable $e) {
             // Use default fallback
             $pagesFieldsForSlug = [
                 [
@@ -124,7 +124,7 @@ if (!function_exists('array_flatten')) {
 
     if (ExtensionManagementUtility::isLoaded('masi')) {
         foreach ($GLOBALS['TCA']['pages']['columns']['slug']['config']['generatorOptions']['postModifiers'] as $key => $modifier) {
-            if (\B13\Masi\SlugModifier::class . '->modifyGeneratedSlugForPage' === $modifier) {
+            if (B13\Masi\SlugModifier::class . '->modifyGeneratedSlugForPage' === $modifier) {
                 $GLOBALS['TCA']['pages']['columns']['slug']['config']['generatorOptions']['postModifiers'][$key]
                     = SlugModifier::class . '->modifyGeneratedSlugForPage';
                 break;

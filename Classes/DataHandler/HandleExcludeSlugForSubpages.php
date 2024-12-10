@@ -30,7 +30,7 @@ final class HandleExcludeSlugForSubpages implements LoggerAwareInterface
     public function __construct(
         private readonly Context $context,
         private readonly PageRepository $pageRepository,
-        private readonly SlugService $slugService
+        private readonly SlugService $slugService,
     ) {
     }
 
@@ -43,7 +43,7 @@ final class HandleExcludeSlugForSubpages implements LoggerAwareInterface
         string $table,
         string|int $id,
         array &$fields,
-        DataHandler $dataHandler
+        DataHandler $dataHandler,
     ): void {
         if (!$this->shouldRun($status, $table, $fields)) {
             return;

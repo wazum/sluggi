@@ -79,7 +79,7 @@ final class InputSlugElement extends \TYPO3\CMS\Backend\Form\Element\InputSlugEl
             $prefix .= implode('/', $segments);
         }
 
-        $result['html'] = $this->replaceValues($result['html'], $prefix, $editableSlugSegments);
+        $result['html'] = $this->replaceValues($result['html'], $prefix, $editableSlugSegments) ?? '';
 
         return $result;
     }
@@ -99,7 +99,7 @@ final class InputSlugElement extends \TYPO3\CMS\Backend\Form\Element\InputSlugEl
         return 0;
     }
 
-    private function replaceValues(string $html, string $prefix, string $segments): string
+    private function replaceValues(string $html, string $prefix, string $segments): ?string
     {
         return preg_replace(
             [

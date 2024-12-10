@@ -68,7 +68,6 @@ final class FormSlugAjaxController extends \TYPO3\CMS\Backend\Controller\FormSlu
             $recordData[$GLOBALS['TCA'][$tableName]['ctrl']['languageField']] = $languageId;
         }
 
-        /** @var SlugHelper $slug */
         $slug = GeneralUtility::makeInstance(SlugHelper::class, $tableName, $fieldName, $fieldConfig);
         if ('auto' === $mode) {
             // New page - Feed incoming values to generator

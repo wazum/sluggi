@@ -23,6 +23,8 @@ final class PermissionHelper
             if (self::isMemberOfGroup((int) $groupId)) {
                 return true;
             }
+
+            return false;
         }
 
         return false;
