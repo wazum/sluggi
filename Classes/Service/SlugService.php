@@ -4,10 +4,37 @@ declare(strict_types=1);
 
 namespace Wazum\Sluggi\Service;
 
+use Psr\EventDispatcher\EventDispatcherInterface;
+use TYPO3\CMS\Core\Context\Context;
+use TYPO3\CMS\Core\Database\ConnectionPool;
+use TYPO3\CMS\Core\Domain\Repository\PageRepository;
+use TYPO3\CMS\Core\LinkHandling\LinkService;
 use TYPO3\CMS\Redirects\RedirectUpdate\SlugRedirectChangeItem;
+use TYPO3\CMS\Redirects\RedirectUpdate\SlugRedirectChangeItemFactory;
+use TYPO3\CMS\Redirects\Service\RedirectCacheService;
 
 final class SlugService extends \TYPO3\CMS\Redirects\Service\SlugService
 {
+    public function __construct(
+        Context $context,
+        PageRepository $pageRepository,
+        LinkService $linkService,
+        RedirectCacheService $redirectCacheService,
+        private readonly SlugRedirectChangeItemFactory $slugRedirectChangeItemFactory,
+        EventDispatcherInterface $eventDispatcher,
+        ConnectionPool $connectionPool,
+    ) {
+        parent::__construct(
+            $context,
+            $pageRepository,
+            $linkService,
+            $redirectCacheService,
+            $slugRedirectChangeItemFactory,
+            $eventDispatcher,
+            $connectionPool
+        );
+    }
+
     protected function checkSubPages(array $currentPageRecord, SlugRedirectChangeItem $parentChangeItem): array
     {
         $sourceHosts = [];
