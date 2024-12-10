@@ -35,6 +35,9 @@ final class SlugService extends \TYPO3\CMS\Redirects\Service\SlugService
         );
     }
 
+    /**
+     * @return string[] all unique source hosts for created redirects
+     */
     protected function checkSubPages(array $currentPageRecord, SlugRedirectChangeItem $parentChangeItem): array
     {
         $sourceHosts = [];

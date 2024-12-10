@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Wazum\Sluggi\DataHandler;
 
 use TYPO3\CMS\Backend\Utility\BackendUtility;
+use TYPO3\CMS\Core\Database\Connection;
 use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\DataHandling\DataHandler;
 use TYPO3\CMS\Core\DataHandling\Model\RecordStateFactory;
@@ -33,7 +34,7 @@ final class HandlePageCopy
         $value,
         DataHandler $dataHandler,
         $pasteUpdate,
-        array &$pasteDataMap
+        array &$pasteDataMap,
     ): void {
         if ('copy' !== $command || 'pages' !== $table) {
             return;
@@ -98,9 +99,9 @@ final class HandlePageCopy
             ->select('uid', 'slug', 'tx_sluggi_sync')
             ->from('pages')
             ->where(
-                $queryBuilder->expr()->eq('pid', $queryBuilder->createNamedParameter($parentPageId, \PDO::PARAM_INT)),
+                $queryBuilder->expr()->eq('pid', $queryBuilder->createNamedParameter($parentPageId, Connection::PARAM_INT)),
                 $queryBuilder->expr()->eq('deleted', 0),
-                $queryBuilder->expr()->eq('sys_language_uid', $queryBuilder->createNamedParameter($languageId, \PDO::PARAM_INT))
+                $queryBuilder->expr()->eq('sys_language_uid', $queryBuilder->createNamedParameter($languageId, Connection::PARAM_INT))
             )
             ->executeQuery()->fetchAllAssociative();
     }

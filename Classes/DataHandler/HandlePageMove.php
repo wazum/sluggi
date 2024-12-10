@@ -21,7 +21,7 @@ final class HandlePageMove
         int $siblingTargetId,
         array $moveRecord,
         array $updateFields,
-        DataHandler $dataHandler
+        DataHandler $dataHandler,
     ): void {
         if ('pages' !== $table) {
             return;
@@ -37,7 +37,7 @@ final class HandlePageMove
         int $targetId,
         array $moveRecord,
         array $updateFields,
-        DataHandler $dataHandler
+        DataHandler $dataHandler,
     ): void {
         if ('pages' !== $table) {
             return;

@@ -34,12 +34,12 @@ defined('TYPO3') || exit;
         = PageRendererRenderPreProcess::class . '->run';
 
     // Render custom options for slug fields
-    $GLOBALS['TYPO3_CONF_VARS']['SYS']['Objects'][\TYPO3\CMS\Backend\Form\Element\InputSlugElement::class] = [
+    $GLOBALS['TYPO3_CONF_VARS']['SYS']['Objects'][TYPO3\CMS\Backend\Form\Element\InputSlugElement::class] = [
         'className' => InputSlugElement::class,
     ];
 
     // Use a custom slug service
-    $GLOBALS['TYPO3_CONF_VARS']['SYS']['Objects'][\TYPO3\CMS\Redirects\Service\SlugService::class] = [
+    $GLOBALS['TYPO3_CONF_VARS']['SYS']['Objects'][TYPO3\CMS\Redirects\Service\SlugService::class] = [
         'className' => SlugService::class,
     ];
 
@@ -57,7 +57,7 @@ defined('TYPO3') || exit;
     ];
 
     // Overwrite the controller that returns slug suggestions
-    $GLOBALS['TYPO3_CONF_VARS']['SYS']['Objects'][\TYPO3\CMS\Backend\Controller\FormSlugAjaxController::class] = [
+    $GLOBALS['TYPO3_CONF_VARS']['SYS']['Objects'][TYPO3\CMS\Backend\Controller\FormSlugAjaxController::class] = [
         'className' => FormSlugAjaxController::class,
     ];
 

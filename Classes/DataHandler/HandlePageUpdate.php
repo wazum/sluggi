@@ -33,7 +33,7 @@ final class HandlePageUpdate implements LoggerAwareInterface
 
     public function __construct(
         private readonly SlugService $slugService,
-        private readonly SlugRedirectChangeItemFactory $slugRedirectChangeItemFactory
+        private readonly SlugRedirectChangeItemFactory $slugRedirectChangeItemFactory,
     ) {
     }
 
@@ -44,7 +44,7 @@ final class HandlePageUpdate implements LoggerAwareInterface
         array &$fields,
         string $table,
         string|int $id,
-        DataHandler $dataHandler
+        DataHandler $dataHandler,
     ): void {
         if (!$this->shouldRun($table, $id, $fields, $dataHandler)) {
             return;
@@ -91,7 +91,7 @@ final class HandlePageUpdate implements LoggerAwareInterface
         string $table,
         string|int $id,
         array &$fields,
-        DataHandler $dataHandler
+        DataHandler $dataHandler,
     ): void {
         if (
             'pages' !== $table
@@ -197,7 +197,7 @@ final class HandlePageUpdate implements LoggerAwareInterface
         string $table,
         string|int $id,
         array $fields,
-        DataHandler $dataHandler
+        DataHandler $dataHandler,
     ): bool {
         return
             'pages' === $table
