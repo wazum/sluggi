@@ -106,7 +106,7 @@ final class InputSlugElement extends \TYPO3\CMS\Backend\Form\Element\InputSlugEl
                 '/(<input[\s]+class=".*?t3js-form-field-slug-input.*?".*?)placeholder="(.*?)"(.*?>)/ius',
                 '/(<input[\s]+class=".*?t3js-form-field-slug-readonly".*?)title="(.*?)"(.*?)value="(.*?)"(.*?>)/ius',
                 '/(<input[\s]+class=".*?t3js-form-field-slug-hidden.*?".*?)value="(.*?)"(.*?>)/ius',
-                '/(<span class="input-group-addon">)(.*?)(<\/span>)/ius',
+                '/(<span class="input-group-text">)(.*?)(<\/span>)/ius',
             ],
             [
                 '$1placeholder="' . $segments . '"$3',
