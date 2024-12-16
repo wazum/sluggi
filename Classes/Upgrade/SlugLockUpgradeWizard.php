@@ -50,6 +50,9 @@ final class SlugLockUpgradeWizard implements UpgradeWizardInterface
         return false;
     }
 
+    /**
+     * @return string[]
+     */
     public function getPrerequisites(): array
     {
         return [

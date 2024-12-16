@@ -3,19 +3,24 @@
        cacheDirectory="../.Build/"
        errorLevel="5"
        hideExternalErrors="true"
-	   phpVersion="8.1">
+       phpVersion="8.2">
     <projectFiles>
-		<directory name="../" />
+		<directory name="../Classes" />
 		<ignoreFiles>
 			<directory name="../Build" />
 			<directory name="../.Build" />
 		</ignoreFiles>
     </projectFiles>
 	<issueHandlers>
-		<UndefinedClass>
+		<UnusedClass>
 			<errorLevel type="suppress">
-				<referencedClass name="Wazum\Sluggi\Upgrade\SlugLockUpgradeWizard" />
+				<directory name="../Classes"/>
 			</errorLevel>
-		</UndefinedClass>
+		</UnusedClass>
+		<UnusedParam>
+			<errorLevel type="suppress">
+				<directory name="../Classes/DataHandler"/>
+			</errorLevel>
+		</UnusedParam>
 	</issueHandlers>
 </psalm>

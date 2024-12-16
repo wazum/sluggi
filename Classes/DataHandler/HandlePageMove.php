@@ -1,5 +1,7 @@
 <?php
 
+// phpcs:disable PSR1.Methods.CamelCapsMethodName.NotCamelCaps
+
 declare(strict_types=1);
 
 namespace Wazum\Sluggi\DataHandler;
@@ -13,6 +15,10 @@ use Wazum\Sluggi\Helper\SlugHelper;
 
 final class HandlePageMove
 {
+    /**
+     * @param array<string, mixed> $moveRecord
+     * @param array<string, mixed> $updateFields
+     */
     public function moveRecord_afterAnotherElementPostProcess(
         /* @noinspection PhpUnusedParameterInspection */
         string $table,
@@ -30,6 +36,10 @@ final class HandlePageMove
         $this->updateSlugForMovedPage($id, $targetId, $dataHandler);
     }
 
+    /**
+     * @param array<string, mixed> $moveRecord
+     * @param array<string, mixed> $updateFields
+     */
     public function moveRecord_firstElementPostProcess(
         /* @noinspection PhpUnusedParameterInspection */
         string $table,
@@ -67,7 +77,6 @@ final class HandlePageMove
 
         $data = [];
         $data['pages'][$id]['slug'] = $newSlug;
-        /** @var DataHandler $localDataHandler */
         $localDataHandler = GeneralUtility::makeInstance(DataHandler::class);
         $localDataHandler->start($data, []);
         $localDataHandler->setCorrelationId($dataHandler->getCorrelationId());

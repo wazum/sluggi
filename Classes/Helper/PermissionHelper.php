@@ -30,6 +30,9 @@ final class PermissionHelper
         return false;
     }
 
+    /**
+     * @param array<string, mixed> $page
+     */
     public static function isLocked(array $page): bool
     {
         return (bool) $page['slug_locked'];
@@ -40,6 +43,9 @@ final class PermissionHelper
         return self::getBackendUser()->check('non_exclude_fields', 'pages:slug_locked');
     }
 
+    /**
+     * @return array<string, mixed>|null
+     */
     public static function getTopmostAccessiblePage(int $pageId): ?array
     {
         $rootLine = BackendUtility::BEgetRootLine(
