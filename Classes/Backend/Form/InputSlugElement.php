@@ -12,7 +12,7 @@ use Wazum\Sluggi\Helper\SlugHelper as SluggiSlugHelper;
 final class InputSlugElement extends \TYPO3\CMS\Backend\Form\Element\InputSlugElement
 {
     /**
-     * @return array<array-key, mixed>
+     * @return array<string, mixed>
      */
     public function render(): array
     {
@@ -37,6 +37,11 @@ final class InputSlugElement extends \TYPO3\CMS\Backend\Form\Element\InputSlugEl
         return $result;
     }
 
+    /**
+     * @param array<string, mixed> $result
+     *
+     * @return array<string, mixed>
+     */
     private function setStatusDataAttributes(array $result): array
     {
         $attributes = [
@@ -57,6 +62,11 @@ final class InputSlugElement extends \TYPO3\CMS\Backend\Form\Element\InputSlugEl
         return $result;
     }
 
+    /**
+     * @param array<string, mixed> $result
+     *
+     * @return array<string, mixed>
+     */
     private function updateUiForRestrictedAccess(array $result): array
     {
         $languageId = $this->getLanguageId($this->data['tableName'], $this->data['databaseRow']);
@@ -84,6 +94,9 @@ final class InputSlugElement extends \TYPO3\CMS\Backend\Form\Element\InputSlugEl
         return $result;
     }
 
+    /**
+     * @param array<string, mixed> $row
+     */
     private function getLanguageId(string $table, array $row): int
     {
         if (isset($GLOBALS['TCA'][$table]['ctrl']['languageField'])

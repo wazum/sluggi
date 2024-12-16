@@ -1,5 +1,7 @@
 <?php
 
+// phpcs:disable PSR1.Methods.CamelCapsMethodName.NotCamelCaps
+
 declare(strict_types=1);
 
 namespace Wazum\Sluggi\DataHandler;
@@ -27,13 +29,16 @@ final class HandlePageCopy
         );
     }
 
+    /**
+     * @param array<array-key, mixed> $pasteDataMap
+     */
     public function processCmdmap_postProcess(
         string $command,
         string $table,
         string|int $id,
-        $value,
+        string|int $value,
         DataHandler $dataHandler,
-        $pasteUpdate,
+        bool $pasteUpdate,
         array &$pasteDataMap,
     ): void {
         if ('copy' !== $command || 'pages' !== $table) {
@@ -70,6 +75,9 @@ final class HandlePageCopy
         }
     }
 
+    /**
+     * @param array<array-key, mixed> $pasteDataMap
+     */
     private function handleAllChildPages(int $id, string $parentSlug, int $languageId, DataHandler $dataHandler, array &$pasteDataMap): void
     {
         foreach ($this->getChildPagesFor($id, $languageId) as $childPage) {
@@ -90,6 +98,11 @@ final class HandlePageCopy
         }
     }
 
+    /**
+     * @return array<array-key, array<string, mixed>>
+     *
+     * @throws \Doctrine\DBAL\Exception
+     */
     private function getChildPagesFor(int $parentPageId, int $languageId): array
     {
         $queryBuilder = GeneralUtility::makeInstance(ConnectionPool::class)

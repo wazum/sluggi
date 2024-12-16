@@ -86,6 +86,9 @@ final class HandlePageUpdate implements LoggerAwareInterface
         $fields = $this->prependInaccessibleSlugSegments($pageRecord, $fields);
     }
 
+    /**
+     * @param array<string, mixed> $fields
+     */
     public function processDatamap_postProcessFieldArray(
         string $status,
         string $table,
@@ -173,7 +176,6 @@ final class HandlePageUpdate implements LoggerAwareInterface
      */
     private function regenerateSlug(array $pageRecord): string
     {
-        /** @var SlugHelper $helper */
         $helper = GeneralUtility::makeInstance(
             SlugHelper::class,
             'pages',
@@ -295,6 +297,9 @@ final class HandlePageUpdate implements LoggerAwareInterface
         return '/' . ltrim($slug, '/');
     }
 
+    /**
+     * @param array<string, mixed> $fields
+     */
     private function isManualUpdateWithOnlyLastSegmentAllowed(array $fields): bool
     {
         return isset($fields['slug']) && Configuration::get('last_segment_only') && !PermissionHelper::hasFullPermission();
@@ -308,7 +313,6 @@ final class HandlePageUpdate implements LoggerAwareInterface
      */
     private function updateLastSegment(array $pageRecord, array $fields): array
     {
-        /** @var SlugHelper $helper */
         $helper = GeneralUtility::makeInstance(
             SlugHelper::class,
             'pages',

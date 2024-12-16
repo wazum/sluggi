@@ -1,5 +1,7 @@
 <?php
 
+// phpcs:disable PSR1.Methods.CamelCapsMethodName.NotCamelCaps
+
 declare(strict_types=1);
 
 namespace Wazum\Sluggi\DataHandler;
@@ -35,6 +37,8 @@ final class HandleExcludeSlugForSubpages implements LoggerAwareInterface
     }
 
     /**
+     * @param array<string, mixed> $fields
+     *
      * @throws \Exception
      * @throws Exception
      */
@@ -75,6 +79,8 @@ final class HandleExcludeSlugForSubpages implements LoggerAwareInterface
 
     /**
      * Method copied from \TYPO3\CMS\Redirects\Service\SlugService.
+     *
+     * @return array<array-key, mixed>
      *
      * @throws \Exception
      * @throws Exception
@@ -163,6 +169,9 @@ final class HandleExcludeSlugForSubpages implements LoggerAwareInterface
         unset($GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['t3lib/class.t3lib_tcemain.php']['processDatamapClass']['sluggi-exclude']);
     }
 
+    /**
+     * @param array<string, mixed> $fields
+     */
     private function shouldRun(string $status, string $table, array $fields): bool
     {
         return 'update' === $status && 'pages' === $table && isset($fields['exclude_slug_for_subpages']);

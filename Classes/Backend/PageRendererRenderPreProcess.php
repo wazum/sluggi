@@ -11,6 +11,8 @@ final class PageRendererRenderPreProcess
 {
     /**
      * @param array<array-key, mixed> $params
+     *
+     * @psalm-suppress UnusedParam
      */
     public function run(array $params, PageRenderer $pageRenderer): void
     {

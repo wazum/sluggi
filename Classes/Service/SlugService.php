@@ -15,6 +15,9 @@ use TYPO3\CMS\Redirects\Service\RedirectCacheService;
 
 final class SlugService extends \TYPO3\CMS\Redirects\Service\SlugService
 {
+    /**
+     * @psalm-suppress PossiblyUnusedMethod
+     */
     public function __construct(
         Context $context,
         PageRepository $pageRepository,
@@ -36,7 +39,9 @@ final class SlugService extends \TYPO3\CMS\Redirects\Service\SlugService
     }
 
     /**
-     * @return string[] all unique source hosts for created redirects
+     * @param array<array-key, mixed> $currentPageRecord
+     *
+     * @return string[]
      */
     protected function checkSubPages(array $currentPageRecord, SlugRedirectChangeItem $parentChangeItem): array
     {

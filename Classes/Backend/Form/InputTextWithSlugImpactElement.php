@@ -10,7 +10,7 @@ use Wazum\Sluggi\Helper\Configuration;
 class InputTextWithSlugImpactElement extends InputTextElement
 {
     /**
-     * @return array<array-key, mixed>
+     * @return array<string, mixed>
      */
     public function render(): array
     {
@@ -22,7 +22,7 @@ class InputTextWithSlugImpactElement extends InputTextElement
     }
 
     /**
-     * @return array<array-key, mixed>
+     * @return array<string, mixed>
      */
     protected function renderWithImpactMark(): array
     {
