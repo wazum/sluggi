@@ -116,7 +116,9 @@ final class FormSlugAjaxController extends \TYPO3\CMS\Backend\Controller\FormSlu
             $inaccessibleSlugSegments = SluggiSlugHelper::getSlug($mountRootPage['pid'], $languageId);
         }
         if (!empty($inaccessibleSlugSegments)) {
-            $proposal = $inaccessibleSlugSegments . $proposal;
+            if (strpos($proposal, $inaccessibleSlugSegments) !== 0) {
+                $proposal = $inaccessibleSlugSegments . $proposal;
+            }
         }
 
         return new JsonResponse([
