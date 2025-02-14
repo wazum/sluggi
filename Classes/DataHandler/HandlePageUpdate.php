@@ -83,7 +83,9 @@ final class HandlePageUpdate implements LoggerAwareInterface
             return;
         }
 
-        $fields = $this->prependInaccessibleSlugSegments($pageRecord, $fields);
+        if (!empty($fields['slug'])) {
+            $fields = $this->prependInaccessibleSlugSegments($pageRecord, $fields);
+        }
     }
 
     /**
