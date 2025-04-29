@@ -18,6 +18,27 @@ use Wazum\Sluggi\Service\SlugService;
 
 defined('TYPO3') || exit;
 
+if (!function_exists('array_flatten')) {
+    /**
+     * @param array<array-key, mixed> $array
+     *
+     * @return array<array-key, mixed>
+     */
+    function array_flatten(array $array): array
+    {
+        $merged = [[]];
+        foreach ($array as $value) {
+            if (is_array($value)) {
+                $merged[] = array_flatten($value);
+            } else {
+                $merged[] = [$value];
+            }
+        }
+
+        return array_merge([], ...$merged);
+    }
+}
+
 (static function (): void {
     // Register some DataHandler hooks for page related actions
     $GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['t3lib/class.t3lib_tcemain.php']['processDatamapClass']['sluggi-update']
