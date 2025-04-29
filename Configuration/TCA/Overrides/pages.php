@@ -10,27 +10,6 @@ use Wazum\Sluggi\Helper\Configuration;
 
 defined('TYPO3') || exit;
 
-if (!function_exists('array_flatten')) {
-    /**
-     * @param array<array-key, mixed> $array
-     *
-     * @return array<array-key, mixed>
-     */
-    function array_flatten(array $array): array
-    {
-        $merged = [[]];
-        foreach ($array as $value) {
-            if (is_array($value)) {
-                $merged[] = array_flatten($value);
-            } else {
-                $merged[] = [$value];
-            }
-        }
-
-        return array_merge([], ...$merged);
-    }
-}
-
 (static function (): void {
     if (!isset($GLOBALS['TCA']['pages']['columns']['slug']['config']['generatorOptions']['replacements']['/'])
         && Configuration::get('slash_replacement')) {

@@ -230,7 +230,11 @@ final class HandlePageUpdate implements LoggerAwareInterface
             return false;
         }
 
-        return $this->isSynchronizationActiveForPage($pageRecord, $fields);
+        if (!$this->isSynchronizationActiveForPage($pageRecord, $fields)) {
+            return false;
+        }
+
+        return $this->hasSlugRelevantFieldsChanged($pageRecord, $fields);
     }
 
     /**
@@ -349,5 +353,26 @@ final class HandlePageUpdate implements LoggerAwareInterface
         }
 
         return $fields;
+    }
+
+    /**
+     * @param array<array-key, mixed> $pageRecord
+     * @param array<array-key, mixed> $fields
+     */
+    private function hasSlugRelevantFieldsChanged(array $pageRecord, array $fields): bool
+    {
+        $relevantFields = json_decode(Configuration::get('pages_fields') ?? '[]', true);
+        if (!is_array($relevantFields) || empty($relevantFields)) {
+            return false;
+        }
+
+        $slugFields = array_flatten($relevantFields);
+        foreach ($slugFields as $field) {
+            if (isset($fields[$field]) && $fields[$field] !== ($pageRecord[$field] ?? null)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }
