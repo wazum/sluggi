@@ -100,6 +100,12 @@ defined('TYPO3') || exit;
         implode(',', $showItems),
         'after:slug'
     );
+    ExtensionManagementUtility::addFieldsToPalette(
+        'pages',
+        'content_blocks_titleonly',
+        implode(',', $showItems),
+        'after:slug'
+    );
 
     if (ExtensionManagementUtility::isLoaded('masi')) {
         foreach ($GLOBALS['TCA']['pages']['columns']['slug']['config']['generatorOptions']['postModifiers'] as $key => $modifier) {
