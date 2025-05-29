@@ -90,8 +90,12 @@ final class FormSlugAjaxController extends \TYPO3\CMS\Backend\Controller\FormSlu
                 $proposal = preg_replace('#(?<!^)/(?!$)#', '-', $proposal);
 
                 $pageRecord = BackendUtility::getRecordWSOL('pages', $recordId);
-                $parts = \explode('/', $pageRecord['slug']);
-                array_pop($parts);
+                if ($pageRecord === null) {
+                    $parts = \explode('/', SluggiSlugHelper::getSlug($pid, $languageId));
+                } else {
+                    $parts = \explode('/', $pageRecord['slug']);
+                    array_pop($parts);
+                }
                 $proposal = rtrim(implode('/', $parts), '/') . '/' . ltrim($proposal, '/');
             }
         } else {
