@@ -71,15 +71,21 @@ final class InputSlugElement extends \TYPO3\CMS\Backend\Form\Element\InputSlugEl
     {
         $languageId = $this->getLanguageId($this->data['tableName'], $this->data['databaseRow']);
         $mountRootPage = PermissionHelper::getTopmostAccessiblePage((int) $this->data['databaseRow']['uid']);
+        $allowOnlyLastSegment = (bool) Configuration::get('last_segment_only');
+
         // This is the case when a new page is generated through the context menu
         if (null === $mountRootPage) {
+            if ($allowOnlyLastSegment) {
+                $parentSlug = SluggiSlugHelper::getSlug((int)$this->data['databaseRow']['pid'], $languageId);
+                $prefix = ($this->data['customData'][$this->data['fieldName']]['slugPrefix'] ?? '') . $parentSlug;
+                $result['html'] = $this->replaceValues($result['html'], $prefix, '');
+            }
             return $result;
         }
 
         $inaccessibleSlugSegments = SluggiSlugHelper::getSlug((int) $mountRootPage['pid'], $languageId);
         $prefix = ($this->data['customData'][$this->data['fieldName']]['slugPrefix'] ?? '') . $inaccessibleSlugSegments;
         $editableSlugSegments = $this->data['databaseRow']['slug'];
-        $allowOnlyLastSegment = (bool) Configuration::get('last_segment_only');
         if (!empty($inaccessibleSlugSegments) && str_starts_with($editableSlugSegments, $inaccessibleSlugSegments)) {
             $editableSlugSegments = substr($editableSlugSegments, strlen($inaccessibleSlugSegments));
         }

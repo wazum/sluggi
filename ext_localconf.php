@@ -10,6 +10,7 @@ use Wazum\Sluggi\Backend\Form\InputTextWithSlugImpactElement;
 use Wazum\Sluggi\Backend\FormDataProvider;
 use Wazum\Sluggi\Backend\PageRendererRenderPreProcess;
 use Wazum\Sluggi\DataHandler\HandleExcludeSlugForSubpages;
+use Wazum\Sluggi\DataHandler\HandleNewPage;
 use Wazum\Sluggi\DataHandler\HandlePageCopy;
 use Wazum\Sluggi\DataHandler\HandlePageMove;
 use Wazum\Sluggi\DataHandler\HandlePageUpdate;
@@ -41,6 +42,9 @@ if (!function_exists('array_flatten')) {
 
 (static function (): void {
     // Register some DataHandler hooks for page related actions
+    $GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['t3lib/class.t3lib_tcemain.php']['processDatamapClass']['sluggi-new']
+        = HandleNewPage::class;
+
     $GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['t3lib/class.t3lib_tcemain.php']['processDatamapClass']['sluggi-update']
         = HandlePageUpdate::class;
 
