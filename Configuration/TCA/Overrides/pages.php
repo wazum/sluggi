@@ -24,13 +24,12 @@ defined('TYPO3') || exit;
             'description' => 'LLL:EXT:sluggi/Resources/Private/Language/locallang.xlf:pages.slug_locked.description',
             'config' => [
                 'type' => 'check',
-                'renderType' => 'checkboxToggle',
+                'renderType' => 'checkboxLabeledToggle',
                 'items' => [
                     [
-                        0 => '',
-                        1 => '',
-                        'labelChecked' => 'LLL:EXT:sluggi/Resources/Private/Language/locallang.xlf:pages.tx_sluggi_lock.enabled',
-                        'labelUnchecked' => 'LLL:EXT:sluggi/Resources/Private/Language/locallang.xlf:pages.tx_sluggi_lock.disabled',
+                        'label' => '',
+                        'labelChecked' => 'LLL:EXT:sluggi/Resources/Private/Language/locallang.xlf:pages.slug_locked.enabled',
+                        'labelUnchecked' => 'LLL:EXT:sluggi/Resources/Private/Language/locallang.xlf:pages.slug_locked.disabled',
                     ],
                 ],
             ],
@@ -72,11 +71,10 @@ defined('TYPO3') || exit;
             'description' => 'LLL:EXT:sluggi/Resources/Private/Language/locallang.xlf:pages.tx_sluggi_sync.description',
             'config' => [
                 'type' => 'check',
-                'renderType' => 'checkboxToggle',
+                'renderType' => 'checkboxLabeledToggle',
                 'items' => [
                     [
-                        0 => '',
-                        1 => '',
+                        'label' => '',
                         'labelChecked' => 'LLL:EXT:sluggi/Resources/Private/Language/locallang.xlf:pages.tx_sluggi_sync.enabled',
                         'labelUnchecked' => 'LLL:EXT:sluggi/Resources/Private/Language/locallang.xlf:pages.tx_sluggi_sync.disabled',
                     ],
