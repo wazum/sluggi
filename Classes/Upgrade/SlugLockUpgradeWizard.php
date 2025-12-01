@@ -37,7 +37,7 @@ final class SlugLockUpgradeWizard implements UpgradeWizardInterface
     public function updateNecessary(): bool
     {
         $connection = GeneralUtility::makeInstance(ConnectionPool::class)->getConnectionForTable('pages');
-        $tableInformation = $connection->getSchemaInformation()->introspectTable('pages');
+        $tableInformation = $connection->createSchemaManager()->introspectTable('pages');
         if ($tableInformation->hasColumn('tx_sluggi_lock')) {
             $queryBuilder = $this->getPagesQueryBuilder();
 
