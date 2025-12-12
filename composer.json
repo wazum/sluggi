@@ -1,0 +1,70 @@
+{
+    "name": "wazum/sluggi",
+    "type": "typo3-cms-extension",
+    "license": "GPL-3.0-or-later",
+    "description": "Enhanced TYPO3 URL slug management (The little TYPO3 Slug Helper)",
+    "homepage": "https://github.com/wazum/sluggi",
+    "minimum-stability": "stable",
+    "prefer-stable": true,
+    "authors": [
+        {
+            "name": "Wolfgang Klinger",
+            "role": "Lead Developer"
+        }
+    ],
+    "keywords": [
+        "typo3",
+        "backend",
+        "slug",
+        "url",
+        "speaking url",
+        "routing"
+    ],
+    "require": {
+        "php": "^8.2",
+        "typo3/cms-core": "^14.0",
+        "typo3/cms-backend": "^14.0",
+        "typo3/cms-redirects": "^14.0"
+    },
+    "require-dev": {
+        "friendsofphp/php-cs-fixer": "^3.65",
+        "phpstan/phpstan": "^2.0",
+        "phpunit/phpunit": "^11.5",
+        "typo3/cms-fluid-styled-content": "^14.0",
+        "typo3/cms-frontend": "^14.0",
+        "typo3/cms-install": "^14.0",
+        "typo3/cms-rte-ckeditor": "^14.0",
+        "typo3/cms-setup": "^14.0",
+        "typo3/testing-framework": "^9.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Wazum\\Sluggi\\": "Classes/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Wazum\\Sluggi\\Tests\\": "Tests/"
+        }
+    },
+    "config": {
+        "sort-packages": true,
+        "allow-plugins": {
+            "typo3/class-alias-loader": true,
+            "typo3/cms-composer-installers": true
+        }
+    },
+    "extra": {
+        "typo3/cms": {
+            "extension-key": "sluggi",
+            "web-dir": "public"
+        }
+    },
+    "scripts": {
+        "test:unit": "phpunit -c Tests/phpunit.xml --testsuite unit",
+        "test:functional": "typo3DatabaseDriver=pdo_sqlite phpunit -c Tests/phpunit.functional.xml",
+        "phpstan": "phpstan analyse -c phpstan.neon",
+        "cs:check": "php-cs-fixer fix --dry-run --diff",
+        "cs:fix": "php-cs-fixer fix"
+    }
+}

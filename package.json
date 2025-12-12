@@ -1,0 +1,26 @@
+{
+    "name": "@wazum/sluggi",
+    "version": "13.0.0",
+    "type": "module",
+    "scripts": {
+        "dev": "vite build --watch",
+        "build": "vite build",
+        "typecheck": "tsc --noEmit",
+        "test": "web-test-runner",
+        "test:watch": "web-test-runner --watch"
+    },
+    "devDependencies": {
+        "@open-wc/testing": "^4.0.0",
+        "@types/mocha": "^10.0.10",
+        "@types/node": "^22.0.0",
+        "@web/dev-server-esbuild": "^1.0.2",
+        "@web/test-runner": "^0.19.0",
+        "@web/test-runner-playwright": "^0.11.0",
+        "sass": "^1.80.0",
+        "typescript": "^5.7.2",
+        "vite": "^6.0.3"
+    },
+    "dependencies": {
+        "lit": "^3.2.1"
+    }
+}

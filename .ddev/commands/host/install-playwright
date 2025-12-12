@@ -1,0 +1,13 @@
+#!/bin/bash
+
+if [ ! -f Tests/E2e/package.json ]; then
+  echo "No playwright installation exists at Tests/E2e."
+  echo "Please ensure Tests/E2e/package.json exists with @playwright/test dependency."
+  exit 1
+fi
+
+# ddev errors out on subsequent builds if we symlink these files. Instead, we
+# copy them each time.
+echo "Rebuilding web service with playwright dependencies..."
+cp .ddev/web-build/disabled.Dockerfile.playwright .ddev/web-build/Dockerfile.playwright
+ddev restart

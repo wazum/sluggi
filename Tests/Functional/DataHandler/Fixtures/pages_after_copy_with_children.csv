@@ -1,0 +1,10 @@
+"pages"
+,"uid","pid","title","slug","tx_sluggi_sync","doktype"
+,1,0,"Root Page","/",0,1
+,2,1,"Target Parent","/target-parent",0,1
+,3,1,"Source Parent","/source-parent",0,1
+,4,3,"Child One","/source-parent/child-one",0,1
+,5,3,"Child Two","/source-parent/child-two",0,1
+,6,2,"Source Parent","/target-parent/source-parent",0,1
+,7,6,"Child One","/target-parent/source-parent/child-one",0,1
+,8,6,"Child Two","/target-parent/source-parent/child-two",0,1

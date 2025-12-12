@@ -1,0 +1,288 @@
+// =========================================================================
+// Base & Reset
+// =========================================================================
+
+:host {
+    display: block;
+    color-scheme: light dark;
+}
+
+// =========================================================================
+// CSS Custom Properties (using TYPO3 design tokens with light-dark fallbacks)
+// =========================================================================
+
+:host {
+    --sluggi-bg: var(--typo3-input-bg, light-dark(#fff, #212529));
+    --sluggi-color: var(--typo3-input-color, light-dark(#212529, #dee2e6));
+    --sluggi-border-color: var(--typo3-input-border-color, light-dark(#bfbfbf, #495057));
+    --sluggi-border-radius: var(--typo3-input-border-radius, 4px);
+    --sluggi-secondary-bg: var(--typo3-surface-container-low, light-dark(#e9ecef, #343a40));
+    --sluggi-tertiary-bg: var(--typo3-surface-container-lowest, light-dark(#f8f9fa, #2b3035));
+    --sluggi-secondary-color: var(--typo3-text-color-secondary, light-dark(rgba(33, 37, 41, 0.75), rgba(222, 226, 230, 0.75)));
+    --sluggi-emphasis-color: light-dark(#000, #fff);
+    --sluggi-btn-hover-bg: color-mix(in srgb, var(--sluggi-secondary-bg) 85%, var(--sluggi-emphasis-color));
+    --sluggi-btn-active-bg: color-mix(in srgb, var(--sluggi-secondary-bg) 75%, var(--sluggi-emphasis-color));
+}
+
+// =========================================================================
+// Buttons
+// =========================================================================
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 400;
+  gap: 3.85px;
+  text-align: center;
+  white-space: nowrap;
+  user-select: none;
+  border: none;
+  border-left: 1px solid var(--sluggi-border-color);
+  padding: 5px 8px;
+  font-size: 12px;
+  line-height: 18px;
+  border-radius: 0;
+  cursor: pointer;
+
+  &:last-child {
+    border-radius: 0 var(--sluggi-border-radius) var(--sluggi-border-radius) 0;
+  }
+}
+
+.btn-sm {
+  min-width: 2.5rem;
+}
+
+.btn-default {
+  color: var(--sluggi-color);
+  background-color: var(--sluggi-secondary-bg);
+
+  &:hover {
+    background-color: var(--sluggi-btn-hover-bg);
+  }
+
+  &:active {
+    background-color: var(--sluggi-btn-active-bg);
+  }
+}
+
+// =========================================================================
+// Wrapper
+// =========================================================================
+
+.sluggi-wrapper {
+    display: flex;
+    align-items: stretch;
+    gap: 0;
+    background: var(--sluggi-bg);
+    border: 1px solid var(--sluggi-border-color);
+    border-radius: var(--sluggi-border-radius);
+    min-height: 36px;
+    box-sizing: border-box;
+    font-size: 12px;
+    line-height: 18px;
+
+    &.locked {
+        cursor: not-allowed;
+        background: var(--sluggi-tertiary-bg);
+    }
+
+    .btn {
+        padding: 8px 12px;
+    }
+}
+
+// =========================================================================
+// Slug Display
+// =========================================================================
+
+.sluggi-prefix {
+    display: flex;
+    align-items: center;
+    color: var(--sluggi-secondary-color);
+    white-space: nowrap;
+    padding: 8px 12px;
+    background-color: var(--sluggi-secondary-bg);
+    border-radius: var(--sluggi-border-radius) 0 0 var(--sluggi-border-radius);
+    border-right: 1px solid var(--sluggi-border-color);
+}
+
+.sluggi-editable {
+    cursor: pointer;
+    min-width: 2rem;
+    flex: 1;
+    font-weight: bold;
+    line-height: inherit;
+    padding: 8px 0 8px 12px;
+    display: flex;
+    align-items: center;
+    color: var(--sluggi-color);
+
+    &.locked {
+        cursor: not-allowed;
+        opacity: 0.7;
+    }
+
+    &.synced {
+        cursor: default;
+    }
+}
+
+// =========================================================================
+// Input
+// =========================================================================
+
+.sluggi-input-prefix {
+    font-weight: bold;
+    line-height: inherit;
+    padding: 8px 0 8px 12px;
+    color: var(--sluggi-color);
+}
+
+.sluggi-input {
+    border: none;
+    background: transparent;
+    font-size: inherit;
+    font-family: inherit;
+    font-weight: bold;
+    line-height: inherit;
+    flex: 1;
+    min-width: 100px;
+    outline: none;
+    padding: 8px 0;
+    margin: 0;
+    height: auto;
+    color: var(--sluggi-color);
+}
+
+.sluggi-hidden-input {
+    position: absolute;
+    left: -9999px;
+}
+
+// =========================================================================
+// Controls
+// =========================================================================
+
+.sluggi-controls {
+    display: flex;
+    align-items: stretch;
+    margin-left: auto;
+}
+
+.sluggi-lock-icon {
+    display: inline-flex;
+    align-items: center;
+    color: var(--sluggi-secondary-color);
+    padding: 8px 12px;
+}
+
+.sluggi-spinner {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    border: 2px solid var(--sluggi-secondary-color);
+    border-top-color: transparent;
+    border-radius: 50%;
+    animation: sluggi-spin 0.8s linear infinite;
+    margin: 8px 12px;
+}
+
+// =========================================================================
+// Sync Toggle
+// =========================================================================
+
+.sluggi-sync-label {
+    font-size: 8px;
+    font-weight: 600;
+    color: var(--sluggi-secondary-color);
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    line-height: 1;
+    margin-top: 3px;
+}
+
+.sluggi-sync-toggle {
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: none;
+    padding: 2px 10px 4px;
+    cursor: pointer;
+    transition: background-color 0.15s ease;
+    display: flex;
+    flex-direction: column;
+    border-left: 1px solid var(--sluggi-border-color);
+    border-radius: 0 var(--sluggi-border-radius) var(--sluggi-border-radius) 0;
+    gap: 3px;
+
+    &:hover {
+        background-color: var(--sluggi-tertiary-bg);
+    }
+}
+
+.sluggi-sync-icons {
+    position: relative;
+    width: 30px;
+    height: 18px;
+}
+
+.sluggi-sync-icon {
+    position: absolute;
+    top: 0;
+    left: 0;
+    transition: opacity 0.35s ease-in-out;
+
+    svg {
+        display: block;
+    }
+}
+
+.sluggi-sync-icon-on {
+    opacity: 0;
+}
+
+.sluggi-sync-icon-off {
+    opacity: 1;
+}
+
+.sluggi-sync-toggle.is-synced {
+    .sluggi-sync-icon-on {
+        opacity: 1;
+    }
+
+    .sluggi-sync-icon-off {
+        opacity: 0;
+    }
+}
+
+// =========================================================================
+// Animations
+// =========================================================================
+
+@keyframes sluggi-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes sluggi-shake {
+    0%, 100% { transform: rotate(0deg); }
+    25% { transform: rotate(-12deg); }
+    75% { transform: rotate(12deg); }
+}
+
+@keyframes sluggi-rotate {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+.sluggi-edit-btn:hover svg,
+.sluggi-editable:hover ~ .sluggi-controls .sluggi-edit-btn svg {
+    animation: sluggi-shake 0.4s ease;
+}
+
+.sluggi-regenerate-btn:hover svg {
+    animation: sluggi-rotate 0.5s ease;
+}

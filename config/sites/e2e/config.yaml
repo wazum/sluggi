@@ -1,0 +1,12 @@
+base: 'https://e2e.sluggi-typo3-14.ddev.site/'
+rootPageId: 1
+languages:
+  - title: English
+    enabled: true
+    languageId: 0
+    base: /
+    locale: en_US.UTF-8
+    navigationTitle: English
+    flag: us
+errorHandling: []
+routes: []

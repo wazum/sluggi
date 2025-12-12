@@ -1,0 +1,7 @@
+"pages"
+,"uid","pid","l10n_parent","sys_language_uid","title","slug","tx_sluggi_sync","doktype"
+,1,0,0,0,"Root Page","/",0,1
+,2,1,0,0,"Parent Page","/parent-page",0,1
+,3,2,0,0,"Child Page","/parent-page/child-page",0,1
+,4,2,3,1,"Kind Seite","/eltern-seite/kind-seite",0,1
+,5,1,2,1,"Eltern Seite","/eltern-seite",0,1

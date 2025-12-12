@@ -1,0 +1,38 @@
+services:
+  _defaults:
+    autowire: true
+    autoconfigure: true
+    public: false
+
+  Wazum\Sluggi\:
+    resource: '../Classes/*'
+
+  Wazum\Sluggi\Form\Element\SlugElement:
+    public: true
+
+  Wazum\Sluggi\Form\Element\SlugSourceElement:
+    public: true
+
+  Wazum\Sluggi\DataHandler\HandlePageUpdate:
+    public: true
+
+  Wazum\Sluggi\DataHandler\HandlePageMove:
+    public: true
+
+  Wazum\Sluggi\DataHandler\HandlePageCopy:
+    public: true
+
+  Wazum\Sluggi\Service\SlugSyncService:
+    public: true
+
+  Wazum\Sluggi\Service\SlugGeneratorService:
+    public: true
+
+  Wazum\Sluggi\Service\LastSegmentValidationService:
+    public: true
+
+  Wazum\Sluggi\DataHandler\ValidateLastSegmentOnly:
+    public: true
+
+  Wazum\Sluggi\Form\FormDataProvider\InitializeSyncField:
+    public: true

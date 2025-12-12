@@ -1,0 +1,8 @@
+"pages"
+,"uid","pid","title","slug","tx_sluggi_sync","doktype"
+,1,0,"Root Page","/",0,1
+,2,1,"Parent A","/parent-a",0,1
+,3,1,"Parent B","/parent-b",0,1
+,4,2,"Same Name","/parent-a/same-name",0,1
+,5,3,"Same Name","/parent-b/same-name",0,1
+,6,2,"Same Name (copy 1)","/parent-a/same-name-1",0,1

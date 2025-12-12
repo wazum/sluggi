@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xliff version="1.2" xmlns="urn:oasis:names:tc:xliff:document:1.2">
+    <file source-language="en" datatype="plaintext" original="messages" date="2024-01-01T00:00:00Z" product-name="sluggi">
+        <header/>
+        <body>
+            <trans-unit id="conflict.title" resname="conflict.title">
+                <source>URL Segment Conflict</source>
+            </trans-unit>
+            <trans-unit id="conflict.message" resname="conflict.message">
+                <source>The URL segment "%s" is already in use.</source>
+            </trans-unit>
+            <trans-unit id="conflict.suggestion" resname="conflict.suggestion">
+                <source>Use the suggested alternative "%s" instead?</source>
+            </trans-unit>
+            <trans-unit id="conflict.button.cancel" resname="conflict.button.cancel">
+                <source>Cancel</source>
+            </trans-unit>
+            <trans-unit id="conflict.button.useSuggestion" resname="conflict.button.useSuggestion">
+                <source>Use Suggestion</source>
+            </trans-unit>
+        </body>
+    </file>
+</xliff>

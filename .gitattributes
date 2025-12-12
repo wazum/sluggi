@@ -1,0 +1,30 @@
+# Development environment
+/.ddev export-ignore
+/.ddev/** export-ignore
+/.github export-ignore
+/.github/** export-ignore
+
+# Tests
+/Tests export-ignore
+/Tests/** export-ignore
+
+# Development config
+/.editorconfig export-ignore
+/.gitattributes export-ignore
+/phpstan.neon export-ignore
+/vite.config.ts export-ignore
+/tsconfig.json export-ignore
+/web-test-runner.config.mjs export-ignore
+/package.json export-ignore
+/package-lock.json export-ignore
+
+# Source files (compiled JS is in Resources/Public)
+/src export-ignore
+/src/** export-ignore
+
+# Documentation
+/CLAUDE.md export-ignore
+
+# Site config (demo-specific)
+/config export-ignore
+/config/** export-ignore
