@@ -30,20 +30,33 @@ describe('SluggiElement', () => {
             expect(el.shadowRoot!.querySelector('.sluggi-spinner')).to.exist;
         });
 
-        it('shows placeholder appended to editable value when source field is empty', async () => {
+        it('shows placeholder when source field is empty on new page', async () => {
             const container = document.createElement('div');
             container.innerHTML = `
                 <input data-sluggi-source data-formengine-input-name="data[pages][123][title]" value="" />
-                <sluggi-element value="/parent/child" locked-prefix="/parent"></sluggi-element>
+                <sluggi-element value="/parent/child" locked-prefix="/parent" command="new"></sluggi-element>
             `;
             document.body.appendChild(container);
             const el = container.querySelector('sluggi-element') as SluggiElement;
             await el.updateComplete;
 
             const editable = el.shadowRoot!.querySelector('.sluggi-editable');
-            expect(editable?.textContent).to.contain('/child');
             expect(editable?.textContent).to.contain('/new-page');
             expect(el.shadowRoot!.querySelector('.sluggi-placeholder')).to.exist;
+            document.body.removeChild(container);
+        });
+
+        it('does not show placeholder on existing page even when source field is empty', async () => {
+            const container = document.createElement('div');
+            container.innerHTML = `
+                <input data-sluggi-source data-formengine-input-name="data[pages][123][title]" value="" />
+                <sluggi-element value="/parent/child" locked-prefix="/parent" command="edit"></sluggi-element>
+            `;
+            document.body.appendChild(container);
+            const el = container.querySelector('sluggi-element') as SluggiElement;
+            await el.updateComplete;
+
+            expect(el.shadowRoot!.querySelector('.sluggi-placeholder')).to.not.exist;
             document.body.removeChild(container);
         });
 
@@ -83,29 +96,33 @@ describe('SluggiElement', () => {
             document.body.removeChild(container);
         });
 
-        it('should hide placeholder after TYPO3 FormEngine initializes source field', async () => {
+        it('should keep placeholder while typing until sync happens on new page', async () => {
             const sourceInput = document.createElement('input');
             sourceInput.setAttribute('data-sluggi-source', '');
-            sourceInput.setAttribute('data-formengine-input-name', 'data[pages][26][title]');
+            sourceInput.setAttribute('data-formengine-input-name', 'data[pages][NEW123][title]');
             sourceInput.value = '';
             document.body.appendChild(sourceInput);
 
             const el = document.createElement('sluggi-element') as SluggiElement;
-            el.setAttribute('value', '/organization/department/institute/about-page');
-            el.setAttribute('locked-prefix', '/organization/department');
-            el.setAttribute('command', 'edit');
+            el.setAttribute('value', '/parent/child');
+            el.setAttribute('locked-prefix', '/parent');
+            el.setAttribute('command', 'new');
             document.body.appendChild(el);
 
             await el.updateComplete;
             expect(el.shadowRoot!.querySelector('.sluggi-placeholder')).to.exist;
 
-            sourceInput.value = 'About Us';
-            sourceInput.dispatchEvent(new Event('formengine:input:initialized'));
-
+            sourceInput.value = 'My New Page';
+            sourceInput.dispatchEvent(new Event('input', { bubbles: true }));
             await new Promise(r => setTimeout(r, 200));
             await el.updateComplete;
 
-            expect(el.shadowRoot!.querySelector('.sluggi-placeholder')).to.not.exist;
+            expect(el.shadowRoot!.querySelector('.sluggi-placeholder'), 'placeholder should stay while typing').to.exist;
+
+            el.setProposal('/parent/child/my-new-page');
+            await el.updateComplete;
+
+            expect(el.shadowRoot!.querySelector('.sluggi-placeholder'), 'placeholder should hide after sync').to.not.exist;
 
             document.body.removeChild(el);
             document.body.removeChild(sourceInput);

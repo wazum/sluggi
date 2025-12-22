@@ -115,6 +115,9 @@ export class SluggiElement extends LitElement {
     @state()
     private valueBeforeEdit = '';
 
+    @state()
+    private slugGenerated = false;
+
     @query('input.sluggi-input')
     private inputElement?: HTMLInputElement;
 
@@ -184,10 +187,16 @@ export class SluggiElement extends LitElement {
     }
 
     private get showPlaceholder(): boolean {
+        if (this.command !== 'new') {
+            return false;
+        }
+        if (this.slugGenerated) {
+            return false;
+        }
         if (this.sourceFieldElements.size === 0) {
             return false;
         }
-        return !this.hasNonEmptySourceFieldValue();
+        return true;
     }
 
     private get hiddenInputValue(): string {
@@ -392,6 +401,7 @@ export class SluggiElement extends LitElement {
             this.showConflictModal();
         } else {
             this.value = proposal;
+            this.slugGenerated = true;
             this.clearConflictState();
             this.dispatchEvent(new CustomEvent('sluggi-change', {
                 bubbles: true,
