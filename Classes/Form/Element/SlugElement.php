@@ -13,6 +13,7 @@ use Wazum\Sluggi\Service\HierarchyPermissionService;
 use Wazum\Sluggi\Service\LastSegmentValidationService;
 use Wazum\Sluggi\Service\SlugConfigurationService;
 use Wazum\Sluggi\Service\SlugElementRenderer;
+use Wazum\Sluggi\Service\SlugGeneratorService;
 use Wazum\Sluggi\Service\SlugSyncService;
 
 final class SlugElement extends AbstractFormElement
@@ -46,6 +47,7 @@ final class SlugElement extends AbstractFormElement
         private readonly SlugConfigurationService $slugConfigurationService,
         private readonly LastSegmentValidationService $lastSegmentValidationService,
         private readonly HierarchyPermissionService $hierarchyPermissionService,
+        private readonly SlugGeneratorService $slugGeneratorService,
     ) {
     }
 
@@ -112,11 +114,29 @@ final class SlugElement extends AbstractFormElement
         );
 
         $lockedPrefix = '';
-        if (!$lastSegmentOnly && $table === 'pages' && is_numeric($recordId) && (int)$recordId > 0) {
-            $lockedPrefix = $this->hierarchyPermissionService->getLockedPrefixForPage(
-                (int)$recordId,
-                $itemValue
-            );
+        $isNewPage = $command === 'new';
+        $isAdmin = $this->getBackendUser()->isAdmin();
+
+        if ($table === 'pages' && !$isAdmin) {
+            if ($isNewPage && $effectivePid > 0) {
+                $parentSlug = $this->slugGeneratorService->getParentSlug($effectivePid, $languageId);
+                if ($lastSegmentOnly) {
+                    $lockedPrefix = $parentSlug;
+                } else {
+                    $lockedPrefix = $this->hierarchyPermissionService->getLockedPrefixForPage(
+                        $effectivePid,
+                        $parentSlug
+                    );
+                }
+                if ($itemValue === '' && $parentSlug !== '') {
+                    $itemValue = $parentSlug;
+                }
+            } elseif (!$lastSegmentOnly && is_numeric($recordId) && (int)$recordId > 0) {
+                $lockedPrefix = $this->hierarchyPermissionService->getLockedPrefixForPage(
+                    (int)$recordId,
+                    $itemValue
+                );
+            }
         }
 
         return [

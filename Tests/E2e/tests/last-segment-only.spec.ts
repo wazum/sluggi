@@ -101,6 +101,57 @@ test.describe('Last Segment Only - Editor Restrictions', () => {
     await expect(flashMessage).toBeVisible({ timeout: 5000 });
   });
 
+  test('new page via context menu shows parent prefix as locked (issue #128)', async ({ page }) => {
+    const PARENT_PAGE_ID = 18;
+
+    // Navigate to page module to access page tree
+    await page.goto('/typo3/module/web/layout');
+
+    const pageTree = page.locator('.scaffold-content-navigation-component');
+    await expect(pageTree).toBeVisible({ timeout: 10000 });
+
+    // Right-click on Parent Section to open context menu
+    const parentNode = pageTree.locator(`[data-id="${PARENT_PAGE_ID}"]`);
+    await expect(parentNode).toBeVisible({ timeout: 10000 });
+    await parentNode.click({ button: 'right' });
+
+    // Click "New subpage" in context menu
+    const newSubpageMenuItem = page.getByRole('menuitem', { name: 'New subpage' });
+    await expect(newSubpageMenuItem).toBeVisible({ timeout: 5000 });
+    await newSubpageMenuItem.click();
+
+    // Wait for the new page form to load
+    const editFrame = page.frameLocator('iframe');
+    await expect(editFrame.locator('h1')).toContainText('Create new Page', { timeout: 15000 });
+
+    const slugElement = editFrame.locator('sluggi-element');
+    await expect(slugElement).toBeVisible();
+
+    // The slug element should have the last-segment-only attribute
+    await expect(slugElement).toHaveAttribute('last-segment-only', '');
+
+    // For new pages, the locked-prefix should be set to the parent's slug
+    await expect(slugElement).toHaveAttribute('locked-prefix', '/parent-section');
+
+    // Enter a title to trigger slug generation
+    const titleInput = editFrame.locator('input[data-formengine-input-name*="[title]"]');
+    await titleInput.fill('New Test Subpage');
+    await titleInput.press('Tab');
+
+    // Wait for AJAX slug suggestion
+    await page.waitForTimeout(1000);
+
+    // The prefix should show the parent path as locked
+    const prefix = slugElement.locator('.sluggi-prefix');
+    await expect(prefix).toBeVisible();
+    await expect(prefix).toContainText('/parent-section');
+
+    // The generated slug in the hidden field should include the parent path
+    const hiddenField = editFrame.locator('.sluggi-hidden-field');
+    const slugValue = await hiddenField.inputValue();
+    expect(slugValue).toContain('/parent-section/');
+  });
+
   test('slash in title via page tree inline edit does not create extra segment', async ({ page }) => {
     const SYNCED_PAGE_ID = 20;
 
