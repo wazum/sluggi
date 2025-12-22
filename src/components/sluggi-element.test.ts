@@ -29,6 +29,87 @@ describe('SluggiElement', () => {
             `);
             expect(el.shadowRoot!.querySelector('.sluggi-spinner')).to.exist;
         });
+
+        it('shows placeholder appended to editable value when source field is empty', async () => {
+            const container = document.createElement('div');
+            container.innerHTML = `
+                <input data-sluggi-source data-formengine-input-name="data[pages][123][title]" value="" />
+                <sluggi-element value="/parent/child" locked-prefix="/parent"></sluggi-element>
+            `;
+            document.body.appendChild(container);
+            const el = container.querySelector('sluggi-element') as SluggiElement;
+            await el.updateComplete;
+
+            const editable = el.shadowRoot!.querySelector('.sluggi-editable');
+            expect(editable?.textContent).to.contain('/child');
+            expect(editable?.textContent).to.contain('/new-page');
+            expect(el.shadowRoot!.querySelector('.sluggi-placeholder')).to.exist;
+            document.body.removeChild(container);
+        });
+
+        it('does not show placeholder when source field has value', async () => {
+            const container = document.createElement('div');
+            container.innerHTML = `
+                <input data-sluggi-source data-formengine-input-name="data[pages][123][title]" value="My Page Title" />
+                <sluggi-element value="/my-page" prefix="/parent"></sluggi-element>
+            `;
+            document.body.appendChild(container);
+            const el = container.querySelector('sluggi-element') as SluggiElement;
+            await el.updateComplete;
+
+            const editable = el.shadowRoot!.querySelector('.sluggi-editable');
+            expect(editable?.textContent).to.contain('/my-page');
+            expect(el.shadowRoot!.querySelector('.sluggi-placeholder')).to.not.exist;
+            document.body.removeChild(container);
+        });
+
+        it('does not show placeholder when editing existing page with title', async () => {
+            const container = document.createElement('div');
+            container.innerHTML = `
+                <input data-sluggi-source data-formengine-input-name="data[pages][26][title]" value="About Us" />
+                <sluggi-element
+                    value="/organization/department/institute/about-page"
+                    locked-prefix="/organization/department"
+                    command="edit"
+                ></sluggi-element>
+            `;
+            document.body.appendChild(container);
+            const el = container.querySelector('sluggi-element') as SluggiElement;
+            await el.updateComplete;
+
+            const editable = el.shadowRoot!.querySelector('.sluggi-editable');
+            expect(editable?.textContent).to.contain('/institute/about-page');
+            expect(el.shadowRoot!.querySelector('.sluggi-placeholder'), 'placeholder should not exist').to.not.exist;
+            document.body.removeChild(container);
+        });
+
+        it('should hide placeholder after TYPO3 FormEngine initializes source field', async () => {
+            const sourceInput = document.createElement('input');
+            sourceInput.setAttribute('data-sluggi-source', '');
+            sourceInput.setAttribute('data-formengine-input-name', 'data[pages][26][title]');
+            sourceInput.value = '';
+            document.body.appendChild(sourceInput);
+
+            const el = document.createElement('sluggi-element') as SluggiElement;
+            el.setAttribute('value', '/organization/department/institute/about-page');
+            el.setAttribute('locked-prefix', '/organization/department');
+            el.setAttribute('command', 'edit');
+            document.body.appendChild(el);
+
+            await el.updateComplete;
+            expect(el.shadowRoot!.querySelector('.sluggi-placeholder')).to.exist;
+
+            sourceInput.value = 'About Us';
+            sourceInput.dispatchEvent(new Event('formengine:input:initialized'));
+
+            await new Promise(r => requestAnimationFrame(r));
+            await el.updateComplete;
+
+            expect(el.shadowRoot!.querySelector('.sluggi-placeholder')).to.not.exist;
+
+            document.body.removeChild(el);
+            document.body.removeChild(sourceInput);
+        });
     });
 
     describe('Properties', () => {

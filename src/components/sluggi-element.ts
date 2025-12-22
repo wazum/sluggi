@@ -120,6 +120,7 @@ export class SluggiElement extends LitElement {
 
     private sourceFieldElements: Map<string, HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement> = new Map();
     private boundSourceFieldHandler: (event: Event) => void;
+    private boundSourceFieldInitHandler: () => void;
 
     // =========================================================================
     // Constructor & Lifecycle
@@ -128,6 +129,7 @@ export class SluggiElement extends LitElement {
     constructor() {
         super();
         this.boundSourceFieldHandler = this.handleSourceFieldChange.bind(this);
+        this.boundSourceFieldInitHandler = this.handleSourceFieldInit.bind(this);
     }
 
     override connectedCallback() {
@@ -180,6 +182,13 @@ export class SluggiElement extends LitElement {
         return this.value;
     }
 
+    private get showPlaceholder(): boolean {
+        if (this.sourceFieldElements.size === 0) {
+            return false;
+        }
+        return !this.hasNonEmptySourceFieldValue();
+    }
+
     private get hiddenInputValue(): string {
         if (this.lastSegmentOnly || this.lockedPrefix) {
             return this.computedPrefix + this.editableValue;
@@ -207,15 +216,22 @@ export class SluggiElement extends LitElement {
 
     private renderViewMode() {
         const isEditable = !this.isLocked && !this.isSynced;
+        const editable = this.editableValue;
+        const classes = [
+            'sluggi-editable',
+            this.isLocked ? 'locked' : '',
+            this.isSynced ? 'synced' : '',
+        ].filter(Boolean).join(' ');
+
         return html`
             <span
-                class="sluggi-editable ${this.isLocked ? 'locked' : ''} ${this.isSynced ? 'synced' : ''}"
+                class="${classes}"
                 role="${isEditable ? 'button' : nothing}"
                 tabindex="${isEditable ? '0' : '-1'}"
-                aria-label="${isEditable ? `Click to edit slug: ${this.editableValue}` : this.editableValue}"
+                aria-label="${isEditable ? `Click to edit slug: ${editable}` : editable}"
                 @click="${this.handleEditableClick}"
                 @keydown="${this.handleEditableKeydown}"
-            >${this.editableValue || '/'}</span>
+            >${editable || '/'}${this.showPlaceholder ? html`<span class="sluggi-placeholder">/new-page</span>` : nothing}</span>
         `;
     }
 
@@ -677,6 +693,7 @@ export class SluggiElement extends LitElement {
             if (fieldName) {
                 this.sourceFieldElements.set(fieldName, element);
                 element.addEventListener('change', this.boundSourceFieldHandler);
+                element.addEventListener('formengine:input:initialized', this.boundSourceFieldInitHandler);
             }
         }
     }
@@ -684,8 +701,13 @@ export class SluggiElement extends LitElement {
     private removeSourceFieldListeners() {
         for (const element of this.sourceFieldElements.values()) {
             element.removeEventListener('change', this.boundSourceFieldHandler);
+            element.removeEventListener('formengine:input:initialized', this.boundSourceFieldInitHandler);
         }
         this.sourceFieldElements.clear();
+    }
+
+    private handleSourceFieldInit() {
+        this.requestUpdate();
     }
 
     private collectFormFieldValues(): Record<string, string> {

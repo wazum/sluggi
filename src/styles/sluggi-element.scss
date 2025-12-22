@@ -127,6 +127,14 @@
     &.synced {
         cursor: default;
     }
+
+}
+
+.sluggi-placeholder {
+    color: var(--sluggi-secondary-color);
+    font-weight: normal;
+    font-style: italic;
+    margin-left: 0.25em;
 }
 
 // =========================================================================
