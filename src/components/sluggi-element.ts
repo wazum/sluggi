@@ -148,7 +148,8 @@ export class SluggiElement extends LitElement {
 
     private get canRegenerate(): boolean {
         if (!this.showRegenerate || this.isSynced) return false;
-        return this.sourceFieldElements.size > 0 || this.hasPostModifiers;
+        if (this.hasPostModifiers) return true;
+        return this.sourceFieldElements.size > 0 && this.hasNonEmptySourceFieldValue();
     }
 
     private get showSyncToggle(): boolean {
@@ -693,6 +694,7 @@ export class SluggiElement extends LitElement {
             if (fieldName) {
                 this.sourceFieldElements.set(fieldName, element);
                 element.addEventListener('change', this.boundSourceFieldHandler);
+                element.addEventListener('input', this.boundSourceFieldInitHandler);
                 element.addEventListener('formengine:input:initialized', this.boundSourceFieldInitHandler);
             }
         }
@@ -701,13 +703,22 @@ export class SluggiElement extends LitElement {
     private removeSourceFieldListeners() {
         for (const element of this.sourceFieldElements.values()) {
             element.removeEventListener('change', this.boundSourceFieldHandler);
+            element.removeEventListener('input', this.boundSourceFieldInitHandler);
             element.removeEventListener('formengine:input:initialized', this.boundSourceFieldInitHandler);
         }
         this.sourceFieldElements.clear();
     }
 
+    private sourceFieldInputTimeout: number | null = null;
+
     private handleSourceFieldInit() {
-        this.requestUpdate();
+        if (this.sourceFieldInputTimeout) {
+            clearTimeout(this.sourceFieldInputTimeout);
+        }
+        this.sourceFieldInputTimeout = window.setTimeout(() => {
+            this.requestUpdate();
+            this.sourceFieldInputTimeout = null;
+        }, 150);
     }
 
     private collectFormFieldValues(): Record<string, string> {

@@ -102,7 +102,7 @@ describe('SluggiElement', () => {
             sourceInput.value = 'About Us';
             sourceInput.dispatchEvent(new Event('formengine:input:initialized'));
 
-            await new Promise(r => requestAnimationFrame(r));
+            await new Promise(r => setTimeout(r, 200));
             await el.updateComplete;
 
             expect(el.shadowRoot!.querySelector('.sluggi-placeholder')).to.not.exist;
@@ -471,16 +471,30 @@ describe('SluggiElement', () => {
     describe('Regenerate Button', () => {
         const visibilityTestCases = [
             {
-                desc: 'visible when source fields exist in DOM',
+                desc: 'visible when source fields have values',
                 setup: () => {
                     const input = document.createElement('input');
                     input.setAttribute('data-sluggi-source', '');
                     input.setAttribute('data-formengine-input-name', 'data[pages][123][title]');
+                    input.value = 'Test Title';
                     document.body.appendChild(input);
                     return input;
                 },
                 attrs: 'value="/test"',
                 expected: true,
+            },
+            {
+                desc: 'hidden when source fields are empty',
+                setup: () => {
+                    const input = document.createElement('input');
+                    input.setAttribute('data-sluggi-source', '');
+                    input.setAttribute('data-formengine-input-name', 'data[pages][123][title]');
+                    input.value = '';
+                    document.body.appendChild(input);
+                    return input;
+                },
+                attrs: 'value="/test"',
+                expected: false,
             },
             {
                 desc: 'visible when has-post-modifiers is set',
