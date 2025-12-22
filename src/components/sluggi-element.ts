@@ -538,7 +538,9 @@ export class SluggiElement extends LitElement {
             return;
         }
 
-        const shouldAutoSync = (this.syncFeatureEnabled && this.isSynced) || this.command === 'new';
+        const shouldAutoSync = this.syncFeatureEnabled
+            ? this.isSynced
+            : this.command === 'new';
         if (shouldAutoSync && this.mode === 'view') {
             this.sendSlugProposal('recreate');
         }

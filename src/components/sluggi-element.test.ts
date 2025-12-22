@@ -756,6 +756,42 @@ describe('SluggiElement', () => {
             document.body.removeChild(titleInput);
             document.body.removeChild(wrapper);
         });
+
+        it('should NOT auto-sync new pages when sync is toggled OFF', async () => {
+            const titleInput = document.createElement('input');
+            titleInput.setAttribute('data-sluggi-source', '');
+            titleInput.setAttribute('data-formengine-input-name', 'data[pages][NEW123][title]');
+            titleInput.value = 'Initial';
+            document.body.appendChild(titleInput);
+
+            const el = await fixture<SluggiElement>(html`
+                <sluggi-element
+                    value=""
+                    page-id="123"
+                    record-id="NEW123"
+                    table-name="pages"
+                    field-name="slug"
+                    command="new"
+                    sync-feature-enabled
+                ></sluggi-element>
+            `);
+
+            expect(el.isSynced).to.be.false;
+
+            let proposalRequested = false;
+            el.addEventListener('sluggi-request-proposal', () => {
+                proposalRequested = true;
+            });
+
+            titleInput.value = 'Changed Title';
+            titleInput.dispatchEvent(new Event('change', { bubbles: true }));
+            await el.updateComplete;
+            await new Promise(r => setTimeout(r, 50));
+
+            expect(proposalRequested).to.be.false;
+
+            document.body.removeChild(titleInput);
+        });
     });
 
     describe('Source Field Listening', () => {
