@@ -9,6 +9,7 @@ use TYPO3\CMS\Backend\Form\Element\AbstractFormElement;
 use TYPO3\CMS\Core\Crypto\HashService;
 use TYPO3\CMS\Core\Page\JavaScriptModuleInstruction;
 use TYPO3\CMS\Core\Utility\MathUtility;
+use Wazum\Sluggi\Service\HierarchyPermissionService;
 use Wazum\Sluggi\Service\LastSegmentValidationService;
 use Wazum\Sluggi\Service\SlugConfigurationService;
 use Wazum\Sluggi\Service\SlugElementRenderer;
@@ -44,6 +45,7 @@ final class SlugElement extends AbstractFormElement
         private readonly SlugSyncService $slugSyncService,
         private readonly SlugConfigurationService $slugConfigurationService,
         private readonly LastSegmentValidationService $lastSegmentValidationService,
+        private readonly HierarchyPermissionService $hierarchyPermissionService,
     ) {
     }
 
@@ -109,6 +111,14 @@ final class SlugElement extends AbstractFormElement
             $this->getBackendUser()->isAdmin()
         );
 
+        $lockedPrefix = '';
+        if (!$lastSegmentOnly && $table === 'pages' && is_numeric($recordId) && (int)$recordId > 0) {
+            $lockedPrefix = $this->hierarchyPermissionService->getLockedPrefixForPage(
+                (int)$recordId,
+                $itemValue
+            );
+        }
+
         return [
             'table' => $table,
             'fieldName' => $fieldName,
@@ -133,6 +143,7 @@ final class SlugElement extends AbstractFormElement
             'syncFieldName' => $this->slugElementRenderer->buildSyncFieldName($table, $recordId),
             'requiredSourceFields' => $requiredSourceFields,
             'lastSegmentOnly' => $lastSegmentOnly,
+            'lockedPrefix' => $lockedPrefix,
         ];
     }
 

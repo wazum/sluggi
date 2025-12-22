@@ -156,8 +156,22 @@ jobs:
           <?php
           declare(strict_types=1);
           $GLOBALS['TYPO3_CONF_VARS']['BE']['passwordPolicy'] = '';
-          $GLOBALS['TYPO3_CONF_VARS']['EXTENSIONS']['sluggi']['synchronize'] = '1';
-          $GLOBALS['TYPO3_CONF_VARS']['EXTENSIONS']['sluggi']['last_segment_only'] = '1';
+          $testId = $_SERVER['HTTP_X_PLAYWRIGHT_TEST_ID'] ?? 'default';
+          $sluggiSettings = match ($testId) {
+              'last-segment-only' => [
+                  'last_segment_only' => '1',
+                  'synchronize' => '1',
+              ],
+              'hierarchy-permission' => [
+                  'last_segment_only' => '0',
+                  'synchronize' => '0',
+              ],
+              default => [
+                  'last_segment_only' => '0',
+                  'synchronize' => '1',
+              ],
+          };
+          $GLOBALS['TYPO3_CONF_VARS']['EXTENSIONS']['sluggi'] = $sluggiSettings;
           EOF
 
       - name: Start PHP server

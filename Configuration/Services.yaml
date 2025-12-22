@@ -34,5 +34,11 @@ services:
   Wazum\Sluggi\DataHandler\ValidateLastSegmentOnly:
     public: true
 
+  Wazum\Sluggi\DataHandler\ValidateHierarchyPermission:
+    public: true
+
+  Wazum\Sluggi\Service\HierarchyPermissionService:
+    public: true
+
   Wazum\Sluggi\Form\FormDataProvider\InitializeSyncField:
     public: true

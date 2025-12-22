@@ -74,6 +74,8 @@ final readonly class FormSlugAjaxController extends CoreFormSlugAjaxController
         /** @var array<string, mixed> $values */
         $values = $params['values'] ?? [];
 
+        $values = array_map(static fn ($value) => is_string($value) ? $value : '', $values);
+
         return match ($mode) {
             'manual' => $slug->sanitize((string)($values['manual'] ?? '')),
             default => $slug->generate($values, (int)($params['parentPageId'] ?? 0)),

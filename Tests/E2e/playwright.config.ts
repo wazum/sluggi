@@ -28,7 +28,7 @@ export default defineConfig({
     {
       name: 'chromium',
       testDir: './tests',
-      testIgnore: '**/last-segment-only.spec.ts',
+      testIgnore: ['**/last-segment-only.spec.ts', '**/hierarchy-permission.spec.ts'],
       use: {
         ...devices['Desktop Chrome'],
         storageState: '.auth/user.json',
@@ -38,7 +38,7 @@ export default defineConfig({
     {
       name: 'editor',
       testDir: './tests',
-      testMatch: '**/last-segment-only.spec.ts',
+      testMatch: ['**/last-segment-only.spec.ts', '**/hierarchy-permission.spec.ts'],
       use: {
         ...devices['Desktop Chrome'],
         storageState: '.auth/editor.json',

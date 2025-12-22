@@ -43,6 +43,9 @@ export class SluggiElement extends LitElement {
     @property({ type: Boolean, attribute: 'last-segment-only' })
     lastSegmentOnly = false;
 
+    @property({ type: String, attribute: 'locked-prefix' })
+    lockedPrefix = '';
+
     @property({ type: Boolean, attribute: 'has-post-modifiers' })
     hasPostModifiers = false;
 
@@ -158,6 +161,9 @@ export class SluggiElement extends LitElement {
                 return '/' + parts.join('/');
             }
         }
+        if (this.lockedPrefix) {
+            return this.lockedPrefix;
+        }
         return this.prefix;
     }
 
@@ -168,13 +174,15 @@ export class SluggiElement extends LitElement {
                 return '/' + parts[parts.length - 1];
             }
         }
+        if (this.lockedPrefix && this.value.startsWith(this.lockedPrefix)) {
+            return this.value.slice(this.lockedPrefix.length) || '/';
+        }
         return this.value;
     }
 
     private get hiddenInputValue(): string {
-        if (this.lastSegmentOnly) {
-            const prefix = this.computedPrefix;
-            return prefix + this.editableValue;
+        if (this.lastSegmentOnly || this.lockedPrefix) {
+            return this.computedPrefix + this.editableValue;
         }
         return this.value;
     }
@@ -545,7 +553,10 @@ export class SluggiElement extends LitElement {
     }
 
     private buildFullSlug(segment: string): string {
-        return this.lastSegmentOnly ? this.computedPrefix + segment : segment;
+        if (this.lastSegmentOnly || this.lockedPrefix) {
+            return this.computedPrefix + segment;
+        }
+        return segment;
     }
 
     private clearConflictState() {

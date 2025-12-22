@@ -6,6 +6,12 @@ test.describe('Last Segment Only - Editor Restrictions', () => {
   let frame: FrameLocator;
   let slugElement: Locator;
 
+  test.use({
+    extraHTTPHeaders: {
+      'X-Playwright-Test-ID': 'last-segment-only',
+    },
+  });
+
   test.beforeEach(async ({ page }) => {
     await page.goto(`/typo3/record/edit?edit[pages][${NESTED_PAGE_ID}]=edit`);
     frame = page.frameLocator('iframe');
@@ -104,23 +110,13 @@ test.describe('Last Segment Only - Editor Restrictions', () => {
     const pageTree = page.locator('.scaffold-content-navigation-component');
     await expect(pageTree).toBeVisible({ timeout: 10000 });
 
-    // Expand tree nodes to find our test page
-    const rootNode = pageTree.locator('[data-id="1"]');
-    await expect(rootNode).toBeVisible({ timeout: 10000 });
-    const rootToggle = rootNode.locator('.node-toggle');
-    if (await rootToggle.isVisible()) {
-      await rootToggle.click();
-      await page.waitForTimeout(500);
-    }
-
-    // Expand parent section (uid=18)
+    // Editor sees page 18 (Parent Section) as their mount point
     const parentNode = pageTree.locator('[data-id="18"]');
-    if (await parentNode.isVisible({ timeout: 2000 }).catch(() => false)) {
-      const parentToggle = parentNode.locator('.node-toggle');
-      if (await parentToggle.isVisible()) {
-        await parentToggle.click();
-        await page.waitForTimeout(500);
-      }
+    await expect(parentNode).toBeVisible({ timeout: 10000 });
+    const parentToggle = parentNode.locator('.node-toggle');
+    if (await parentToggle.isVisible()) {
+      await parentToggle.click();
+      await page.waitForTimeout(500);
     }
 
     // Find and double-click our synced test page to edit inline

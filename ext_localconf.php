@@ -11,6 +11,7 @@ use Wazum\Sluggi\Controller\FormSlugAjaxController;
 use Wazum\Sluggi\DataHandler\HandlePageCopy;
 use Wazum\Sluggi\DataHandler\HandlePageMove;
 use Wazum\Sluggi\DataHandler\HandlePageUpdate;
+use Wazum\Sluggi\DataHandler\ValidateHierarchyPermission;
 use Wazum\Sluggi\DataHandler\ValidateLastSegmentOnly;
 use Wazum\Sluggi\Form\Element\SlugElement;
 use Wazum\Sluggi\Form\Element\SlugSourceElement;
@@ -54,6 +55,9 @@ $GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['t3lib/class.t3lib_tcemain.php']['proc
 
 $GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['t3lib/class.t3lib_tcemain.php']['processDatamapClass']['sluggi_validate'] =
     ValidateLastSegmentOnly::class;
+
+$GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['t3lib/class.t3lib_tcemain.php']['processDatamapClass']['sluggi_hierarchy'] =
+    ValidateHierarchyPermission::class;
 
 $GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['t3lib/class.t3lib_tcemain.php']['moveRecordClass']['sluggi'] =
     HandlePageMove::class;

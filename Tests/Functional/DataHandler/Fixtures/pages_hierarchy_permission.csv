@@ -1,0 +1,16 @@
+"be_groups"
+,"uid","pid","title","tables_modify","pagetypes_select","non_exclude_fields","db_mountpoints"
+,1,0,"Institute Editors","pages","1,254","pages:slug,pages:title","4"
+
+"be_users"
+,"uid","pid","username","password","admin","usergroup"
+,1,0,"admin","$2y$12$abc123",1,""
+,2,0,"editor","$2y$12$abc123",0,"1"
+
+"pages"
+,"uid","pid","title","slug","tx_sluggi_sync","doktype","perms_userid","perms_groupid","perms_user","perms_group","perms_everybody"
+,1,0,"Root Page","/",0,1,1,0,31,0,0
+,2,1,"Home","/home",0,1,1,0,31,0,0
+,3,2,"Department","/home/department",0,1,1,0,31,0,0
+,4,3,"Institute","/home/department/institute",0,1,2,1,31,31,0
+,5,4,"About Us","/home/department/institute/about-us",0,1,2,1,31,31,0

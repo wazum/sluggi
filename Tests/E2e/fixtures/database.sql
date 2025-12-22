@@ -107,17 +107,17 @@ ON DUPLICATE KEY UPDATE `title` = VALUES(`title`), `slug` = VALUES(`slug`), `tx_
 -- =============================================
 -- Page 18: Parent page for last-segment-only tests
 INSERT INTO `pages` (`uid`, `pid`, `title`, `slug`, `doktype`, `is_siteroot`, `hidden`, `deleted`, `tstamp`, `crdate`, `tx_sluggi_sync`, `perms_userid`, `perms_groupid`, `perms_user`, `perms_group`, `perms_everybody`)
-VALUES (18, 1, 'Parent Section', '/parent-section', 1, 0, 0, 0, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 0, 1, 1, 31, 31, 0)
+VALUES (18, 1, 'Parent Section', '/parent-section', 1, 0, 0, 0, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 0, 1, 2, 31, 31, 0)
 ON DUPLICATE KEY UPDATE `title` = VALUES(`title`), `slug` = VALUES(`slug`), `tx_sluggi_sync` = 0;
 
 -- Page 19: Child page for last-segment-only tests
 INSERT INTO `pages` (`uid`, `pid`, `title`, `slug`, `doktype`, `is_siteroot`, `hidden`, `deleted`, `tstamp`, `crdate`, `tx_sluggi_sync`, `perms_userid`, `perms_groupid`, `perms_user`, `perms_group`, `perms_everybody`)
-VALUES (19, 18, 'Nested Page', '/parent-section/nested-page', 1, 0, 0, 0, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 0, 1, 1, 31, 31, 0)
+VALUES (19, 18, 'Nested Page', '/parent-section/nested-page', 1, 0, 0, 0, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 0, 1, 2, 31, 31, 0)
 ON DUPLICATE KEY UPDATE `title` = VALUES(`title`), `slug` = VALUES(`slug`), `tx_sluggi_sync` = 0;
 
 -- Page 20: Page with sync enabled for slash-in-title page tree inline edit test
 INSERT INTO `pages` (`uid`, `pid`, `title`, `slug`, `doktype`, `is_siteroot`, `hidden`, `deleted`, `tstamp`, `crdate`, `tx_sluggi_sync`, `perms_userid`, `perms_groupid`, `perms_user`, `perms_group`, `perms_everybody`)
-VALUES (20, 18, 'Synced Page', '/parent-section/synced-page', 1, 0, 0, 0, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 1, 1, 1, 31, 31, 0)
+VALUES (20, 18, 'Synced Page', '/parent-section/synced-page', 1, 0, 0, 0, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 1, 1, 2, 31, 31, 0)
 ON DUPLICATE KEY UPDATE `title` = VALUES(`title`), `slug` = VALUES(`slug`), `tx_sluggi_sync` = 1;
 
 -- =============================================
@@ -146,7 +146,35 @@ INSERT INTO `be_users` (`uid`, `pid`, `username`, `password`, `admin`, `usergrou
 VALUES (1, 0, 'admin', '$argon2id$v=19$m=65536,t=4,p=1$cDN1QXFkY21Rd1NGR2YwMQ$6co8ugqO4m6sdtCw08XSe9ayMuKNzgUDKpcfU9sSODg', 1, '', 0, 0)
 ON DUPLICATE KEY UPDATE `username` = VALUES(`username`), `password` = VALUES(`password`), `admin` = 1;
 
--- Editor user (non-admin, password: docker)
+-- Editor user (non-admin, password: docker) - only in group 2 for hierarchy permission tests
 INSERT INTO `be_users` (`uid`, `pid`, `username`, `password`, `admin`, `usergroup`, `disable`, `deleted`)
-VALUES (2, 0, 'editor', '$argon2id$v=19$m=65536,t=4,p=1$cDN1QXFkY21Rd1NGR2YwMQ$6co8ugqO4m6sdtCw08XSe9ayMuKNzgUDKpcfU9sSODg', 0, '1', 0, 0)
-ON DUPLICATE KEY UPDATE `username` = VALUES(`username`), `password` = VALUES(`password`), `admin` = 0, `usergroup` = '1';
+VALUES (2, 0, 'editor', '$argon2id$v=19$m=65536,t=4,p=1$cDN1QXFkY21Rd1NGR2YwMQ$6co8ugqO4m6sdtCw08XSe9ayMuKNzgUDKpcfU9sSODg', 0, '2', 0, 0)
+ON DUPLICATE KEY UPDATE `username` = VALUES(`username`), `password` = VALUES(`password`), `admin` = 0, `usergroup` = '2';
+
+-- =============================================
+-- hierarchy-permission.spec.ts (uses pages 23-26)
+-- =============================================
+-- Editor group for Institute section (uid=2) - includes page 18 for last-segment-only tests and page 25 for hierarchy tests
+INSERT INTO `be_groups` (`uid`, `pid`, `title`, `tables_modify`, `pagetypes_select`, `non_exclude_fields`, `db_mountpoints`, `groupMods`)
+VALUES (2, 0, 'Institute Editors', 'pages', '1,254', 'pages:slug,pages:title,pages:nav_title', '18,25', 'web_layout,web_list')
+ON DUPLICATE KEY UPDATE `title` = VALUES(`title`), `tables_modify` = VALUES(`tables_modify`), `pagetypes_select` = VALUES(`pagetypes_select`), `non_exclude_fields` = VALUES(`non_exclude_fields`), `db_mountpoints` = VALUES(`db_mountpoints`), `groupMods` = VALUES(`groupMods`);
+
+-- Page 23: Hierarchy test - root section (admin only, editor cannot edit)
+INSERT INTO `pages` (`uid`, `pid`, `title`, `slug`, `doktype`, `is_siteroot`, `hidden`, `deleted`, `tstamp`, `crdate`, `tx_sluggi_sync`, `perms_userid`, `perms_groupid`, `perms_user`, `perms_group`, `perms_everybody`)
+VALUES (23, 1, 'Organization', '/organization', 1, 0, 0, 0, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 0, 1, 0, 31, 0, 1)
+ON DUPLICATE KEY UPDATE `title` = VALUES(`title`), `slug` = VALUES(`slug`), `tx_sluggi_sync` = 0, `perms_userid` = 1, `perms_groupid` = 0, `perms_user` = 31, `perms_group` = 0, `perms_everybody` = 1;
+
+-- Page 24: Hierarchy test - department section (admin only, editor cannot edit)
+INSERT INTO `pages` (`uid`, `pid`, `title`, `slug`, `doktype`, `is_siteroot`, `hidden`, `deleted`, `tstamp`, `crdate`, `tx_sluggi_sync`, `perms_userid`, `perms_groupid`, `perms_user`, `perms_group`, `perms_everybody`)
+VALUES (24, 23, 'Department', '/organization/department', 1, 0, 0, 0, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 0, 1, 0, 31, 0, 1)
+ON DUPLICATE KEY UPDATE `title` = VALUES(`title`), `slug` = VALUES(`slug`), `tx_sluggi_sync` = 0, `perms_userid` = 1, `perms_groupid` = 0, `perms_user` = 31, `perms_group` = 0, `perms_everybody` = 1;
+
+-- Page 25: Hierarchy test - institute section (editor can edit via group 2)
+INSERT INTO `pages` (`uid`, `pid`, `title`, `slug`, `doktype`, `is_siteroot`, `hidden`, `deleted`, `tstamp`, `crdate`, `tx_sluggi_sync`, `perms_userid`, `perms_groupid`, `perms_user`, `perms_group`, `perms_everybody`)
+VALUES (25, 24, 'Institute', '/organization/department/institute', 1, 0, 0, 0, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 0, 1, 2, 31, 31, 1)
+ON DUPLICATE KEY UPDATE `title` = VALUES(`title`), `slug` = VALUES(`slug`), `tx_sluggi_sync` = 0, `perms_userid` = 1, `perms_groupid` = 2, `perms_user` = 31, `perms_group` = 31, `perms_everybody` = 1;
+
+-- Page 26: Hierarchy test - about us (editor can edit via group 2)
+INSERT INTO `pages` (`uid`, `pid`, `title`, `slug`, `doktype`, `is_siteroot`, `hidden`, `deleted`, `tstamp`, `crdate`, `tx_sluggi_sync`, `perms_userid`, `perms_groupid`, `perms_user`, `perms_group`, `perms_everybody`)
+VALUES (26, 25, 'About Us', '/organization/department/institute/about-us', 1, 0, 0, 0, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 0, 1, 2, 31, 31, 1)
+ON DUPLICATE KEY UPDATE `title` = VALUES(`title`), `slug` = VALUES(`slug`), `tx_sluggi_sync` = 0, `perms_userid` = 1, `perms_groupid` = 2, `perms_user` = 31, `perms_group` = 31, `perms_everybody` = 1;

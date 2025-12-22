@@ -47,6 +47,9 @@ final readonly class SlugElementRenderer
         if ($context['lastSegmentOnly'] ?? false) {
             $attributes['last-segment-only'] = '';
         }
+        if (!empty($context['lockedPrefix'])) {
+            $attributes['locked-prefix'] = $context['lockedPrefix'];
+        }
 
         return $attributes;
     }
