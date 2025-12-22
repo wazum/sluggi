@@ -547,6 +547,28 @@ describe('SluggiElement', () => {
             document.body.removeChild(titleInput);
         });
 
+        it('hides when source field is cleared via change event', async () => {
+            const titleInput = document.createElement('input');
+            titleInput.setAttribute('data-sluggi-source', '');
+            titleInput.setAttribute('data-formengine-input-name', 'data[pages][123][title]');
+            titleInput.value = 'Some Title';
+            document.body.appendChild(titleInput);
+
+            const el = await fixture<SluggiElement>(html`
+                <sluggi-element value="/test"></sluggi-element>
+            `);
+            expect(el.shadowRoot!.querySelector('.sluggi-regenerate-btn')).to.exist;
+
+            titleInput.value = '';
+            titleInput.dispatchEvent(new Event('change', { bubbles: true }));
+            await new Promise(r => setTimeout(r, 200));
+            await el.updateComplete;
+
+            expect(el.shadowRoot!.querySelector('.sluggi-regenerate-btn')).to.not.exist;
+
+            document.body.removeChild(titleInput);
+        });
+
         it('dispatches sluggi-request-proposal with mode recreate when clicked', async () => {
             const titleInput = document.createElement('input');
             titleInput.setAttribute('data-sluggi-source', '');

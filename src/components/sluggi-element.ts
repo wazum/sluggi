@@ -531,6 +531,7 @@ export class SluggiElement extends LitElement {
     private handleSourceFieldChange(event: Event) {
         const changedElement = event.target as HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement;
         if (changedElement.value.trim() === '') {
+            this.requestUpdate();
             return;
         }
 
