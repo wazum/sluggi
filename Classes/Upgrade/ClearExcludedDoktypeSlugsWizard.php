@@ -13,7 +13,7 @@ use Wazum\Sluggi\Configuration\ExtensionConfiguration;
 final readonly class ClearExcludedDoktypeSlugsWizard implements UpgradeWizardInterface
 {
     public function __construct(
-        private ExtensionConfiguration $config,
+        private ExtensionConfiguration $extensionConfiguration,
         private ConnectionPool $connectionPool,
     ) {
     }
@@ -25,7 +25,7 @@ final readonly class ClearExcludedDoktypeSlugsWizard implements UpgradeWizardInt
 
     public function getDescription(): string
     {
-        $pageTypes = implode(', ', $this->config->getExcludedPageTypes());
+        $pageTypes = implode(', ', $this->extensionConfiguration->getExcludedPageTypes());
 
         return sprintf(
             'Removes URL slugs from pages with excluded page types (%s) to free up the slug namespace.',
@@ -35,7 +35,7 @@ final readonly class ClearExcludedDoktypeSlugsWizard implements UpgradeWizardInt
 
     public function executeUpdate(): bool
     {
-        $excludedPageTypes = $this->config->getExcludedPageTypes();
+        $excludedPageTypes = $this->extensionConfiguration->getExcludedPageTypes();
         if ($excludedPageTypes === []) {
             return true;
         }
@@ -52,7 +52,7 @@ final readonly class ClearExcludedDoktypeSlugsWizard implements UpgradeWizardInt
 
     public function updateNecessary(): bool
     {
-        $excludedPageTypes = $this->config->getExcludedPageTypes();
+        $excludedPageTypes = $this->extensionConfiguration->getExcludedPageTypes();
         if ($excludedPageTypes === []) {
             return false;
         }

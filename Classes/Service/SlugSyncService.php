@@ -9,13 +9,13 @@ use Wazum\Sluggi\Configuration\ExtensionConfiguration;
 final readonly class SlugSyncService
 {
     public function __construct(
-        private ExtensionConfiguration $config,
+        private ExtensionConfiguration $extensionConfiguration,
     ) {
     }
 
     public function isSyncFeatureEnabled(): bool
     {
-        return $this->config->isSyncEnabled();
+        return $this->extensionConfiguration->isSyncEnabled();
     }
 
     /**

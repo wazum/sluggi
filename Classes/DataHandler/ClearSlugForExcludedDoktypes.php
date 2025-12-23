@@ -11,7 +11,7 @@ use Wazum\Sluggi\Configuration\ExtensionConfiguration;
 final readonly class ClearSlugForExcludedDoktypes
 {
     public function __construct(
-        private ExtensionConfiguration $config,
+        private ExtensionConfiguration $extensionConfiguration,
     ) {
     }
 
@@ -30,7 +30,7 @@ final readonly class ClearSlugForExcludedDoktypes
         }
 
         $pageType = $this->getPageType($status, $id, $fieldArray);
-        if ($this->config->isPageTypeExcluded($pageType)) {
+        if ($this->extensionConfiguration->isPageTypeExcluded($pageType)) {
             $fieldArray['slug'] = '';
             $fieldArray['tx_sluggi_sync'] = 0;
         }

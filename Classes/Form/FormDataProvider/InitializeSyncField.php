@@ -10,7 +10,7 @@ use Wazum\Sluggi\Configuration\ExtensionConfiguration;
 final readonly class InitializeSyncField implements FormDataProviderInterface
 {
     public function __construct(
-        private ExtensionConfiguration $config,
+        private ExtensionConfiguration $extensionConfiguration,
     ) {
     }
 
@@ -25,7 +25,7 @@ final readonly class InitializeSyncField implements FormDataProviderInterface
             return $result;
         }
 
-        if ($this->config->isSyncEnabled()) {
+        if ($this->extensionConfiguration->isSyncEnabled()) {
             $result['databaseRow']['tx_sluggi_sync'] = 1;
         }
 

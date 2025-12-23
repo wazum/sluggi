@@ -9,13 +9,13 @@ use Wazum\Sluggi\Configuration\ExtensionConfiguration;
 final readonly class LastSegmentValidationService
 {
     public function __construct(
-        private ExtensionConfiguration $config,
+        private ExtensionConfiguration $extensionConfiguration,
     ) {
     }
 
     public function shouldRestrictUser(bool $isAdmin): bool
     {
-        if (!$this->config->isLastSegmentOnlyEnabled()) {
+        if (!$this->extensionConfiguration->isLastSegmentOnlyEnabled()) {
             return false;
         }
 

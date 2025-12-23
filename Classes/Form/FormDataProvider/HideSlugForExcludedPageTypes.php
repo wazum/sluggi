@@ -10,7 +10,7 @@ use Wazum\Sluggi\Configuration\ExtensionConfiguration;
 final readonly class HideSlugForExcludedPageTypes implements FormDataProviderInterface
 {
     public function __construct(
-        private ExtensionConfiguration $config,
+        private ExtensionConfiguration $extensionConfiguration,
     ) {
     }
 
@@ -30,7 +30,7 @@ final readonly class HideSlugForExcludedPageTypes implements FormDataProviderInt
             $pageType = (int)($result['databaseRow']['doktype'][0] ?? 1);
         }
 
-        if ($this->config->isPageTypeExcluded($pageType)) {
+        if ($this->extensionConfiguration->isPageTypeExcluded($pageType)) {
             unset($result['processedTca']['columns']['slug']);
         }
 
