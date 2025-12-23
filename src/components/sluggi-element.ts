@@ -689,6 +689,7 @@ export class SluggiElement extends LitElement {
         const syncInput = this.parentElement?.querySelector('.sluggi-sync-field') as HTMLInputElement | null;
         if (syncInput) {
             syncInput.value = this.isSynced ? '1' : '0';
+            syncInput.classList.add('has-change');
             syncInput.dispatchEvent(new Event('change', { bubbles: true }));
         }
     }
@@ -753,6 +754,7 @@ export class SluggiElement extends LitElement {
         const hiddenInput = this.parentElement?.querySelector('.sluggi-hidden-field') as HTMLInputElement | null;
         if (hiddenInput) {
             hiddenInput.value = this.hiddenInputValue;
+            hiddenInput.classList.add('has-change');
             hiddenInput.dispatchEvent(new Event('change', { bubbles: true }));
         }
     }

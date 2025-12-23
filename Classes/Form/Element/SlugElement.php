@@ -206,11 +206,13 @@ final class SlugElement extends AbstractFormElement
                                 class="sluggi-hidden-field"
                                 name="%s"
                                 value="%s"
+                                data-formengine-input-name="%s"
                             />
                             <input type="hidden"
                                 class="sluggi-sync-field"
                                 name="%s"
                                 value="%s"
+                                data-formengine-input-name="%s"
                             />
                         </div>
                         <div class="form-wizards-item-bottom">%s</div>
@@ -222,8 +224,10 @@ final class SlugElement extends AbstractFormElement
             $attributeString,
             htmlspecialchars($context['itemName']),
             htmlspecialchars($context['itemValue']),
+            htmlspecialchars($context['itemName']),
             htmlspecialchars($context['syncFieldName']),
             $context['isSynced'] ? '1' : '0',
+            htmlspecialchars($context['syncFieldName']),
             $fieldWizardHtml
         );
     }

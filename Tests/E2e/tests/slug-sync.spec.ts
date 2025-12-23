@@ -159,4 +159,35 @@ test.describe('Slug Sync Toggle - TYPO3 Integration', () => {
     // KEY ASSERTION: Sync state must persist after full page reload
     await expect(syncToggle).toHaveClass(/is-synced/);
   });
+
+  test('toggling sync marks form as dirty and shows unsaved changes modal', async ({ page }) => {
+    // Use dedicated page 16
+    await page.goto('/typo3/record/edit?edit[pages][16]=edit');
+    const frame = page.frameLocator('iframe');
+    await expect(frame.locator('h1')).toContainText('Edit Page', { timeout: 15000 });
+    const slugElement = frame.locator('sluggi-element');
+    const syncToggle = slugElement.locator('.sluggi-sync-toggle');
+
+    // Verify sync is OFF initially
+    await expect(syncToggle).not.toHaveClass(/is-synced/);
+
+    // Toggle sync ON
+    await syncToggle.click();
+    await slugElement.locator('.sluggi-spinner').waitFor({ state: 'hidden', timeout: 10000 }).catch(() => {});
+    await expect(syncToggle).toHaveClass(/is-synced/);
+
+    // Try to navigate away - this should trigger the unsaved changes modal
+    await page.click('.scaffold-modulemenu [data-modulemenu-identifier="web_layout"]');
+
+    // TYPO3's unsaved changes modal should appear
+    const modal = page.locator('.modal');
+    await expect(modal).toBeVisible({ timeout: 5000 });
+
+    // Verify it's the unsaved changes modal (check header or body text)
+    await expect(modal).toContainText(/unsaved/i);
+
+    // Dismiss the modal by clicking "No" / "Keep editing"
+    await modal.locator('button[name="no"]').click();
+    await expect(modal).not.toBeVisible();
+  });
 });
