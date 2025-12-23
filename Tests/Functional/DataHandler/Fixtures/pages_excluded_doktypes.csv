@@ -1,0 +1,9 @@
+"be_users"
+,"uid","pid","username","password","admin"
+,1,0,"admin","$2y$12$abc123",1
+
+"pages"
+,"uid","pid","title","slug","tx_sluggi_sync","doktype"
+,1,0,"Root Page","/",0,1
+,2,1,"Sysfolder","/sysfolder",0,254
+,3,1,"Standard Page","/standard-page",1,1

@@ -37,4 +37,29 @@ final readonly class ExtensionConfiguration
             return false;
         }
     }
+
+    /**
+     * @return list<int>
+     */
+    public function getExcludedPageTypes(): array
+    {
+        try {
+            $value = (string)$this->extensionConfiguration->get(
+                extension: 'sluggi',
+                path: 'exclude_doktypes'
+            );
+            if ($value === '') {
+                return [];
+            }
+
+            return array_values(array_map(intval(...), array_filter(explode(',', $value))));
+        } catch (Exception) {
+            return [];
+        }
+    }
+
+    public function isPageTypeExcluded(int $pageType): bool
+    {
+        return in_array($pageType, $this->getExcludedPageTypes(), true);
+    }
 }

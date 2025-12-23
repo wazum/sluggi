@@ -183,14 +183,17 @@ jobs:
           $testId = $_SERVER['HTTP_X_PLAYWRIGHT_TEST_ID'] ?? 'default';
           $sluggiSettings = match ($testId) {
               'last-segment-only' => [
+                  'exclude_doktypes' => '254',
                   'last_segment_only' => '1',
                   'synchronize' => '1',
               ],
               'hierarchy-permission' => [
+                  'exclude_doktypes' => '254',
                   'last_segment_only' => '0',
                   'synchronize' => '0',
               ],
               default => [
+                  'exclude_doktypes' => '254',
                   'last_segment_only' => '0',
                   'synchronize' => '1',
               ],

@@ -8,6 +8,7 @@ use TYPO3\CMS\Backend\Form\FormDataProvider\TcaColumnsProcessCommon;
 use TYPO3\CMS\Core\Http\ApplicationType;
 use TYPO3\CMS\Core\Page\PageRenderer;
 use Wazum\Sluggi\Controller\FormSlugAjaxController;
+use Wazum\Sluggi\DataHandler\ClearSlugForExcludedDoktypes;
 use Wazum\Sluggi\DataHandler\HandlePageCopy;
 use Wazum\Sluggi\DataHandler\HandlePageMove;
 use Wazum\Sluggi\DataHandler\HandlePageUpdate;
@@ -15,6 +16,7 @@ use Wazum\Sluggi\DataHandler\ValidateHierarchyPermission;
 use Wazum\Sluggi\DataHandler\ValidateLastSegmentOnly;
 use Wazum\Sluggi\Form\Element\SlugElement;
 use Wazum\Sluggi\Form\Element\SlugSourceElement;
+use Wazum\Sluggi\Form\FormDataProvider\HideSlugForExcludedPageTypes;
 use Wazum\Sluggi\Form\FormDataProvider\InitializeSyncField;
 
 // Form elements
@@ -32,6 +34,10 @@ $GLOBALS['TYPO3_CONF_VARS']['SYS']['formEngine']['nodeRegistry'][1733600001] = [
 
 // Form data providers
 $GLOBALS['TYPO3_CONF_VARS']['SYS']['formEngine']['formDataGroup']['tcaDatabaseRecord'][InitializeSyncField::class] = [
+    'depends' => [TcaColumnsProcessCommon::class],
+];
+
+$GLOBALS['TYPO3_CONF_VARS']['SYS']['formEngine']['formDataGroup']['tcaDatabaseRecord'][HideSlugForExcludedPageTypes::class] = [
     'depends' => [TcaColumnsProcessCommon::class],
 ];
 
@@ -58,6 +64,9 @@ $GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['t3lib/class.t3lib_tcemain.php']['proc
 
 $GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['t3lib/class.t3lib_tcemain.php']['processDatamapClass']['sluggi_hierarchy'] =
     ValidateHierarchyPermission::class;
+
+$GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['t3lib/class.t3lib_tcemain.php']['processDatamapClass']['sluggi_exclude_doktypes'] =
+    ClearSlugForExcludedDoktypes::class;
 
 $GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['t3lib/class.t3lib_tcemain.php']['moveRecordClass']['sluggi'] =
     HandlePageMove::class;
