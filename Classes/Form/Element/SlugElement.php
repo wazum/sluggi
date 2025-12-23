@@ -18,14 +18,18 @@ use Wazum\Sluggi\Service\SlugSyncService;
 
 final class SlugElement extends AbstractFormElement
 {
-    /** @var array<string, array<string, string>> */
+    /**
+     * @var array<string, array<string, string>>
+     */
     protected $defaultFieldInformation = [
         'tcaDescription' => [
             'renderType' => 'tcaDescription',
         ],
     ];
 
-    /** @var array<string, array<string, mixed>> */
+    /**
+     * @var array<string, array<string, mixed>>
+     */
     protected $defaultFieldWizard = [
         'localizationStateSelector' => [
             'renderType' => 'localizationStateSelector',
@@ -51,7 +55,9 @@ final class SlugElement extends AbstractFormElement
     ) {
     }
 
-    /** @return array<string, mixed> */
+    /**
+     * @return array<string, mixed>
+     */
     public function render(): array
     {
         $parameterArray = $this->data['parameterArray'];
@@ -167,7 +173,9 @@ final class SlugElement extends AbstractFormElement
         ];
     }
 
-    /** @param array<int, string|array<int, string>> $fields */
+    /**
+     * @param array<int, string|array<int, string>> $fields
+     */
     private function hasUidInGeneratorFields(array $fields): bool
     {
         foreach ($fields as $field) {
@@ -231,7 +239,9 @@ final class SlugElement extends AbstractFormElement
         return $context['isLocked'] ? $attributeString . ' is-locked' : $attributeString;
     }
 
-    /** @return array<string, string> */
+    /**
+     * @return array<string, string>
+     */
     private function getLabels(): array
     {
         $languageService = $this->getLanguageService();

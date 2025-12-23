@@ -19,7 +19,9 @@ final class SlugGeneratorServiceTest extends TestCase
         $this->subject = new SlugGeneratorService();
     }
 
-    /** @return array<string, array{slug: string, expected: string}> */
+    /**
+     * @return array<string, array{slug: string, expected: string}>
+     */
     public static function lastSegmentDataProvider(): array
     {
         return [
@@ -49,7 +51,9 @@ final class SlugGeneratorServiceTest extends TestCase
         self::assertSame($expected, $this->subject->getLastSegment($slug));
     }
 
-    /** @return array<string, array{parentSlug: string, childSlug: string, expected: string}> */
+    /**
+     * @return array<string, array{parentSlug: string, childSlug: string, expected: string}>
+     */
     public static function slugCombinationDataProvider(): array
     {
         return [

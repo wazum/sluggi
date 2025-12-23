@@ -54,7 +54,9 @@ final readonly class SlugElementRenderer
         return $attributes;
     }
 
-    /** @param array<string, string> $attributes */
+    /**
+     * @param array<string, string> $attributes
+     */
     public function buildAttributeString(array $attributes): string
     {
         $parts = [];

@@ -19,7 +19,9 @@ final readonly class ValidateLastSegmentOnly
     ) {
     }
 
-    /** @param array<string, mixed> $fieldArray */
+    /**
+     * @param array<string, mixed> $fieldArray
+     */
     public function processDatamap_preProcessFieldArray(
         array &$fieldArray,
         string $table,

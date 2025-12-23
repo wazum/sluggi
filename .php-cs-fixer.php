@@ -15,6 +15,11 @@ return (new PhpCsFixer\Config())
             'import_functions' => false,
             'import_constants' => false,
         ],
+        'phpdoc_line_span' => [
+            'const' => 'multi',
+            'method' => 'multi',
+            'property' => 'multi',
+        ],
     ])
     ->setFinder($finder)
     ->setRiskyAllowed(true);

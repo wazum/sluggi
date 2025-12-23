@@ -21,7 +21,9 @@ final readonly class HandlePageUpdate
     ) {
     }
 
-    /** @param array<string, mixed> $fieldArray */
+    /**
+     * @param array<string, mixed> $fieldArray
+     */
     public function processDatamap_postProcessFieldArray(
         string $status,
         string $table,

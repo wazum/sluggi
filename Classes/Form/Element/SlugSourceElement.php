@@ -18,7 +18,9 @@ final class SlugSourceElement extends InputTextElement
     ) {
     }
 
-    /** @return array<string, mixed> */
+    /**
+     * @return array<string, mixed>
+     */
     public function render(): array
     {
         $result = parent::render();

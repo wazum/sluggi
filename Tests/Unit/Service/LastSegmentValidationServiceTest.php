@@ -50,7 +50,9 @@ final class LastSegmentValidationServiceTest extends TestCase
         self::assertFalse($subject->shouldRestrictUser(isAdmin: false));
     }
 
-    /** @return array<string, array{oldSlug: string, newSlug: string, expected: bool}> */
+    /**
+     * @return array<string, array{oldSlug: string, newSlug: string, expected: bool}>
+     */
     public static function slugValidationDataProvider(): array
     {
         return [

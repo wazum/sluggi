@@ -13,7 +13,9 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 final readonly class SlugGeneratorService
 {
-    /** @param array<string, mixed> $record */
+    /**
+     * @param array<string, mixed> $record
+     */
     public function generate(array $record, int $pid): string
     {
         $slugHelper = $this->getSlugHelper();

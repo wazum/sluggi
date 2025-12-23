@@ -18,14 +18,18 @@ final readonly class SlugSyncService
         return $this->config->isSyncEnabled();
     }
 
-    /** @param array<string, mixed> $record */
+    /**
+     * @param array<string, mixed> $record
+     */
     public function shouldSync(array $record): bool
     {
         return $this->isSyncFeatureEnabled()
             && ($record['tx_sluggi_sync'] ?? false);
     }
 
-    /** @param array<string, mixed> $record */
+    /**
+     * @param array<string, mixed> $record
+     */
     public function shouldShowSourceBadge(string $command, array $record): bool
     {
         if ($command === 'new') {
@@ -35,7 +39,9 @@ final readonly class SlugSyncService
         return $this->shouldSync($record);
     }
 
-    /** @param array<string, mixed> $fieldArray */
+    /**
+     * @param array<string, mixed> $fieldArray
+     */
     public function hasSourceFieldChanged(string $table, array $fieldArray): bool
     {
         $configService = new SlugConfigurationService();
@@ -44,7 +50,9 @@ final readonly class SlugSyncService
         return array_intersect($sourceFields, array_keys($fieldArray)) !== [];
     }
 
-    /** @param array<string, mixed> $record */
+    /**
+     * @param array<string, mixed> $record
+     */
     public function hasNonEmptySourceFieldValue(string $table, array $record): bool
     {
         $configService = new SlugConfigurationService();
