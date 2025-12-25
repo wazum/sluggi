@@ -8,3 +8,4 @@
 ,2,1,"Parent Page","/parent-page",1,0,1
 ,3,2,"Locked Child","/parent-page/locked-child",0,1,1
 ,4,2,"Unlocked Child","/parent-page/unlocked-child",0,0,1
+,5,3,"Grandchild Under Locked","/parent-page/locked-child/grandchild",0,0,1

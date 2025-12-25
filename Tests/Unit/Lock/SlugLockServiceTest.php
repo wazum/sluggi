@@ -85,4 +85,19 @@ final class SlugLockServiceTest extends TestCase
 
         self::assertFalse($result);
     }
+
+    #[Test]
+    public function hasLockedAncestorReturnsFalseWhenFeatureDisabled(): void
+    {
+        $coreConfig = $this->createMock(CoreExtensionConfiguration::class);
+        $coreConfig->method('get')
+            ->willReturnMap([
+                ['sluggi', 'lock', '0'],
+                ['sluggi', 'lock_descendants', '0'],
+            ]);
+
+        $subject = new SlugLockService(new ExtensionConfiguration($coreConfig));
+
+        self::assertFalse($subject->hasLockedAncestor(123));
+    }
 }

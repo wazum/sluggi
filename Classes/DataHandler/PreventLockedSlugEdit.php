@@ -45,7 +45,7 @@ final readonly class PreventLockedSlugEdit
             return;
         }
 
-        if ($this->lockService->isLocked($record)) {
+        if ($this->lockService->isLocked($record) || $this->lockService->hasLockedAncestor((int)$id)) {
             unset($fieldArray['slug']);
         }
     }

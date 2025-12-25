@@ -38,6 +38,18 @@ final readonly class ExtensionConfiguration
         }
     }
 
+    public function isLockDescendantsEnabled(): bool
+    {
+        try {
+            return $this->isLockEnabled() && (bool)$this->extensionConfiguration->get(
+                extension: 'sluggi',
+                path: 'lock_descendants'
+            );
+        } catch (Exception) {
+            return false;
+        }
+    }
+
     public function isLastSegmentOnlyEnabled(): bool
     {
         try {

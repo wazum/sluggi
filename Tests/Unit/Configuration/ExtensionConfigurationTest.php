@@ -89,4 +89,61 @@ final class ExtensionConfigurationTest extends TestCase
 
         self::assertFalse($subject->isLastSegmentOnlyEnabled());
     }
+
+    #[Test]
+    public function isLockDescendantsEnabledReturnsTrueWhenBothEnabled(): void
+    {
+        $coreConfig = $this->createMock(CoreExtensionConfiguration::class);
+        $coreConfig->method('get')
+            ->willReturnMap([
+                ['sluggi', 'lock', '1'],
+                ['sluggi', 'lock_descendants', '1'],
+            ]);
+
+        $subject = new ExtensionConfiguration($coreConfig);
+
+        self::assertTrue($subject->isLockDescendantsEnabled());
+    }
+
+    #[Test]
+    public function isLockDescendantsEnabledReturnsFalseWhenLockDisabled(): void
+    {
+        $coreConfig = $this->createMock(CoreExtensionConfiguration::class);
+        $coreConfig->method('get')
+            ->willReturnMap([
+                ['sluggi', 'lock', '0'],
+                ['sluggi', 'lock_descendants', '1'],
+            ]);
+
+        $subject = new ExtensionConfiguration($coreConfig);
+
+        self::assertFalse($subject->isLockDescendantsEnabled());
+    }
+
+    #[Test]
+    public function isLockDescendantsEnabledReturnsFalseWhenDescendantsDisabled(): void
+    {
+        $coreConfig = $this->createMock(CoreExtensionConfiguration::class);
+        $coreConfig->method('get')
+            ->willReturnMap([
+                ['sluggi', 'lock', '1'],
+                ['sluggi', 'lock_descendants', '0'],
+            ]);
+
+        $subject = new ExtensionConfiguration($coreConfig);
+
+        self::assertFalse($subject->isLockDescendantsEnabled());
+    }
+
+    #[Test]
+    public function isLockDescendantsEnabledReturnsFalseWhenSettingIsMissing(): void
+    {
+        $coreConfig = $this->createMock(CoreExtensionConfiguration::class);
+        $coreConfig->method('get')
+            ->willThrowException(new Exception('Configuration not found'));
+
+        $subject = new ExtensionConfiguration($coreConfig);
+
+        self::assertFalse($subject->isLockDescendantsEnabled());
+    }
 }

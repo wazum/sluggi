@@ -26,6 +26,7 @@ final class LockedSlugTest extends FunctionalTestCase
             'sluggi' => [
                 'synchronize' => '1',
                 'lock' => '1',
+                'lock_descendants' => '1',
             ],
         ],
     ];

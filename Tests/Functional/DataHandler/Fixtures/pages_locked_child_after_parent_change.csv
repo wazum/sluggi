@@ -4,3 +4,4 @@
 ,2,1,"Updated Parent","/updated-parent",1,0,1
 ,3,2,"Locked Child","/parent-page/locked-child",0,1,1
 ,4,2,"Unlocked Child","/updated-parent/unlocked-child",0,0,1
+,5,3,"Grandchild Under Locked","/parent-page/locked-child/grandchild",0,0,1
