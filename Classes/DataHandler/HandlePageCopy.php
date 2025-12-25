@@ -35,16 +35,25 @@ final readonly class HandlePageCopy
         }
 
         $copiedPages = $dataHandler->copyMappingArray['pages'] ?? [];
+        $processedSlugs = [];
+
         foreach ($copiedPages as $sourceUid => $targetUid) {
-            $this->updateSlugForCopiedPage($sourceUid, $targetUid, $pasteDataMap);
+            $this->updateSlugForCopiedPage($sourceUid, $targetUid, $pasteDataMap, $copiedPages, $processedSlugs);
         }
     }
 
     /**
      * @param array<string, array<int, array<string, mixed>>> $pasteDataMap
+     * @param array<int, int>                                 $copiedPages
+     * @param array<int, string>                              $processedSlugs
      */
-    private function updateSlugForCopiedPage(int $sourceUid, int $targetUid, array &$pasteDataMap): void
-    {
+    private function updateSlugForCopiedPage(
+        int $sourceUid,
+        int $targetUid,
+        array &$pasteDataMap,
+        array $copiedPages,
+        array &$processedSlugs,
+    ): void {
         $sourcePage = BackendUtility::getRecordWSOL('pages', $sourceUid);
         if (empty($sourcePage)) {
             return;
@@ -57,7 +66,10 @@ final readonly class HandlePageCopy
 
         $languageId = (int)($sourcePage['sys_language_uid'] ?? 0);
         $parentPid = (int)$targetPage['pid'];
-        $parentSlug = $this->slugGeneratorService->getParentSlug($parentPid, $languageId);
+
+        // Check if parent was also copied and we already processed its slug
+        $parentSlug = $processedSlugs[$parentPid] ?? $this->slugGeneratorService->getParentSlug($parentPid, $languageId);
+
         $newSlug = $this->slugGeneratorService->combineWithParent(
             $parentSlug,
             $sourcePage['slug'] ?? '',
@@ -70,6 +82,9 @@ final readonly class HandlePageCopy
 
         $pasteDataMap['pages'][$targetUid]['slug'] = $newSlug;
         $pasteDataMap['pages'][$targetUid]['slug_locked'] = 0;
+
+        // Track this slug for child pages that might reference it
+        $processedSlugs[$targetUid] = $newSlug;
     }
 
     private function getSlugHelper(): SlugHelper

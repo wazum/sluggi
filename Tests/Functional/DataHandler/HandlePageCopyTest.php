@@ -116,4 +116,29 @@ final class HandlePageCopyTest extends FunctionalTestCase
 
         $this->assertCSVDataSet(__DIR__ . '/Fixtures/pages_after_copy_translated.csv');
     }
+
+    #[Test]
+    public function copyingPageTreeUpdatesChildSlugsWithNewParentPrefix(): void
+    {
+        $this->setUpTest('pages_for_copy_with_children.csv');
+
+        // Enable recursive copy (copy subpages)
+        $backendUser = $this->setUpBackendUser(1);
+        $backendUser->uc['copyLevels'] = 10;
+        $backendUser->writeUC();
+
+        // Copy Source Parent (page 3) with children into Target Parent (page 2)
+        // Children should get new parent's slug prefix, not the original parent's
+        $dataHandler = GeneralUtility::makeInstance(DataHandler::class);
+        $dataHandler->start([], [
+            'pages' => [
+                3 => [
+                    'copy' => 2,
+                ],
+            ],
+        ]);
+        $dataHandler->process_cmdmap();
+
+        $this->assertCSVDataSet(__DIR__ . '/Fixtures/pages_after_copy_with_children.csv');
+    }
 }
