@@ -24,6 +24,12 @@
             <trans-unit id="pages.slug_locked" resname="pages.slug_locked">
                 <source>Sluggi: Lock slug</source>
             </trans-unit>
+            <trans-unit id="restriction.sync" resname="restriction.sync">
+                <source>The slug is automatically synchronized with the source fields.</source>
+            </trans-unit>
+            <trans-unit id="restriction.lock" resname="restriction.lock">
+                <source>The slug is locked and cannot be edited.</source>
+            </trans-unit>
         </body>
     </file>
 </xliff>

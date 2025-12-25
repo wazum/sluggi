@@ -231,7 +231,18 @@ export class SluggiElement extends LitElement {
                     ${this.renderControls()}
                 </div>
             </div>
+            ${this.renderRestrictionNote()}
         `;
+    }
+
+    private renderRestrictionNote() {
+        if (!this.isSynced && !this.isLocked) return nothing;
+
+        const message = this.isSynced
+            ? this.labels.syncRestrictionNote || 'The slug is automatically synchronized with the source fields.'
+            : this.labels.lockRestrictionNote || 'The slug is locked and cannot be edited.';
+
+        return html`<p class="sluggi-restriction-note">${message}</p>`;
     }
 
     private renderViewMode() {

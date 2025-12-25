@@ -392,3 +392,15 @@
 .sluggi-regenerate-btn:hover svg {
     animation: sluggi-rotate 0.5s ease;
 }
+
+// =========================================================================
+// Restriction Note
+// =========================================================================
+
+.sluggi-restriction-note {
+    margin: 0.5em 0 0;
+    padding: 0;
+    font-size: 11px;
+    color: var(--sluggi-secondary-color);
+    font-style: italic;
+}

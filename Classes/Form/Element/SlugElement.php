@@ -277,6 +277,8 @@ final class SlugElement extends AbstractFormElement
             'conflict.suggestion' => $languageService->sL('LLL:EXT:sluggi/Resources/Private/Language/locallang.xlf:conflict.suggestion'),
             'conflict.button.cancel' => $languageService->sL('LLL:EXT:sluggi/Resources/Private/Language/locallang.xlf:conflict.button.cancel'),
             'conflict.button.useSuggestion' => $languageService->sL('LLL:EXT:sluggi/Resources/Private/Language/locallang.xlf:conflict.button.useSuggestion'),
+            'syncRestrictionNote' => $languageService->sL('LLL:EXT:sluggi/Resources/Private/Language/locallang.xlf:restriction.sync'),
+            'lockRestrictionNote' => $languageService->sL('LLL:EXT:sluggi/Resources/Private/Language/locallang.xlf:restriction.lock'),
         ];
     }
 

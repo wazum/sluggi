@@ -1427,4 +1427,42 @@ describe('SluggiElement', () => {
             document.body.removeChild(titleInput);
         });
     });
+
+    describe('Restriction Notes', () => {
+        it('shows sync restriction note when isSynced', async () => {
+            const el = await fixture<SluggiElement>(html`
+                <sluggi-element
+                    value="/test"
+                    is-synced
+                ></sluggi-element>
+            `);
+
+            const note = el.shadowRoot!.querySelector('.sluggi-restriction-note');
+            expect(note).to.exist;
+            expect(note?.textContent).to.contain('synchronized');
+        });
+
+        it('shows lock restriction note when isLocked', async () => {
+            const el = await fixture<SluggiElement>(html`
+                <sluggi-element
+                    value="/test"
+                    is-locked
+                ></sluggi-element>
+            `);
+
+            const note = el.shadowRoot!.querySelector('.sluggi-restriction-note');
+            expect(note).to.exist;
+            expect(note?.textContent).to.contain('locked');
+        });
+
+        it('does not show restriction note when neither synced nor locked', async () => {
+            const el = await fixture<SluggiElement>(html`
+                <sluggi-element
+                    value="/test"
+                ></sluggi-element>
+            `);
+
+            expect(el.shadowRoot!.querySelector('.sluggi-restriction-note')).to.be.null;
+        });
+    });
 });
