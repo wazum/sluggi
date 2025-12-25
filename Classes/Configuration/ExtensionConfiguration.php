@@ -26,6 +26,18 @@ final readonly class ExtensionConfiguration
         }
     }
 
+    public function isLockEnabled(): bool
+    {
+        try {
+            return (bool)$this->extensionConfiguration->get(
+                extension: 'sluggi',
+                path: 'lock'
+            );
+        } catch (Exception) {
+            return false;
+        }
+    }
+
     public function isLastSegmentOnlyEnabled(): bool
     {
         try {

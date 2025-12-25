@@ -9,12 +9,14 @@ use TYPO3\CMS\Core\DataHandling\DataHandler;
 use TYPO3\CMS\Redirects\RedirectUpdate\SlugRedirectChangeItemFactory;
 use TYPO3\CMS\Redirects\Service\SlugService;
 use Wazum\Sluggi\Service\SlugGeneratorService;
+use Wazum\Sluggi\Service\SlugLockService;
 use Wazum\Sluggi\Service\SlugSyncService;
 
 final readonly class HandlePageUpdate
 {
     public function __construct(
         private SlugSyncService $syncService,
+        private SlugLockService $lockService,
         private SlugGeneratorService $generatorService,
         private SlugRedirectChangeItemFactory $changeItemFactory,
         private SlugService $slugService,
@@ -41,6 +43,10 @@ final readonly class HandlePageUpdate
 
         $record = BackendUtility::getRecordWSOL($table, (int)$id);
         if ($record === null) {
+            return;
+        }
+
+        if ($this->lockService->isLocked($record)) {
             return;
         }
 

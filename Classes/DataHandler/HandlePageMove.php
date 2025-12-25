@@ -8,11 +8,13 @@ use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\DataHandling\DataHandler;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use Wazum\Sluggi\Service\SlugGeneratorService;
+use Wazum\Sluggi\Service\SlugLockService;
 
 final readonly class HandlePageMove
 {
     public function __construct(
         private SlugGeneratorService $slugGeneratorService,
+        private SlugLockService $lockService,
     ) {
     }
 
@@ -57,8 +59,12 @@ final readonly class HandlePageMove
 
     private function updateSlugForMovedPage(int $id, int $targetId, DataHandler $dataHandler): void
     {
-        $currentPage = BackendUtility::getRecordWSOL('pages', $id, 'uid,slug,sys_language_uid');
+        $currentPage = BackendUtility::getRecordWSOL('pages', $id, 'uid,slug,sys_language_uid,slug_locked');
         if (empty($currentPage)) {
+            return;
+        }
+
+        if ($this->lockService->isLocked($currentPage)) {
             return;
         }
 

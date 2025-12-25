@@ -717,6 +717,30 @@ describe('SluggiElement', () => {
             expect(el.shadowRoot!.querySelector('.sluggi-sync-toggle')).to.be.null;
         });
 
+        it('is hidden when isLocked is true (lock takes precedence)', async () => {
+            const titleInput = document.createElement('input');
+            titleInput.setAttribute('data-sluggi-source', '');
+            titleInput.setAttribute('data-formengine-input-name', 'data[pages][456][title]');
+            titleInput.value = 'Demo';
+            document.body.appendChild(titleInput);
+
+            const el = await fixture<SluggiElement>(html`
+                <sluggi-element
+                    value="/demo-1"
+                    page-id="123"
+                    record-id="456"
+                    table-name="pages"
+                    field-name="slug"
+                    sync-feature-enabled
+                    is-locked
+                ></sluggi-element>
+            `);
+
+            expect(el.shadowRoot!.querySelector('.sluggi-sync-toggle')).to.be.null;
+
+            document.body.removeChild(titleInput);
+        });
+
         it('hides source badges when toggling sync OFF', async () => {
             const titleInput = document.createElement('input');
             titleInput.setAttribute('data-sluggi-source', '');
@@ -1174,6 +1198,136 @@ describe('SluggiElement', () => {
             await el.updateComplete;
 
             expect(hidden.value).to.equal('/updated');
+        });
+    });
+
+    describe('Lock Toggle', () => {
+        it('is hidden when lockFeatureEnabled is false', async () => {
+            const el = await fixture<SluggiElement>(html`
+                <sluggi-element
+                    value="/demo"
+                    page-id="123"
+                    record-id="456"
+                    table-name="pages"
+                    field-name="slug"
+                ></sluggi-element>
+            `);
+
+            expect(el.shadowRoot!.querySelector('.sluggi-lock-toggle')).to.be.null;
+        });
+
+        it('is visible when lockFeatureEnabled is true', async () => {
+            const el = await fixture<SluggiElement>(html`
+                <sluggi-element
+                    value="/demo"
+                    page-id="123"
+                    record-id="456"
+                    table-name="pages"
+                    field-name="slug"
+                    lock-feature-enabled
+                ></sluggi-element>
+            `);
+
+            expect(el.shadowRoot!.querySelector('.sluggi-lock-toggle')).to.exist;
+        });
+
+        it('has is-locked class when isLocked is true', async () => {
+            const el = await fixture<SluggiElement>(html`
+                <sluggi-element
+                    value="/demo"
+                    page-id="123"
+                    record-id="456"
+                    table-name="pages"
+                    field-name="slug"
+                    lock-feature-enabled
+                    is-locked
+                ></sluggi-element>
+            `);
+
+            const lockToggle = el.shadowRoot!.querySelector('.sluggi-lock-toggle');
+            expect(lockToggle?.classList.contains('is-locked')).to.be.true;
+        });
+
+        it('toggles lock state when clicked', async () => {
+            const el = await fixture<SluggiElement>(html`
+                <sluggi-element
+                    value="/demo"
+                    page-id="123"
+                    record-id="456"
+                    table-name="pages"
+                    field-name="slug"
+                    lock-feature-enabled
+                ></sluggi-element>
+            `);
+
+            expect(el.isLocked).to.be.false;
+
+            const lockToggle = el.shadowRoot!.querySelector('.sluggi-lock-toggle') as HTMLElement;
+            lockToggle.click();
+            await el.updateComplete;
+
+            expect(el.isLocked).to.be.true;
+            const updatedLockToggle = el.shadowRoot!.querySelector('.sluggi-lock-toggle');
+            expect(updatedLockToggle?.classList.contains('is-locked')).to.be.true;
+        });
+
+        it('is hidden when isSynced is true', async () => {
+            const el = await fixture<SluggiElement>(html`
+                <sluggi-element
+                    value="/demo"
+                    page-id="123"
+                    record-id="456"
+                    table-name="pages"
+                    field-name="slug"
+                    lock-feature-enabled
+                    is-synced
+                ></sluggi-element>
+            `);
+
+            expect(el.shadowRoot!.querySelector('.sluggi-lock-toggle')).to.be.null;
+        });
+
+        it('updates hidden lock field when toggled', async () => {
+            const container = document.createElement('div');
+            container.innerHTML = `
+                <sluggi-element
+                    value="/demo"
+                    page-id="123"
+                    record-id="456"
+                    table-name="pages"
+                    field-name="slug"
+                    lock-feature-enabled
+                ></sluggi-element>
+                <input type="hidden" class="sluggi-lock-field" value="0" />
+            `;
+            document.body.appendChild(container);
+
+            const el = container.querySelector('sluggi-element') as SluggiElement;
+            const lockField = container.querySelector('.sluggi-lock-field') as HTMLInputElement;
+            await el.updateComplete;
+
+            const lockToggle = el.shadowRoot!.querySelector('.sluggi-lock-toggle') as HTMLElement;
+            lockToggle.click();
+            await el.updateComplete;
+
+            expect(lockField.value).to.equal('1');
+
+            document.body.removeChild(container);
+        });
+
+        it('prevents editing when locked', async () => {
+            const el = await fixture<SluggiElement>(html`
+                <sluggi-element
+                    value="/test"
+                    is-locked
+                ></sluggi-element>
+            `);
+
+            const editable = el.shadowRoot!.querySelector('.sluggi-editable') as HTMLElement;
+            editable?.click();
+            await el.updateComplete;
+
+            expect(el.shadowRoot!.querySelector('input.sluggi-input')).to.not.exist;
         });
     });
 

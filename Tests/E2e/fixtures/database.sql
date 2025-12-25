@@ -186,3 +186,36 @@ ON DUPLICATE KEY UPDATE `title` = VALUES(`title`), `slug` = VALUES(`slug`), `tx_
 INSERT INTO `pages` (`uid`, `pid`, `title`, `slug`, `doktype`, `is_siteroot`, `hidden`, `deleted`, `tstamp`, `crdate`, `tx_sluggi_sync`)
 VALUES (27, 1, 'News Records', '/news-records', 254, 0, 0, 0, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 0)
 ON DUPLICATE KEY UPDATE `title` = VALUES(`title`), `slug` = VALUES(`slug`), `doktype` = 254, `tx_sluggi_sync` = 0;
+
+-- =============================================
+-- slug-lock.spec.ts (uses pages 28-32)
+-- =============================================
+-- Page 28: Lock toggle visibility test (unlocked)
+INSERT INTO `pages` (`uid`, `pid`, `title`, `slug`, `doktype`, `is_siteroot`, `hidden`, `deleted`, `tstamp`, `crdate`, `tx_sluggi_sync`, `slug_locked`)
+VALUES (28, 1, 'Lock Toggle Test', '/lock-toggle-test', 1, 0, 0, 0, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 0, 0)
+ON DUPLICATE KEY UPDATE `title` = VALUES(`title`), `slug` = VALUES(`slug`), `tx_sluggi_sync` = 0, `slug_locked` = 0;
+
+-- Page 29: Lock visual state test (unlocked initially)
+INSERT INTO `pages` (`uid`, `pid`, `title`, `slug`, `doktype`, `is_siteroot`, `hidden`, `deleted`, `tstamp`, `crdate`, `tx_sluggi_sync`, `slug_locked`)
+VALUES (29, 1, 'Lock Visual Test', '/lock-visual-test', 1, 0, 0, 0, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 0, 0)
+ON DUPLICATE KEY UPDATE `title` = VALUES(`title`), `slug` = VALUES(`slug`), `tx_sluggi_sync` = 0, `slug_locked` = 0;
+
+-- Page 30: Lock persistence test (unlocked initially)
+INSERT INTO `pages` (`uid`, `pid`, `title`, `slug`, `doktype`, `is_siteroot`, `hidden`, `deleted`, `tstamp`, `crdate`, `tx_sluggi_sync`, `slug_locked`)
+VALUES (30, 1, 'Lock Persist Test', '/lock-persist-test', 1, 0, 0, 0, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 0, 0)
+ON DUPLICATE KEY UPDATE `title` = VALUES(`title`), `slug` = VALUES(`slug`), `tx_sluggi_sync` = 0, `slug_locked` = 0;
+
+-- Page 31: Locked page editing test (locked)
+INSERT INTO `pages` (`uid`, `pid`, `title`, `slug`, `doktype`, `is_siteroot`, `hidden`, `deleted`, `tstamp`, `crdate`, `tx_sluggi_sync`, `slug_locked`)
+VALUES (31, 1, 'Already Locked Page', '/already-locked-page', 1, 0, 0, 0, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 0, 1)
+ON DUPLICATE KEY UPDATE `title` = VALUES(`title`), `slug` = VALUES(`slug`), `tx_sluggi_sync` = 0, `slug_locked` = 1;
+
+-- Page 32: Lock vs Sync mutual exclusion test (unlocked and unsynced initially)
+INSERT INTO `pages` (`uid`, `pid`, `title`, `slug`, `doktype`, `is_siteroot`, `hidden`, `deleted`, `tstamp`, `crdate`, `tx_sluggi_sync`, `slug_locked`)
+VALUES (32, 1, 'Lock Sync Test', '/lock-sync-test', 1, 0, 0, 0, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 0, 0)
+ON DUPLICATE KEY UPDATE `title` = VALUES(`title`), `slug` = VALUES(`slug`), `tx_sluggi_sync` = 0, `slug_locked` = 0;
+
+-- Page 33: Sync vs Lock mutual exclusion test (synced initially)
+INSERT INTO `pages` (`uid`, `pid`, `title`, `slug`, `doktype`, `is_siteroot`, `hidden`, `deleted`, `tstamp`, `crdate`, `tx_sluggi_sync`, `slug_locked`)
+VALUES (33, 1, 'Sync Lock Test', '/sync-lock-test', 1, 0, 0, 0, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 1, 0)
+ON DUPLICATE KEY UPDATE `title` = VALUES(`title`), `slug` = VALUES(`slug`), `tx_sluggi_sync` = 1, `slug_locked` = 0;

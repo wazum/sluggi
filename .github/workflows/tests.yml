@@ -186,16 +186,25 @@ jobs:
                   'exclude_doktypes' => '254',
                   'last_segment_only' => '1',
                   'synchronize' => '1',
+                  'lock' => '0',
               ],
               'hierarchy-permission' => [
                   'exclude_doktypes' => '254',
                   'last_segment_only' => '0',
                   'synchronize' => '0',
+                  'lock' => '0',
+              ],
+              'slug-lock' => [
+                  'exclude_doktypes' => '254',
+                  'last_segment_only' => '0',
+                  'synchronize' => '1',
+                  'lock' => '1',
               ],
               default => [
                   'exclude_doktypes' => '254',
                   'last_segment_only' => '0',
                   'synchronize' => '1',
+                  'lock' => '1',
               ],
           };
           $GLOBALS['TYPO3_CONF_VARS']['EXTENSIONS']['sluggi'] = $sluggiSettings;

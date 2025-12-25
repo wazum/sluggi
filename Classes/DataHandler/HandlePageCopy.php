@@ -63,6 +63,7 @@ final readonly class HandlePageCopy
         $newSlug = $this->getSlugHelper()->buildSlugForUniqueInSite($newSlug, $state);
 
         $pasteDataMap['pages'][$targetUid]['slug'] = $newSlug;
+        $pasteDataMap['pages'][$targetUid]['slug_locked'] = 0;
     }
 
     private function getSlugHelper(): SlugHelper

@@ -12,6 +12,12 @@ $GLOBALS['TCA']['pages']['columns']['tx_sluggi_sync'] = [
     ],
 ];
 
+$GLOBALS['TCA']['pages']['columns']['slug_locked'] = [
+    'config' => [
+        'type' => 'passthrough',
+    ],
+];
+
 foreach ((new SlugConfigurationService())->getRequiredSourceFields('pages') as $fieldName) {
     if (isset($GLOBALS['TCA']['pages']['columns'][$fieldName]['config'])) {
         $GLOBALS['TCA']['pages']['columns'][$fieldName]['config']['renderType'] = 'slugSourceInput';

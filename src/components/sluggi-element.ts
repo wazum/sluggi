@@ -3,7 +3,7 @@ import { customElement, property, state, query } from 'lit/decorators.js';
 import Modal from '@typo3/backend/modal.js';
 import Severity from '@typo3/backend/severity.js';
 import type { ComponentMode } from '@/types';
-import { lockIcon, editIcon, refreshIcon, checkIcon, closeIcon, syncOnIcon, syncOffIcon } from './icons.js';
+import { lockIcon, editIcon, refreshIcon, checkIcon, closeIcon, syncOnIcon, syncOffIcon, lockOnIcon, lockOffIcon } from './icons.js';
 import styles from '../styles/sluggi-element.scss?inline';
 
 @customElement('sluggi-element')
@@ -57,6 +57,9 @@ export class SluggiElement extends LitElement {
 
     @property({ type: Boolean, attribute: 'sync-feature-enabled' })
     syncFeatureEnabled = false;
+
+    @property({ type: Boolean, attribute: 'lock-feature-enabled' })
+    lockFeatureEnabled = false;
 
     // =========================================================================
     // Properties: Conflict State
@@ -157,6 +160,10 @@ export class SluggiElement extends LitElement {
 
     private get showSyncToggle(): boolean {
         return this.syncFeatureEnabled && this.sourceFieldElements.size > 0 && !this.isLocked;
+    }
+
+    private get showLockToggle(): boolean {
+        return this.lockFeatureEnabled && !this.isSynced;
     }
 
     private get computedPrefix(): string {
@@ -265,14 +272,17 @@ export class SluggiElement extends LitElement {
             return html`
                 <span class="sluggi-spinner" aria-label="Loading..."></span>
                 ${this.renderSyncToggle()}
+                ${this.renderLockToggle()}
             `;
         }
 
         if (this.isLocked) {
             return html`
-                <span class="sluggi-lock-icon" aria-label="This slug is locked">
-                    ${lockIcon}
-                </span>
+                ${this.showLockToggle ? this.renderLockToggle() : html`
+                    <span class="sluggi-lock-icon" aria-label="This slug is locked">
+                        ${lockIcon}
+                    </span>
+                `}
             `;
         }
 
@@ -299,6 +309,7 @@ export class SluggiElement extends LitElement {
                     </button>
                 ` : nothing}
                 ${this.renderSyncToggle()}
+                ${this.renderLockToggle()}
             `;
         }
 
@@ -338,6 +349,28 @@ export class SluggiElement extends LitElement {
                     <span class="sluggi-sync-icons">
                         <span class="sluggi-sync-icon sluggi-sync-icon-on">${syncOnIcon}</span>
                         <span class="sluggi-sync-icon sluggi-sync-icon-off">${syncOffIcon}</span>
+                    </span>
+                </button>
+            </div>
+        `;
+    }
+
+    private renderLockToggle() {
+        if (!this.showLockToggle) return nothing;
+
+        return html`
+            <div class="sluggi-lock-wrapper">
+                <button
+                    type="button"
+                    class="sluggi-lock-toggle ${this.isLocked ? 'is-locked' : ''}"
+                    aria-label="${this.isLocked ? 'Unlock slug' : 'Lock slug'}"
+                    title="${this.isLocked ? 'Slug is locked: click to unlock' : 'Slug is unlocked: click to lock'}"
+                    @click="${this.toggleLock}"
+                >
+                    <span class="sluggi-lock-label">lock</span>
+                    <span class="sluggi-lock-icons">
+                        <span class="sluggi-lock-icon-toggle sluggi-lock-icon-on">${lockOnIcon}</span>
+                        <span class="sluggi-lock-icon-toggle sluggi-lock-icon-off">${lockOffIcon}</span>
                     </span>
                 </button>
             </div>
@@ -691,6 +724,24 @@ export class SluggiElement extends LitElement {
             syncInput.value = this.isSynced ? '1' : '0';
             syncInput.classList.add('has-change');
             syncInput.dispatchEvent(new Event('change', { bubbles: true }));
+        }
+    }
+
+    // =========================================================================
+    // Private Helpers: Lock Feature
+    // =========================================================================
+
+    private toggleLock() {
+        this.isLocked = !this.isLocked;
+        this.notifyLockFieldOfChange();
+    }
+
+    private notifyLockFieldOfChange() {
+        const lockInput = this.parentElement?.querySelector('.sluggi-lock-field') as HTMLInputElement | null;
+        if (lockInput) {
+            lockInput.value = this.isLocked ? '1' : '0';
+            lockInput.classList.add('has-change');
+            lockInput.dispatchEvent(new Event('change', { bubbles: true }));
         }
     }
 

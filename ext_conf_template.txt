@@ -1,5 +1,7 @@
 # cat=sync; type=boolean; label=Enable automatic slug synchronization: When enabled, slug will be automatically regenerated when source fields change
 synchronize=1
+# cat=lock; type=boolean; label=Enable slug locking: When enabled, users can lock a page's slug to prevent any modifications
+lock=0
 # cat=basic; type=boolean; label=Allow standard editors to edit only the last segment of the URL slug
 last_segment_only=0
 # cat=basic; type=string; label=Exclude page types: Comma-separated list of doktypes that should not have slugs (e.g. 199,254,255 for Spacer, Sysfolder, Recycler)

@@ -44,6 +44,12 @@ final readonly class SlugElementRenderer
         if ($context['isSynced']) {
             $attributes['is-synced'] = '';
         }
+        if ($context['lockFeatureEnabled'] ?? false) {
+            $attributes['lock-feature-enabled'] = '';
+        }
+        if ($context['isLocked'] ?? false) {
+            $attributes['is-locked'] = '';
+        }
         if ($context['lastSegmentOnly'] ?? false) {
             $attributes['last-segment-only'] = '';
         }
@@ -74,5 +80,10 @@ final readonly class SlugElementRenderer
     public function buildSyncFieldName(string $table, int|string $recordId): string
     {
         return sprintf('data[%s][%s][tx_sluggi_sync]', $table, $recordId);
+    }
+
+    public function buildLockFieldName(string $table, int|string $recordId): string
+    {
+        return sprintf('data[%s][%s][slug_locked]', $table, $recordId);
     }
 }

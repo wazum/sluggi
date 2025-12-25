@@ -1,0 +1,5 @@
+"pages"
+,"uid","pid","title","slug","tx_sluggi_sync","slug_locked","doktype"
+,1,0,"Root Page","/",0,0,1
+,2,1,"Updated Title","/locked-page",1,1,1
+,3,1,"Unlocked Page","/unlocked-page",1,0,1

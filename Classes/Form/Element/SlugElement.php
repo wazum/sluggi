@@ -14,6 +14,7 @@ use Wazum\Sluggi\Service\LastSegmentValidationService;
 use Wazum\Sluggi\Service\SlugConfigurationService;
 use Wazum\Sluggi\Service\SlugElementRenderer;
 use Wazum\Sluggi\Service\SlugGeneratorService;
+use Wazum\Sluggi\Service\SlugLockService;
 use Wazum\Sluggi\Service\SlugSyncService;
 
 final class SlugElement extends AbstractFormElement
@@ -48,6 +49,7 @@ final class SlugElement extends AbstractFormElement
         private readonly HashService $hashService,
         private readonly SlugElementRenderer $slugElementRenderer,
         private readonly SlugSyncService $slugSyncService,
+        private readonly SlugLockService $slugLockService,
         private readonly SlugConfigurationService $slugConfigurationService,
         private readonly LastSegmentValidationService $lastSegmentValidationService,
         private readonly HierarchyPermissionService $hierarchyPermissionService,
@@ -114,6 +116,7 @@ final class SlugElement extends AbstractFormElement
         $hasPostModifiers = !empty($config['generatorOptions']['postModifiers']);
 
         $syncFeatureEnabled = $this->slugSyncService->isSyncFeatureEnabled();
+        $lockFeatureEnabled = $this->slugLockService->isLockFeatureEnabled();
         $requiredSourceFields = $this->slugConfigurationService->getRequiredSourceFields($table);
         $lastSegmentOnly = $this->lastSegmentValidationService->shouldRestrictUser(
             $this->getBackendUser()->isAdmin()
@@ -154,7 +157,7 @@ final class SlugElement extends AbstractFormElement
             'command' => $command,
             'effectivePid' => $effectivePid,
             'size' => $size,
-            'isLocked' => (bool)($config['readOnly'] ?? false),
+            'isReadOnly' => (bool)($config['readOnly'] ?? false),
             'signature' => $this->generateSignature($table, $effectivePid, $recordId, $languageId, $fieldName, $command, $parentPageId),
             'slugPrefix' => $this->data['customData'][$fieldName]['slugPrefix'] ?? '',
             'itemName' => (string)$parameterArray['itemFormElName'],
@@ -167,6 +170,9 @@ final class SlugElement extends AbstractFormElement
             'syncFeatureEnabled' => $syncFeatureEnabled,
             'isSynced' => $syncFeatureEnabled && $this->slugSyncService->shouldSync($row),
             'syncFieldName' => $this->slugElementRenderer->buildSyncFieldName($table, $recordId),
+            'lockFeatureEnabled' => $lockFeatureEnabled,
+            'isLocked' => $lockFeatureEnabled && $this->slugLockService->isLocked($row),
+            'lockFieldName' => $this->slugElementRenderer->buildLockFieldName($table, $recordId),
             'requiredSourceFields' => $requiredSourceFields,
             'lastSegmentOnly' => $lastSegmentOnly,
             'lockedPrefix' => $lockedPrefix,
@@ -214,6 +220,12 @@ final class SlugElement extends AbstractFormElement
                                 value="%s"
                                 data-formengine-input-name="%s"
                             />
+                            <input type="hidden"
+                                class="sluggi-lock-field"
+                                name="%s"
+                                value="%s"
+                                data-formengine-input-name="%s"
+                            />
                         </div>
                         <div class="form-wizards-item-bottom">%s</div>
                     </div>
@@ -228,6 +240,9 @@ final class SlugElement extends AbstractFormElement
             htmlspecialchars($context['syncFieldName']),
             $context['isSynced'] ? '1' : '0',
             htmlspecialchars($context['syncFieldName']),
+            htmlspecialchars($context['lockFieldName']),
+            $context['isLocked'] ? '1' : '0',
+            htmlspecialchars($context['lockFieldName']),
             $fieldWizardHtml
         );
     }
@@ -240,7 +255,11 @@ final class SlugElement extends AbstractFormElement
         $attributes = $this->slugElementRenderer->buildAttributes($context, $this->getLabels());
         $attributeString = $this->slugElementRenderer->buildAttributeString($attributes);
 
-        return $context['isLocked'] ? $attributeString . ' is-locked' : $attributeString;
+        if ($context['isReadOnly']) {
+            $attributeString .= ' is-locked';
+        }
+
+        return $attributeString;
     }
 
     /**

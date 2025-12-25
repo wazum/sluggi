@@ -56,3 +56,18 @@ export const syncOffIcon = html`
         <circle cx="10" cy="10" r="6" fill="white"/>
     </svg>
 `;
+
+export const lockOnIcon = html`
+    <svg width="30" height="18" viewBox="0 0 36 20" fill="none">
+        <rect x="1" y="1" width="34" height="18" rx="9" fill="#dc3545" stroke="#dc3545" stroke-width="2"/>
+        <circle cx="26" cy="10" r="6" fill="white"/>
+        <path d="M26 7v2h-1.5c-.28 0-.5.22-.5.5v3c0 .28.22.5.5.5h3c.28 0 .5-.22.5-.5v-3c0-.28-.22-.5-.5-.5H26V7c0-.55-.45-1-1-1s-1 .45-1 1" stroke="#dc3545" stroke-width="1" stroke-linecap="round"/>
+    </svg>
+`;
+
+export const lockOffIcon = html`
+    <svg width="30" height="18" viewBox="0 0 36 20" fill="none">
+        <rect x="1" y="1" width="34" height="18" rx="9" fill="#6c757d" stroke="#6c757d" stroke-width="2"/>
+        <circle cx="10" cy="10" r="6" fill="white"/>
+    </svg>
+`;
