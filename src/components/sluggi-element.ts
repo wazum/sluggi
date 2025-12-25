@@ -3,7 +3,7 @@ import { customElement, property, state, query } from 'lit/decorators.js';
 import Modal from '@typo3/backend/modal.js';
 import Severity from '@typo3/backend/severity.js';
 import type { ComponentMode } from '@/types';
-import { lockIcon, editIcon, refreshIcon, checkIcon, closeIcon, syncOnIcon, syncOffIcon, lockOnIcon, lockOffIcon } from './icons.js';
+import { lockIcon, editIcon, refreshIcon, checkIcon, closeIcon, syncIcon, syncOnIcon, syncOffIcon, lockOnIcon, lockOffIcon } from './icons.js';
 import styles from '../styles/sluggi-element.scss?inline';
 
 @customElement('sluggi-element')
@@ -234,10 +234,12 @@ export class SluggiElement extends LitElement {
     private renderViewMode() {
         const isEditable = !this.isLocked && !this.isSynced;
         const editable = this.editableValue;
+        const cannotEdit = this.isSynced && !this.syncFeatureEnabled;
         const classes = [
             'sluggi-editable',
             this.isLocked ? 'locked' : '',
             this.isSynced ? 'synced' : '',
+            cannotEdit ? 'no-edit' : '',
         ].filter(Boolean).join(' ');
 
         return html`
@@ -272,6 +274,7 @@ export class SluggiElement extends LitElement {
             return html`
                 <span class="sluggi-spinner" aria-label="Loading..."></span>
                 ${this.renderSyncToggle()}
+                ${this.renderStaticSyncIcon()}
                 ${this.renderLockToggle()}
             `;
         }
@@ -309,6 +312,7 @@ export class SluggiElement extends LitElement {
                     </button>
                 ` : nothing}
                 ${this.renderSyncToggle()}
+                ${this.renderStaticSyncIcon()}
                 ${this.renderLockToggle()}
             `;
         }
@@ -352,6 +356,16 @@ export class SluggiElement extends LitElement {
                     </span>
                 </button>
             </div>
+        `;
+    }
+
+    private renderStaticSyncIcon() {
+        if (this.syncFeatureEnabled || !this.isSynced) return nothing;
+
+        return html`
+            <span class="sluggi-sync-icon-static" aria-label="Auto-sync is enabled" title="Auto-sync enabled: slug updates automatically">
+                ${syncIcon}
+            </span>
         `;
     }
 
@@ -582,9 +596,7 @@ export class SluggiElement extends LitElement {
             return;
         }
 
-        const shouldAutoSync = this.syncFeatureEnabled
-            ? this.isSynced
-            : this.command === 'new';
+        const shouldAutoSync = this.isSynced || (!this.syncFeatureEnabled && this.command === 'new');
         if (shouldAutoSync && this.mode === 'view') {
             this.sendSlugProposal('recreate');
         }

@@ -138,4 +138,28 @@ final class SlugElementPermissionTest extends FunctionalTestCase
         self::assertStringNotContainsString('sync-feature-enabled', $html);
         self::assertStringNotContainsString('lock-feature-enabled', $html);
     }
+
+    #[Test]
+    public function userWithoutLockAccessStillSeesLockedStateOnLockedPage(): void
+    {
+        $this->setUpBackendUser(3); // sync_only user - no access to slug_locked field
+        $html = $this->renderSlugElement(3); // locked page
+
+        // User cannot toggle lock (no lock-feature-enabled)
+        self::assertStringNotContainsString('lock-feature-enabled', $html);
+        // But page IS locked - must be enforced visually
+        self::assertStringContainsString('is-locked', $html);
+    }
+
+    #[Test]
+    public function userWithoutSyncAccessStillSeesSyncedStateOnSyncedPage(): void
+    {
+        $this->setUpBackendUser(4); // lock_only user - no access to tx_sluggi_sync field
+        $html = $this->renderSlugElement(4); // synced page
+
+        // User cannot toggle sync (no sync-feature-enabled)
+        self::assertStringNotContainsString('sync-feature-enabled', $html);
+        // But page IS synced - must be enforced (auto-regeneration works)
+        self::assertStringContainsString('is-synced', $html);
+    }
 }

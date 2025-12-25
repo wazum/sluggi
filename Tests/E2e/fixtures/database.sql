@@ -155,8 +155,9 @@ ON DUPLICATE KEY UPDATE `username` = VALUES(`username`), `password` = VALUES(`pa
 -- hierarchy-permission.spec.ts (uses pages 23-26)
 -- =============================================
 -- Editor group for Institute section (uid=2) - includes page 18 for last-segment-only tests and page 25 for hierarchy tests
+-- Has access to sync/lock fields (tx_sluggi_sync, slug_locked) for full toggle visibility
 INSERT INTO `be_groups` (`uid`, `pid`, `title`, `tables_modify`, `pagetypes_select`, `non_exclude_fields`, `db_mountpoints`, `groupMods`)
-VALUES (2, 0, 'Institute Editors', 'pages', '1,254', 'pages:slug,pages:title,pages:nav_title', '18,25', 'web_layout,web_list')
+VALUES (2, 0, 'Institute Editors', 'pages', '1,254', 'pages:slug,pages:title,pages:nav_title,pages:tx_sluggi_sync,pages:slug_locked', '18,25', 'web_layout,web_list')
 ON DUPLICATE KEY UPDATE `title` = VALUES(`title`), `tables_modify` = VALUES(`tables_modify`), `pagetypes_select` = VALUES(`pagetypes_select`), `non_exclude_fields` = VALUES(`non_exclude_fields`), `db_mountpoints` = VALUES(`db_mountpoints`), `groupMods` = VALUES(`groupMods`);
 
 -- Page 23: Hierarchy test - root section (admin only, editor cannot edit)
@@ -219,3 +220,32 @@ ON DUPLICATE KEY UPDATE `title` = VALUES(`title`), `slug` = VALUES(`slug`), `tx_
 INSERT INTO `pages` (`uid`, `pid`, `title`, `slug`, `doktype`, `is_siteroot`, `hidden`, `deleted`, `tstamp`, `crdate`, `tx_sluggi_sync`, `slug_locked`)
 VALUES (33, 1, 'Sync Lock Test', '/sync-lock-test', 1, 0, 0, 0, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 1, 0)
 ON DUPLICATE KEY UPDATE `title` = VALUES(`title`), `slug` = VALUES(`slug`), `tx_sluggi_sync` = 1, `slug_locked` = 0;
+
+-- =============================================
+-- field-access-restriction.spec.ts (uses pages 34-35)
+-- Tests for users who can see pages but cannot toggle sync/lock fields
+-- =============================================
+-- Editor group 3: NO access to sync/lock fields (only basic slug access)
+INSERT INTO `be_groups` (`uid`, `pid`, `title`, `tables_modify`, `pagetypes_select`, `non_exclude_fields`, `db_mountpoints`, `groupMods`)
+VALUES (3, 0, 'Restricted Editors', 'pages', '1,254', 'pages:slug,pages:title', '34', 'web_layout,web_list')
+ON DUPLICATE KEY UPDATE `title` = VALUES(`title`), `tables_modify` = VALUES(`tables_modify`), `pagetypes_select` = VALUES(`pagetypes_select`), `non_exclude_fields` = VALUES(`non_exclude_fields`), `db_mountpoints` = VALUES(`db_mountpoints`), `groupMods` = VALUES(`groupMods`);
+
+-- Editor user 3: non-admin in group 3 (no sync/lock field access)
+INSERT INTO `be_users` (`uid`, `pid`, `username`, `password`, `admin`, `usergroup`, `disable`, `deleted`)
+VALUES (3, 0, 'restricted_editor', '$argon2id$v=19$m=65536,t=4,p=1$cDN1QXFkY21Rd1NGR2YwMQ$6co8ugqO4m6sdtCw08XSe9ayMuKNzgUDKpcfU9sSODg', 0, '3', 0, 0)
+ON DUPLICATE KEY UPDATE `username` = VALUES(`username`), `password` = VALUES(`password`), `admin` = 0, `usergroup` = '3';
+
+-- Page 34: Parent for restricted editor tests
+INSERT INTO `pages` (`uid`, `pid`, `title`, `slug`, `doktype`, `is_siteroot`, `hidden`, `deleted`, `tstamp`, `crdate`, `tx_sluggi_sync`, `slug_locked`, `perms_userid`, `perms_groupid`, `perms_user`, `perms_group`, `perms_everybody`)
+VALUES (34, 1, 'Restricted Section', '/restricted-section', 1, 0, 0, 0, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 0, 0, 1, 3, 31, 31, 0)
+ON DUPLICATE KEY UPDATE `title` = VALUES(`title`), `slug` = VALUES(`slug`), `tx_sluggi_sync` = 0, `slug_locked` = 0, `perms_groupid` = 3;
+
+-- Page 35: Synced page that restricted editor can see but not toggle sync
+INSERT INTO `pages` (`uid`, `pid`, `title`, `slug`, `doktype`, `is_siteroot`, `hidden`, `deleted`, `tstamp`, `crdate`, `tx_sluggi_sync`, `slug_locked`, `perms_userid`, `perms_groupid`, `perms_user`, `perms_group`, `perms_everybody`)
+VALUES (35, 34, 'Synced No Toggle', '/restricted-section/synced-no-toggle', 1, 0, 0, 0, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 1, 0, 1, 3, 31, 31, 0)
+ON DUPLICATE KEY UPDATE `title` = VALUES(`title`), `slug` = VALUES(`slug`), `tx_sluggi_sync` = 1, `slug_locked` = 0, `perms_groupid` = 3;
+
+-- Page 36: Locked page that restricted editor can see but not toggle lock
+INSERT INTO `pages` (`uid`, `pid`, `title`, `slug`, `doktype`, `is_siteroot`, `hidden`, `deleted`, `tstamp`, `crdate`, `tx_sluggi_sync`, `slug_locked`, `perms_userid`, `perms_groupid`, `perms_user`, `perms_group`, `perms_everybody`)
+VALUES (36, 34, 'Locked No Toggle', '/restricted-section/locked-no-toggle', 1, 0, 0, 0, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 0, 1, 1, 3, 31, 31, 0)
+ON DUPLICATE KEY UPDATE `title` = VALUES(`title`), `slug` = VALUES(`slug`), `tx_sluggi_sync` = 0, `slug_locked` = 1, `perms_groupid` = 3;

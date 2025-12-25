@@ -188,11 +188,11 @@ jobs:
                   'synchronize' => '1',
                   'lock' => '0',
               ],
-              'hierarchy-permission' => [
+              'hierarchy-permission', 'field-access-restriction' => [
                   'exclude_doktypes' => '254',
                   'last_segment_only' => '0',
-                  'synchronize' => '0',
-                  'lock' => '0',
+                  'synchronize' => '1',
+                  'lock' => '1',
               ],
               'slug-lock' => [
                   'exclude_doktypes' => '254',

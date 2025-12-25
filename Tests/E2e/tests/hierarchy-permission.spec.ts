@@ -108,4 +108,9 @@ test.describe('Hierarchy Permission - Editor Slug Restrictions', () => {
     const flashMessage = editFrame.locator('.alert-danger').first();
     await expect(flashMessage).toBeVisible({ timeout: 5000 });
   });
+
+  test('editor with field permissions sees both sync and lock toggles', async () => {
+    await expect(slugElement.locator('.sluggi-sync-toggle')).toBeVisible();
+    await expect(slugElement.locator('.sluggi-lock-toggle')).toBeVisible();
+  });
 });

@@ -1345,4 +1345,86 @@ describe('SluggiElement', () => {
             expect(input.getAttribute('aria-label')).to.exist;
         });
     });
+
+    describe('Synced State Without Toggle Access', () => {
+        it('triggers auto-sync on source field change when isSynced even without syncFeatureEnabled', async () => {
+            const titleInput = document.createElement('input');
+            titleInput.setAttribute('data-sluggi-source', '');
+            titleInput.setAttribute('data-formengine-input-name', 'data[pages][456][title]');
+            titleInput.value = 'Initial Title';
+            document.body.appendChild(titleInput);
+
+            const el = await fixture<SluggiElement>(html`
+                <sluggi-element
+                    value="/initial-title"
+                    table-name="pages"
+                    record-id="456"
+                    command="edit"
+                    is-synced
+                ></sluggi-element>
+            `);
+
+            // syncFeatureEnabled is false but isSynced is true
+            expect(el.syncFeatureEnabled).to.be.false;
+            expect(el.isSynced).to.be.true;
+
+            titleInput.value = 'New Title';
+
+            setTimeout(() => titleInput.dispatchEvent(new Event('change')));
+
+            const event = await oneEvent(el, 'sluggi-request-proposal') as CustomEvent;
+            expect(event.detail.mode).to.equal('recreate');
+
+            document.body.removeChild(titleInput);
+        });
+
+        it('shows static sync icon when isSynced but syncFeatureEnabled is false', async () => {
+            const titleInput = document.createElement('input');
+            titleInput.setAttribute('data-sluggi-source', '');
+            titleInput.setAttribute('data-formengine-input-name', 'data[pages][456][title]');
+            titleInput.value = 'Test Title';
+            document.body.appendChild(titleInput);
+
+            const el = await fixture<SluggiElement>(html`
+                <sluggi-element
+                    value="/test"
+                    table-name="pages"
+                    record-id="456"
+                    is-synced
+                ></sluggi-element>
+            `);
+
+            // No toggle button (syncFeatureEnabled is false)
+            expect(el.shadowRoot!.querySelector('.sluggi-sync-toggle')).to.be.null;
+            // But static sync icon should be visible
+            expect(el.shadowRoot!.querySelector('.sluggi-sync-icon-static')).to.exist;
+
+            document.body.removeChild(titleInput);
+        });
+
+        it('hides static sync icon when syncFeatureEnabled is true (toggle is shown instead)', async () => {
+            const titleInput = document.createElement('input');
+            titleInput.setAttribute('data-sluggi-source', '');
+            titleInput.setAttribute('data-formengine-input-name', 'data[pages][456][title]');
+            titleInput.value = 'Test Title';
+            document.body.appendChild(titleInput);
+
+            const el = await fixture<SluggiElement>(html`
+                <sluggi-element
+                    value="/test"
+                    table-name="pages"
+                    record-id="456"
+                    is-synced
+                    sync-feature-enabled
+                ></sluggi-element>
+            `);
+
+            // Toggle button is shown
+            expect(el.shadowRoot!.querySelector('.sluggi-sync-toggle')).to.exist;
+            // Static icon should NOT be shown
+            expect(el.shadowRoot!.querySelector('.sluggi-sync-icon-static')).to.be.null;
+
+            document.body.removeChild(titleInput);
+        });
+    });
 });

@@ -26,9 +26,13 @@ export default defineConfig({
       testMatch: 'fixtures/editor-auth.setup.ts',
     },
     {
+      name: 'setup-restricted-editor',
+      testMatch: 'fixtures/restricted-editor-auth.setup.ts',
+    },
+    {
       name: 'chromium',
       testDir: './tests',
-      testIgnore: ['**/last-segment-only.spec.ts', '**/hierarchy-permission.spec.ts'],
+      testIgnore: ['**/last-segment-only.spec.ts', '**/hierarchy-permission.spec.ts', '**/field-access-restriction.spec.ts'],
       use: {
         ...devices['Desktop Chrome'],
         storageState: '.auth/user.json',
@@ -44,6 +48,16 @@ export default defineConfig({
         storageState: '.auth/editor.json',
       },
       dependencies: ['setup-editor'],
+    },
+    {
+      name: 'restricted-editor',
+      testDir: './tests',
+      testMatch: ['**/field-access-restriction.spec.ts'],
+      use: {
+        ...devices['Desktop Chrome'],
+        storageState: '.auth/restricted-editor.json',
+      },
+      dependencies: ['setup-restricted-editor'],
     },
   ],
 

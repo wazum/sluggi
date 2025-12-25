@@ -128,6 +128,9 @@
         cursor: default;
     }
 
+    &.no-edit {
+        cursor: not-allowed;
+    }
 }
 
 .sluggi-placeholder {
@@ -182,8 +185,15 @@
 .sluggi-lock-icon {
     display: inline-flex;
     align-items: center;
+    justify-content: center;
     color: var(--sluggi-secondary-color);
     padding: 8px 12px;
+    border-left: 1px solid var(--sluggi-border-color);
+    cursor: not-allowed;
+
+    svg {
+        display: block;
+    }
 }
 
 .sluggi-spinner {
@@ -262,6 +272,20 @@
 
     .sluggi-sync-icon-off {
         opacity: 0;
+    }
+}
+
+.sluggi-sync-icon-static {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--sluggi-secondary-color);
+    padding: 8px 12px;
+    border-left: 1px solid var(--sluggi-border-color);
+    cursor: not-allowed;
+
+    svg {
+        display: block;
     }
 }
 
