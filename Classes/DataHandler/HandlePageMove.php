@@ -59,7 +59,7 @@ final readonly class HandlePageMove
 
     private function updateSlugForMovedPage(int $id, int $targetId, DataHandler $dataHandler): void
     {
-        $currentPage = BackendUtility::getRecordWSOL('pages', $id, 'uid,slug,sys_language_uid,slug_locked');
+        $currentPage = BackendUtility::getRecordWSOL('pages', $id);
         if (empty($currentPage)) {
             return;
         }
@@ -70,7 +70,12 @@ final readonly class HandlePageMove
 
         $languageId = (int)($currentPage['sys_language_uid'] ?? 0);
         $parentSlug = $this->slugGeneratorService->getParentSlug($targetId, $languageId);
-        $newSlug = $this->slugGeneratorService->combineWithParent($parentSlug, $currentPage['slug'] ?? '');
+        $newSlug = $this->slugGeneratorService->combineWithParent(
+            $parentSlug,
+            $currentPage['slug'] ?? '',
+            $currentPage,
+            $targetId,
+        );
 
         $data = ['pages' => [$id => ['slug' => $newSlug]]];
         $localDataHandler = GeneralUtility::makeInstance(DataHandler::class);

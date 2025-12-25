@@ -34,54 +34,28 @@ final readonly class SlugGeneratorService
     }
 
     /**
-     * Replace slashes in source field values with the fallback character
-     * to prevent them from creating extra path segments.
-     *
-     * @param array<string, mixed> $record
-     * @param array<string, mixed> $fieldConfig
-     *
-     * @return array<string, mixed>
+     * @param array<string, mixed>|null $record Optional record for postModifier context
      */
-    private function sanitizeSourceFieldValues(array $record, array $fieldConfig): array
-    {
-        $fallbackCharacter = (string)($fieldConfig['generatorOptions']['fallbackCharacter'] ?? '-');
-        $sourceFields = $fieldConfig['generatorOptions']['fields'] ?? [];
-
-        foreach ($sourceFields as $fieldNameParts) {
-            if (is_string($fieldNameParts)) {
-                $fieldNameParts = array_map('trim', explode(',', $fieldNameParts));
-            }
-            foreach ($fieldNameParts as $fieldName) {
-                if (isset($record[$fieldName]) && is_string($record[$fieldName])) {
-                    $record[$fieldName] = str_replace('/', $fallbackCharacter, $record[$fieldName]);
-                }
-            }
-        }
-
-        return $record;
-    }
-
-    public function getLastSegment(string $slug): string
-    {
-        $slug = trim($slug, '/');
-        if ($slug === '') {
-            return '/';
-        }
-        $parts = explode('/', $slug);
-
-        return '/' . array_pop($parts);
-    }
-
-    public function combineWithParent(string $parentSlug, string $childSlug): string
-    {
+    public function combineWithParent(
+        string $parentSlug,
+        string $childSlug,
+        ?array $record = null,
+        ?int $pid = null,
+    ): string {
         $parentSlug = rtrim($parentSlug, '/');
         $childSegment = $this->getLastSegment($childSlug);
 
         if ($parentSlug === '' || $parentSlug === '/') {
-            return $childSegment;
+            $slug = $childSegment;
+        } else {
+            $slug = $parentSlug . $childSegment;
         }
 
-        return $parentSlug . $childSegment;
+        if ($record !== null) {
+            $slug = $this->applyPostModifiers($slug, $record, $pid ?? 0);
+        }
+
+        return $slug;
     }
 
     public function getParentSlug(int $pageId, int $languageId = 0): string
@@ -106,6 +80,95 @@ final readonly class SlugGeneratorService
         $slug = (string)($record['slug'] ?? '');
 
         return $slug === '/' ? '' : $slug;
+    }
+
+    public function getLastSegment(string $slug): string
+    {
+        $slug = trim($slug, '/');
+        if ($slug === '') {
+            return '/';
+        }
+        $parts = explode('/', $slug);
+
+        return '/' . array_pop($parts);
+    }
+
+    /**
+     * @param array<string, mixed> $record
+     * @param array<string, mixed> $fieldConfig
+     *
+     * @return array<string, mixed>
+     */
+    private function sanitizeSourceFieldValues(array $record, array $fieldConfig): array
+    {
+        $fallbackCharacter = (string)($fieldConfig['generatorOptions']['fallbackCharacter'] ?? '-');
+        $sourceFields = $fieldConfig['generatorOptions']['fields'] ?? [];
+
+        foreach ($sourceFields as $fieldNameParts) {
+            if (is_string($fieldNameParts)) {
+                $fieldNameParts = array_map('trim', explode(',', $fieldNameParts));
+            }
+            foreach ($fieldNameParts as $fieldName) {
+                if (isset($record[$fieldName]) && is_string($record[$fieldName])) {
+                    $record[$fieldName] = str_replace('/', $fallbackCharacter, $record[$fieldName]);
+                }
+            }
+        }
+
+        return $record;
+    }
+
+    /**
+     * @param array<string, mixed> $record
+     */
+    private function applyPostModifiers(string $slug, array $record, int $pid): string
+    {
+        $fieldConfig = $GLOBALS['TCA']['pages']['columns']['slug']['config'] ?? [];
+        $postModifiers = $fieldConfig['generatorOptions']['postModifiers'] ?? [];
+
+        if ($postModifiers === []) {
+            return $slug;
+        }
+
+        // TYPO3 core calls postModifiers without leading slash
+        $slug = ltrim($slug, '/');
+
+        $slugHelper = $this->getSlugHelper();
+        $prefix = $this->getParentPath($slug);
+
+        foreach ($postModifiers as $funcName) {
+            $hookParameters = [
+                'slug' => $slug,
+                'workspaceId' => 0,
+                'configuration' => $fieldConfig,
+                'record' => $record,
+                'pid' => $pid,
+                'prefix' => $prefix,
+                'tableName' => 'pages',
+                'fieldName' => 'slug',
+            ];
+            $slug = GeneralUtility::callUserFunction($funcName, $hookParameters, $slugHelper);
+        }
+
+        return $this->sanitizeSlug($slug);
+    }
+
+    private function getParentPath(string $slug): string
+    {
+        $slug = trim($slug, '/');
+        if ($slug === '') {
+            return '';
+        }
+
+        $parts = explode('/', $slug);
+        array_pop($parts);
+
+        return $parts === [] ? '' : '/' . implode('/', $parts);
+    }
+
+    private function sanitizeSlug(string $slug): string
+    {
+        return $this->getSlugHelper()->sanitize($slug);
     }
 
     private function getSlugHelper(): SlugHelper

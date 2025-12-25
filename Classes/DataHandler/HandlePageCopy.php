@@ -45,7 +45,7 @@ final readonly class HandlePageCopy
      */
     private function updateSlugForCopiedPage(int $sourceUid, int $targetUid, array &$pasteDataMap): void
     {
-        $sourcePage = BackendUtility::getRecordWSOL('pages', $sourceUid, 'slug,sys_language_uid');
+        $sourcePage = BackendUtility::getRecordWSOL('pages', $sourceUid);
         if (empty($sourcePage)) {
             return;
         }
@@ -56,10 +56,16 @@ final readonly class HandlePageCopy
         }
 
         $languageId = (int)($sourcePage['sys_language_uid'] ?? 0);
-        $parentSlug = $this->slugGeneratorService->getParentSlug((int)$targetPage['pid'], $languageId);
-        $newSlug = $this->slugGeneratorService->combineWithParent($parentSlug, $sourcePage['slug'] ?? '');
+        $parentPid = (int)$targetPage['pid'];
+        $parentSlug = $this->slugGeneratorService->getParentSlug($parentPid, $languageId);
+        $newSlug = $this->slugGeneratorService->combineWithParent(
+            $parentSlug,
+            $sourcePage['slug'] ?? '',
+            $targetPage,
+            $parentPid,
+        );
 
-        $state = RecordStateFactory::forName('pages')->fromArray($targetPage, (int)$targetPage['pid'], $targetUid);
+        $state = RecordStateFactory::forName('pages')->fromArray($targetPage, $parentPid, $targetUid);
         $newSlug = $this->getSlugHelper()->buildSlugForUniqueInSite($newSlug, $state);
 
         $pasteDataMap['pages'][$targetUid]['slug'] = $newSlug;
