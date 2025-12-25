@@ -121,6 +121,9 @@ export class SluggiElement extends LitElement {
     @state()
     private slugGenerated = false;
 
+    @state()
+    private syncAnimating = false;
+
     @query('input.sluggi-input')
     private inputElement?: HTMLInputElement;
 
@@ -363,10 +366,19 @@ export class SluggiElement extends LitElement {
         if (this.syncFeatureEnabled || !this.isSynced) return nothing;
 
         return html`
-            <span class="sluggi-sync-icon-static" aria-label="Auto-sync is enabled" title="Auto-sync enabled: slug updates automatically">
+            <span
+                class="sluggi-sync-icon-static ${this.syncAnimating ? 'syncing' : ''}"
+                aria-label="Auto-sync is enabled"
+                title="Auto-sync enabled: slug updates automatically"
+                @animationend="${this.handleSyncAnimationEnd}"
+            >
                 ${syncIcon}
             </span>
         `;
+    }
+
+    private handleSyncAnimationEnd() {
+        this.syncAnimating = false;
     }
 
     private renderLockToggle() {
@@ -460,6 +472,10 @@ export class SluggiElement extends LitElement {
     }
 
     async sendSlugProposal(mode: 'auto' | 'recreate' | 'manual') {
+        if (mode === 'recreate' && !this.syncFeatureEnabled && this.isSynced) {
+            this.syncAnimating = true;
+        }
+
         this.dispatchEvent(new CustomEvent('sluggi-request-proposal', {
             bubbles: true,
             composed: true,
