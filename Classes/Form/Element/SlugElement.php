@@ -115,8 +115,10 @@ final class SlugElement extends AbstractFormElement
         $includeUid = $this->hasUidInGeneratorFields($generatorFields);
         $hasPostModifiers = !empty($config['generatorOptions']['postModifiers']);
 
-        $syncFeatureEnabled = $this->slugSyncService->isSyncFeatureEnabled();
-        $lockFeatureEnabled = $this->slugLockService->isLockFeatureEnabled();
+        $syncFeatureEnabled = $this->slugSyncService->isSyncFeatureEnabled()
+            && $this->canUserAccessSyncField($table);
+        $lockFeatureEnabled = $this->slugLockService->isLockFeatureEnabled()
+            && $this->canUserAccessLockField($table);
         $requiredSourceFields = $this->slugConfigurationService->getRequiredSourceFields($table);
         $lastSegmentOnly = $this->lastSegmentValidationService->shouldRestrictUser(
             $this->getBackendUser()->isAdmin()
@@ -325,5 +327,15 @@ final class SlugElement extends AbstractFormElement
             . '<legend class="form-label t3js-formengine-label">' . $chainIcon . $legend . '</legend>'
             . $innerHTML
             . '</fieldset>';
+    }
+
+    private function canUserAccessSyncField(string $table): bool
+    {
+        return $this->getBackendUser()->check('non_exclude_fields', $table . ':tx_sluggi_sync');
+    }
+
+    private function canUserAccessLockField(string $table): bool
+    {
+        return $this->getBackendUser()->check('non_exclude_fields', $table . ':slug_locked');
     }
 }

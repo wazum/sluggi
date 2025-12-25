@@ -7,12 +7,16 @@ use Wazum\Sluggi\Service\SlugConfigurationService;
 $GLOBALS['TCA']['pages']['columns']['slug']['config']['renderType'] = 'sluggiSlug';
 
 $GLOBALS['TCA']['pages']['columns']['tx_sluggi_sync'] = [
+    'exclude' => true,
+    'label' => 'LLL:EXT:sluggi/Resources/Private/Language/locallang.xlf:pages.tx_sluggi_sync',
     'config' => [
         'type' => 'passthrough',
     ],
 ];
 
 $GLOBALS['TCA']['pages']['columns']['slug_locked'] = [
+    'exclude' => true,
+    'label' => 'LLL:EXT:sluggi/Resources/Private/Language/locallang.xlf:pages.slug_locked',
     'config' => [
         'type' => 'passthrough',
     ],

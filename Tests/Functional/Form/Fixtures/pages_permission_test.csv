@@ -1,0 +1,19 @@
+"be_groups"
+,"uid","pid","title","tables_modify","pagetypes_select","non_exclude_fields","db_mountpoints"
+,1,0,"Full Access","pages","1,254","pages:slug,pages:title,pages:tx_sluggi_sync,pages:slug_locked","1"
+,2,0,"Sync Only","pages","1,254","pages:slug,pages:title,pages:tx_sluggi_sync","1"
+,3,0,"Lock Only","pages","1,254","pages:slug,pages:title,pages:slug_locked","1"
+,4,0,"No Sluggi Access","pages","1,254","pages:slug,pages:title","1"
+
+"be_users"
+,"uid","pid","username","password","admin","usergroup"
+,1,0,"admin","$2y$12$abc123",1,""
+,2,0,"full_access","$2y$12$abc123",0,"1"
+,3,0,"sync_only","$2y$12$abc123",0,"2"
+,4,0,"lock_only","$2y$12$abc123",0,"3"
+,5,0,"no_sluggi","$2y$12$abc123",0,"4"
+
+"pages"
+,"uid","pid","title","slug","tx_sluggi_sync","slug_locked","doktype","perms_userid","perms_groupid","perms_user","perms_group","perms_everybody"
+,1,0,"Root Page","/",0,0,1,1,0,31,31,31
+,2,1,"Test Page","/test-page",0,0,1,1,0,31,31,31

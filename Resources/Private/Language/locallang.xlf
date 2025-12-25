@@ -18,6 +18,12 @@
             <trans-unit id="conflict.button.useSuggestion" resname="conflict.button.useSuggestion">
                 <source>Use Suggestion</source>
             </trans-unit>
+            <trans-unit id="pages.tx_sluggi_sync" resname="pages.tx_sluggi_sync">
+                <source>Sluggi: Auto-sync slug</source>
+            </trans-unit>
+            <trans-unit id="pages.slug_locked" resname="pages.slug_locked">
+                <source>Sluggi: Lock slug</source>
+            </trans-unit>
         </body>
     </file>
 </xliff>
