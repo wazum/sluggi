@@ -8,7 +8,7 @@ test.describe('Slug Lock Toggle - TYPO3 Integration', () => {
   });
 
   test('lock toggle button is visible with label', async ({ page }) => {
-    await page.goto('/typo3/record/edit?edit[pages][28]=edit');
+    await page.goto('/typo3/record/edit?edit[pages][30]=edit');
     const frame = page.frameLocator('iframe');
     await expect(frame.locator('h1')).toContainText('Edit Page', { timeout: 15000 });
 
@@ -24,7 +24,7 @@ test.describe('Slug Lock Toggle - TYPO3 Integration', () => {
   });
 
   test('clicking lock toggle changes visual state', async ({ page }) => {
-    await page.goto('/typo3/record/edit?edit[pages][29]=edit');
+    await page.goto('/typo3/record/edit?edit[pages][31]=edit');
     const frame = page.frameLocator('iframe');
     await expect(frame.locator('h1')).toContainText('Edit Page', { timeout: 15000 });
     const slugElement = frame.locator('sluggi-element');
@@ -38,7 +38,7 @@ test.describe('Slug Lock Toggle - TYPO3 Integration', () => {
   });
 
   test('locked slug field shows lock icon and is not editable', async ({ page }) => {
-    await page.goto('/typo3/record/edit?edit[pages][31]=edit');
+    await page.goto('/typo3/record/edit?edit[pages][33]=edit');
     const frame = page.frameLocator('iframe');
     await expect(frame.locator('h1')).toContainText('Edit Page', { timeout: 15000 });
     const slugElement = frame.locator('sluggi-element');
@@ -54,7 +54,7 @@ test.describe('Slug Lock Toggle - TYPO3 Integration', () => {
   });
 
   test('lock state persists after form save and full page reload', async ({ page }) => {
-    await page.goto('/typo3/record/edit?edit[pages][30]=edit');
+    await page.goto('/typo3/record/edit?edit[pages][32]=edit');
     let frame = page.frameLocator('iframe');
     await expect(frame.locator('h1')).toContainText('Edit Page', { timeout: 15000 });
     let slugElement = frame.locator('sluggi-element');
@@ -71,7 +71,7 @@ test.describe('Slug Lock Toggle - TYPO3 Integration', () => {
     await page.goto('/typo3/module/web/layout');
     await expect(page.locator('.scaffold-content-navigation-component')).toBeVisible({ timeout: 10000 });
 
-    await page.goto('/typo3/record/edit?edit[pages][30]=edit');
+    await page.goto('/typo3/record/edit?edit[pages][32]=edit');
     frame = page.frameLocator('iframe');
     await expect(frame.locator('h1')).toContainText('Edit Page', { timeout: 15000 });
     slugElement = frame.locator('sluggi-element');
@@ -81,7 +81,7 @@ test.describe('Slug Lock Toggle - TYPO3 Integration', () => {
   });
 
   test('sync toggle is hidden when page is locked', async ({ page }) => {
-    await page.goto('/typo3/record/edit?edit[pages][31]=edit');
+    await page.goto('/typo3/record/edit?edit[pages][33]=edit');
     const frame = page.frameLocator('iframe');
     await expect(frame.locator('h1')).toContainText('Edit Page', { timeout: 15000 });
     const slugElement = frame.locator('sluggi-element');
@@ -94,7 +94,7 @@ test.describe('Slug Lock Toggle - TYPO3 Integration', () => {
   });
 
   test('locking page hides sync toggle', async ({ page }) => {
-    await page.goto('/typo3/record/edit?edit[pages][32]=edit');
+    await page.goto('/typo3/record/edit?edit[pages][34]=edit');
     const frame = page.frameLocator('iframe');
     await expect(frame.locator('h1')).toContainText('Edit Page', { timeout: 15000 });
     const slugElement = frame.locator('sluggi-element');
@@ -111,7 +111,7 @@ test.describe('Slug Lock Toggle - TYPO3 Integration', () => {
   });
 
   test('synced page hides lock toggle', async ({ page }) => {
-    await page.goto('/typo3/record/edit?edit[pages][33]=edit');
+    await page.goto('/typo3/record/edit?edit[pages][35]=edit');
     const frame = page.frameLocator('iframe');
     await expect(frame.locator('h1')).toContainText('Edit Page', { timeout: 15000 });
     const slugElement = frame.locator('sluggi-element');
@@ -125,7 +125,7 @@ test.describe('Slug Lock Toggle - TYPO3 Integration', () => {
   });
 
   test('toggling lock marks form as dirty and shows unsaved changes modal', async ({ page }) => {
-    await page.goto('/typo3/record/edit?edit[pages][28]=edit');
+    await page.goto('/typo3/record/edit?edit[pages][30]=edit');
     const frame = page.frameLocator('iframe');
     await expect(frame.locator('h1')).toContainText('Edit Page', { timeout: 15000 });
     const slugElement = frame.locator('sluggi-element');

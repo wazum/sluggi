@@ -1,7 +1,5 @@
 import { test, expect, FrameLocator, Locator } from '@playwright/test';
 
-const ABOUT_US_PAGE_ID = 26;
-
 test.describe('Hierarchy Permission - Editor Slug Restrictions', () => {
   let frame: FrameLocator;
   let slugElement: Locator;
@@ -13,7 +11,7 @@ test.describe('Hierarchy Permission - Editor Slug Restrictions', () => {
   });
 
   test.beforeEach(async ({ page }) => {
-    await page.goto(`/typo3/record/edit?edit[pages][${ABOUT_US_PAGE_ID}]=edit`);
+    await page.goto('/typo3/record/edit?edit[pages][28]=edit');
     frame = page.frameLocator('iframe');
     await expect(frame.locator('h1')).toContainText('Edit Page', { timeout: 15000 });
     slugElement = frame.locator('sluggi-element');
@@ -56,15 +54,12 @@ test.describe('Hierarchy Permission - Editor Slug Restrictions', () => {
   });
 
   test('new page has correct locked-prefix based on hierarchy permissions', async ({ page }) => {
-    // In hierarchy permission mode, new pages should have locked-prefix based on
-    // the user's permissions, not the entire parent slug
     await page.goto('/typo3/module/web/layout');
 
     const pageTree = page.locator('.scaffold-content-navigation-component');
     await expect(pageTree).toBeVisible({ timeout: 10000 });
 
-    // Right-click on Institute (page 25) to create a subpage
-    const instituteNode = pageTree.locator('[data-id="25"]');
+    const instituteNode = pageTree.locator('[data-id="27"]');
     await expect(instituteNode).toBeVisible({ timeout: 10000 });
     await instituteNode.click({ button: 'right' });
 
@@ -77,16 +72,12 @@ test.describe('Hierarchy Permission - Editor Slug Restrictions', () => {
 
     const slugElement = editFrame.locator('sluggi-element');
     await expect(slugElement).toBeVisible();
-
-    // Locked prefix should be /organization/department (above user's permission level)
     await expect(slugElement).toHaveAttribute('locked-prefix', '/organization/department');
 
-    // The prefix display should show the locked part
     const prefix = slugElement.locator('.sluggi-prefix');
     await expect(prefix).toBeVisible();
     await expect(prefix).toContainText('/organization/department');
 
-    // The editable area should show /institute (the part user can edit)
     const editableArea = slugElement.locator('.sluggi-editable');
     await expect(editableArea).toBeVisible();
     const editableText = await editableArea.textContent();

@@ -1,6 +1,4 @@
-import { test, expect, FrameLocator, Locator } from '@playwright/test';
-
-const TEST_PAGE_ID = 37;
+import {expect, FrameLocator, Locator, test} from '@playwright/test';
 
 test.describe('Full Path Editing - Editor Toggle', () => {
   let frame: FrameLocator;
@@ -13,7 +11,7 @@ test.describe('Full Path Editing - Editor Toggle', () => {
   });
 
   test.beforeEach(async ({ page }) => {
-    await page.goto(`/typo3/record/edit?edit[pages][${TEST_PAGE_ID}]=edit`);
+    await page.goto('/typo3/record/edit?edit[pages][39]=edit');
     frame = page.frameLocator('iframe');
     await expect(frame.locator('h1')).toContainText('Edit Page', { timeout: 15000 });
     slugElement = frame.locator('sluggi-element');
@@ -91,8 +89,7 @@ test.describe('Full Path Editing - Editor Toggle', () => {
   });
 
   test('full path change persists after save', async ({ page }) => {
-    // Use dedicated page 38 for save test
-    await page.goto('/typo3/record/edit?edit[pages][38]=edit');
+    await page.goto('/typo3/record/edit?edit[pages][40]=edit');
     const editFrame = page.frameLocator('iframe');
     await expect(editFrame.locator('h1')).toContainText('Edit Page', { timeout: 15000 });
 
@@ -120,8 +117,7 @@ test.describe('Full Path Editing - Editor Toggle', () => {
   });
 
   test('full path toggle is not visible when slug is synced', async ({ page }) => {
-    // Use page 20 which has sync enabled
-    await page.goto('/typo3/record/edit?edit[pages][20]=edit');
+    await page.goto('/typo3/record/edit?edit[pages][22]=edit');
     const editFrame = page.frameLocator('iframe');
     await expect(editFrame.locator('h1')).toContainText('Edit Page', { timeout: 15000 });
 
@@ -161,8 +157,7 @@ test.describe('Full Path Editing - Regenerate Behavior', () => {
   });
 
   test('regenerate only updates last segment when slug matches hierarchy', async ({ page }) => {
-    // Page 39 has slug /parent-section/regen-match which matches hierarchy
-    await page.goto('/typo3/record/edit?edit[pages][39]=edit');
+    await page.goto('/typo3/record/edit?edit[pages][41]=edit');
     const frame = page.frameLocator('iframe');
     await expect(frame.locator('h1')).toContainText('Edit Page', { timeout: 15000 });
 
@@ -189,8 +184,7 @@ test.describe('Full Path Editing - Regenerate Behavior', () => {
   });
 
   test('regenerate auto-activates full path when slug was shortened', async ({ page }) => {
-    // Page 40 has slug /short-url which doesn't match hierarchy (parent is /parent-section)
-    await page.goto('/typo3/record/edit?edit[pages][40]=edit');
+    await page.goto('/typo3/record/edit?edit[pages][42]=edit');
     const frame = page.frameLocator('iframe');
     await expect(frame.locator('h1')).toContainText('Edit Page', { timeout: 15000 });
 
@@ -208,8 +202,7 @@ test.describe('Full Path Editing - Regenerate Behavior', () => {
   });
 
   test('regenerate with auto-activated full path saves successfully', async ({ page }) => {
-    // Page 40 has slug /short-url which doesn't match hierarchy
-    await page.goto('/typo3/record/edit?edit[pages][40]=edit');
+    await page.goto('/typo3/record/edit?edit[pages][42]=edit');
     const frame = page.frameLocator('iframe');
     await expect(frame.locator('h1')).toContainText('Edit Page', { timeout: 15000 });
 

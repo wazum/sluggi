@@ -1,6 +1,4 @@
-import { test, expect } from '@playwright/test';
-
-const TEST_PAGE_ID = 2;
+import {expect, test} from '@playwright/test';
 
 test.describe('Page Tree Inline Editing with Sync', () => {
   test('slug updates when title is changed via page tree inline editing', async ({ page }) => {
@@ -16,7 +14,7 @@ test.describe('Page Tree Inline Editing with Sync', () => {
       await rootToggle.click();
     }
 
-    const treeNode = pageTree.locator(`[data-id="${TEST_PAGE_ID}"]`);
+    const treeNode = pageTree.locator('[data-id="2"]');
     await expect(treeNode).toBeVisible({ timeout: 10000 });
 
     const titleElement = treeNode.locator('.node-contentlabel');
@@ -31,14 +29,10 @@ test.describe('Page Tree Inline Editing with Sync', () => {
     await treeInput.fill(newTitle);
     await treeInput.press('Enter');
 
-    // Wait for the AJAX save to complete and tree to update
     await expect(treeInput).not.toBeVisible({ timeout: 10000 });
-
-    // Wait for page tree to refresh - the title should update
     await expect(treeNode.locator('.node-contentlabel')).toContainText(newTitle, { timeout: 15000 });
 
-    // Now verify the slug was updated
-    await page.goto(`/typo3/record/edit?edit[pages][${TEST_PAGE_ID}]=edit`);
+    await page.goto('/typo3/record/edit?edit[pages][2]=edit');
     const frame = page.frameLocator('iframe');
     await expect(frame.locator('h1')).toContainText('Edit Page', { timeout: 15000 });
 

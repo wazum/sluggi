@@ -13,7 +13,7 @@ test.describe('Page Copy - Slug Update', () => {
       await rootToggle.click();
     }
 
-    // Copy "Copy Source" (page 21) into "Copy Target" (page 22)
+    // Copy "Copy Source" (page 23) into "Copy Target" (page 24)
     const sourceNode = page.getByRole('treeitem', { name: 'Copy Source' });
     await expect(sourceNode).toBeVisible({ timeout: 10000 });
     await sourceNode.click({ button: 'right' });

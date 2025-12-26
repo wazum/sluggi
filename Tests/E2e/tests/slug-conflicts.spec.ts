@@ -1,12 +1,10 @@
-import { test, expect, FrameLocator } from '@playwright/test';
-
-const CONFLICT_PAGE_ID = 3;
+import {expect, FrameLocator, test} from '@playwright/test';
 
 test.describe('Slug Conflicts - TYPO3 Integration', () => {
   let frame: FrameLocator;
 
   test('server detects duplicate slug and shows conflict modal', async ({ page }) => {
-    await page.goto(`/typo3/record/edit?edit[pages][${CONFLICT_PAGE_ID}]=edit`);
+    await page.goto('/typo3/record/edit?edit[pages][3]=edit');
     frame = page.frameLocator('iframe');
     await expect(frame.locator('h1')).toContainText('Edit Page', { timeout: 15000 });
 
@@ -40,7 +38,7 @@ test.describe('Slug Conflicts - TYPO3 Integration', () => {
   });
 
   test('applying conflict suggestion updates slug via TYPO3', async ({ page }) => {
-    await page.goto(`/typo3/record/edit?edit[pages][${CONFLICT_PAGE_ID}]=edit`);
+    await page.goto('/typo3/record/edit?edit[pages][3]=edit');
     frame = page.frameLocator('iframe');
     await expect(frame.locator('h1')).toContainText('Edit Page', { timeout: 15000 });
 
@@ -70,9 +68,7 @@ test.describe('Slug Conflicts - TYPO3 Integration', () => {
   });
 
   test('enabling sync does not show conflict modal when slug is already correct', async ({ page }) => {
-    const ALREADY_UNIQUE_PAGE_ID = 5;
-
-    await page.goto(`/typo3/record/edit?edit[pages][${ALREADY_UNIQUE_PAGE_ID}]=edit`);
+    await page.goto('/typo3/record/edit?edit[pages][5]=edit');
     frame = page.frameLocator('iframe');
     await expect(frame.locator('h1')).toContainText('Edit Page', { timeout: 15000 });
 

@@ -1,6 +1,4 @@
-import { test, expect } from '@playwright/test';
-
-const CHILD_PAGE_ID = 17;
+import {expect, test} from '@playwright/test';
 
 test.describe('Page Move - Slug Update', () => {
   test('moving a page into another updates slug with parent prefix', async ({ page }) => {
@@ -15,7 +13,6 @@ test.describe('Page Move - Slug Update', () => {
       await rootToggle.click();
     }
 
-    // Page 17 has slug /child-page, page 16 has slug /parent-page
     const childNode = page.getByRole('treeitem', { name: 'Child Page' });
     await expect(childNode).toBeVisible({ timeout: 10000 });
     await childNode.click({ button: 'right' });
@@ -33,11 +30,10 @@ test.describe('Page Move - Slug Update', () => {
     await dialog.getByRole('button', { name: 'OK', exact: true }).click();
     await expect(dialog).not.toBeVisible({ timeout: 5000 });
 
-    await page.goto(`/typo3/record/edit?edit[pages][${CHILD_PAGE_ID}]=edit`);
+    await page.goto('/typo3/record/edit?edit[pages][17]=edit');
     const frame = page.frameLocator('iframe');
     await expect(frame.locator('h1')).toContainText('Edit Page', { timeout: 15000 });
 
-    // After move, child slug should be parent slug + child segment
     const hiddenField = frame.locator('.sluggi-hidden-field');
     const slug = await hiddenField.inputValue();
     expect(slug).toBe('/parent-page/child-page');
