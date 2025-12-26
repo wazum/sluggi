@@ -137,6 +137,40 @@ final class PreventSelfReferencingRedirectTest extends FunctionalTestCase
         self::assertNotContains('/page-c', $sourcePaths, 'No self-referencing redirect from /page-c');
     }
 
+    #[Test]
+    public function redirectsForOtherSitesAreNotDeletedWhenSlugChanges(): void
+    {
+        $connection = GeneralUtility::makeInstance(ConnectionPool::class)
+            ->getConnectionForTable('sys_redirect');
+        $connection->insert('sys_redirect', [
+            'source_host' => 'other-site.example.com',
+            'source_path' => '/page-b',
+            'target' => '/some-target',
+            'target_statuscode' => 301,
+        ]);
+        $otherSiteRedirectUid = (int)$connection->lastInsertId();
+
+        $dataHandler = GeneralUtility::makeInstance(DataHandler::class);
+        $dataHandler->start(
+            ['pages' => [2 => ['slug' => '/page-b']]],
+            []
+        );
+        $dataHandler->process_datamap();
+
+        $redirects = $this->getAllRedirects();
+        $otherSiteRedirect = array_filter(
+            $redirects,
+            static fn (array $r) => (int)$r['uid'] === $otherSiteRedirectUid
+        );
+
+        self::assertCount(1, $otherSiteRedirect, 'Redirect for other site should still exist');
+        self::assertSame(
+            'other-site.example.com',
+            array_values($otherSiteRedirect)[0]['source_host'],
+            'Other site redirect should have its original source_host'
+        );
+    }
+
     private function getRedirectsForPage(): array
     {
         $connection = GeneralUtility::makeInstance(ConnectionPool::class)

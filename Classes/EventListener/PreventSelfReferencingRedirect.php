@@ -20,6 +20,7 @@ final readonly class PreventSelfReferencingRedirect
         $changeItem = $event->getSlugRedirectChangeItem();
         $newSlug = $changeItem->getChanged()['slug'] ?? '';
         $sourcePath = $redirectRecord['source_path'] ?? '';
+        $sourceHost = $redirectRecord['source_host'] ?? '*';
 
         if ($newSlug === '') {
             return;
@@ -30,7 +31,7 @@ final readonly class PreventSelfReferencingRedirect
             $event->setRedirectRecord($redirectRecord);
         }
 
-        $this->deleteExistingRedirectsForSlug($newSlug);
+        $this->deleteExistingRedirectsForSlug($newSlug, $sourceHost);
     }
 
     private function isSelfReferencing(string $sourcePath, string $newSlug): bool
@@ -45,7 +46,7 @@ final readonly class PreventSelfReferencingRedirect
         return $normalizedSource === $normalizedSlug;
     }
 
-    private function deleteExistingRedirectsForSlug(string $slug): void
+    private function deleteExistingRedirectsForSlug(string $slug, string $sourceHost): void
     {
         $queryBuilder = $this->connectionPool->getQueryBuilderForTable('sys_redirect');
         $queryBuilder->getRestrictions()->removeAll();
@@ -53,7 +54,8 @@ final readonly class PreventSelfReferencingRedirect
         $queryBuilder
             ->delete('sys_redirect')
             ->where(
-                $queryBuilder->expr()->eq('source_path', $queryBuilder->createNamedParameter($slug))
+                $queryBuilder->expr()->eq('source_path', $queryBuilder->createNamedParameter($slug)),
+                $queryBuilder->expr()->eq('source_host', $queryBuilder->createNamedParameter($sourceHost))
             )
             ->executeStatement();
     }
