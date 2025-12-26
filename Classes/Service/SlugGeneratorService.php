@@ -18,18 +18,30 @@ final readonly class SlugGeneratorService
      */
     public function generate(array $record, int $pid): string
     {
-        $slugHelper = $this->getSlugHelper();
-        $fieldConfig = $GLOBALS['TCA']['pages']['columns']['slug']['config'] ?? [];
+        return $this->generateForTable($record, $pid, 'pages', 'slug');
+    }
+
+    /**
+     * @param array<string, mixed> $record
+     */
+    public function generateForTable(array $record, int $pid, string $table, string $slugField): string
+    {
+        $fieldConfig = $GLOBALS['TCA'][$table]['columns'][$slugField]['config'] ?? [];
+        $slugHelper = $this->getSlugHelperForTable($table, $slugField, $fieldConfig);
         $sanitizedRecord = $this->sanitizeSourceFieldValues($record, $fieldConfig);
 
-        $state = RecordStateFactory::forName('pages')
+        $state = RecordStateFactory::forName($table)
             ->fromArray($sanitizedRecord, $pid, $sanitizedRecord['uid'] ?? 0);
         $slug = $slugHelper->generate($sanitizedRecord, $pid);
 
+        $prependSlash = (bool)($fieldConfig['prependSlash'] ?? ($table === 'pages'));
+
         try {
-            return '/' . ltrim($slugHelper->buildSlugForUniqueInSite($slug, $state), '/');
+            $uniqueSlug = $slugHelper->buildSlugForUniqueInSite($slug, $state);
+
+            return $prependSlash ? '/' . ltrim($uniqueSlug, '/') : $uniqueSlug;
         } catch (SiteNotFoundException) {
-            return '';
+            return $prependSlash ? '/' . ltrim($slug, '/') : $slug;
         }
     }
 
@@ -173,12 +185,18 @@ final readonly class SlugGeneratorService
 
     private function getSlugHelper(): SlugHelper
     {
-        $fieldConfig = $GLOBALS['TCA']['pages']['columns']['slug']['config'] ?? [];
+        return $this->getSlugHelperForTable('pages', 'slug', $GLOBALS['TCA']['pages']['columns']['slug']['config'] ?? []);
+    }
 
+    /**
+     * @param array<string, mixed> $fieldConfig
+     */
+    private function getSlugHelperForTable(string $table, string $slugField, array $fieldConfig): SlugHelper
+    {
         return GeneralUtility::makeInstance(
             SlugHelper::class,
-            'pages',
-            'slug',
+            $table,
+            $slugField,
             $fieldConfig
         );
     }

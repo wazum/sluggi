@@ -185,4 +185,82 @@ final class ExtensionConfigurationTest extends TestCase
 
         self::assertFalse($subject->isFullPathEditingEnabled());
     }
+
+    #[Test]
+    public function getSynchronizeTablesReturnsArrayOfTableNames(): void
+    {
+        $coreConfig = $this->createMock(CoreExtensionConfiguration::class);
+        $coreConfig->method('get')
+            ->with('sluggi', 'synchronize_tables')
+            ->willReturn('tx_news_domain_model_news,tx_blog_domain_model_post');
+
+        $subject = new ExtensionConfiguration($coreConfig);
+
+        self::assertSame(['tx_news_domain_model_news', 'tx_blog_domain_model_post'], $subject->getSynchronizeTables());
+    }
+
+    #[Test]
+    public function getSynchronizeTablesTrimsWhitespace(): void
+    {
+        $coreConfig = $this->createMock(CoreExtensionConfiguration::class);
+        $coreConfig->method('get')
+            ->with('sluggi', 'synchronize_tables')
+            ->willReturn(' tx_news_domain_model_news , tx_blog_domain_model_post ');
+
+        $subject = new ExtensionConfiguration($coreConfig);
+
+        self::assertSame(['tx_news_domain_model_news', 'tx_blog_domain_model_post'], $subject->getSynchronizeTables());
+    }
+
+    #[Test]
+    public function getSynchronizeTablesReturnsEmptyArrayWhenEmpty(): void
+    {
+        $coreConfig = $this->createMock(CoreExtensionConfiguration::class);
+        $coreConfig->method('get')
+            ->with('sluggi', 'synchronize_tables')
+            ->willReturn('');
+
+        $subject = new ExtensionConfiguration($coreConfig);
+
+        self::assertSame([], $subject->getSynchronizeTables());
+    }
+
+    #[Test]
+    public function getSynchronizeTablesReturnsEmptyArrayWhenMissing(): void
+    {
+        $coreConfig = $this->createMock(CoreExtensionConfiguration::class);
+        $coreConfig->method('get')
+            ->with('sluggi', 'synchronize_tables')
+            ->willThrowException(new Exception('Configuration not found'));
+
+        $subject = new ExtensionConfiguration($coreConfig);
+
+        self::assertSame([], $subject->getSynchronizeTables());
+    }
+
+    #[Test]
+    public function isTableSynchronizeEnabledReturnsTrueForConfiguredTable(): void
+    {
+        $coreConfig = $this->createMock(CoreExtensionConfiguration::class);
+        $coreConfig->method('get')
+            ->with('sluggi', 'synchronize_tables')
+            ->willReturn('tx_news_domain_model_news,tx_blog_domain_model_post');
+
+        $subject = new ExtensionConfiguration($coreConfig);
+
+        self::assertTrue($subject->isTableSynchronizeEnabled('tx_news_domain_model_news'));
+    }
+
+    #[Test]
+    public function isTableSynchronizeEnabledReturnsFalseForUnconfiguredTable(): void
+    {
+        $coreConfig = $this->createMock(CoreExtensionConfiguration::class);
+        $coreConfig->method('get')
+            ->with('sluggi', 'synchronize_tables')
+            ->willReturn('tx_news_domain_model_news');
+
+        $subject = new ExtensionConfiguration($coreConfig);
+
+        self::assertFalse($subject->isTableSynchronizeEnabled('tx_blog_domain_model_post'));
+    }
 }

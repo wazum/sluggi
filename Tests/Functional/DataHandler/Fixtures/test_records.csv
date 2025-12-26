@@ -1,0 +1,7 @@
+"be_users"
+,"uid","pid","username","password","admin"
+,1,0,"admin","$2y$12$abc123",1
+
+"tx_sluggitest_article"
+,"uid","pid","title","subtitle","slug"
+,1,0,"Original Title","Original Subtitle","original-title/original-subtitle"

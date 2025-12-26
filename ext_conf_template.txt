@@ -1,5 +1,7 @@
 # cat=sync; type=boolean; label=Enable automatic slug synchronization: When enabled, slug will be automatically regenerated when source fields change
 synchronize=1
+# cat=sync; type=string; label=Synchronize tables: Comma-separated list of tables (other than pages) that should have automatic slug synchronization (e.g. tx_news_domain_model_news)
+synchronize_tables=
 # cat=lock; type=boolean; label=Enable slug locking: When enabled, users can lock a page's slug to prevent any modifications
 lock=0
 # cat=lock; type=boolean; label=Lock descendants: When enabled, children of a locked page are also protected from slug updates caused by ancestor changes

@@ -1,0 +1,9 @@
+{
+    "name": "wazum/test-sluggi-records",
+    "type": "typo3-cms-extension",
+    "extra": {
+        "typo3/cms": {
+            "extension-key": "test_sluggi_records"
+        }
+    }
+}

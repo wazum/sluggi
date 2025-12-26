@@ -107,7 +107,7 @@ final readonly class SlugConfigurationService
         return $GLOBALS['TCA'][$table]['columns'][$slugFieldName]['config']['generatorOptions']['fields'] ?? [];
     }
 
-    private function getSlugFieldName(string $table): ?string
+    public function getSlugFieldName(string $table): ?string
     {
         foreach ($GLOBALS['TCA'][$table]['columns'] ?? [] as $fieldName => $fieldConfig) {
             if (($fieldConfig['config']['type'] ?? '') === 'slug') {

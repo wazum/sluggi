@@ -26,6 +26,31 @@ final readonly class ExtensionConfiguration
         }
     }
 
+    /**
+     * @return list<string>
+     */
+    public function getSynchronizeTables(): array
+    {
+        try {
+            $value = (string)$this->extensionConfiguration->get(
+                extension: 'sluggi',
+                path: 'synchronize_tables'
+            );
+            if ($value === '') {
+                return [];
+            }
+
+            return array_values(array_filter(array_map(trim(...), explode(',', $value))));
+        } catch (Exception) {
+            return [];
+        }
+    }
+
+    public function isTableSynchronizeEnabled(string $table): bool
+    {
+        return in_array($table, $this->getSynchronizeTables(), true);
+    }
+
     public function isLockEnabled(): bool
     {
         try {

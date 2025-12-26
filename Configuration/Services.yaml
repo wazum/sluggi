@@ -20,6 +20,9 @@ services:
   Wazum\Sluggi\DataHandler\HandlePageUpdate:
     public: true
 
+  Wazum\Sluggi\DataHandler\HandleRecordUpdate:
+    public: true
+
   Wazum\Sluggi\DataHandler\PreventLockedSlugEdit:
     public: true
 
