@@ -25,7 +25,7 @@ final readonly class InitializeSyncField implements FormDataProviderInterface
             return $result;
         }
 
-        if ($this->extensionConfiguration->isSyncEnabled()) {
+        if ($this->extensionConfiguration->isSyncEnabled() && $this->extensionConfiguration->isSyncDefaultEnabled()) {
             $result['databaseRow']['tx_sluggi_sync'] = 1;
         }
 

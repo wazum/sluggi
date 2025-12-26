@@ -26,6 +26,18 @@ final readonly class ExtensionConfiguration
         }
     }
 
+    public function isSyncDefaultEnabled(): bool
+    {
+        try {
+            return (bool)$this->extensionConfiguration->get(
+                extension: 'sluggi',
+                path: 'synchronize_default'
+            );
+        } catch (Exception) {
+            return true;
+        }
+    }
+
     /**
      * @return list<string>
      */

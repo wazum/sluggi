@@ -263,4 +263,43 @@ final class ExtensionConfigurationTest extends TestCase
 
         self::assertFalse($subject->isTableSynchronizeEnabled('tx_blog_domain_model_post'));
     }
+
+    #[Test]
+    public function isSyncDefaultEnabledReturnsTrueWhenSettingIs1(): void
+    {
+        $coreConfig = $this->createMock(CoreExtensionConfiguration::class);
+        $coreConfig->method('get')
+            ->with('sluggi', 'synchronize_default')
+            ->willReturn('1');
+
+        $subject = new ExtensionConfiguration($coreConfig);
+
+        self::assertTrue($subject->isSyncDefaultEnabled());
+    }
+
+    #[Test]
+    public function isSyncDefaultEnabledReturnsFalseWhenSettingIs0(): void
+    {
+        $coreConfig = $this->createMock(CoreExtensionConfiguration::class);
+        $coreConfig->method('get')
+            ->with('sluggi', 'synchronize_default')
+            ->willReturn('0');
+
+        $subject = new ExtensionConfiguration($coreConfig);
+
+        self::assertFalse($subject->isSyncDefaultEnabled());
+    }
+
+    #[Test]
+    public function isSyncDefaultEnabledReturnsTrueWhenSettingIsMissing(): void
+    {
+        $coreConfig = $this->createMock(CoreExtensionConfiguration::class);
+        $coreConfig->method('get')
+            ->with('sluggi', 'synchronize_default')
+            ->willThrowException(new Exception('Configuration not found'));
+
+        $subject = new ExtensionConfiguration($coreConfig);
+
+        self::assertTrue($subject->isSyncDefaultEnabled());
+    }
 }
