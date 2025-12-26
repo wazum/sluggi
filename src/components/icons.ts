@@ -77,3 +77,18 @@ export const lockOffIcon = html`
         <circle cx="10" cy="10" r="6" fill="white"/>
     </svg>
 `;
+
+export const pathOnIcon = html`
+    <svg width="30" height="18" viewBox="0 0 36 20" fill="none">
+        <rect x="1" y="1" width="34" height="18" rx="9" fill="#0d6efd" stroke="#0d6efd" stroke-width="2"/>
+        <circle cx="26" cy="10" r="6" fill="white"/>
+        <path d="M24 10h4M26 8v4" stroke="#0d6efd" stroke-width="1.5" stroke-linecap="round"/>
+    </svg>
+`;
+
+export const pathOffIcon = html`
+    <svg width="30" height="18" viewBox="0 0 36 20" fill="none">
+        <rect x="1" y="1" width="34" height="18" rx="9" fill="#6c757d" stroke="#6c757d" stroke-width="2"/>
+        <circle cx="10" cy="10" r="6" fill="white"/>
+    </svg>
+`;

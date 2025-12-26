@@ -22,6 +22,14 @@ $GLOBALS['TCA']['pages']['columns']['slug_locked'] = [
     ],
 ];
 
+$GLOBALS['TCA']['pages']['columns']['tx_sluggi_full_path'] = [
+    'exclude' => true,
+    'label' => 'LLL:EXT:sluggi/Resources/Private/Language/locallang.xlf:pages.tx_sluggi_full_path',
+    'config' => [
+        'type' => 'none',
+    ],
+];
+
 foreach ((new SlugConfigurationService())->getRequiredSourceFields('pages') as $fieldName) {
     if (isset($GLOBALS['TCA']['pages']['columns'][$fieldName]['config'])) {
         $GLOBALS['TCA']['pages']['columns'][$fieldName]['config']['renderType'] = 'slugSourceInput';

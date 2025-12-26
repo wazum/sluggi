@@ -146,4 +146,43 @@ final class ExtensionConfigurationTest extends TestCase
 
         self::assertFalse($subject->isLockDescendantsEnabled());
     }
+
+    #[Test]
+    public function isFullPathEditingEnabledReturnsTrueWhenSettingIs1(): void
+    {
+        $coreConfig = $this->createMock(CoreExtensionConfiguration::class);
+        $coreConfig->method('get')
+            ->with('sluggi', 'allow_full_path_editing')
+            ->willReturn('1');
+
+        $subject = new ExtensionConfiguration($coreConfig);
+
+        self::assertTrue($subject->isFullPathEditingEnabled());
+    }
+
+    #[Test]
+    public function isFullPathEditingEnabledReturnsFalseWhenSettingIs0(): void
+    {
+        $coreConfig = $this->createMock(CoreExtensionConfiguration::class);
+        $coreConfig->method('get')
+            ->with('sluggi', 'allow_full_path_editing')
+            ->willReturn('0');
+
+        $subject = new ExtensionConfiguration($coreConfig);
+
+        self::assertFalse($subject->isFullPathEditingEnabled());
+    }
+
+    #[Test]
+    public function isFullPathEditingEnabledReturnsFalseWhenSettingIsMissing(): void
+    {
+        $coreConfig = $this->createMock(CoreExtensionConfiguration::class);
+        $coreConfig->method('get')
+            ->with('sluggi', 'allow_full_path_editing')
+            ->willThrowException(new Exception('Configuration not found'));
+
+        $subject = new ExtensionConfiguration($coreConfig);
+
+        self::assertFalse($subject->isFullPathEditingEnabled());
+    }
 }

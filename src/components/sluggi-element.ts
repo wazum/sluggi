@@ -3,7 +3,7 @@ import { customElement, property, state, query } from 'lit/decorators.js';
 import Modal from '@typo3/backend/modal.js';
 import Severity from '@typo3/backend/severity.js';
 import type { ComponentMode } from '@/types';
-import { lockIcon, editIcon, refreshIcon, checkIcon, closeIcon, syncIcon, syncOnIcon, syncOffIcon, lockOnIcon, lockOffIcon } from './icons.js';
+import { lockIcon, editIcon, refreshIcon, checkIcon, closeIcon, syncIcon, syncOnIcon, syncOffIcon, lockOnIcon, lockOffIcon, pathOnIcon, pathOffIcon } from './icons.js';
 import styles from '../styles/sluggi-element.scss?inline';
 
 @customElement('sluggi-element')
@@ -60,6 +60,9 @@ export class SluggiElement extends LitElement {
 
     @property({ type: Boolean, attribute: 'lock-feature-enabled' })
     lockFeatureEnabled = false;
+
+    @property({ type: Boolean, attribute: 'full-path-feature-enabled' })
+    fullPathFeatureEnabled = false;
 
     // =========================================================================
     // Properties: Conflict State
@@ -124,6 +127,9 @@ export class SluggiElement extends LitElement {
     @state()
     private syncAnimating = false;
 
+    @state()
+    private isFullPathMode = false;
+
     @query('input.sluggi-input')
     private inputElement?: HTMLInputElement;
 
@@ -169,7 +175,16 @@ export class SluggiElement extends LitElement {
         return this.lockFeatureEnabled && !this.isSynced;
     }
 
+    private get showFullPathToggle(): boolean {
+        if (!this.fullPathFeatureEnabled) return false;
+        if (this.isLocked || this.isSynced) return false;
+        return this.lastSegmentOnly || !!this.lockedPrefix;
+    }
+
     private get computedPrefix(): string {
+        if (this.isFullPathMode) {
+            return this.prefix;
+        }
         if (this.lastSegmentOnly && this.value) {
             const parts = this.value.split('/').filter(Boolean);
             if (parts.length > 1) {
@@ -184,6 +199,12 @@ export class SluggiElement extends LitElement {
     }
 
     private get editableValue(): string {
+        if (this.isFullPathMode) {
+            if (this.prefix && this.value.startsWith(this.prefix)) {
+                return this.value.slice(this.prefix.length) || '/';
+            }
+            return this.value;
+        }
         if (this.lastSegmentOnly && this.value) {
             const parts = this.value.split('/').filter(Boolean);
             if (parts.length > 0) {
@@ -210,6 +231,9 @@ export class SluggiElement extends LitElement {
     }
 
     private get hiddenInputValue(): string {
+        if (this.isFullPathMode) {
+            return this.prefix + this.editableValue;
+        }
         if (this.lastSegmentOnly || this.lockedPrefix) {
             return this.computedPrefix + this.editableValue;
         }
@@ -325,6 +349,7 @@ export class SluggiElement extends LitElement {
                         ${refreshIcon}
                     </button>
                 ` : nothing}
+                ${this.renderFullPathToggle()}
                 ${this.renderSyncToggle()}
                 ${this.renderStaticSyncIcon()}
                 ${this.renderLockToggle()}
@@ -414,6 +439,28 @@ export class SluggiElement extends LitElement {
         `;
     }
 
+    private renderFullPathToggle() {
+        if (!this.showFullPathToggle) return nothing;
+
+        return html`
+            <div class="sluggi-full-path-wrapper">
+                <button
+                    type="button"
+                    class="sluggi-full-path-toggle ${this.isFullPathMode ? 'is-active' : ''}"
+                    aria-label="${this.isFullPathMode ? 'Restrict editing' : 'Edit full path'}"
+                    title="${this.isFullPathMode ? 'Full path editing enabled: click to restrict' : 'Click to edit full path'}"
+                    @click="${this.toggleFullPath}"
+                >
+                    <span class="sluggi-full-path-label">path</span>
+                    <span class="sluggi-full-path-icons">
+                        <span class="sluggi-full-path-icon sluggi-full-path-icon-on">${pathOnIcon}</span>
+                        <span class="sluggi-full-path-icon sluggi-full-path-icon-off">${pathOffIcon}</span>
+                    </span>
+                </button>
+            </div>
+        `;
+    }
+
     // =========================================================================
     // Public API
     // =========================================================================
@@ -464,6 +511,26 @@ export class SluggiElement extends LitElement {
     }
 
     setProposal(proposal: string, hasConflict = false, conflictingSlug = '') {
+        if ((this.lastSegmentOnly || this.lockedPrefix) && !this.isFullPathMode) {
+            const proposalPrefix = this.getParentPath(proposal);
+            const currentValuePrefix = this.getParentPath(this.value);
+            // Use lockedPrefix only if value already follows hierarchy, otherwise use derived prefix
+            const expectedPrefix = (this.lockedPrefix && this.value.startsWith(this.lockedPrefix))
+                ? this.lockedPrefix
+                : currentValuePrefix;
+
+            if (proposalPrefix !== expectedPrefix) {
+                this.isFullPathMode = true;
+                this.notifyFullPathFieldOfChange();
+            } else {
+                const proposalParts = proposal.split('/').filter(Boolean);
+                const newLastSegment = proposalParts.pop() || '';
+                if (newLastSegment) {
+                    proposal = expectedPrefix + '/' + newLastSegment;
+                }
+            }
+        }
+
         if (hasConflict && this.value !== proposal) {
             this.hasConflict = true;
             this.conflictProposal = proposal;
@@ -480,6 +547,12 @@ export class SluggiElement extends LitElement {
             }));
             this.notifyFormEngineOfChange();
         }
+    }
+
+    private getParentPath(slug: string): string {
+        const parts = slug.split('/').filter(Boolean);
+        parts.pop();
+        return parts.length > 0 ? '/' + parts.join('/') : '';
     }
 
     async sendSlugProposal(mode: 'auto' | 'recreate' | 'manual') {
@@ -572,7 +645,7 @@ export class SluggiElement extends LitElement {
         const input = e.target as HTMLInputElement;
         let value = this.sanitizeSlug(input.value, false);
 
-        if (this.lastSegmentOnly) {
+        if (this.lastSegmentOnly && !this.isFullPathMode) {
             value = value.replace(/^\/+/, '');
             value = value.replace(/\//g, this.fallbackCharacter);
             value = this.sanitizeSlug(value, false);
@@ -781,6 +854,24 @@ export class SluggiElement extends LitElement {
             lockInput.value = this.isLocked ? '1' : '0';
             lockInput.classList.add('has-change');
             lockInput.dispatchEvent(new Event('change', { bubbles: true }));
+        }
+    }
+
+    // =========================================================================
+    // Private Helpers: Full Path Feature
+    // =========================================================================
+
+    private toggleFullPath() {
+        this.isFullPathMode = !this.isFullPathMode;
+        this.notifyFullPathFieldOfChange();
+    }
+
+    private notifyFullPathFieldOfChange() {
+        const fullPathInput = this.parentElement?.querySelector('.sluggi-full-path-field') as HTMLInputElement | null;
+        if (fullPathInput) {
+            fullPathInput.value = this.isFullPathMode ? '1' : '0';
+            fullPathInput.classList.add('has-change');
+            fullPathInput.dispatchEvent(new Event('change', { bubbles: true }));
         }
     }
 

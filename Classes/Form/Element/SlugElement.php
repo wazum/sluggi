@@ -9,6 +9,7 @@ use TYPO3\CMS\Backend\Form\Element\AbstractFormElement;
 use TYPO3\CMS\Core\Crypto\HashService;
 use TYPO3\CMS\Core\Page\JavaScriptModuleInstruction;
 use TYPO3\CMS\Core\Utility\MathUtility;
+use Wazum\Sluggi\Service\FullPathEditingService;
 use Wazum\Sluggi\Service\HierarchyPermissionService;
 use Wazum\Sluggi\Service\LastSegmentValidationService;
 use Wazum\Sluggi\Service\SlugConfigurationService;
@@ -54,6 +55,7 @@ final class SlugElement extends AbstractFormElement
         private readonly LastSegmentValidationService $lastSegmentValidationService,
         private readonly HierarchyPermissionService $hierarchyPermissionService,
         private readonly SlugGeneratorService $slugGeneratorService,
+        private readonly FullPathEditingService $fullPathEditingService,
     ) {
     }
 
@@ -178,6 +180,8 @@ final class SlugElement extends AbstractFormElement
             'requiredSourceFields' => $requiredSourceFields,
             'lastSegmentOnly' => $lastSegmentOnly,
             'lockedPrefix' => $lockedPrefix,
+            'fullPathFeatureEnabled' => $this->isFullPathFeatureEnabled($table, $lastSegmentOnly, $lockedPrefix),
+            'fullPathFieldName' => $this->slugElementRenderer->buildFullPathFieldName($table, $recordId),
         ];
     }
 
@@ -228,6 +232,12 @@ final class SlugElement extends AbstractFormElement
                                 value="%s"
                                 data-formengine-input-name="%s"
                             />
+                            <input type="hidden"
+                                class="sluggi-full-path-field"
+                                name="%s"
+                                value="0"
+                                data-formengine-input-name="%s"
+                            />
                         </div>
                         <div class="form-wizards-item-bottom">%s</div>
                     </div>
@@ -245,6 +255,8 @@ final class SlugElement extends AbstractFormElement
             htmlspecialchars($context['lockFieldName']),
             $context['isLocked'] ? '1' : '0',
             htmlspecialchars($context['lockFieldName']),
+            htmlspecialchars($context['fullPathFieldName']),
+            htmlspecialchars($context['fullPathFieldName']),
             $fieldWizardHtml
         );
     }
@@ -339,5 +351,19 @@ final class SlugElement extends AbstractFormElement
     private function canUserAccessLockField(string $table): bool
     {
         return $this->getBackendUser()->check('non_exclude_fields', $table . ':slug_locked');
+    }
+
+    private function canUserAccessFullPathField(string $table): bool
+    {
+        return $this->getBackendUser()->check('non_exclude_fields', $table . ':tx_sluggi_full_path');
+    }
+
+    private function isFullPathFeatureEnabled(string $table, bool $lastSegmentOnly, string $lockedPrefix): bool
+    {
+        $hasRestriction = $lastSegmentOnly || $lockedPrefix !== '';
+
+        return $this->fullPathEditingService->isEnabled()
+            && $hasRestriction
+            && $this->canUserAccessFullPathField($table);
     }
 }

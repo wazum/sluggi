@@ -5,18 +5,21 @@ declare(strict_types=1);
 namespace Wazum\Sluggi\DataHandler;
 
 use TYPO3\CMS\Backend\Utility\BackendUtility;
+use TYPO3\CMS\Core\Authentication\BackendUserAuthentication;
 use TYPO3\CMS\Core\DataHandling\DataHandler;
 use TYPO3\CMS\Core\Messaging\FlashMessage;
 use TYPO3\CMS\Core\Messaging\FlashMessageService;
 use TYPO3\CMS\Core\Type\ContextualFeedbackSeverity;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use Wazum\Sluggi\Configuration\ExtensionConfiguration;
+use Wazum\Sluggi\Service\FullPathEditingService;
 use Wazum\Sluggi\Service\HierarchyPermissionService;
 
 final readonly class ValidateHierarchyPermission
 {
     public function __construct(
         private HierarchyPermissionService $hierarchyPermissionService,
+        private FullPathEditingService $fullPathEditingService,
         private ExtensionConfiguration $extensionConfiguration,
     ) {
     }
@@ -42,8 +45,14 @@ final readonly class ValidateHierarchyPermission
             return;
         }
 
-        $backendUser = $GLOBALS['BE_USER'] ?? null;
+        $backendUser = $this->getBackendUser();
         if ($backendUser === null || $backendUser->isAdmin()) {
+            return;
+        }
+
+        if ($this->fullPathEditingService->isAllowedForRequest($fieldArray, $table)) {
+            unset($fieldArray['tx_sluggi_full_path']);
+
             return;
         }
 
@@ -79,6 +88,11 @@ final readonly class ValidateHierarchyPermission
                 'Slug change blocked'
             );
         }
+    }
+
+    private function getBackendUser(): ?BackendUserAuthentication
+    {
+        return $GLOBALS['BE_USER'] ?? null;
     }
 
     private function addFlashMessage(string $message, string $title): void

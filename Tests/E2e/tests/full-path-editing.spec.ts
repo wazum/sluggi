@@ -1,0 +1,237 @@
+import { test, expect, FrameLocator, Locator } from '@playwright/test';
+
+const TEST_PAGE_ID = 37;
+
+test.describe('Full Path Editing - Editor Toggle', () => {
+  let frame: FrameLocator;
+  let slugElement: Locator;
+
+  test.use({
+    extraHTTPHeaders: {
+      'X-Playwright-Test-ID': 'last-segment-only',
+    },
+  });
+
+  test.beforeEach(async ({ page }) => {
+    await page.goto(`/typo3/record/edit?edit[pages][${TEST_PAGE_ID}]=edit`);
+    frame = page.frameLocator('iframe');
+    await expect(frame.locator('h1')).toContainText('Edit Page', { timeout: 15000 });
+    slugElement = frame.locator('sluggi-element');
+  });
+
+  test('full path toggle is visible with label when restrictions apply', async () => {
+    await expect(slugElement).toBeVisible();
+    await expect(slugElement).toHaveAttribute('last-segment-only', '');
+    await expect(slugElement).toHaveAttribute('full-path-feature-enabled', '');
+
+    const pathWrapper = slugElement.locator('.sluggi-full-path-wrapper');
+    await expect(pathWrapper).toBeVisible();
+
+    const pathLabel = pathWrapper.locator('.sluggi-full-path-label');
+    await expect(pathLabel).toHaveText('path');
+
+    const pathToggle = pathWrapper.locator('.sluggi-full-path-toggle');
+    await expect(pathToggle).toBeVisible();
+  });
+
+  test('clicking path toggle changes visual state', async () => {
+    const pathToggle = slugElement.locator('.sluggi-full-path-toggle');
+    await expect(pathToggle).not.toHaveClass(/is-active/);
+
+    await pathToggle.click();
+
+    await expect(pathToggle).toHaveClass(/is-active/);
+  });
+
+  test('enabling full path mode removes locked prefix', async () => {
+    const prefix = slugElement.locator('.sluggi-prefix');
+    await expect(prefix).toBeVisible();
+    await expect(prefix).toContainText('/parent-section');
+
+    const pathToggle = slugElement.locator('.sluggi-full-path-toggle');
+    await pathToggle.click();
+    await expect(pathToggle).toHaveClass(/is-active/);
+
+    await expect(prefix).not.toBeVisible();
+  });
+
+  test('slashes are allowed in input when full path mode is enabled', async () => {
+    const pathToggle = slugElement.locator('.sluggi-full-path-toggle');
+    await pathToggle.click();
+    await expect(pathToggle).toHaveClass(/is-active/);
+
+    const editableArea = slugElement.locator('.sluggi-editable');
+    await editableArea.click();
+
+    const input = slugElement.locator('input.sluggi-input');
+    await input.fill('new-parent/new-segment');
+    await input.press('Enter');
+
+    await slugElement.locator('.sluggi-spinner').waitFor({ state: 'hidden', timeout: 10000 }).catch(() => {});
+
+    const hiddenField = frame.locator('.sluggi-hidden-field');
+    const value = await hiddenField.inputValue();
+    expect(value).toContain('/new-parent/new-segment');
+  });
+
+  test('dashes are preserved in full path mode when typing', async () => {
+    const pathToggle = slugElement.locator('.sluggi-full-path-toggle');
+    await pathToggle.click();
+    await expect(pathToggle).toHaveClass(/is-active/);
+
+    const editableArea = slugElement.locator('.sluggi-editable');
+    await editableArea.click();
+
+    const input = slugElement.locator('input.sluggi-input');
+    await input.clear();
+    await input.type('my-parent/my-segment');
+
+    const inputValue = await input.inputValue();
+    expect(inputValue).toBe('my-parent/my-segment');
+  });
+
+  test('full path change persists after save', async ({ page }) => {
+    // Use dedicated page 38 for save test
+    await page.goto('/typo3/record/edit?edit[pages][38]=edit');
+    const editFrame = page.frameLocator('iframe');
+    await expect(editFrame.locator('h1')).toContainText('Edit Page', { timeout: 15000 });
+
+    const slugEl = editFrame.locator('sluggi-element');
+    const pathToggle = slugEl.locator('.sluggi-full-path-toggle');
+    await pathToggle.click();
+
+    const editableArea = slugEl.locator('.sluggi-editable');
+    await editableArea.click();
+
+    const input = slugEl.locator('input.sluggi-input');
+    await input.fill('custom-path/nested-page');
+    await input.press('Enter');
+
+    await slugEl.locator('.sluggi-spinner').waitFor({ state: 'hidden', timeout: 10000 }).catch(() => {});
+
+    await editFrame.locator('button[name="_savedok"]').click();
+    await page.waitForURL(/edit/, { timeout: 10000 });
+
+    const savedFrame = page.frameLocator('iframe');
+    await expect(savedFrame.locator('h1')).toContainText('Edit Page', { timeout: 15000 });
+
+    const savedHiddenField = savedFrame.locator('.sluggi-hidden-field');
+    await expect(savedHiddenField).toHaveValue('/custom-path/nested-page');
+  });
+
+  test('full path toggle is not visible when slug is synced', async ({ page }) => {
+    // Use page 20 which has sync enabled
+    await page.goto('/typo3/record/edit?edit[pages][20]=edit');
+    const editFrame = page.frameLocator('iframe');
+    await expect(editFrame.locator('h1')).toContainText('Edit Page', { timeout: 15000 });
+
+    const slugEl = editFrame.locator('sluggi-element');
+    const syncToggle = slugEl.locator('.sluggi-sync-toggle');
+
+    if (!(await syncToggle.evaluate((el) => el.classList.contains('is-synced')))) {
+      await syncToggle.click();
+    }
+    await expect(syncToggle).toHaveClass(/is-synced/);
+
+    const pathToggle = slugEl.locator('.sluggi-full-path-toggle');
+    await expect(pathToggle).not.toBeVisible();
+  });
+
+  test('toggling full path marks form as dirty', async ({ page }) => {
+    const pathToggle = slugElement.locator('.sluggi-full-path-toggle');
+    await pathToggle.click();
+    await expect(pathToggle).toHaveClass(/is-active/);
+
+    await page.click('.scaffold-modulemenu [data-modulemenu-identifier="web_layout"]');
+
+    const modal = page.locator('.modal');
+    await expect(modal).toBeVisible({ timeout: 5000 });
+    await expect(modal).toContainText(/unsaved/i);
+
+    await modal.locator('button[name="no"]').click();
+    await expect(modal).not.toBeVisible();
+  });
+});
+
+test.describe('Full Path Editing - Regenerate Behavior', () => {
+  test.use({
+    extraHTTPHeaders: {
+      'X-Playwright-Test-ID': 'last-segment-only',
+    },
+  });
+
+  test('regenerate only updates last segment when slug matches hierarchy', async ({ page }) => {
+    // Page 39 has slug /parent-section/regen-match which matches hierarchy
+    await page.goto('/typo3/record/edit?edit[pages][39]=edit');
+    const frame = page.frameLocator('iframe');
+    await expect(frame.locator('h1')).toContainText('Edit Page', { timeout: 15000 });
+
+    const slugElement = frame.locator('sluggi-element');
+    const pathToggle = slugElement.locator('.sluggi-full-path-toggle');
+
+    await expect(pathToggle).not.toHaveClass(/is-active/);
+
+    const regenerateBtn = slugElement.locator('button[aria-label="Regenerate slug from title"]');
+    await regenerateBtn.click();
+
+    await slugElement.locator('.sluggi-spinner').waitFor({ state: 'hidden', timeout: 10000 }).catch(() => {});
+
+    await expect(pathToggle).not.toHaveClass(/is-active/);
+
+    await frame.locator('button[name="_savedok"]').click();
+    await page.waitForURL(/edit/, { timeout: 10000 });
+
+    const editFrame = page.frameLocator('iframe');
+    await expect(editFrame.locator('h1')).toContainText('Edit Page', { timeout: 15000 });
+
+    const errorAlert = editFrame.locator('.alert-danger');
+    await expect(errorAlert).not.toBeVisible();
+  });
+
+  test('regenerate auto-activates full path when slug was shortened', async ({ page }) => {
+    // Page 40 has slug /short-url which doesn't match hierarchy (parent is /parent-section)
+    await page.goto('/typo3/record/edit?edit[pages][40]=edit');
+    const frame = page.frameLocator('iframe');
+    await expect(frame.locator('h1')).toContainText('Edit Page', { timeout: 15000 });
+
+    const slugElement = frame.locator('sluggi-element');
+    const pathToggle = slugElement.locator('.sluggi-full-path-toggle');
+
+    await expect(pathToggle).not.toHaveClass(/is-active/);
+
+    const regenerateBtn = slugElement.locator('button[aria-label="Regenerate slug from title"]');
+    await regenerateBtn.click();
+
+    await slugElement.locator('.sluggi-spinner').waitFor({ state: 'hidden', timeout: 10000 }).catch(() => {});
+
+    await expect(pathToggle).toHaveClass(/is-active/);
+  });
+
+  test('regenerate with auto-activated full path saves successfully', async ({ page }) => {
+    // Page 40 has slug /short-url which doesn't match hierarchy
+    await page.goto('/typo3/record/edit?edit[pages][40]=edit');
+    const frame = page.frameLocator('iframe');
+    await expect(frame.locator('h1')).toContainText('Edit Page', { timeout: 15000 });
+
+    const slugElement = frame.locator('sluggi-element');
+
+    const regenerateBtn = slugElement.locator('button[aria-label="Regenerate slug from title"]');
+    await regenerateBtn.click();
+
+    await slugElement.locator('.sluggi-spinner').waitFor({ state: 'hidden', timeout: 10000 }).catch(() => {});
+
+    await frame.locator('button[name="_savedok"]').click();
+    await page.waitForURL(/edit/, { timeout: 10000 });
+
+    const editFrame = page.frameLocator('iframe');
+    await expect(editFrame.locator('h1')).toContainText('Edit Page', { timeout: 15000 });
+
+    const errorAlert = editFrame.locator('.alert-danger');
+    await expect(errorAlert).not.toBeVisible();
+
+    const hiddenField = editFrame.locator('.sluggi-hidden-field');
+    const slugValue = await hiddenField.inputValue();
+    expect(slugValue).toContain('/');
+    expect(slugValue).not.toBe('/short-url');
+  });
+});

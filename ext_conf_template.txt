@@ -6,5 +6,7 @@ lock=0
 lock_descendants=0
 # cat=basic; type=boolean; label=Allow standard editors to edit only the last segment of the URL slug
 last_segment_only=0
+# cat=basic; type=boolean; label=Allow full path editing: When enabled with last_segment_only or hierarchy permissions, permitted users can unlock full path editing via a toggle button
+allow_full_path_editing=0
 # cat=basic; type=string; label=Exclude page types: Comma-separated list of doktypes that should not have slugs (e.g. 199,254,255 for Spacer, Sysfolder, Recycler)
 exclude_doktypes=

@@ -157,7 +157,7 @@ ON DUPLICATE KEY UPDATE `username` = VALUES(`username`), `password` = VALUES(`pa
 -- Editor group for Institute section (uid=2) - includes page 18 for last-segment-only tests and page 25 for hierarchy tests
 -- Has access to sync/lock fields (tx_sluggi_sync, slug_locked) for full toggle visibility
 INSERT INTO `be_groups` (`uid`, `pid`, `title`, `tables_modify`, `pagetypes_select`, `non_exclude_fields`, `db_mountpoints`, `groupMods`)
-VALUES (2, 0, 'Institute Editors', 'pages', '1,254', 'pages:slug,pages:title,pages:nav_title,pages:tx_sluggi_sync,pages:slug_locked', '18,25', 'web_layout,web_list')
+VALUES (2, 0, 'Institute Editors', 'pages', '1,254', 'pages:slug,pages:title,pages:nav_title,pages:tx_sluggi_sync,pages:slug_locked,pages:tx_sluggi_full_path', '18,25', 'web_layout,web_list')
 ON DUPLICATE KEY UPDATE `title` = VALUES(`title`), `tables_modify` = VALUES(`tables_modify`), `pagetypes_select` = VALUES(`pagetypes_select`), `non_exclude_fields` = VALUES(`non_exclude_fields`), `db_mountpoints` = VALUES(`db_mountpoints`), `groupMods` = VALUES(`groupMods`);
 
 -- Page 23: Hierarchy test - root section (admin only, editor cannot edit)
@@ -249,3 +249,26 @@ ON DUPLICATE KEY UPDATE `title` = VALUES(`title`), `slug` = VALUES(`slug`), `tx_
 INSERT INTO `pages` (`uid`, `pid`, `title`, `slug`, `doktype`, `is_siteroot`, `hidden`, `deleted`, `tstamp`, `crdate`, `tx_sluggi_sync`, `slug_locked`, `perms_userid`, `perms_groupid`, `perms_user`, `perms_group`, `perms_everybody`)
 VALUES (36, 34, 'Locked No Toggle', '/restricted-section/locked-no-toggle', 1, 0, 0, 0, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 0, 1, 1, 3, 31, 31, 0)
 ON DUPLICATE KEY UPDATE `title` = VALUES(`title`), `slug` = VALUES(`slug`), `tx_sluggi_sync` = 0, `slug_locked` = 1, `perms_groupid` = 3;
+
+-- =============================================
+-- full-path-editing.spec.ts (uses pages 37-40)
+-- =============================================
+-- Page 37: Full path toggle test (matches hierarchy)
+INSERT INTO `pages` (`uid`, `pid`, `title`, `slug`, `doktype`, `is_siteroot`, `hidden`, `deleted`, `tstamp`, `crdate`, `tx_sluggi_sync`, `perms_userid`, `perms_groupid`, `perms_user`, `perms_group`, `perms_everybody`)
+VALUES (37, 18, 'Full Path Test', '/parent-section/full-path-test', 1, 0, 0, 0, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 0, 1, 2, 31, 31, 0)
+ON DUPLICATE KEY UPDATE `title` = VALUES(`title`), `slug` = VALUES(`slug`), `tx_sluggi_sync` = 0;
+
+-- Page 38: Full path save test
+INSERT INTO `pages` (`uid`, `pid`, `title`, `slug`, `doktype`, `is_siteroot`, `hidden`, `deleted`, `tstamp`, `crdate`, `tx_sluggi_sync`, `perms_userid`, `perms_groupid`, `perms_user`, `perms_group`, `perms_everybody`)
+VALUES (38, 18, 'Full Path Save', '/parent-section/full-path-save', 1, 0, 0, 0, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 0, 1, 2, 31, 31, 0)
+ON DUPLICATE KEY UPDATE `title` = VALUES(`title`), `slug` = VALUES(`slug`), `tx_sluggi_sync` = 0;
+
+-- Page 39: Regenerate test - slug matches hierarchy
+INSERT INTO `pages` (`uid`, `pid`, `title`, `slug`, `doktype`, `is_siteroot`, `hidden`, `deleted`, `tstamp`, `crdate`, `tx_sluggi_sync`, `perms_userid`, `perms_groupid`, `perms_user`, `perms_group`, `perms_everybody`)
+VALUES (39, 18, 'Regen Match', '/parent-section/regen-match', 1, 0, 0, 0, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 0, 1, 2, 31, 31, 0)
+ON DUPLICATE KEY UPDATE `title` = VALUES(`title`), `slug` = VALUES(`slug`), `tx_sluggi_sync` = 0;
+
+-- Page 40: Regenerate test - slug was shortened (doesn't match hierarchy)
+INSERT INTO `pages` (`uid`, `pid`, `title`, `slug`, `doktype`, `is_siteroot`, `hidden`, `deleted`, `tstamp`, `crdate`, `tx_sluggi_sync`, `perms_userid`, `perms_groupid`, `perms_user`, `perms_group`, `perms_everybody`)
+VALUES (40, 18, 'Short URL Page', '/short-url', 1, 0, 0, 0, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 0, 1, 2, 31, 31, 0)
+ON DUPLICATE KEY UPDATE `title` = VALUES(`title`), `slug` = VALUES(`slug`), `tx_sluggi_sync` = 0;

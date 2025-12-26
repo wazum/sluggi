@@ -30,6 +30,12 @@
             <trans-unit id="restriction.lock" resname="restriction.lock">
                 <source>The slug is locked and cannot be edited.</source>
             </trans-unit>
+            <trans-unit id="pages.tx_sluggi_full_path" resname="pages.tx_sluggi_full_path">
+                <source>Sluggi: Edit full path</source>
+            </trans-unit>
+            <trans-unit id="restriction.fullPath" resname="restriction.fullPath">
+                <source>Full path editing is enabled. You can modify the entire URL structure.</source>
+            </trans-unit>
         </body>
     </file>
 </xliff>

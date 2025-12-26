@@ -56,6 +56,9 @@ final readonly class SlugElementRenderer
         if (!empty($context['lockedPrefix'])) {
             $attributes['locked-prefix'] = $context['lockedPrefix'];
         }
+        if ($context['fullPathFeatureEnabled'] ?? false) {
+            $attributes['full-path-feature-enabled'] = '';
+        }
 
         return $attributes;
     }
@@ -85,5 +88,10 @@ final readonly class SlugElementRenderer
     public function buildLockFieldName(string $table, int|string $recordId): string
     {
         return sprintf('data[%s][%s][slug_locked]', $table, $recordId);
+    }
+
+    public function buildFullPathFieldName(string $table, int|string $recordId): string
+    {
+        return sprintf('data[%s][%s][tx_sluggi_full_path]', $table, $recordId);
     }
 }

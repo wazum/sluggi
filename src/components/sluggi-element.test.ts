@@ -467,6 +467,40 @@ describe('SluggiElement', () => {
             expect(el.value).to.equal('/lorem/ipsum/consectetur');
         });
 
+        it('setProposal keeps prefix visible for new page with single-segment value', async () => {
+            const el = await fixture<SluggiElement>(html`
+                <sluggi-element
+                    value="/parent-section"
+                    locked-prefix="/parent-section"
+                    last-segment-only
+                    command="new"
+                ></sluggi-element>
+            `);
+
+            el.setProposal('/parent-section/new-test-page');
+            await el.updateComplete;
+
+            expect(el.shadowRoot!.querySelector('.sluggi-prefix')).to.exist;
+            expect(el.value).to.equal('/parent-section/new-test-page');
+        });
+
+        it('setProposal activates fullPathMode when shortened URL is regenerated to hierarchical path', async () => {
+            const el = await fixture<SluggiElement>(html`
+                <sluggi-element
+                    value="/short-url"
+                    locked-prefix="/parent-section"
+                    last-segment-only
+                    full-path-feature-enabled
+                ></sluggi-element>
+            `);
+
+            el.setProposal('/parent-section/short-url-page');
+            await el.updateComplete;
+
+            const pathToggle = el.shadowRoot!.querySelector('.sluggi-full-path-toggle');
+            expect(pathToggle?.classList.contains('is-active')).to.be.true;
+        });
+
     });
 
     describe('Locked State', () => {

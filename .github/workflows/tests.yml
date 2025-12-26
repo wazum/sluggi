@@ -187,6 +187,7 @@ jobs:
                   'last_segment_only' => '1',
                   'synchronize' => '1',
                   'lock' => '0',
+                  'allow_full_path_editing' => '1',
               ],
               'hierarchy-permission', 'field-access-restriction' => [
                   'exclude_doktypes' => '254',

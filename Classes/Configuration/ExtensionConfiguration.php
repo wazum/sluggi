@@ -62,6 +62,18 @@ final readonly class ExtensionConfiguration
         }
     }
 
+    public function isFullPathEditingEnabled(): bool
+    {
+        try {
+            return (bool)$this->extensionConfiguration->get(
+                extension: 'sluggi',
+                path: 'allow_full_path_editing'
+            );
+        } catch (Exception) {
+            return false;
+        }
+    }
+
     /**
      * @return list<int>
      */
