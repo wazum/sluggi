@@ -962,7 +962,11 @@ export class SluggiElement extends LitElement {
         }
 
         if (trim) {
-            value = value.replace(new RegExp(`^${fallbackEscaped}+|${fallbackEscaped}+$`, 'g'), '');
+            const trimPattern = new RegExp(`^${fallbackEscaped}+|${fallbackEscaped}+$`, 'g');
+            value = value
+                .split('/')
+                .map(segment => segment.replace(trimPattern, ''))
+                .join('/');
         }
 
         return value;

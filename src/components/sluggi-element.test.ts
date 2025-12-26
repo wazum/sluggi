@@ -386,6 +386,32 @@ describe('SluggiElement', () => {
                 });
             });
         });
+
+        describe('segment trimming on save', () => {
+            const segmentTrimCases = [
+                { input: 'products/-electronics-/phones', expected: '/products/electronics/phones', desc: 'trims hyphens from each segment' },
+                { input: '-about-/-our-team-/-contact-', expected: '/about/our-team/contact', desc: 'trims all segments with leading/trailing hyphens' },
+                { input: 'services/consulting/strategy', expected: '/services/consulting/strategy', desc: 'keeps clean segments unchanged' },
+                { input: '-welcome-page', expected: '/welcome-page', desc: 'trims leading hyphen from single segment' },
+                { input: 'privacy-policy-', expected: '/privacy-policy', desc: 'trims trailing hyphen from single segment' },
+            ];
+
+            segmentTrimCases.forEach(({ input, expected, desc }) => {
+                it(`${desc}: "${input}" → "${expected}"`, async () => {
+                    const el = await fixture<SluggiElement>(html`
+                        <sluggi-element value="/page"></sluggi-element>
+                    `);
+
+                    const inputEl = await enterEditMode(el);
+                    inputEl.value = input;
+                    inputEl.dispatchEvent(new Event('input', { bubbles: true }));
+                    inputEl.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+                    await el.updateComplete;
+
+                    expect(el.value).to.equal(expected);
+                });
+            });
+        });
     });
 
     describe('Last Segment Only Mode', () => {
