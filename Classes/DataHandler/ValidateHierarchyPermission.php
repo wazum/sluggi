@@ -57,7 +57,7 @@ final readonly class ValidateHierarchyPermission
         }
 
         $pageId = (int)$id;
-        $record = BackendUtility::getRecord('pages', $pageId, 'slug');
+        $record = BackendUtility::getRecordWSOL('pages', $pageId, 'slug');
         if ($record === null) {
             return;
         }

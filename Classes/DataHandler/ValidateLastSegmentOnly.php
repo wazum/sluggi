@@ -55,7 +55,7 @@ final readonly class ValidateLastSegmentOnly
             return;
         }
 
-        $record = BackendUtility::getRecord('pages', (int)$id, 'slug');
+        $record = BackendUtility::getRecordWSOL('pages', (int)$id, 'slug');
         if ($record === null) {
             return;
         }

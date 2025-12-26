@@ -46,7 +46,7 @@ final readonly class ClearSlugForExcludedDoktypes
         }
 
         if ($status === 'update' && is_numeric($id)) {
-            $record = BackendUtility::getRecord('pages', (int)$id, 'doktype');
+            $record = BackendUtility::getRecordWSOL('pages', (int)$id, 'doktype');
 
             return (int)($record['doktype'] ?? 1);
         }
