@@ -46,6 +46,14 @@ final class SlugConfigurationServiceTest extends TestCase
                 [['seo_title', 'title'], ['nav_title', 'subtitle']],
                 ['seo_title', 'title', 'nav_title', 'subtitle'],
             ],
+            'comma-separated string as fallback chain' => [
+                ['nav_title, title'],
+                ['nav_title', 'title'],
+            ],
+            'comma-separated string with extra spaces' => [
+                ['nav_title , title'],
+                ['nav_title', 'title'],
+            ],
         ];
     }
 
@@ -132,6 +140,13 @@ final class SlugConfigurationServiceTest extends TestCase
                     'title' => ['slot' => 1, 'role' => 'fallback', 'chainSize' => 3],
                 ],
             ],
+            'comma-separated string as fallback chain' => [
+                ['nav_title, title'],
+                [
+                    'nav_title' => ['slot' => 1, 'role' => 'preferred', 'chainSize' => 2],
+                    'title' => ['slot' => 1, 'role' => 'fallback', 'chainSize' => 2],
+                ],
+            ],
         ];
     }
 
@@ -192,6 +207,10 @@ final class SlugConfigurationServiceTest extends TestCase
             'multiple fallback chains' => [
                 [['seo_title', 'title'], ['nav_title', 'subtitle']],
                 ['title', 'subtitle'],
+            ],
+            'comma-separated string as fallback chain' => [
+                ['nav_title, title'],
+                ['title'],
             ],
         ];
     }

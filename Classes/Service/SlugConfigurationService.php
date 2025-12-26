@@ -11,7 +11,7 @@ final readonly class SlugConfigurationService
      */
     public function getSourceFields(string $table): array
     {
-        $fields = $this->getRawFieldsConfig($table);
+        $fields = $this->getNormalizedFieldsConfig($table);
 
         $result = [];
         foreach ($fields as $field) {
@@ -38,7 +38,7 @@ final readonly class SlugConfigurationService
      */
     public function getFieldMetadata(string $table): array
     {
-        $fields = $this->getRawFieldsConfig($table);
+        $fields = $this->getNormalizedFieldsConfig($table);
         $result = [];
         $slot = 0;
 
@@ -80,7 +80,7 @@ final readonly class SlugConfigurationService
      */
     public function getRequiredSourceFields(string $table): array
     {
-        $fields = $this->getRawFieldsConfig($table);
+        $fields = $this->getNormalizedFieldsConfig($table);
 
         $result = [];
         foreach ($fields as $field) {
@@ -98,13 +98,22 @@ final readonly class SlugConfigurationService
     }
 
     /**
+     * Normalizes field config by splitting comma-separated strings into arrays.
+     * TYPO3 core supports both ['nav_title, title'] and [['nav_title', 'title']].
+     *
      * @return array<int, string|string[]>
      */
-    private function getRawFieldsConfig(string $table): array
+    private function getNormalizedFieldsConfig(string $table): array
     {
         $slugFieldName = $this->getSlugFieldName($table);
+        $fields = $GLOBALS['TCA'][$table]['columns'][$slugFieldName]['config']['generatorOptions']['fields'] ?? [];
 
-        return $GLOBALS['TCA'][$table]['columns'][$slugFieldName]['config']['generatorOptions']['fields'] ?? [];
+        return array_map(
+            static fn ($field) => is_string($field) && str_contains($field, ',')
+                ? array_map('trim', explode(',', $field))
+                : $field,
+            $fields
+        );
     }
 
     public function getSlugFieldName(string $table): ?string
