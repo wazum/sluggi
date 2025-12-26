@@ -58,3 +58,10 @@ services:
 
   Wazum\Sluggi\Service\SlugSyncService:
     public: true
+
+  # EventListener
+  Wazum\Sluggi\EventListener\PreventSelfReferencingRedirect:
+    tags:
+      - name: event.listener
+        identifier: 'sluggi/prevent-self-referencing-redirect'
+        event: TYPO3\CMS\Redirects\Event\ModifyAutoCreateRedirectRecordBeforePersistingEvent

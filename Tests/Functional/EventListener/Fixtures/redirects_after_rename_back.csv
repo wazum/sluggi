@@ -1,0 +1,4 @@
+"sys_redirect"
+,"uid","source_host","source_path","target","deleted"
+,1,"*","/page-a","t3://page?uid=2",1
+,2,"*","/page-b","t3://page?uid=2",0
