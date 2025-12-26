@@ -1,7 +1,7 @@
 {
     "name": "wazum/sluggi",
     "type": "typo3-cms-extension",
-    "license": "GPL-3.0-or-later",
+    "license": "GPL-2.0-or-later",
     "description": "Enhanced TYPO3 URL slug management (The little TYPO3 Slug Helper)",
     "homepage": "https://github.com/wazum/sluggi",
     "minimum-stability": "stable",
