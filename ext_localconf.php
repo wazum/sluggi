@@ -7,7 +7,9 @@ use TYPO3\CMS\Backend\Controller\FormSlugAjaxController as CoreFormSlugAjaxContr
 use TYPO3\CMS\Backend\Form\FormDataProvider\TcaColumnsProcessCommon;
 use TYPO3\CMS\Core\Http\ApplicationType;
 use TYPO3\CMS\Core\Page\PageRenderer;
-use Wazum\Sluggi\Controller\FormSlugAjaxController;
+use Wazum\Sluggi\Compatibility\Typo3Compatibility;
+use Wazum\Sluggi\Controller\FormSlugAjaxControllerV12;
+use Wazum\Sluggi\Controller\FormSlugAjaxControllerV14;
 use Wazum\Sluggi\DataHandler\ClearSlugForExcludedDoktypes;
 use Wazum\Sluggi\DataHandler\HandlePageCopy;
 use Wazum\Sluggi\DataHandler\HandlePageMove;
@@ -16,27 +18,35 @@ use Wazum\Sluggi\DataHandler\HandleRecordUpdate;
 use Wazum\Sluggi\DataHandler\PreventLockedSlugEdit;
 use Wazum\Sluggi\DataHandler\ValidateHierarchyPermission;
 use Wazum\Sluggi\DataHandler\ValidateLastSegmentOnly;
-use Wazum\Sluggi\Form\Element\SlugElement;
-use Wazum\Sluggi\Form\Element\SlugSourceElement;
+use Wazum\Sluggi\Form\Element\SlugElementV12;
+use Wazum\Sluggi\Form\Element\SlugElementV14;
+use Wazum\Sluggi\Form\Element\SlugSourceElementV12;
+use Wazum\Sluggi\Form\Element\SlugSourceElementV14;
 use Wazum\Sluggi\Form\FormDataProvider\HideSlugForExcludedPageTypes;
 use Wazum\Sluggi\Form\FormDataProvider\InitializeSyncField;
 
 // XCLASS
 $GLOBALS['TYPO3_CONF_VARS']['SYS']['Objects'][CoreFormSlugAjaxController::class] = [
-    'className' => FormSlugAjaxController::class,
+    'className' => Typo3Compatibility::getMajorVersion() >= 14
+        ? FormSlugAjaxControllerV14::class
+        : FormSlugAjaxControllerV12::class,
 ];
 
 // Form elements
 $GLOBALS['TYPO3_CONF_VARS']['SYS']['formEngine']['nodeRegistry'][1733600000] = [
     'nodeName' => 'sluggiSlug',
     'priority' => 50,
-    'class' => SlugElement::class,
+    'class' => Typo3Compatibility::getMajorVersion() >= 13
+        ? SlugElementV14::class
+        : SlugElementV12::class,
 ];
 
 $GLOBALS['TYPO3_CONF_VARS']['SYS']['formEngine']['nodeRegistry'][1733600001] = [
     'nodeName' => 'slugSourceInput',
     'priority' => 50,
-    'class' => SlugSourceElement::class,
+    'class' => Typo3Compatibility::getMajorVersion() >= 13
+        ? SlugSourceElementV14::class
+        : SlugSourceElementV12::class,
 ];
 
 // Form data providers

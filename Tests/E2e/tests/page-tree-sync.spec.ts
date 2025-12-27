@@ -1,4 +1,5 @@
 import {expect, test} from '@playwright/test';
+import { expandPageTreeNode, getPageTreeNode, getPageTreeNodeLabel, getPageTreeEditInput } from '../fixtures/typo3-compat';
 
 test.describe('Page Tree Inline Editing with Sync', () => {
   test('slug updates when title is changed via page tree inline editing', async ({ page }) => {
@@ -7,30 +8,27 @@ test.describe('Page Tree Inline Editing with Sync', () => {
     const pageTree = page.locator('.scaffold-content-navigation-component');
     await expect(pageTree).toBeVisible({ timeout: 10000 });
 
-    const rootNode = pageTree.locator('[data-id="1"]');
-    await expect(rootNode).toBeVisible({ timeout: 10000 });
-    const rootToggle = rootNode.locator('.node-toggle');
-    if (await rootToggle.isVisible()) {
-      await rootToggle.click();
-    }
+    // Expand root node to show child pages
+    await expandPageTreeNode(page, 1);
 
-    const treeNode = pageTree.locator('[data-id="2"]');
+    const treeNode = await getPageTreeNode(page, 2);
     await expect(treeNode).toBeVisible({ timeout: 10000 });
 
-    const titleElement = treeNode.locator('.node-contentlabel');
+    const titleElement = await getPageTreeNodeLabel(page, 2);
     await titleElement.dblclick();
 
     const timestamp = Date.now();
     const newTitle = `Edited ${timestamp}`;
 
-    const treeInput = pageTree.locator('input.node-edit');
+    const treeInput = await getPageTreeEditInput(page);
     await expect(treeInput).toBeVisible({ timeout: 5000 });
 
     await treeInput.fill(newTitle);
     await treeInput.press('Enter');
 
     await expect(treeInput).not.toBeVisible({ timeout: 10000 });
-    await expect(treeNode.locator('.node-contentlabel')).toContainText(newTitle, { timeout: 15000 });
+    const updatedLabel = await getPageTreeNodeLabel(page, 2);
+    await expect(updatedLabel).toContainText(newTitle, { timeout: 15000 });
 
     await page.goto('/typo3/record/edit?edit[pages][2]=edit');
     const frame = page.frameLocator('iframe');

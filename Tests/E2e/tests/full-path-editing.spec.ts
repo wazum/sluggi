@@ -1,4 +1,5 @@
 import {expect, FrameLocator, Locator, test} from '@playwright/test';
+import { waitForFormFrame } from '../fixtures/typo3-compat';
 
 test.describe('Full Path Editing - Editor Toggle', () => {
   let frame: FrameLocator;
@@ -158,15 +159,14 @@ test.describe('Full Path Editing - Regenerate Behavior', () => {
 
   test('regenerate only updates last segment when slug matches hierarchy', async ({ page }) => {
     await page.goto('/typo3/record/edit?edit[pages][41]=edit');
-    const frame = page.frameLocator('iframe');
-    await expect(frame.locator('h1')).toContainText('Edit Page', { timeout: 15000 });
+    const frame = await waitForFormFrame(page);
 
     const slugElement = frame.locator('sluggi-element');
     const pathToggle = slugElement.locator('.sluggi-full-path-toggle');
-
     await expect(pathToggle).not.toHaveClass(/is-active/);
 
     const regenerateBtn = slugElement.locator('button[aria-label="Regenerate slug from title"]');
+    await expect(regenerateBtn).toBeVisible({ timeout: 10000 });
     await regenerateBtn.click();
 
     await slugElement.locator('.sluggi-spinner').waitFor({ state: 'hidden', timeout: 10000 }).catch(() => {});
@@ -185,15 +185,14 @@ test.describe('Full Path Editing - Regenerate Behavior', () => {
 
   test('regenerate auto-activates full path when slug was shortened', async ({ page }) => {
     await page.goto('/typo3/record/edit?edit[pages][42]=edit');
-    const frame = page.frameLocator('iframe');
-    await expect(frame.locator('h1')).toContainText('Edit Page', { timeout: 15000 });
+    const frame = await waitForFormFrame(page);
 
     const slugElement = frame.locator('sluggi-element');
     const pathToggle = slugElement.locator('.sluggi-full-path-toggle');
-
     await expect(pathToggle).not.toHaveClass(/is-active/);
 
     const regenerateBtn = slugElement.locator('button[aria-label="Regenerate slug from title"]');
+    await expect(regenerateBtn).toBeVisible({ timeout: 10000 });
     await regenerateBtn.click();
 
     await slugElement.locator('.sluggi-spinner').waitFor({ state: 'hidden', timeout: 10000 }).catch(() => {});
@@ -203,12 +202,11 @@ test.describe('Full Path Editing - Regenerate Behavior', () => {
 
   test('regenerate with auto-activated full path saves successfully', async ({ page }) => {
     await page.goto('/typo3/record/edit?edit[pages][42]=edit');
-    const frame = page.frameLocator('iframe');
-    await expect(frame.locator('h1')).toContainText('Edit Page', { timeout: 15000 });
+    const frame = await waitForFormFrame(page);
 
     const slugElement = frame.locator('sluggi-element');
-
     const regenerateBtn = slugElement.locator('button[aria-label="Regenerate slug from title"]');
+    await expect(regenerateBtn).toBeVisible({ timeout: 10000 });
     await regenerateBtn.click();
 
     await slugElement.locator('.sluggi-spinner').waitFor({ state: 'hidden', timeout: 10000 }).catch(() => {});

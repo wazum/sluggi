@@ -8,12 +8,12 @@ use PHPUnit\Framework\Attributes\Test;
 use TYPO3\CMS\Backend\Form\FormDataCompiler;
 use TYPO3\CMS\Backend\Form\FormDataGroup\TcaDatabaseRecord;
 use TYPO3\CMS\Backend\Form\NodeFactory;
-use TYPO3\CMS\Core\Configuration\SiteWriter;
 use TYPO3\CMS\Core\Http\NormalizedParams;
 use TYPO3\CMS\Core\Http\ServerRequest;
 use TYPO3\CMS\Core\Localization\LanguageServiceFactory;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\TestingFramework\Core\Functional\FunctionalTestCase;
+use Wazum\Sluggi\Compatibility\Typo3Compatibility;
 
 final class SlugElementPermissionTest extends FunctionalTestCase
 {
@@ -56,7 +56,7 @@ final class SlugElementPermissionTest extends FunctionalTestCase
                 ],
             ],
         ];
-        GeneralUtility::makeInstance(SiteWriter::class)->write('test', $configuration);
+        Typo3Compatibility::writeSiteConfiguration('test', $configuration);
     }
 
     private function renderSlugElement(int $pageId): string

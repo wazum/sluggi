@@ -5,12 +5,12 @@ declare(strict_types=1);
 namespace Wazum\Sluggi\Tests\Functional\DataHandler;
 
 use PHPUnit\Framework\Attributes\Test;
-use TYPO3\CMS\Core\Configuration\SiteWriter;
 use TYPO3\CMS\Core\DataHandling\DataHandler;
 use TYPO3\CMS\Core\Localization\LanguageServiceFactory;
 use TYPO3\CMS\Core\Schema\TcaSchemaFactory;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\TestingFramework\Core\Functional\FunctionalTestCase;
+use Wazum\Sluggi\Compatibility\Typo3Compatibility;
 use Wazum\Sluggi\Tests\Functional\DataHandler\Fixtures\TestSlugPostModifier;
 
 /**
@@ -52,7 +52,7 @@ final class PostModifierTest extends FunctionalTestCase
                 ],
             ],
         ];
-        GeneralUtility::makeInstance(SiteWriter::class)->write('test', $configuration);
+        Typo3Compatibility::writeSiteConfiguration('test', $configuration);
     }
 
     private function setUpTestWithPostModifier(string $fixture): void
@@ -68,7 +68,9 @@ final class PostModifierTest extends FunctionalTestCase
         ];
 
         // Force TcaSchemaFactory to rebuild with our modified TCA
-        GeneralUtility::makeInstance(TcaSchemaFactory::class)->load($GLOBALS['TCA'], true);
+        if (Typo3Compatibility::hasTcaSchemaFactory()) {
+            GeneralUtility::makeInstance(TcaSchemaFactory::class)->load($GLOBALS['TCA'], true);
+        }
     }
 
     #[Test]

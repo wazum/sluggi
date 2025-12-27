@@ -9,9 +9,9 @@ setup('authenticate', async ({ page }) => {
 
   await page.goto('/typo3');
 
-  await page.getByLabel('Username').fill(username);
-  await page.getByLabel('Password').fill(password);
-  await page.getByRole('button', { name: 'Login' }).click();
+  await page.locator('#t3-username').fill(username);
+  await page.locator('#t3-password').fill(password);
+  await page.locator('#t3-login-submit').click();
 
   await expect(page.locator('.modulemenu')).toBeVisible({ timeout: 15000 });
 

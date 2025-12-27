@@ -5,11 +5,11 @@ declare(strict_types=1);
 namespace Wazum\Sluggi\Tests\Functional\DataHandler;
 
 use PHPUnit\Framework\Attributes\Test;
-use TYPO3\CMS\Core\Configuration\SiteWriter;
 use TYPO3\CMS\Core\DataHandling\DataHandler;
 use TYPO3\CMS\Core\Localization\LanguageServiceFactory;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\TestingFramework\Core\Functional\FunctionalTestCase;
+use Wazum\Sluggi\Compatibility\Typo3Compatibility;
 
 final class LockedSlugTest extends FunctionalTestCase
 {
@@ -51,7 +51,7 @@ final class LockedSlugTest extends FunctionalTestCase
                 ],
             ],
         ];
-        GeneralUtility::makeInstance(SiteWriter::class)->write('test', $configuration);
+        Typo3Compatibility::writeSiteConfiguration('test', $configuration);
     }
 
     private function setUpTest(string $fixture): void

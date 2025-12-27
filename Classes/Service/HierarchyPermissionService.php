@@ -25,9 +25,14 @@ final readonly class HierarchyPermissionService
 
         foreach (array_reverse($rootLine) as $page) {
             $uid = (int)($page['uid'] ?? 0);
-            if ($uid > 0 && in_array($uid, $editablePageUids, true)) {
-                $slug = (string)($page['slug'] ?? '');
+            $slug = (string)($page['slug'] ?? '');
 
+            // Skip root page - it has no meaningful parent path for prefix calculation
+            if ($slug === '/' || $slug === '') {
+                continue;
+            }
+
+            if ($uid > 0 && in_array($uid, $editablePageUids, true)) {
                 return $this->getParentPath($slug);
             }
         }

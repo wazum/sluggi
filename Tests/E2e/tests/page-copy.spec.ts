@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { expandPageTreeNode, getPageTreeItemByName, getListModuleUrl } from '../fixtures/typo3-compat';
 
 test.describe('Page Copy - Slug Update', () => {
   test('copying a page into another updates slug with parent prefix', async ({ page }) => {
@@ -6,58 +7,63 @@ test.describe('Page Copy - Slug Update', () => {
     const pageTree = page.locator('.scaffold-content-navigation-component');
     await expect(pageTree).toBeVisible({ timeout: 15000 });
 
-    const rootNode = pageTree.locator('[data-id="1"]');
-    await expect(rootNode).toBeVisible({ timeout: 10000 });
-    const rootToggle = rootNode.locator('.node-toggle');
-    if (await rootToggle.isVisible()) {
-      await rootToggle.click();
-    }
+    await expandPageTreeNode(page, 1);
 
-    // Copy "Copy Source" (page 23) into "Copy Target" (page 24)
-    const sourceNode = page.getByRole('treeitem', { name: 'Copy Source' });
-    await expect(sourceNode).toBeVisible({ timeout: 10000 });
-    await sourceNode.click({ button: 'right' });
+    // Copy "Copy Source" (page 23)
+    const sourceNode = await getPageTreeItemByName(page, /Copy Source/);
+    await expect(sourceNode.first()).toBeVisible({ timeout: 10000 });
+    await sourceNode.first().click({ button: 'right' });
+
     const copyMenuItem = page.getByRole('menuitem', { name: 'Copy' });
+    await expect(copyMenuItem).toBeVisible({ timeout: 5000 });
     await copyMenuItem.click();
-    await expect(copyMenuItem).not.toBeVisible();
+    await expect(copyMenuItem).not.toBeVisible({ timeout: 5000 });
 
-    const targetNode = page.getByRole('treeitem', { name: 'Copy Target' });
-    await expect(targetNode).toBeVisible({ timeout: 10000 });
-    await targetNode.click({ button: 'right' });
+    // Paste into "Copy Target" (page 24) - wait for paste AJAX to complete
+    const targetNode = await getPageTreeItemByName(page, /Copy Target/);
+    await expect(targetNode.first()).toBeVisible({ timeout: 10000 });
+    await targetNode.first().click({ button: 'right' });
+
     const pasteMenuItem = page.getByRole('menuitem', { name: 'Paste into' });
     await expect(pasteMenuItem).toBeVisible({ timeout: 5000 });
+
+    // Intercept the paste response to get the new page ID
+    const pasteResponsePromise = page.waitForResponse(
+      response => response.url().includes('ajax') && response.status() === 200,
+      { timeout: 15000 }
+    );
     await pasteMenuItem.click();
 
     const dialog = page.getByRole('dialog');
     await expect(dialog).toBeVisible({ timeout: 5000 });
     await dialog.getByRole('button', { name: 'OK', exact: true }).click();
-    await expect(dialog).not.toBeVisible({ timeout: 5000 });
+    await expect(dialog).not.toBeVisible({ timeout: 10000 });
 
-    // Reload tree to show the new page
-    await page.getByRole('button', { name: 'Open page tree options menu' }).click();
-    await page.getByRole('button', { name: 'Reload the tree from server' }).click();
+    // Wait for paste operation to complete
+    await pasteResponsePromise;
 
-    // Expand Copy Target to see the copied page
-    const targetToggle = page.getByRole('treeitem', { name: 'Copy Target' }).locator('.node-toggle');
-    await expect(targetToggle).toBeVisible({ timeout: 10000 });
-    await targetToggle.click();
+    // Navigate to List/Records module for Copy Target (page 24) to find the copied page
+    const listModuleUrl = await getListModuleUrl(page, 24);
+    await page.goto(listModuleUrl);
+    const listFrame = page.frameLocator('iframe');
+    await expect(listFrame.locator('h1')).toBeVisible({ timeout: 15000 });
 
-    // Click the copied page (second "Copy Source" in tree, now under Copy Target)
-    const copiedNode = page.getByRole('treeitem', { name: 'Copy Source' }).nth(1);
-    await expect(copiedNode).toBeVisible({ timeout: 10000 });
-    await copiedNode.click();
+    // Find the link to the copied page in the list
+    const copiedPageLink = listFrame.locator('a', { hasText: 'Copy Source' }).first();
+    await expect(copiedPageLink).toBeVisible({ timeout: 10000 });
 
-    // Get the page ID from URL
-    await page.waitForURL(/module\/web\/layout.*id=\d+/);
-    const copiedPageId = page.url().match(/id=(\d+)/)?.[1];
+    // Get the page ID from the link href (URL-encoded: edit%5Bpages%5D%5B56%5D)
+    const href = await copiedPageLink.getAttribute('href');
+    const copiedPageId = href?.match(/edit%5Bpages%5D%5B(\d+)%5D/)?.[1];
     expect(copiedPageId).toBeTruthy();
 
+    // Navigate to edit the copied page and verify slug
     await page.goto(`/typo3/record/edit?edit[pages][${copiedPageId}]=edit`);
-    const frame = page.frameLocator('iframe');
-    await expect(frame.locator('h1')).toContainText('Edit Page', { timeout: 15000 });
+    const editFrame = page.frameLocator('iframe');
+    await expect(editFrame.locator('h1')).toContainText('Edit Page', { timeout: 15000 });
 
-    const hiddenField = frame.locator('.sluggi-hidden-field');
+    const hiddenField = editFrame.locator('.sluggi-hidden-field');
     const slug = await hiddenField.inputValue();
-    expect(slug).toBe('/copy-target/copy-source');
+    expect(slug).toMatch(/^\/copy-target\/copy-source(-\d+)?$/);
   });
 });

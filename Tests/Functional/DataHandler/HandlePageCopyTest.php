@@ -5,11 +5,11 @@ declare(strict_types=1);
 namespace Wazum\Sluggi\Tests\Functional\DataHandler;
 
 use PHPUnit\Framework\Attributes\Test;
-use TYPO3\CMS\Core\Configuration\SiteWriter;
 use TYPO3\CMS\Core\DataHandling\DataHandler;
 use TYPO3\CMS\Core\Localization\LanguageServiceFactory;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\TestingFramework\Core\Functional\FunctionalTestCase;
+use Wazum\Sluggi\Compatibility\Typo3Compatibility;
 
 final class HandlePageCopyTest extends FunctionalTestCase
 {
@@ -47,7 +47,7 @@ final class HandlePageCopyTest extends FunctionalTestCase
                 ],
             ],
         ];
-        GeneralUtility::makeInstance(SiteWriter::class)->write('test', $configuration);
+        Typo3Compatibility::writeSiteConfiguration('test', $configuration);
     }
 
     private function setUpTest(string $fixture): void
@@ -130,6 +130,9 @@ final class HandlePageCopyTest extends FunctionalTestCase
         // Copy Source Parent (page 3) with children into Target Parent (page 2)
         // Children should get new parent's slug prefix, not the original parent's
         $dataHandler = GeneralUtility::makeInstance(DataHandler::class);
+        // @deprecated TYPO3 12 requires copyTree to be set manually (v13+ reads from user settings)
+        // @phpstan-ignore property.deprecated
+        @$dataHandler->copyTree = $backendUser->uc['copyLevels'];
         $dataHandler->start([], [
             'pages' => [
                 3 => [

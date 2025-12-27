@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Wazum\Sluggi\Upgrade;
 
-use TYPO3\CMS\Core\Attribute\UpgradeWizard;
 use TYPO3\CMS\Core\Database\ConnectionPool;
-use TYPO3\CMS\Core\Upgrades\UpgradeWizardInterface;
+use TYPO3\CMS\Install\Attribute\UpgradeWizard;
+use TYPO3\CMS\Install\Updates\UpgradeWizardInterface;
 use Wazum\Sluggi\Configuration\ExtensionConfiguration;
 
 #[UpgradeWizard('sluggi_clearExcludedDoktypeSlugs')]
@@ -72,6 +72,9 @@ final readonly class ClearExcludedDoktypeSlugsWizard implements UpgradeWizardInt
         return $count > 0;
     }
 
+    /**
+     * @return list<class-string>
+     */
     public function getPrerequisites(): array
     {
         return [];

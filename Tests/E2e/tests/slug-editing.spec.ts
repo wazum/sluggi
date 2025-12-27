@@ -1,4 +1,5 @@
 import {expect, FrameLocator, Locator, test} from '@playwright/test';
+import { waitForSourceFieldsInitialized } from '../fixtures/typo3-compat';
 
 test.describe('Slug Editing - TYPO3 Integration', () => {
   let frame: FrameLocator;
@@ -66,14 +67,22 @@ test.describe('Slug Editing - TYPO3 Integration', () => {
     const editFrame = page.frameLocator('iframe');
     await expect(editFrame.locator('h1')).toContainText('Edit Page', { timeout: 15000 });
 
+    const slugElement = editFrame.locator('sluggi-element');
+    await expect(slugElement.locator('.sluggi-editable')).toBeVisible({ timeout: 10000 });
+
+    // Wait for FormEngine to fully initialize the title input
+    await waitForSourceFieldsInitialized(editFrame);
+
     const titleInput = editFrame.locator('input[data-formengine-input-name*="[title]"]');
     await titleInput.clear();
     await titleInput.fill('Test/With/Slashes');
     await titleInput.blur();
 
-    const slugElement = editFrame.locator('sluggi-element');
     const regenerateButton = slugElement.locator('.sluggi-regenerate-btn');
+    await expect(regenerateButton).toBeVisible({ timeout: 10000 });
     await regenerateButton.click();
+
+    await slugElement.locator('.sluggi-spinner').waitFor({ state: 'hidden', timeout: 10000 }).catch(() => {});
 
     const hiddenField = editFrame.locator('.sluggi-hidden-field');
     await expect(hiddenField).toHaveValue('/test-with-slashes', { timeout: 10000 });

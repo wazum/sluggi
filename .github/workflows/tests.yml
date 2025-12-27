@@ -55,12 +55,31 @@ jobs:
         run: npm run test
 
   unit:
-    name: Unit (PHP ${{ matrix.php }})
+    name: Unit (PHP ${{ matrix.php }} - TYPO3 ${{ matrix.typo3 }})
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
-        php: ['8.2', '8.3', '8.4']
+        include:
+          # TYPO3 12.4 LTS
+          - php: '8.2'
+            typo3: '12.4'
+          - php: '8.3'
+            typo3: '12.4'
+          # TYPO3 13.4 LTS
+          - php: '8.2'
+            typo3: '13.4'
+          - php: '8.3'
+            typo3: '13.4'
+          - php: '8.4'
+            typo3: '13.4'
+          # TYPO3 14.x
+          - php: '8.2'
+            typo3: '14.0'
+          - php: '8.3'
+            typo3: '14.0'
+          - php: '8.4'
+            typo3: '14.0'
 
     steps:
       - uses: actions/checkout@v4
@@ -73,18 +92,39 @@ jobs:
           tools: composer
 
       - name: Install dependencies
-        run: composer install --no-interaction
+        run: |
+          composer require "typo3/cms-core:^${{ matrix.typo3 }}" "typo3/cms-backend:^${{ matrix.typo3 }}" "typo3/cms-redirects:^${{ matrix.typo3 }}" --no-update --no-interaction
+          composer install --no-interaction
 
       - name: Run unit tests
         run: vendor/bin/phpunit -c Tests/phpunit.xml --testsuite unit
 
   functional:
-    name: Functional (PHP ${{ matrix.php }})
+    name: Functional (PHP ${{ matrix.php }} - TYPO3 ${{ matrix.typo3 }})
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
-        php: ['8.2', '8.3', '8.4']
+        include:
+          # TYPO3 12.4 LTS
+          - php: '8.2'
+            typo3: '12.4'
+          - php: '8.3'
+            typo3: '12.4'
+          # TYPO3 13.4 LTS
+          - php: '8.2'
+            typo3: '13.4'
+          - php: '8.3'
+            typo3: '13.4'
+          - php: '8.4'
+            typo3: '13.4'
+          # TYPO3 14.x
+          - php: '8.2'
+            typo3: '14.0'
+          - php: '8.3'
+            typo3: '14.0'
+          - php: '8.4'
+            typo3: '14.0'
 
     steps:
       - uses: actions/checkout@v4
@@ -97,19 +137,40 @@ jobs:
           tools: composer
 
       - name: Install dependencies
-        run: composer install --no-interaction
+        run: |
+          composer require "typo3/cms-core:^${{ matrix.typo3 }}" "typo3/cms-backend:^${{ matrix.typo3 }}" "typo3/cms-redirects:^${{ matrix.typo3 }}" --no-update --no-interaction
+          composer install --no-interaction
 
       - name: Run functional tests
         run: typo3DatabaseDriver=pdo_sqlite vendor/bin/phpunit --bootstrap vendor/typo3/testing-framework/Resources/Core/Build/FunctionalTestsBootstrap.php Tests/Functional
 
   e2e:
-    name: E2E (PHP ${{ matrix.php }})
+    name: E2E (PHP ${{ matrix.php }} - TYPO3 ${{ matrix.typo3 }})
     runs-on: ubuntu-latest
     timeout-minutes: 30
     strategy:
       fail-fast: false
       matrix:
-        php: ['8.2', '8.3', '8.4']
+        include:
+          # TYPO3 12.4 LTS
+          - php: '8.2'
+            typo3: '12.4'
+          - php: '8.3'
+            typo3: '12.4'
+          # TYPO3 13.4 LTS
+          - php: '8.2'
+            typo3: '13.4'
+          - php: '8.3'
+            typo3: '13.4'
+          - php: '8.4'
+            typo3: '13.4'
+          # TYPO3 14.x
+          - php: '8.2'
+            typo3: '14.0'
+          - php: '8.3'
+            typo3: '14.0'
+          - php: '8.4'
+            typo3: '14.0'
 
     services:
       mysql:
@@ -137,11 +198,12 @@ jobs:
           node-version: '20'
 
       - name: Create TYPO3 project
-        run: composer create-project typo3/cms-base-distribution:^14.0 typo3-test --no-interaction
+        run: composer create-project typo3/cms-base-distribution:^${{ matrix.typo3 }} typo3-test --no-interaction
 
       - name: Install sluggi extension
         run: |
           cd typo3-test
+          composer config --unset platform.php
           composer config repositories.sluggi path ../
           composer require wazum/sluggi:@dev --no-interaction
 
@@ -237,6 +299,6 @@ jobs:
         if: ${{ !cancelled() }}
         uses: actions/upload-artifact@v4
         with:
-          name: playwright-results-php${{ matrix.php }}
+          name: playwright-results-php${{ matrix.php }}-typo3-${{ matrix.typo3 }}
           path: Tests/E2e/test-results/
           retention-days: 7

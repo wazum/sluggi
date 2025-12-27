@@ -1,4 +1,5 @@
 import {expect, test} from '@playwright/test';
+import { expandPageTreeNode, getPageTreeItemByName } from '../fixtures/typo3-compat';
 
 test.describe('Page Move - Slug Update', () => {
   test('moving a page into another updates slug with parent prefix', async ({ page }) => {
@@ -6,21 +7,17 @@ test.describe('Page Move - Slug Update', () => {
     const pageTree = page.locator('.scaffold-content-navigation-component');
     await expect(pageTree).toBeVisible({ timeout: 15000 });
 
-    const rootNode = pageTree.locator('[data-id="1"]');
-    await expect(rootNode).toBeVisible({ timeout: 10000 });
-    const rootToggle = rootNode.locator('.node-toggle');
-    if (await rootToggle.isVisible()) {
-      await rootToggle.click();
-    }
+    // Expand root node to show child pages
+    await expandPageTreeNode(page, 1);
 
-    const childNode = page.getByRole('treeitem', { name: 'Child Page' });
+    const childNode = await getPageTreeItemByName(page, 'Child Page');
     await expect(childNode).toBeVisible({ timeout: 10000 });
     await childNode.click({ button: 'right' });
     const cutMenuItem = page.getByRole('menuitem', { name: 'Cut' });
     await cutMenuItem.click();
     await expect(cutMenuItem).not.toBeVisible();
 
-    const parentNode = page.getByRole('treeitem', { name: 'Parent Page' });
+    const parentNode = await getPageTreeItemByName(page, 'Parent Page');
     await expect(parentNode).toBeVisible({ timeout: 10000 });
     await parentNode.click({ button: 'right' });
     await page.getByRole('menuitem', { name: 'Paste into' }).click();
