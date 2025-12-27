@@ -6,6 +6,13 @@ services:
 
   Wazum\Sluggi\:
     resource: '../Classes/*'
+    exclude:
+      - '../Classes/Controller/FormSlugAjaxControllerV12.php'
+      - '../Classes/Controller/FormSlugAjaxControllerV14.php'
+      - '../Classes/Form/Element/SlugElementV12.php'
+      - '../Classes/Form/Element/SlugElementV14.php'
+      - '../Classes/Form/Element/SlugSourceElementV12.php'
+      - '../Classes/Form/Element/SlugSourceElementV14.php'
 
   # DataHandler
   Wazum\Sluggi\DataHandler\ClearSlugForExcludedDoktypes:
@@ -33,10 +40,16 @@ services:
     public: true
 
   # Form/Element
-  Wazum\Sluggi\Form\Element\SlugElement:
+  Wazum\Sluggi\Form\Element\SlugElementV12:
     public: true
 
-  Wazum\Sluggi\Form\Element\SlugSourceElement:
+  Wazum\Sluggi\Form\Element\SlugElementV14:
+    public: true
+
+  Wazum\Sluggi\Form\Element\SlugSourceElementV12:
+    public: true
+
+  Wazum\Sluggi\Form\Element\SlugSourceElementV14:
     public: true
 
   # Form/FormDataProvider
@@ -56,7 +69,16 @@ services:
   Wazum\Sluggi\Service\LastSegmentValidationService:
     public: true
 
+  Wazum\Sluggi\Service\SlugConfigurationService:
+    public: true
+
+  Wazum\Sluggi\Service\SlugElementRenderer:
+    public: true
+
   Wazum\Sluggi\Service\SlugGeneratorService:
+    public: true
+
+  Wazum\Sluggi\Service\SlugLockService:
     public: true
 
   Wazum\Sluggi\Service\SlugSyncService:

@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Wazum\Sluggi\Service;
 
+use Wazum\Sluggi\Compatibility\Typo3Compatibility;
+
 final readonly class SlugSourceBadgeRenderer
 {
     /**
@@ -46,7 +48,8 @@ final readonly class SlugSourceBadgeRenderer
 
     public function insertBadgeIntoHtml(string $html, string $badge, bool $hidden = false): string
     {
-        $pattern = '/(<div class="form-wizards-item-element">)\s*(<input)([^>]+type="text"[^>]*>)/s';
+        $elementClass = Typo3Compatibility::getFormWizardsElementClass();
+        $pattern = '/(<div class="[^"]*' . preg_quote($elementClass, '/') . '[^"]*">)\s*(<input)([^>]+type="text"[^>]*>)/s';
         $wrapperClass = $hidden ? '' : ' class="input-group"';
         $replacement = '$1<div' . $wrapperClass . '>' . $badge . '$2$3</div>';
 
@@ -55,7 +58,8 @@ final readonly class SlugSourceBadgeRenderer
 
     public function markAsSourceField(string $html): string
     {
-        $pattern = '/(<div class="form-wizards-item-element">)\s*(<input)([^>]+type="text"[^>]*>)/s';
+        $elementClass = Typo3Compatibility::getFormWizardsElementClass();
+        $pattern = '/(<div class="[^"]*' . preg_quote($elementClass, '/') . '[^"]*">)\s*(<input)([^>]+type="text"[^>]*>)/s';
         $replacement = '$1$2 data-sluggi-source$3';
 
         return preg_replace($pattern, $replacement, $html, 1) ?? $html;

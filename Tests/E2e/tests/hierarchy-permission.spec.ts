@@ -1,4 +1,5 @@
 import { test, expect, FrameLocator, Locator } from '@playwright/test';
+import { expandPageTreeNode, getPageTreeNode } from '../fixtures/typo3-compat';
 
 test.describe('Hierarchy Permission - Editor Slug Restrictions', () => {
   let frame: FrameLocator;
@@ -59,7 +60,8 @@ test.describe('Hierarchy Permission - Editor Slug Restrictions', () => {
     const pageTree = page.locator('.scaffold-content-navigation-component');
     await expect(pageTree).toBeVisible({ timeout: 10000 });
 
-    const instituteNode = pageTree.locator('[data-id="27"]');
+    // Editor has mount point at page 27, so it's directly visible
+    const instituteNode = await getPageTreeNode(page, 27);
     await expect(instituteNode).toBeVisible({ timeout: 10000 });
     await instituteNode.click({ button: 'right' });
 

@@ -6,12 +6,11 @@ namespace Wazum\Sluggi\Controller;
 
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
-use TYPO3\CMS\Backend\Controller\FormSlugAjaxController as CoreFormSlugAjaxController;
 use TYPO3\CMS\Core\DataHandling\SlugHelper;
 use TYPO3\CMS\Core\Http\JsonResponse;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
-final readonly class FormSlugAjaxController extends CoreFormSlugAjaxController
+trait FormSlugAjaxControllerTrait
 {
     public function suggestAction(ServerRequestInterface $request): ResponseInterface
     {

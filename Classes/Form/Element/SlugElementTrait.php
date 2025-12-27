@@ -5,10 +5,9 @@ declare(strict_types=1);
 namespace Wazum\Sluggi\Form\Element;
 
 use TYPO3\CMS\Backend\Controller\FormSlugAjaxController;
-use TYPO3\CMS\Backend\Form\Element\AbstractFormElement;
-use TYPO3\CMS\Core\Crypto\HashService;
 use TYPO3\CMS\Core\Page\JavaScriptModuleInstruction;
 use TYPO3\CMS\Core\Utility\MathUtility;
+use Wazum\Sluggi\Compatibility\Typo3Compatibility;
 use Wazum\Sluggi\Service\FullPathEditingService;
 use Wazum\Sluggi\Service\HierarchyPermissionService;
 use Wazum\Sluggi\Service\LastSegmentValidationService;
@@ -18,46 +17,16 @@ use Wazum\Sluggi\Service\SlugGeneratorService;
 use Wazum\Sluggi\Service\SlugLockService;
 use Wazum\Sluggi\Service\SlugSyncService;
 
-final class SlugElement extends AbstractFormElement
+trait SlugElementTrait
 {
-    /**
-     * @var array<string, array<string, string>>
-     */
-    protected $defaultFieldInformation = [
-        'tcaDescription' => [
-            'renderType' => 'tcaDescription',
-        ],
-    ];
-
-    /**
-     * @var array<string, array<string, mixed>>
-     */
-    protected $defaultFieldWizard = [
-        'localizationStateSelector' => [
-            'renderType' => 'localizationStateSelector',
-        ],
-        'otherLanguageContent' => [
-            'renderType' => 'otherLanguageContent',
-            'after' => ['localizationStateSelector'],
-        ],
-        'defaultLanguageDifferences' => [
-            'renderType' => 'defaultLanguageDifferences',
-            'after' => ['otherLanguageContent'],
-        ],
-    ];
-
-    public function __construct(
-        private readonly HashService $hashService,
-        private readonly SlugElementRenderer $slugElementRenderer,
-        private readonly SlugSyncService $slugSyncService,
-        private readonly SlugLockService $slugLockService,
-        private readonly SlugConfigurationService $slugConfigurationService,
-        private readonly LastSegmentValidationService $lastSegmentValidationService,
-        private readonly HierarchyPermissionService $hierarchyPermissionService,
-        private readonly SlugGeneratorService $slugGeneratorService,
-        private readonly FullPathEditingService $fullPathEditingService,
-    ) {
-    }
+    protected SlugElementRenderer $slugElementRenderer;
+    protected SlugSyncService $slugSyncService;
+    protected SlugLockService $slugLockService;
+    protected SlugConfigurationService $slugConfigurationService;
+    protected LastSegmentValidationService $lastSegmentValidationService;
+    protected HierarchyPermissionService $hierarchyPermissionService;
+    protected SlugGeneratorService $slugGeneratorService;
+    protected FullPathEditingService $fullPathEditingService;
 
     /**
      * @return array<string, mixed>
@@ -212,7 +181,7 @@ final class SlugElement extends AbstractFormElement
                 %s
                 <div class="form-control-wrap" style="max-width: %dpx">
                     <div class="form-wizards-wrap">
-                        <div class="form-wizards-item-element">
+                        <div class="%s">
                             <sluggi-element%s></sluggi-element>
                             <input type="hidden"
                                 class="sluggi-hidden-field"
@@ -245,6 +214,7 @@ final class SlugElement extends AbstractFormElement
             </div>',
             $fieldInformationHtml,
             $this->formMaxWidth($context['size']),
+            Typo3Compatibility::getFormWizardsElementClass(),
             $attributeString,
             htmlspecialchars($context['itemName']),
             htmlspecialchars($context['itemValue']),
@@ -318,7 +288,7 @@ final class SlugElement extends AbstractFormElement
         string $command,
         int $parentPageId,
     ): string {
-        return $this->hashService->hmac(
+        return Typo3Compatibility::hmac(
             $table . $effectivePid . $recordId . $languageId . $fieldName . $command . $parentPageId,
             FormSlugAjaxController::class
         );
@@ -338,7 +308,7 @@ final class SlugElement extends AbstractFormElement
         }
 
         return '<fieldset>'
-            . '<legend class="form-label t3js-formengine-label">' . $chainIcon . $legend . '</legend>'
+            . '<legend class="' . Typo3Compatibility::getLegendClass() . '">' . $chainIcon . $legend . '</legend>'
             . $innerHTML
             . '</fieldset>';
     }

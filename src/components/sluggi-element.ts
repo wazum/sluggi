@@ -130,12 +130,16 @@ export class SluggiElement extends LitElement {
     @state()
     private isFullPathMode = false;
 
+    @state()
+    private hasSourceFields = false;
+
     @query('input.sluggi-input')
     private inputElement?: HTMLInputElement;
 
     private sourceFieldElements: Map<string, HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement> = new Map();
     private boundSourceFieldHandler: (event: Event) => void;
     private boundSourceFieldInitHandler: () => void;
+    private sourceFieldObserver: MutationObserver | null = null;
 
     // =========================================================================
     // Constructor & Lifecycle
@@ -150,11 +154,14 @@ export class SluggiElement extends LitElement {
     override connectedCallback() {
         super.connectedCallback();
         this.setupSourceFieldListeners();
+        this.observeSourceFieldInitialization();
     }
 
     override disconnectedCallback() {
         super.disconnectedCallback();
         this.removeSourceFieldListeners();
+        this.sourceFieldObserver?.disconnect();
+        this.sourceFieldObserver = null;
     }
 
     // =========================================================================
@@ -164,11 +171,11 @@ export class SluggiElement extends LitElement {
     private get canRegenerate(): boolean {
         if (!this.showRegenerate || this.isSynced) return false;
         if (this.hasPostModifiers) return true;
-        return this.sourceFieldElements.size > 0 && this.hasNonEmptySourceFieldValue();
+        return this.hasSourceFields && this.hasNonEmptySourceFieldValue();
     }
 
     private get showSyncToggle(): boolean {
-        return this.syncFeatureEnabled && this.sourceFieldElements.size > 0 && !this.isLocked;
+        return this.syncFeatureEnabled && this.hasSourceFields && !this.isLocked;
     }
 
     private get showLockToggle(): boolean {
@@ -224,7 +231,7 @@ export class SluggiElement extends LitElement {
         if (this.slugGenerated) {
             return false;
         }
-        if (this.sourceFieldElements.size === 0) {
+        if (!this.hasSourceFields) {
             return false;
         }
         return true;
@@ -893,6 +900,33 @@ export class SluggiElement extends LitElement {
                 element.addEventListener('formengine:input:initialized', this.boundSourceFieldInitHandler);
             }
         }
+        this.hasSourceFields = this.sourceFieldElements.size > 0;
+    }
+
+    private observeSourceFieldInitialization() {
+        const uninitializedFields = document.querySelectorAll('[data-sluggi-source]:not([data-formengine-input-initialized])');
+        if (uninitializedFields.length === 0) return;
+
+        this.sourceFieldObserver = new MutationObserver((mutations) => {
+            for (const mutation of mutations) {
+                if (mutation.type === 'attributes' && mutation.attributeName === 'data-formengine-input-initialized') {
+                    const target = mutation.target as HTMLElement;
+                    if (target.hasAttribute('data-sluggi-source')) {
+                        if (!this.hasSourceFields) {
+                            this.setupSourceFieldListeners();
+                        }
+                        this.requestUpdate();
+                        this.sourceFieldObserver?.disconnect();
+                        this.sourceFieldObserver = null;
+                        break;
+                    }
+                }
+            }
+        });
+
+        for (const field of uninitializedFields) {
+            this.sourceFieldObserver.observe(field, { attributes: true, attributeFilter: ['data-formengine-input-initialized'] });
+        }
     }
 
     private removeSourceFieldListeners() {
@@ -902,6 +936,7 @@ export class SluggiElement extends LitElement {
             element.removeEventListener('formengine:input:initialized', this.boundSourceFieldInitHandler);
         }
         this.sourceFieldElements.clear();
+        this.hasSourceFields = false;
     }
 
     private sourceFieldInputTimeout: number | null = null;

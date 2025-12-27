@@ -4,19 +4,15 @@ declare(strict_types=1);
 
 namespace Wazum\Sluggi\Form\Element;
 
-use TYPO3\CMS\Backend\Form\Element\InputTextElement;
 use Wazum\Sluggi\Service\SlugConfigurationService;
 use Wazum\Sluggi\Service\SlugSourceBadgeRenderer;
 use Wazum\Sluggi\Service\SlugSyncService;
 
-final class SlugSourceElement extends InputTextElement
+trait SlugSourceElementTrait
 {
-    public function __construct(
-        private readonly SlugSourceBadgeRenderer $badgeRenderer,
-        private readonly SlugConfigurationService $slugConfigurationService,
-        private readonly SlugSyncService $slugSyncService,
-    ) {
-    }
+    protected SlugSourceBadgeRenderer $badgeRenderer;
+    protected SlugConfigurationService $slugConfigurationService;
+    protected SlugSyncService $slugSyncService;
 
     /**
      * @return array<string, mixed>

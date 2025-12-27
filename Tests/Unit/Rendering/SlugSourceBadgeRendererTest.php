@@ -8,15 +8,18 @@ use Generator;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
+use Wazum\Sluggi\Compatibility\Typo3Compatibility;
 use Wazum\Sluggi\Service\SlugSourceBadgeRenderer;
 
 final class SlugSourceBadgeRendererTest extends TestCase
 {
     private SlugSourceBadgeRenderer $subject;
+    private string $elementClass;
 
     protected function setUp(): void
     {
         $this->subject = new SlugSourceBadgeRenderer();
+        $this->elementClass = Typo3Compatibility::getFormWizardsElementClass();
     }
 
     public static function badgeWithMetadataProvider(): Generator
@@ -126,7 +129,7 @@ final class SlugSourceBadgeRendererTest extends TestCase
     #[Test]
     public function insertBadgeIntoHtmlWrapsInputInGroupWhenNotHidden(): void
     {
-        $html = '<div class="form-wizards-item-element"><input type="text" name="test"></div>';
+        $html = '<div class="' . $this->elementClass . '"><input type="text" name="test"></div>';
 
         $result = $this->subject->insertBadgeIntoHtml($html, '<span class="badge">1</span>', hidden: false);
 
@@ -137,7 +140,7 @@ final class SlugSourceBadgeRendererTest extends TestCase
     #[Test]
     public function insertBadgeIntoHtmlOmitsInputGroupClassWhenHidden(): void
     {
-        $html = '<div class="form-wizards-item-element"><input type="text" name="test"></div>';
+        $html = '<div class="' . $this->elementClass . '"><input type="text" name="test"></div>';
 
         $result = $this->subject->insertBadgeIntoHtml($html, '<span class="badge">1</span>', hidden: true);
 
@@ -148,7 +151,7 @@ final class SlugSourceBadgeRendererTest extends TestCase
     #[Test]
     public function insertBadgeDoesNotAddDataSluggiSourceAttribute(): void
     {
-        $html = '<div class="form-wizards-item-element"><input type="text" name="test"></div>';
+        $html = '<div class="' . $this->elementClass . '"><input type="text" name="test"></div>';
 
         $result = $this->subject->insertBadgeIntoHtml($html, '<span>badge</span>');
 
@@ -158,7 +161,7 @@ final class SlugSourceBadgeRendererTest extends TestCase
     #[Test]
     public function markAsSourceFieldAddsDataSluggiSourceAttribute(): void
     {
-        $html = '<div class="form-wizards-item-element"><input type="text" name="test"></div>';
+        $html = '<div class="' . $this->elementClass . '"><input type="text" name="test"></div>';
 
         $result = $this->subject->markAsSourceField($html);
 
@@ -168,7 +171,7 @@ final class SlugSourceBadgeRendererTest extends TestCase
     #[Test]
     public function markAsSourceFieldPreservesExistingInputAttributes(): void
     {
-        $html = '<div class="form-wizards-item-element"><input type="text" name="data[pages][123][title]" class="form-control"></div>';
+        $html = '<div class="' . $this->elementClass . '"><input type="text" name="data[pages][123][title]" class="form-control"></div>';
 
         $result = $this->subject->markAsSourceField($html);
 
@@ -180,7 +183,7 @@ final class SlugSourceBadgeRendererTest extends TestCase
     #[Test]
     public function insertBadgePreservesExistingInputAttributes(): void
     {
-        $html = '<div class="form-wizards-item-element"><input type="text" name="data[pages][123][title]" class="form-control"></div>';
+        $html = '<div class="' . $this->elementClass . '"><input type="text" name="data[pages][123][title]" class="form-control"></div>';
 
         $result = $this->subject->insertBadgeIntoHtml($html, '<span>badge</span>');
 
@@ -191,14 +194,11 @@ final class SlugSourceBadgeRendererTest extends TestCase
     #[Test]
     public function markAsSourceFieldOnlyDoesNotAddBadge(): void
     {
-        // Simulates sync OFF: only markAsSourceField is called, NOT insertBadgeIntoHtml
-        $html = '<div class="form-wizards-item-element"><input type="text" name="test"></div>';
+        $html = '<div class="' . $this->elementClass . '"><input type="text" name="test"></div>';
 
         $result = $this->subject->markAsSourceField($html);
 
-        // Should have the source attribute
         self::assertStringContainsString('data-sluggi-source', $result);
-        // Should NOT have any badge-related markup
         self::assertStringNotContainsString('sluggi-source-badge', $result);
         self::assertStringNotContainsString('input-group', $result);
     }
@@ -206,16 +206,12 @@ final class SlugSourceBadgeRendererTest extends TestCase
     #[Test]
     public function insertBadgeWorksAfterMarkAsSourceField(): void
     {
-        // Simulates sync ON: both methods are called in sequence
-        $html = '<div class="form-wizards-item-element"><input type="text" name="test"></div>';
+        $html = '<div class="' . $this->elementClass . '"><input type="text" name="test"></div>';
         $badge = '<span class="sluggi-source-badge">badge</span>';
 
-        // First mark as source field (always called)
         $markedHtml = $this->subject->markAsSourceField($html);
-        // Then insert badge (only when sync is ON)
         $result = $this->subject->insertBadgeIntoHtml($markedHtml, $badge);
 
-        // Should have both the source attribute AND the badge
         self::assertStringContainsString('data-sluggi-source', $result);
         self::assertStringContainsString('sluggi-source-badge', $result);
         self::assertStringContainsString('input-group', $result);

@@ -1,4 +1,5 @@
 import { test, expect, FrameLocator, Locator } from '@playwright/test';
+import { expandPageTreeNode, getPageTreeNode, getPageTreeNodeLabel, getPageTreeEditInput } from '../fixtures/typo3-compat';
 
 test.describe('Last Segment Only - Editor Restrictions', () => {
   let frame: FrameLocator;
@@ -113,7 +114,8 @@ test.describe('Last Segment Only - Editor Restrictions', () => {
     const pageTree = page.locator('.scaffold-content-navigation-component');
     await expect(pageTree).toBeVisible({ timeout: 10000 });
 
-    const parentNode = pageTree.locator('[data-id="18"]');
+    // Editor has mount point at page 18, so it's directly visible
+    const parentNode = await getPageTreeNode(page, 18);
     await expect(parentNode).toBeVisible({ timeout: 10000 });
     await parentNode.click({ button: 'right' });
 
@@ -150,21 +152,16 @@ test.describe('Last Segment Only - Editor Restrictions', () => {
     const pageTree = page.locator('.scaffold-content-navigation-component');
     await expect(pageTree).toBeVisible({ timeout: 10000 });
 
-    const parentNode = pageTree.locator('[data-id="18"]');
-    await expect(parentNode).toBeVisible({ timeout: 10000 });
-    const parentToggle = parentNode.locator('.node-toggle');
-    if (await parentToggle.isVisible()) {
-      await parentToggle.click();
-      await page.waitForTimeout(500);
-    }
+    // Expand parent section node (editor has mount point at page 18, no access to root)
+    await expandPageTreeNode(page, 18);
 
-    const treeNode = pageTree.locator('[data-id="22"]');
+    const treeNode = await getPageTreeNode(page, 22);
     await expect(treeNode).toBeVisible({ timeout: 10000 });
 
-    const titleElement = treeNode.locator('.node-contentlabel');
+    const titleElement = await getPageTreeNodeLabel(page, 22);
     await titleElement.dblclick();
 
-    const treeInput = pageTree.locator('input.node-edit');
+    const treeInput = await getPageTreeEditInput(page);
     await expect(treeInput).toBeVisible({ timeout: 5000 });
     await treeInput.fill('Test Page/With Slash');
     await treeInput.press('Enter');

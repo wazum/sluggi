@@ -31,6 +31,30 @@ final class HierarchyPermissionServiceTest extends TestCase
     }
 
     #[Test]
+    public function getLockedPrefixSkipsRootPageWhenCalculatingPrefix(): void
+    {
+        $subject = new HierarchyPermissionService();
+
+        // Real-world scenario: root page has perms_everybody=31 (all permissions)
+        // so it appears in editablePageUids even though user only has content access to deeper pages
+        $rootLine = [
+            ['uid' => 28, 'slug' => '/organization/department/institute/about-us'],
+            ['uid' => 27, 'slug' => '/organization/department/institute'],
+            ['uid' => 26, 'slug' => '/organization/department'],
+            ['uid' => 25, 'slug' => '/organization'],
+            ['uid' => 1, 'slug' => '/'],
+            ['uid' => 0, 'slug' => ''],
+        ];
+        // Root page (uid=1) is editable due to permissive settings, but should be skipped
+        $editablePageUids = [28, 27, 1];
+
+        $result = $subject->getLockedPrefix($rootLine, $editablePageUids, '/organization/department/institute/about-us');
+
+        // Should return parent of page 27 (first meaningful editable page), not empty string from root
+        self::assertSame('/organization/department', $result);
+    }
+
+    #[Test]
     public function getLockedPrefixReturnsParentOfTopmostEditablePage(): void
     {
         $subject = new HierarchyPermissionService();
