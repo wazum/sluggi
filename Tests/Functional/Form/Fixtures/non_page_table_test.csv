@@ -1,0 +1,11 @@
+"be_users"
+,"uid","pid","username","password","admin"
+,1,0,"admin","$2y$12$abc123",1
+
+"pages"
+,"uid","pid","title","slug","doktype"
+,1,0,"Root Page","/",1
+
+"tx_sluggitest_article"
+,"uid","pid","title","subtitle","slug"
+,1,1,"Test Article","Subtitle","/test-article"

@@ -86,9 +86,11 @@ trait SlugElementTrait
         $includeUid = $this->hasUidInGeneratorFields($generatorFields);
         $hasPostModifiers = !empty($config['generatorOptions']['postModifiers']);
 
-        $syncFeatureEnabled = $this->slugSyncService->isSyncFeatureEnabled()
+        $syncFeatureEnabled = $table === 'pages'
+            && $this->slugSyncService->isSyncFeatureEnabled()
             && $this->canUserAccessSyncField($table);
-        $lockFeatureEnabled = $this->slugLockService->isLockFeatureEnabled()
+        $lockFeatureEnabled = $table === 'pages'
+            && $this->slugLockService->isLockFeatureEnabled()
             && $this->canUserAccessLockField($table);
         $requiredSourceFields = $this->slugConfigurationService->getRequiredSourceFields($table);
         $lastSegmentOnly = $this->lastSegmentValidationService->shouldRestrictUser(
@@ -141,7 +143,7 @@ trait SlugElementTrait
             'includeUid' => $includeUid,
             'hasPostModifiers' => $hasPostModifiers,
             'syncFeatureEnabled' => $syncFeatureEnabled,
-            'isSynced' => $this->slugSyncService->isSyncFeatureEnabled() && $this->slugSyncService->shouldSync($row),
+            'isSynced' => $this->determineIsSynced($table, $row),
             'syncFieldName' => $this->slugElementRenderer->buildSyncFieldName($table, $recordId),
             'lockFeatureEnabled' => $lockFeatureEnabled,
             'isLocked' => $this->slugLockService->isLockFeatureEnabled() && $this->slugLockService->isLocked($row),
@@ -347,5 +349,18 @@ trait SlugElementTrait
         return $this->fullPathEditingService->isEnabled()
             && $hasRestriction
             && $this->canUserAccessFullPathField($table);
+    }
+
+    /**
+     * @param array<string, mixed> $row
+     */
+    private function determineIsSynced(string $table, array $row): bool
+    {
+        if ($table === 'pages') {
+            return $this->slugSyncService->isSyncFeatureEnabled()
+                && $this->slugSyncService->shouldSync($row);
+        }
+
+        return $this->slugSyncService->isTableAutoSyncEnabled($table);
     }
 }

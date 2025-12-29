@@ -27,6 +27,11 @@ final readonly class SlugSyncService
             && ($record['tx_sluggi_sync'] ?? false);
     }
 
+    public function isTableAutoSyncEnabled(string $table): bool
+    {
+        return $this->extensionConfiguration->isTableSynchronizeEnabled($table);
+    }
+
     /**
      * @param array<string, mixed> $record
      */
