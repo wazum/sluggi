@@ -1,5 +1,10 @@
 # sluggi - Enhanced TYPO3 URL Path Management
 
+[![Tests](https://github.com/wazum/sluggi/workflows/Tests/badge.svg)](https://github.com/wazum/sluggi/actions)
+[![PHP](https://img.shields.io/badge/PHP-8.2%20|%208.3%20|%208.4-blue.svg)](https://www.php.net/)
+[![TYPO3](https://img.shields.io/badge/TYPO3-12.4%20|%2013.4%20|%2014-orange.svg)](https://typo3.org/)
+[![License](https://img.shields.io/badge/License-GPL%20v2-blue.svg)](LICENSE)
+
 A TYPO3 extension that replaces the core slug field with an improved interface featuring inline editing, automatic synchronization, conflict detection, and fine-grained access control.
 
 ## Requirements
