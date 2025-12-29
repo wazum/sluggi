@@ -1,73 +1,95 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <xliff version="1.2" xmlns="urn:oasis:names:tc:xliff:document:1.2">
-    <file source-language="en" datatype="plaintext" original="messages" date="2024-01-01T00:00:00Z" product-name="sluggi">
+    <file source-language="en" target-language="de" datatype="plaintext" original="messages" date="2024-01-01T00:00:00Z" product-name="sluggi">
         <header/>
         <body>
             <trans-unit id="conflict.title" resname="conflict.title">
                 <source>URL Path Conflict</source>
+                <target>URL-Pfad-Konflikt</target>
             </trans-unit>
             <trans-unit id="conflict.message" resname="conflict.message">
                 <source>The URL path "%s" is already in use.</source>
+                <target>Der URL-Pfad "%s" wird bereits verwendet.</target>
             </trans-unit>
             <trans-unit id="conflict.suggestion" resname="conflict.suggestion">
                 <source>Use the suggested alternative "%s" instead?</source>
+                <target>Stattdessen die vorgeschlagene Alternative "%s" verwenden?</target>
             </trans-unit>
             <trans-unit id="conflict.button.cancel" resname="conflict.button.cancel">
                 <source>Cancel</source>
+                <target>Abbrechen</target>
             </trans-unit>
             <trans-unit id="conflict.button.useSuggestion" resname="conflict.button.useSuggestion">
                 <source>Use Suggestion</source>
+                <target>Vorschlag verwenden</target>
             </trans-unit>
             <trans-unit id="pages.tx_sluggi_sync" resname="pages.tx_sluggi_sync">
                 <source>Sluggi: Auto-sync URL path</source>
+                <target>Sluggi: URL-Pfad automatisch synchronisieren</target>
             </trans-unit>
             <trans-unit id="pages.slug_locked" resname="pages.slug_locked">
                 <source>Sluggi: Lock URL path</source>
+                <target>Sluggi: URL-Pfad sperren</target>
             </trans-unit>
             <trans-unit id="restriction.sync" resname="restriction.sync">
                 <source>The URL path is automatically synchronized with the source fields.</source>
+                <target>Der URL-Pfad wird automatisch mit den Quellfeldern synchronisiert.</target>
             </trans-unit>
             <trans-unit id="restriction.lock" resname="restriction.lock">
                 <source>The URL path is locked and cannot be edited.</source>
+                <target>Der URL-Pfad ist gesperrt und kann nicht bearbeitet werden.</target>
             </trans-unit>
             <trans-unit id="pages.tx_sluggi_full_path" resname="pages.tx_sluggi_full_path">
                 <source>Sluggi: Edit full path</source>
+                <target>Sluggi: Vollständigen Pfad bearbeiten</target>
             </trans-unit>
             <trans-unit id="restriction.fullPath" resname="restriction.fullPath">
                 <source>Full path editing is enabled. You can modify the entire URL structure.</source>
+                <target>Vollständige Pfadbearbeitung ist aktiviert. Sie können die gesamte URL-Struktur ändern.</target>
             </trans-unit>
             <trans-unit id="button.edit" resname="button.edit">
                 <source>Click to edit the URL path</source>
+                <target>Klicken, um den URL-Pfad zu bearbeiten</target>
             </trans-unit>
             <trans-unit id="button.regenerate" resname="button.regenerate">
                 <source>Regenerate URL path from source fields</source>
+                <target>URL-Pfad aus Quellfeldern neu generieren</target>
             </trans-unit>
             <trans-unit id="button.cancel" resname="button.cancel">
                 <source>Cancel editing</source>
+                <target>Bearbeitung abbrechen</target>
             </trans-unit>
             <trans-unit id="button.save" resname="button.save">
                 <source>Save URL path</source>
+                <target>URL-Pfad speichern</target>
             </trans-unit>
             <trans-unit id="toggle.sync.on" resname="toggle.sync.on">
                 <source>Auto-sync enabled: URL path updates with title</source>
+                <target>Auto-Sync aktiviert: URL-Pfad wird mit Titel aktualisiert</target>
             </trans-unit>
             <trans-unit id="toggle.sync.off" resname="toggle.sync.off">
                 <source>Auto-sync disabled: click to enable</source>
+                <target>Auto-Sync deaktiviert: Klicken zum Aktivieren</target>
             </trans-unit>
             <trans-unit id="toggle.sync.static" resname="toggle.sync.static">
                 <source>Auto-sync enabled: URL path updates automatically</source>
+                <target>Auto-Sync aktiviert: URL-Pfad wird automatisch aktualisiert</target>
             </trans-unit>
             <trans-unit id="toggle.lock.on" resname="toggle.lock.on">
                 <source>URL path is locked: click to unlock</source>
+                <target>URL-Pfad ist gesperrt: Klicken zum Entsperren</target>
             </trans-unit>
             <trans-unit id="toggle.lock.off" resname="toggle.lock.off">
                 <source>URL path is unlocked: click to lock</source>
+                <target>URL-Pfad ist entsperrt: Klicken zum Sperren</target>
             </trans-unit>
             <trans-unit id="toggle.path.on" resname="toggle.path.on">
                 <source>Full path editing enabled: click to restrict</source>
+                <target>Vollständige Pfadbearbeitung aktiviert: Klicken zum Einschränken</target>
             </trans-unit>
             <trans-unit id="toggle.path.off" resname="toggle.path.off">
                 <source>Click to edit full path</source>
+                <target>Klicken, um vollständigen Pfad zu bearbeiten</target>
             </trans-unit>
         </body>
     </file>

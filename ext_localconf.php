@@ -91,3 +91,9 @@ $GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['t3lib/class.t3lib_tcemain.php']['proc
 
 $GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['t3lib/class.t3lib_tcemain.php']['moveRecordClass']['sluggi_move'] =
     HandlePageMove::class;
+
+// Override core "URL Segment" label to "URL Path"
+$GLOBALS['TYPO3_CONF_VARS']['SYS']['locallangXMLOverride']['EXT:core/Resources/Private/Language/locallang_tca.xlf'][] =
+    'EXT:sluggi/Resources/Private/Language/Overrides/locallang_tca.xlf';
+$GLOBALS['TYPO3_CONF_VARS']['SYS']['locallangXMLOverride']['de']['EXT:core/Resources/Private/Language/locallang_tca.xlf'][] =
+    'EXT:sluggi/Resources/Private/Language/Overrides/de.locallang_tca.xlf';

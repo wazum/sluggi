@@ -270,8 +270,8 @@ export class SluggiElement extends LitElement {
         if (!this.isSynced && !this.isLocked) return nothing;
 
         const message = this.isSynced
-            ? this.labels.syncRestrictionNote || 'The slug is automatically synchronized with the source fields.'
-            : this.labels.lockRestrictionNote || 'The slug is locked and cannot be edited.';
+            ? this.labels.syncRestrictionNote || 'The URL path is automatically synchronized with the source fields.'
+            : this.labels.lockRestrictionNote || 'The URL path is locked and cannot be edited.';
 
         return html`<p class="sluggi-restriction-note">${message}</p>`;
     }
@@ -340,7 +340,7 @@ export class SluggiElement extends LitElement {
                     <button
                         type="button"
                         class="btn btn-sm btn-default sluggi-edit-btn"
-                        title="${this.labels['button.edit'] || 'Click to edit the slug'}"
+                        title="${this.labels['button.edit'] || 'Click to edit the URL path'}"
                         @click="${this.enterEditMode}"
                     >
                         ${editIcon}
@@ -350,7 +350,7 @@ export class SluggiElement extends LitElement {
                     <button
                         type="button"
                         class="btn btn-sm btn-default sluggi-regenerate-btn"
-                        title="${this.labels['button.regenerate'] || 'Regenerate slug from source fields'}"
+                        title="${this.labels['button.regenerate'] || 'Regenerate URL path from source fields'}"
                         @click="${this.handleRegenerate}"
                     >
                         ${refreshIcon}
@@ -375,7 +375,7 @@ export class SluggiElement extends LitElement {
             <button
                 type="button"
                 class="btn btn-sm btn-default sluggi-save-btn"
-                title="${this.labels['button.save'] || 'Save slug'}"
+                title="${this.labels['button.save'] || 'Save URL path'}"
                 @mousedown="${this.handleSaveButtonMousedown}"
             >
                 ${checkIcon}
@@ -391,7 +391,7 @@ export class SluggiElement extends LitElement {
                 <button
                     type="button"
                     class="sluggi-sync-toggle ${this.isSynced ? 'is-synced' : ''}"
-                    title="${this.isSynced ? (this.labels['toggle.sync.on'] || 'Auto-sync enabled: slug updates with title') : (this.labels['toggle.sync.off'] || 'Auto-sync disabled: click to enable')}"
+                    title="${this.isSynced ? (this.labels['toggle.sync.on'] || 'Auto-sync enabled: URL path updates with title') : (this.labels['toggle.sync.off'] || 'Auto-sync disabled: click to enable')}"
                     @click="${this.toggleSync}"
                 >
                     <span class="sluggi-sync-label">sync</span>
@@ -410,7 +410,7 @@ export class SluggiElement extends LitElement {
         return html`
             <span
                 class="sluggi-sync-icon-static ${this.syncAnimating ? 'syncing' : ''}"
-                title="${this.labels['toggle.sync.static'] || 'Auto-sync enabled: slug updates automatically'}"
+                title="${this.labels['toggle.sync.static'] || 'Auto-sync enabled: URL path updates automatically'}"
                 @animationend="${this.handleSyncAnimationEnd}"
             >
                 ${syncIcon}
@@ -430,7 +430,7 @@ export class SluggiElement extends LitElement {
                 <button
                     type="button"
                     class="sluggi-lock-toggle ${this.isLocked ? 'is-locked' : ''}"
-                    title="${this.isLocked ? (this.labels['toggle.lock.on'] || 'Slug is locked: click to unlock') : (this.labels['toggle.lock.off'] || 'Slug is unlocked: click to lock')}"
+                    title="${this.isLocked ? (this.labels['toggle.lock.on'] || 'URL path is locked: click to unlock') : (this.labels['toggle.lock.off'] || 'URL path is unlocked: click to lock')}"
                     @click="${this.toggleLock}"
                 >
                     <span class="sluggi-lock-label">lock</span>
