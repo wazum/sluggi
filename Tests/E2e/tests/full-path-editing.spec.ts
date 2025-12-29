@@ -165,7 +165,7 @@ test.describe('Full Path Editing - Regenerate Behavior', () => {
     const pathToggle = slugElement.locator('.sluggi-full-path-toggle');
     await expect(pathToggle).not.toHaveClass(/is-active/);
 
-    const regenerateBtn = slugElement.locator('button[aria-label="Regenerate slug from title"]');
+    const regenerateBtn = slugElement.locator('.sluggi-regenerate-btn');
     await expect(regenerateBtn).toBeVisible({ timeout: 10000 });
     await regenerateBtn.click();
 
@@ -191,7 +191,7 @@ test.describe('Full Path Editing - Regenerate Behavior', () => {
     const pathToggle = slugElement.locator('.sluggi-full-path-toggle');
     await expect(pathToggle).not.toHaveClass(/is-active/);
 
-    const regenerateBtn = slugElement.locator('button[aria-label="Regenerate slug from title"]');
+    const regenerateBtn = slugElement.locator('.sluggi-regenerate-btn');
     await expect(regenerateBtn).toBeVisible({ timeout: 10000 });
     await regenerateBtn.click();
 
@@ -205,7 +205,7 @@ test.describe('Full Path Editing - Regenerate Behavior', () => {
     const frame = await waitForFormFrame(page);
 
     const slugElement = frame.locator('sluggi-element');
-    const regenerateBtn = slugElement.locator('button[aria-label="Regenerate slug from title"]');
+    const regenerateBtn = slugElement.locator('.sluggi-regenerate-btn');
     await expect(regenerateBtn).toBeVisible({ timeout: 10000 });
     await regenerateBtn.click();
 
