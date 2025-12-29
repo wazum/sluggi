@@ -26,6 +26,10 @@
         "typo3/cms-backend": "^12.4 || ^13.4 || ^14.0",
         "typo3/cms-redirects": "^12.4 || ^13.4 || ^14.0"
     },
+    "suggest": {
+        "georgringer/news-redirect-slug-change": "Generate redirects when news slugs change",
+        "internetgalerie/ig-slug": "Rebuild URL slugs in bulk"
+    },
     "require-dev": {
         "friendsofphp/php-cs-fixer": "^3.65",
         "phpstan/phpstan": "^2.0",
