@@ -188,7 +188,20 @@ export class SluggiElement extends LitElement {
         return this.lastSegmentOnly || !!this.lockedPrefix;
     }
 
+    private get isCompletelyReadonly(): boolean {
+        const hasRestriction = this.lastSegmentOnly || !!this.lockedPrefix;
+        if (!hasRestriction) return false;
+
+        if (this.isLocked && !this.lockFeatureEnabled) return true;
+        if (this.isSynced && !this.syncFeatureEnabled) return true;
+
+        return false;
+    }
+
     private get computedPrefix(): string {
+        if (this.isCompletelyReadonly) {
+            return '';
+        }
         if (this.isFullPathMode) {
             return this.prefix;
         }
@@ -206,6 +219,9 @@ export class SluggiElement extends LitElement {
     }
 
     private get editableValue(): string {
+        if (this.isCompletelyReadonly) {
+            return this.value;
+        }
         if (this.isFullPathMode) {
             if (this.prefix && this.value.startsWith(this.prefix)) {
                 return this.value.slice(this.prefix.length) || '/';

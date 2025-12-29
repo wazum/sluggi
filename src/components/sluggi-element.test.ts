@@ -1488,6 +1488,53 @@ describe('SluggiElement', () => {
         });
     });
 
+    describe('Completely Readonly State', () => {
+        it('shows full path without prefix split when locked without toggle access', async () => {
+            const el = await fixture<SluggiElement>(html`
+                <sluggi-element
+                    value="/parent/child/page"
+                    locked-prefix="/parent"
+                    is-locked
+                ></sluggi-element>
+            `);
+
+            // When user can't change anything, don't split into prefix/editable
+            expect(el.shadowRoot!.querySelector('.sluggi-prefix')).to.be.null;
+            const editable = el.shadowRoot!.querySelector('.sluggi-editable');
+            expect(editable?.textContent?.trim()).to.equal('/parent/child/page');
+        });
+
+        it('shows full path without prefix split when synced without toggle access', async () => {
+            const el = await fixture<SluggiElement>(html`
+                <sluggi-element
+                    value="/parent/child/page"
+                    locked-prefix="/parent"
+                    is-synced
+                ></sluggi-element>
+            `);
+
+            // When user can't change anything, don't split into prefix/editable
+            expect(el.shadowRoot!.querySelector('.sluggi-prefix')).to.be.null;
+            const editable = el.shadowRoot!.querySelector('.sluggi-editable');
+            expect(editable?.textContent?.trim()).to.equal('/parent/child/page');
+        });
+
+        it('shows full path without prefix split in last-segment-only mode when locked without toggle', async () => {
+            const el = await fixture<SluggiElement>(html`
+                <sluggi-element
+                    value="/parent/child/page"
+                    last-segment-only
+                    is-locked
+                ></sluggi-element>
+            `);
+
+            // When user can't change anything, don't split into prefix/editable
+            expect(el.shadowRoot!.querySelector('.sluggi-prefix')).to.be.null;
+            const editable = el.shadowRoot!.querySelector('.sluggi-editable');
+            expect(editable?.textContent?.trim()).to.equal('/parent/child/page');
+        });
+    });
+
     describe('Restriction Notes', () => {
         it('shows sync restriction note when isSynced', async () => {
             const el = await fixture<SluggiElement>(html`
