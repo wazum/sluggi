@@ -340,7 +340,7 @@ export class SluggiElement extends LitElement {
                     <button
                         type="button"
                         class="btn btn-sm btn-default sluggi-edit-btn"
-                        aria-label="Edit slug"
+                        title="${this.labels['button.edit'] || 'Click to edit the slug'}"
                         @click="${this.enterEditMode}"
                     >
                         ${editIcon}
@@ -350,7 +350,7 @@ export class SluggiElement extends LitElement {
                     <button
                         type="button"
                         class="btn btn-sm btn-default sluggi-regenerate-btn"
-                        aria-label="Regenerate slug from title"
+                        title="${this.labels['button.regenerate'] || 'Regenerate slug from source fields'}"
                         @click="${this.handleRegenerate}"
                     >
                         ${refreshIcon}
@@ -367,7 +367,7 @@ export class SluggiElement extends LitElement {
             <button
                 type="button"
                 class="btn btn-sm btn-default sluggi-cancel-btn"
-                aria-label="Cancel editing"
+                title="${this.labels['button.cancel'] || 'Cancel editing'}"
                 @mousedown="${this.handleCancelButtonMousedown}"
             >
                 ${closeIcon}
@@ -375,7 +375,7 @@ export class SluggiElement extends LitElement {
             <button
                 type="button"
                 class="btn btn-sm btn-default sluggi-save-btn"
-                aria-label="Save slug"
+                title="${this.labels['button.save'] || 'Save slug'}"
                 @mousedown="${this.handleSaveButtonMousedown}"
             >
                 ${checkIcon}
@@ -391,8 +391,7 @@ export class SluggiElement extends LitElement {
                 <button
                     type="button"
                     class="sluggi-sync-toggle ${this.isSynced ? 'is-synced' : ''}"
-                    aria-label="${this.isSynced ? 'Disable automatic sync' : 'Enable automatic sync'}"
-                    title="${this.isSynced ? 'Auto-sync enabled: slug updates with title' : 'Auto-sync disabled: click to enable'}"
+                    title="${this.isSynced ? (this.labels['toggle.sync.on'] || 'Auto-sync enabled: slug updates with title') : (this.labels['toggle.sync.off'] || 'Auto-sync disabled: click to enable')}"
                     @click="${this.toggleSync}"
                 >
                     <span class="sluggi-sync-label">sync</span>
@@ -411,8 +410,7 @@ export class SluggiElement extends LitElement {
         return html`
             <span
                 class="sluggi-sync-icon-static ${this.syncAnimating ? 'syncing' : ''}"
-                aria-label="Auto-sync is enabled"
-                title="Auto-sync enabled: slug updates automatically"
+                title="${this.labels['toggle.sync.static'] || 'Auto-sync enabled: slug updates automatically'}"
                 @animationend="${this.handleSyncAnimationEnd}"
             >
                 ${syncIcon}
@@ -432,8 +430,7 @@ export class SluggiElement extends LitElement {
                 <button
                     type="button"
                     class="sluggi-lock-toggle ${this.isLocked ? 'is-locked' : ''}"
-                    aria-label="${this.isLocked ? 'Unlock slug' : 'Lock slug'}"
-                    title="${this.isLocked ? 'Slug is locked: click to unlock' : 'Slug is unlocked: click to lock'}"
+                    title="${this.isLocked ? (this.labels['toggle.lock.on'] || 'Slug is locked: click to unlock') : (this.labels['toggle.lock.off'] || 'Slug is unlocked: click to lock')}"
                     @click="${this.toggleLock}"
                 >
                     <span class="sluggi-lock-label">lock</span>
@@ -454,8 +451,7 @@ export class SluggiElement extends LitElement {
                 <button
                     type="button"
                     class="sluggi-full-path-toggle ${this.isFullPathMode ? 'is-active' : ''}"
-                    aria-label="${this.isFullPathMode ? 'Restrict editing' : 'Edit full path'}"
-                    title="${this.isFullPathMode ? 'Full path editing enabled: click to restrict' : 'Click to edit full path'}"
+                    title="${this.isFullPathMode ? (this.labels['toggle.path.on'] || 'Full path editing enabled: click to restrict') : (this.labels['toggle.path.off'] || 'Click to edit full path')}"
                     @click="${this.toggleFullPath}"
                 >
                     <span class="sluggi-full-path-label">path</span>

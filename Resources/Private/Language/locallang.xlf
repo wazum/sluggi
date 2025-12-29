@@ -36,6 +36,39 @@
             <trans-unit id="restriction.fullPath" resname="restriction.fullPath">
                 <source>Full path editing is enabled. You can modify the entire URL structure.</source>
             </trans-unit>
+            <trans-unit id="button.edit" resname="button.edit">
+                <source>Click to edit the slug</source>
+            </trans-unit>
+            <trans-unit id="button.regenerate" resname="button.regenerate">
+                <source>Regenerate slug from source fields</source>
+            </trans-unit>
+            <trans-unit id="button.cancel" resname="button.cancel">
+                <source>Cancel editing</source>
+            </trans-unit>
+            <trans-unit id="button.save" resname="button.save">
+                <source>Save slug</source>
+            </trans-unit>
+            <trans-unit id="toggle.sync.on" resname="toggle.sync.on">
+                <source>Auto-sync enabled: slug updates with title</source>
+            </trans-unit>
+            <trans-unit id="toggle.sync.off" resname="toggle.sync.off">
+                <source>Auto-sync disabled: click to enable</source>
+            </trans-unit>
+            <trans-unit id="toggle.sync.static" resname="toggle.sync.static">
+                <source>Auto-sync enabled: slug updates automatically</source>
+            </trans-unit>
+            <trans-unit id="toggle.lock.on" resname="toggle.lock.on">
+                <source>Slug is locked: click to unlock</source>
+            </trans-unit>
+            <trans-unit id="toggle.lock.off" resname="toggle.lock.off">
+                <source>Slug is unlocked: click to lock</source>
+            </trans-unit>
+            <trans-unit id="toggle.path.on" resname="toggle.path.on">
+                <source>Full path editing enabled: click to restrict</source>
+            </trans-unit>
+            <trans-unit id="toggle.path.off" resname="toggle.path.off">
+                <source>Click to edit full path</source>
+            </trans-unit>
         </body>
     </file>
 </xliff>

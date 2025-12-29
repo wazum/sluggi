@@ -252,15 +252,27 @@ trait SlugElementTrait
     private function getLabels(): array
     {
         $languageService = $this->getLanguageService();
+        $prefix = 'LLL:EXT:sluggi/Resources/Private/Language/locallang.xlf:';
 
         return [
-            'conflict.title' => $languageService->sL('LLL:EXT:sluggi/Resources/Private/Language/locallang.xlf:conflict.title'),
-            'conflict.message' => $languageService->sL('LLL:EXT:sluggi/Resources/Private/Language/locallang.xlf:conflict.message'),
-            'conflict.suggestion' => $languageService->sL('LLL:EXT:sluggi/Resources/Private/Language/locallang.xlf:conflict.suggestion'),
-            'conflict.button.cancel' => $languageService->sL('LLL:EXT:sluggi/Resources/Private/Language/locallang.xlf:conflict.button.cancel'),
-            'conflict.button.useSuggestion' => $languageService->sL('LLL:EXT:sluggi/Resources/Private/Language/locallang.xlf:conflict.button.useSuggestion'),
-            'syncRestrictionNote' => $languageService->sL('LLL:EXT:sluggi/Resources/Private/Language/locallang.xlf:restriction.sync'),
-            'lockRestrictionNote' => $languageService->sL('LLL:EXT:sluggi/Resources/Private/Language/locallang.xlf:restriction.lock'),
+            'conflict.title' => $languageService->sL($prefix . 'conflict.title'),
+            'conflict.message' => $languageService->sL($prefix . 'conflict.message'),
+            'conflict.suggestion' => $languageService->sL($prefix . 'conflict.suggestion'),
+            'conflict.button.cancel' => $languageService->sL($prefix . 'conflict.button.cancel'),
+            'conflict.button.useSuggestion' => $languageService->sL($prefix . 'conflict.button.useSuggestion'),
+            'syncRestrictionNote' => $languageService->sL($prefix . 'restriction.sync'),
+            'lockRestrictionNote' => $languageService->sL($prefix . 'restriction.lock'),
+            'button.edit' => $languageService->sL($prefix . 'button.edit'),
+            'button.regenerate' => $languageService->sL($prefix . 'button.regenerate'),
+            'button.cancel' => $languageService->sL($prefix . 'button.cancel'),
+            'button.save' => $languageService->sL($prefix . 'button.save'),
+            'toggle.sync.on' => $languageService->sL($prefix . 'toggle.sync.on'),
+            'toggle.sync.off' => $languageService->sL($prefix . 'toggle.sync.off'),
+            'toggle.sync.static' => $languageService->sL($prefix . 'toggle.sync.static'),
+            'toggle.lock.on' => $languageService->sL($prefix . 'toggle.lock.on'),
+            'toggle.lock.off' => $languageService->sL($prefix . 'toggle.lock.off'),
+            'toggle.path.on' => $languageService->sL($prefix . 'toggle.path.on'),
+            'toggle.path.off' => $languageService->sL($prefix . 'toggle.path.off'),
         ];
     }
 
