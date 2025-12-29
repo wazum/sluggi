@@ -302,3 +302,4 @@ jobs:
           name: playwright-results-php${{ matrix.php }}-typo3-${{ matrix.typo3 }}
           path: Tests/E2e/test-results/
           retention-days: 7
+          if-no-files-found: ignore
