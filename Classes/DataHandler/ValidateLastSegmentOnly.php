@@ -84,11 +84,6 @@ final readonly class ValidateLastSegmentOnly
         }
     }
 
-    private function getBackendUser(): ?BackendUserAuthentication
-    {
-        return $GLOBALS['BE_USER'] ?? null;
-    }
-
     /**
      * Detect cascade updates from parent page slug changes.
      * TYPO3 automatically updates child slugs when a parent slug changes.
@@ -123,5 +118,10 @@ final readonly class ValidateLastSegmentOnly
         $expectedSlug = rtrim($parentSlug, '/') . '/' . $newLastSegment;
 
         return $newSlug === $expectedSlug;
+    }
+
+    private function getBackendUser(): ?BackendUserAuthentication
+    {
+        return $GLOBALS['BE_USER'] ?? null;
     }
 }
