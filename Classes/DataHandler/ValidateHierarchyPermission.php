@@ -7,13 +7,10 @@ namespace Wazum\Sluggi\DataHandler;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\Authentication\BackendUserAuthentication;
 use TYPO3\CMS\Core\DataHandling\DataHandler;
-use TYPO3\CMS\Core\Messaging\FlashMessage;
-use TYPO3\CMS\Core\Messaging\FlashMessageService;
-use TYPO3\CMS\Core\Type\ContextualFeedbackSeverity;
-use TYPO3\CMS\Core\Utility\GeneralUtility;
 use Wazum\Sluggi\Configuration\ExtensionConfiguration;
 use Wazum\Sluggi\Service\FullPathEditingService;
 use Wazum\Sluggi\Service\HierarchyPermissionService;
+use Wazum\Sluggi\Utility\FlashMessageUtility;
 
 final readonly class ValidateHierarchyPermission
 {
@@ -83,7 +80,7 @@ final readonly class ValidateHierarchyPermission
                 'Slug change blocked: You cannot modify path segments above your permission level.'
             );
 
-            $this->addFlashMessage(
+            FlashMessageUtility::addError(
                 'You cannot modify path segments above your permission level.',
                 'Slug change blocked'
             );
@@ -93,19 +90,5 @@ final readonly class ValidateHierarchyPermission
     private function getBackendUser(): ?BackendUserAuthentication
     {
         return $GLOBALS['BE_USER'] ?? null;
-    }
-
-    private function addFlashMessage(string $message, string $title): void
-    {
-        $flashMessage = GeneralUtility::makeInstance(
-            FlashMessage::class,
-            $message,
-            $title,
-            ContextualFeedbackSeverity::ERROR,
-            true
-        );
-
-        $flashMessageService = GeneralUtility::makeInstance(FlashMessageService::class);
-        $flashMessageService->getMessageQueueByIdentifier()->enqueue($flashMessage);
     }
 }

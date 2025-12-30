@@ -7,12 +7,9 @@ namespace Wazum\Sluggi\DataHandler;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\Authentication\BackendUserAuthentication;
 use TYPO3\CMS\Core\DataHandling\DataHandler;
-use TYPO3\CMS\Core\Messaging\FlashMessage;
-use TYPO3\CMS\Core\Messaging\FlashMessageService;
-use TYPO3\CMS\Core\Type\ContextualFeedbackSeverity;
-use TYPO3\CMS\Core\Utility\GeneralUtility;
 use Wazum\Sluggi\Service\FullPathEditingService;
 use Wazum\Sluggi\Service\LastSegmentValidationService;
+use Wazum\Sluggi\Utility\FlashMessageUtility;
 use Wazum\Sluggi\Utility\SlugUtility;
 
 final readonly class ValidateLastSegmentOnly
@@ -80,7 +77,7 @@ final readonly class ValidateLastSegmentOnly
                 'Slug change blocked: You can only edit the last segment of the URL slug.'
             );
 
-            $this->addFlashMessage(
+            FlashMessageUtility::addError(
                 'You can only edit the last segment of the URL slug.',
                 'Slug change blocked'
             );
@@ -126,19 +123,5 @@ final readonly class ValidateLastSegmentOnly
         $expectedSlug = rtrim($parentSlug, '/') . '/' . $newLastSegment;
 
         return $newSlug === $expectedSlug;
-    }
-
-    private function addFlashMessage(string $message, string $title): void
-    {
-        $flashMessage = GeneralUtility::makeInstance(
-            FlashMessage::class,
-            $message,
-            $title,
-            ContextualFeedbackSeverity::ERROR,
-            true
-        );
-
-        $flashMessageService = GeneralUtility::makeInstance(FlashMessageService::class);
-        $flashMessageService->getMessageQueueByIdentifier()->enqueue($flashMessage);
     }
 }
