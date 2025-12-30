@@ -1,0 +1,4 @@
+"pages"
+,"uid","pid","title","slug","tx_sluggi_sync","doktype"
+,1,0,"Root Page","/",0,1
+,2,1,"New Page via DataHandler","/new-page-via-datahandler",1,1

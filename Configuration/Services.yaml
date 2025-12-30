@@ -39,6 +39,9 @@ services:
   Wazum\Sluggi\DataHandler\ValidateLastSegmentOnly:
     public: true
 
+  Wazum\Sluggi\DataHandler\InitializeSyncForNewPage:
+    public: true
+
   # Form/Element
   Wazum\Sluggi\Form\Element\SlugElementV12:
     public: true
