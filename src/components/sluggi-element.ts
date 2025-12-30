@@ -3,7 +3,7 @@ import { customElement, property, state, query } from 'lit/decorators.js';
 import Modal from '@typo3/backend/modal.js';
 import Severity from '@typo3/backend/severity.js';
 import type { ComponentMode } from '@/types';
-import { editIcon, refreshIcon, checkIcon, closeIcon, syncIcon, syncOnIcon, syncOffIcon, lockOnIcon, lockOffIcon, pathOnIcon, pathOffIcon } from './icons.js';
+import { editIcon, refreshIcon, checkIcon, closeIcon, syncOnIcon, syncOffIcon, lockOnIcon, lockOffIcon, pathOnIcon, pathOffIcon } from './icons.js';
 import styles from '../styles/sluggi-element.scss?inline';
 
 @customElement('sluggi-element')
@@ -125,9 +125,6 @@ export class SluggiElement extends LitElement {
     private slugGenerated = false;
 
     @state()
-    private syncAnimating = false;
-
-    @state()
     private isFullPathMode = false;
 
     @state()
@@ -201,6 +198,12 @@ export class SluggiElement extends LitElement {
 
     private get isFullPathToggleDisabled(): boolean {
         return this.isLocked || this.isSynced;
+    }
+
+    private get hasNoControls(): boolean {
+        if (this.isLocked && !this.lockFeatureEnabled) return true;
+        if (this.isSynced && !this.syncFeatureEnabled) return true;
+        return false;
     }
 
     private get isCompletelyReadonly(): boolean {
@@ -310,12 +313,11 @@ export class SluggiElement extends LitElement {
     private renderViewMode() {
         const isEditable = !this.isLocked && !this.isSynced;
         const editable = this.editableValue;
-        const cannotEdit = this.isSynced && !this.syncFeatureEnabled;
         const classes = [
             'sluggi-editable',
             this.isLocked ? 'locked' : '',
             this.isSynced ? 'synced' : '',
-            cannotEdit ? 'no-edit' : '',
+            this.hasNoControls ? 'no-edit' : '',
         ].filter(Boolean).join(' ');
 
         return html`
@@ -346,11 +348,14 @@ export class SluggiElement extends LitElement {
     }
 
     private renderControls() {
+        if (this.hasNoControls) {
+            return nothing;
+        }
+
         if (this.loading) {
             return html`
                 <span class="sluggi-spinner" aria-label="Loading..."></span>
                 ${this.renderSyncToggle()}
-                ${this.renderStaticSyncIcon()}
                 ${this.renderLockToggle()}
             `;
         }
@@ -361,7 +366,6 @@ export class SluggiElement extends LitElement {
                 ${this.renderRegenerateButton()}
                 ${this.renderFullPathToggle()}
                 ${this.renderSyncToggle()}
-                ${this.renderStaticSyncIcon()}
                 ${this.renderLockToggle()}
             `;
         }
@@ -443,24 +447,6 @@ export class SluggiElement extends LitElement {
                 </button>
             </div>
         `;
-    }
-
-    private renderStaticSyncIcon() {
-        if (this.syncFeatureEnabled || !this.isSynced) return nothing;
-
-        return html`
-            <span
-                class="sluggi-sync-icon-static ${this.syncAnimating ? 'syncing' : ''}"
-                title="${this.labels['toggle.sync.static'] || 'Auto-sync enabled: URL path updates automatically'}"
-                @animationend="${this.handleSyncAnimationEnd}"
-            >
-                ${syncIcon}
-            </span>
-        `;
-    }
-
-    private handleSyncAnimationEnd() {
-        this.syncAnimating = false;
     }
 
     private renderLockToggle() {
@@ -606,10 +592,6 @@ export class SluggiElement extends LitElement {
     }
 
     async sendSlugProposal(mode: 'auto' | 'recreate' | 'manual') {
-        if (mode === 'recreate' && !this.syncFeatureEnabled && this.isSynced) {
-            this.syncAnimating = true;
-        }
-
         this.dispatchEvent(new CustomEvent('sluggi-request-proposal', {
             bubbles: true,
             composed: true,

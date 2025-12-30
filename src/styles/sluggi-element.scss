@@ -140,17 +140,14 @@
     overflow-wrap: anywhere;
     word-break: break-all;
 
-    &.locked {
-        cursor: not-allowed;
-        opacity: 0.7;
-    }
-
+    &.locked,
     &.synced {
         cursor: default;
     }
 
     &.no-edit {
         cursor: not-allowed;
+        opacity: 0.7;
     }
 }
 
@@ -201,20 +198,6 @@
     display: flex;
     align-items: stretch;
     margin-left: auto;
-}
-
-.sluggi-lock-icon {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--sluggi-secondary-color);
-    padding: 8px 12px;
-    border-left: 1px solid var(--sluggi-border-color);
-    cursor: not-allowed;
-
-    svg {
-        display: block;
-    }
 }
 
 .sluggi-spinner {
@@ -305,20 +288,6 @@
 
     .sluggi-sync-icon-off {
         opacity: 0;
-    }
-}
-
-.sluggi-sync-icon-static {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--sluggi-secondary-color);
-    padding: 8px 12px;
-    border-left: 1px solid var(--sluggi-border-color);
-    cursor: not-allowed;
-
-    svg {
-        display: block;
     }
 }
 
@@ -505,12 +474,6 @@
 .sluggi-edit-btn:not(:disabled):hover svg,
 .sluggi-editable:hover ~ .sluggi-controls .sluggi-edit-btn:not(:disabled) svg {
     animation: sluggi-shake 0.4s ease;
-}
-
-@media (prefers-reduced-motion: no-preference) {
-    .sluggi-sync-icon-static.syncing svg {
-        animation: sluggi-rotate 0.6s ease-in-out;
-    }
 }
 
 .sluggi-regenerate-btn:not(:disabled):hover svg {

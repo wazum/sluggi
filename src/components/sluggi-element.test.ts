@@ -530,9 +530,24 @@ describe('SluggiElement', () => {
     });
 
     describe('Locked State', () => {
-        it('prevents editing when locked', async () => {
+        it('prevents editing when locked without toggle access', async () => {
             const el = await fixture<SluggiElement>(html`
                 <sluggi-element value="/test" is-locked></sluggi-element>
+            `);
+
+            const editable = el.shadowRoot!.querySelector('.sluggi-editable') as HTMLElement;
+            editable?.click();
+            await el.updateComplete;
+
+            expect(el.shadowRoot!.querySelector('input.sluggi-input')).to.not.exist;
+            // No controls shown when hasNoControls is true (locked without lock-feature-enabled)
+            expect(el.shadowRoot!.querySelector('.sluggi-edit-btn')).to.be.null;
+            expect(el.shadowRoot!.querySelector('.sluggi-controls')?.children.length).to.equal(0);
+        });
+
+        it('shows disabled edit button when locked with toggle access', async () => {
+            const el = await fixture<SluggiElement>(html`
+                <sluggi-element value="/test" is-locked lock-feature-enabled></sluggi-element>
             `);
 
             const editable = el.shadowRoot!.querySelector('.sluggi-editable') as HTMLElement;
@@ -602,7 +617,7 @@ describe('SluggiElement', () => {
             expect(el.shadowRoot!.querySelector('.sluggi-regenerate-btn')).to.not.exist;
         });
 
-        it('visible but disabled when locked', async () => {
+        it('visible but disabled when locked with toggle access', async () => {
             const input = document.createElement('input');
             input.setAttribute('data-sluggi-source', '');
             input.setAttribute('data-formengine-input-name', 'data[pages][123][title]');
@@ -610,7 +625,7 @@ describe('SluggiElement', () => {
             document.body.appendChild(input);
 
             const el = await fixture<SluggiElement>(html`
-                <sluggi-element value="/test" is-locked></sluggi-element>
+                <sluggi-element value="/test" is-locked lock-feature-enabled></sluggi-element>
             `);
 
             const btn = el.shadowRoot!.querySelector('.sluggi-regenerate-btn') as HTMLButtonElement;
@@ -620,7 +635,7 @@ describe('SluggiElement', () => {
             document.body.removeChild(input);
         });
 
-        it('visible but disabled when synced with source fields present', async () => {
+        it('visible but disabled when synced with toggle access', async () => {
             const titleInput = document.createElement('input');
             titleInput.setAttribute('data-sluggi-source', '');
             titleInput.setAttribute('data-formengine-input-name', 'data[pages][123][title]');
@@ -628,7 +643,7 @@ describe('SluggiElement', () => {
             document.body.appendChild(titleInput);
 
             const el = await fixture<SluggiElement>(html`
-                <sluggi-element value="/test" is-synced></sluggi-element>
+                <sluggi-element value="/test" is-synced sync-feature-enabled></sluggi-element>
             `);
 
             const btn = el.shadowRoot!.querySelector('.sluggi-regenerate-btn') as HTMLButtonElement;
@@ -808,6 +823,7 @@ describe('SluggiElement', () => {
                     table-name="pages"
                     field-name="slug"
                     sync-feature-enabled
+                    lock-feature-enabled
                     is-locked
                 ></sluggi-element>
             `);
@@ -1350,6 +1366,12 @@ describe('SluggiElement', () => {
         });
 
         it('is disabled when isSynced is true', async () => {
+            const titleInput = document.createElement('input');
+            titleInput.setAttribute('data-sluggi-source', '');
+            titleInput.setAttribute('data-formengine-input-name', 'data[pages][456][title]');
+            titleInput.value = 'Demo';
+            document.body.appendChild(titleInput);
+
             const el = await fixture<SluggiElement>(html`
                 <sluggi-element
                     value="/demo"
@@ -1358,6 +1380,7 @@ describe('SluggiElement', () => {
                     table-name="pages"
                     field-name="slug"
                     lock-feature-enabled
+                    sync-feature-enabled
                     is-synced
                 ></sluggi-element>
             `);
@@ -1365,6 +1388,8 @@ describe('SluggiElement', () => {
             const lockToggle = el.shadowRoot!.querySelector('.sluggi-lock-toggle') as HTMLButtonElement;
             expect(lockToggle).to.exist;
             expect(lockToggle.disabled).to.be.true;
+
+            document.body.removeChild(titleInput);
         });
 
         it('updates hidden lock field when toggled', async () => {
@@ -1458,54 +1483,6 @@ describe('SluggiElement', () => {
             document.body.removeChild(titleInput);
         });
 
-        it('shows static sync icon when isSynced but syncFeatureEnabled is false', async () => {
-            const titleInput = document.createElement('input');
-            titleInput.setAttribute('data-sluggi-source', '');
-            titleInput.setAttribute('data-formengine-input-name', 'data[pages][456][title]');
-            titleInput.value = 'Test Title';
-            document.body.appendChild(titleInput);
-
-            const el = await fixture<SluggiElement>(html`
-                <sluggi-element
-                    value="/test"
-                    table-name="pages"
-                    record-id="456"
-                    is-synced
-                ></sluggi-element>
-            `);
-
-            // No toggle button (syncFeatureEnabled is false)
-            expect(el.shadowRoot!.querySelector('.sluggi-sync-toggle')).to.be.null;
-            // But static sync icon should be visible
-            expect(el.shadowRoot!.querySelector('.sluggi-sync-icon-static')).to.exist;
-
-            document.body.removeChild(titleInput);
-        });
-
-        it('hides static sync icon when syncFeatureEnabled is true (toggle is shown instead)', async () => {
-            const titleInput = document.createElement('input');
-            titleInput.setAttribute('data-sluggi-source', '');
-            titleInput.setAttribute('data-formengine-input-name', 'data[pages][456][title]');
-            titleInput.value = 'Test Title';
-            document.body.appendChild(titleInput);
-
-            const el = await fixture<SluggiElement>(html`
-                <sluggi-element
-                    value="/test"
-                    table-name="pages"
-                    record-id="456"
-                    is-synced
-                    sync-feature-enabled
-                ></sluggi-element>
-            `);
-
-            // Toggle button is shown
-            expect(el.shadowRoot!.querySelector('.sluggi-sync-toggle')).to.exist;
-            // Static icon should NOT be shown
-            expect(el.shadowRoot!.querySelector('.sluggi-sync-icon-static')).to.be.null;
-
-            document.body.removeChild(titleInput);
-        });
     });
 
     describe('Completely Readonly State', () => {
