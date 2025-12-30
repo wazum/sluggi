@@ -130,14 +130,15 @@
 
 .sluggi-editable {
     cursor: pointer;
-    min-width: 2rem;
+    min-width: 0;
     flex: 1;
     font-weight: bold;
     line-height: inherit;
-    padding: 8px 0 8px 12px;
-    display: flex;
-    align-items: center;
+    padding: 8px 12px;
+    display: block;
     color: var(--sluggi-color);
+    overflow-wrap: anywhere;
+    word-break: break-all;
 
     &.locked {
         cursor: not-allowed;
@@ -231,6 +232,11 @@
 // Sync Toggle
 // =========================================================================
 
+.sluggi-sync-wrapper {
+    display: flex;
+    align-self: stretch;
+}
+
 .sluggi-sync-label {
     font-size: 8px;
     font-weight: 600;
@@ -320,6 +326,11 @@
 // Lock Toggle
 // =========================================================================
 
+.sluggi-lock-wrapper {
+    display: flex;
+    align-self: stretch;
+}
+
 .sluggi-lock-label {
     font-size: 8px;
     font-weight: 600;
@@ -394,6 +405,11 @@
 // =========================================================================
 // Full Path Toggle
 // =========================================================================
+
+.sluggi-full-path-wrapper {
+    display: flex;
+    align-self: stretch;
+}
 
 .sluggi-full-path-label {
     font-size: 8px;
