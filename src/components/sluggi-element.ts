@@ -3,7 +3,7 @@ import { customElement, property, state, query } from 'lit/decorators.js';
 import Modal from '@typo3/backend/modal.js';
 import Severity from '@typo3/backend/severity.js';
 import type { ComponentMode } from '@/types';
-import { lockIcon, editIcon, refreshIcon, checkIcon, closeIcon, syncIcon, syncOnIcon, syncOffIcon, lockOnIcon, lockOffIcon, pathOnIcon, pathOffIcon } from './icons.js';
+import { editIcon, refreshIcon, checkIcon, closeIcon, syncIcon, syncOnIcon, syncOffIcon, lockOnIcon, lockOffIcon, pathOnIcon, pathOffIcon } from './icons.js';
 import styles from '../styles/sluggi-element.scss?inline';
 
 @customElement('sluggi-element')
@@ -168,24 +168,39 @@ export class SluggiElement extends LitElement {
     // Computed Properties
     // =========================================================================
 
-    private get canRegenerate(): boolean {
-        if (!this.showRegenerate || this.isSynced) return false;
-        if (this.hasPostModifiers) return true;
-        return this.hasSourceFields && this.hasNonEmptySourceFieldValue();
-    }
-
     private get showSyncToggle(): boolean {
-        return this.syncFeatureEnabled && this.hasSourceFields && !this.isLocked;
+        return this.syncFeatureEnabled && this.hasSourceFields;
     }
 
     private get showLockToggle(): boolean {
-        return this.lockFeatureEnabled && !this.isSynced;
+        return this.lockFeatureEnabled;
     }
 
     private get showFullPathToggle(): boolean {
         if (!this.fullPathFeatureEnabled) return false;
-        if (this.isLocked || this.isSynced) return false;
         return this.lastSegmentOnly || !!this.lockedPrefix;
+    }
+
+    private get isEditDisabled(): boolean {
+        return this.isLocked || this.isSynced;
+    }
+
+    private get isRegenerateDisabled(): boolean {
+        if (this.isLocked || this.isSynced) return true;
+        if (this.hasPostModifiers) return false;
+        return !this.hasNonEmptySourceFieldValue();
+    }
+
+    private get isSyncToggleDisabled(): boolean {
+        return this.isLocked;
+    }
+
+    private get isLockToggleDisabled(): boolean {
+        return this.isSynced;
+    }
+
+    private get isFullPathToggleDisabled(): boolean {
+        return this.isLocked || this.isSynced;
     }
 
     private get isCompletelyReadonly(): boolean {
@@ -340,38 +355,10 @@ export class SluggiElement extends LitElement {
             `;
         }
 
-        if (this.isLocked) {
-            return html`
-                ${this.showLockToggle ? this.renderLockToggle() : html`
-                    <span class="sluggi-lock-icon" aria-label="This slug is locked">
-                        ${lockIcon}
-                    </span>
-                `}
-            `;
-        }
-
         if (this.mode === 'view') {
             return html`
-                ${!this.isSynced ? html`
-                    <button
-                        type="button"
-                        class="btn btn-sm btn-default sluggi-edit-btn"
-                        title="${this.labels['button.edit'] || 'Click to edit the URL path'}"
-                        @click="${this.enterEditMode}"
-                    >
-                        ${editIcon}
-                    </button>
-                ` : nothing}
-                ${this.canRegenerate ? html`
-                    <button
-                        type="button"
-                        class="btn btn-sm btn-default sluggi-regenerate-btn"
-                        title="${this.labels['button.regenerate'] || 'Regenerate URL path from source fields'}"
-                        @click="${this.handleRegenerate}"
-                    >
-                        ${refreshIcon}
-                    </button>
-                ` : nothing}
+                ${this.renderEditButton()}
+                ${this.renderRegenerateButton()}
                 ${this.renderFullPathToggle()}
                 ${this.renderSyncToggle()}
                 ${this.renderStaticSyncIcon()}
@@ -399,16 +386,54 @@ export class SluggiElement extends LitElement {
         `;
     }
 
+    private renderEditButton() {
+        const disabled = this.isEditDisabled;
+        return html`
+            <button
+                type="button"
+                class="btn btn-sm btn-default sluggi-edit-btn ${disabled ? 'is-disabled' : ''}"
+                title="${this.labels['button.edit'] || 'Click to edit the URL path'}"
+                ?disabled="${disabled}"
+                aria-disabled="${disabled}"
+                @click="${disabled ? null : this.enterEditMode}"
+            >
+                ${editIcon}
+            </button>
+        `;
+    }
+
+    private renderRegenerateButton() {
+        if (!this.showRegenerate) return nothing;
+        if (!this.hasPostModifiers && !this.hasSourceFields) return nothing;
+
+        const disabled = this.isRegenerateDisabled;
+        return html`
+            <button
+                type="button"
+                class="btn btn-sm btn-default sluggi-regenerate-btn ${disabled ? 'is-disabled' : ''}"
+                title="${this.labels['button.regenerate'] || 'Regenerate URL path from source fields'}"
+                ?disabled="${disabled}"
+                aria-disabled="${disabled}"
+                @click="${disabled ? null : this.handleRegenerate}"
+            >
+                ${refreshIcon}
+            </button>
+        `;
+    }
+
     private renderSyncToggle() {
         if (!this.showSyncToggle) return nothing;
 
+        const disabled = this.isSyncToggleDisabled;
         return html`
             <div class="sluggi-sync-wrapper">
                 <button
                     type="button"
-                    class="sluggi-sync-toggle ${this.isSynced ? 'is-synced' : ''}"
+                    class="sluggi-sync-toggle ${this.isSynced ? 'is-synced' : ''} ${disabled ? 'is-disabled' : ''}"
                     title="${this.isSynced ? (this.labels['toggle.sync.on'] || 'Auto-sync enabled: URL path updates with title') : (this.labels['toggle.sync.off'] || 'Auto-sync disabled: click to enable')}"
-                    @click="${this.toggleSync}"
+                    ?disabled="${disabled}"
+                    aria-disabled="${disabled}"
+                    @click="${disabled ? null : this.toggleSync}"
                 >
                     <span class="sluggi-sync-label">sync</span>
                     <span class="sluggi-sync-icons">
@@ -441,13 +466,16 @@ export class SluggiElement extends LitElement {
     private renderLockToggle() {
         if (!this.showLockToggle) return nothing;
 
+        const disabled = this.isLockToggleDisabled;
         return html`
             <div class="sluggi-lock-wrapper">
                 <button
                     type="button"
-                    class="sluggi-lock-toggle ${this.isLocked ? 'is-locked' : ''}"
+                    class="sluggi-lock-toggle ${this.isLocked ? 'is-locked' : ''} ${disabled ? 'is-disabled' : ''}"
                     title="${this.isLocked ? (this.labels['toggle.lock.on'] || 'URL path is locked: click to unlock') : (this.labels['toggle.lock.off'] || 'URL path is unlocked: click to lock')}"
-                    @click="${this.toggleLock}"
+                    ?disabled="${disabled}"
+                    aria-disabled="${disabled}"
+                    @click="${disabled ? null : this.toggleLock}"
                 >
                     <span class="sluggi-lock-label">lock</span>
                     <span class="sluggi-lock-icons">
@@ -462,13 +490,16 @@ export class SluggiElement extends LitElement {
     private renderFullPathToggle() {
         if (!this.showFullPathToggle) return nothing;
 
+        const disabled = this.isFullPathToggleDisabled;
         return html`
             <div class="sluggi-full-path-wrapper">
                 <button
                     type="button"
-                    class="sluggi-full-path-toggle ${this.isFullPathMode ? 'is-active' : ''}"
+                    class="sluggi-full-path-toggle ${this.isFullPathMode ? 'is-active' : ''} ${disabled ? 'is-disabled' : ''}"
                     title="${this.isFullPathMode ? (this.labels['toggle.path.on'] || 'Full path editing enabled: click to restrict') : (this.labels['toggle.path.off'] || 'Click to edit full path')}"
-                    @click="${this.toggleFullPath}"
+                    ?disabled="${disabled}"
+                    aria-disabled="${disabled}"
+                    @click="${disabled ? null : this.toggleFullPath}"
                 >
                     <span class="sluggi-full-path-label">path</span>
                     <span class="sluggi-full-path-icons">

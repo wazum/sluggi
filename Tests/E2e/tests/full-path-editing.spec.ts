@@ -117,7 +117,7 @@ test.describe('Full Path Editing - Editor Toggle', () => {
     await expect(savedHiddenField).toHaveValue('/custom-path/nested-page');
   });
 
-  test('full path toggle is not visible when slug is synced', async ({ page }) => {
+  test('full path toggle is disabled when slug is synced', async ({ page }) => {
     await page.goto('/typo3/record/edit?edit[pages][22]=edit');
     const editFrame = page.frameLocator('iframe');
     await expect(editFrame.locator('h1')).toContainText('Edit Page', { timeout: 15000 });
@@ -131,7 +131,9 @@ test.describe('Full Path Editing - Editor Toggle', () => {
     await expect(syncToggle).toHaveClass(/is-synced/);
 
     const pathToggle = slugEl.locator('.sluggi-full-path-toggle');
-    await expect(pathToggle).not.toBeVisible();
+    await expect(pathToggle).toBeVisible();
+    await expect(pathToggle).toHaveClass(/is-disabled/);
+    await expect(pathToggle).toBeDisabled();
   });
 
   test('toggling full path marks form as dirty', async ({ page }) => {

@@ -540,91 +540,105 @@ describe('SluggiElement', () => {
             await el.updateComplete;
 
             expect(el.shadowRoot!.querySelector('input.sluggi-input')).to.not.exist;
-            expect(el.shadowRoot!.querySelector('.sluggi-lock-icon')).to.exist;
-            expect(el.shadowRoot!.querySelector('.sluggi-edit-btn')).to.not.exist;
+            const editBtn = el.shadowRoot!.querySelector('.sluggi-edit-btn') as HTMLButtonElement;
+            expect(editBtn).to.exist;
+            expect(editBtn.disabled).to.be.true;
+            expect(editBtn.classList.contains('is-disabled')).to.be.true;
         });
     });
 
     describe('Regenerate Button', () => {
-        const visibilityTestCases = [
-            {
-                desc: 'visible when source fields have values',
-                setup: () => {
-                    const input = document.createElement('input');
-                    input.setAttribute('data-sluggi-source', '');
-                    input.setAttribute('data-formengine-input-name', 'data[pages][123][title]');
-                    input.value = 'Test Title';
-                    document.body.appendChild(input);
-                    return input;
-                },
-                attrs: 'value="/test"',
-                expected: true,
-            },
-            {
-                desc: 'hidden when source fields are empty',
-                setup: () => {
-                    const input = document.createElement('input');
-                    input.setAttribute('data-sluggi-source', '');
-                    input.setAttribute('data-formengine-input-name', 'data[pages][123][title]');
-                    input.value = '';
-                    document.body.appendChild(input);
-                    return input;
-                },
-                attrs: 'value="/test"',
-                expected: false,
-            },
-            {
-                desc: 'visible when has-post-modifiers is set',
-                setup: () => null,
-                attrs: 'value="/test" has-post-modifiers',
-                expected: true,
-            },
-            {
-                desc: 'hidden when no source fields or post-modifiers',
-                setup: () => null,
-                attrs: 'value="/test"',
-                expected: false,
-            },
-            {
-                desc: 'hidden when locked',
-                setup: () => null,
-                attrs: 'value="/test" is-locked',
-                expected: false,
-            },
-        ];
+        it('visible and enabled when source fields have values', async () => {
+            const input = document.createElement('input');
+            input.setAttribute('data-sluggi-source', '');
+            input.setAttribute('data-formengine-input-name', 'data[pages][123][title]');
+            input.value = 'Test Title';
+            document.body.appendChild(input);
 
-        visibilityTestCases.forEach(({ desc, setup, attrs, expected }) => {
-            it(desc, async () => {
-                const element = setup();
-                const el = await fixture<SluggiElement>(
-                    html`<sluggi-element .value="${'/test'}" ?has-post-modifiers="${attrs.includes('has-post-modifiers')}" ?is-locked="${attrs.includes('is-locked')}"></sluggi-element>`
-                );
+            const el = await fixture<SluggiElement>(html`
+                <sluggi-element value="/test"></sluggi-element>
+            `);
 
-                if (expected) {
-                    expect(el.shadowRoot!.querySelector('.sluggi-regenerate-btn')).to.exist;
-                } else {
-                    expect(el.shadowRoot!.querySelector('.sluggi-regenerate-btn')).to.not.exist;
-                }
+            const btn = el.shadowRoot!.querySelector('.sluggi-regenerate-btn') as HTMLButtonElement;
+            expect(btn).to.exist;
+            expect(btn.disabled).to.be.false;
 
-                if (element) document.body.removeChild(element);
-            });
+            document.body.removeChild(input);
         });
 
-        it('hidden when synced with source fields present', async () => {
+        it('visible but disabled when source fields are empty', async () => {
+            const input = document.createElement('input');
+            input.setAttribute('data-sluggi-source', '');
+            input.setAttribute('data-formengine-input-name', 'data[pages][123][title]');
+            input.value = '';
+            document.body.appendChild(input);
+
+            const el = await fixture<SluggiElement>(html`
+                <sluggi-element value="/test"></sluggi-element>
+            `);
+
+            const btn = el.shadowRoot!.querySelector('.sluggi-regenerate-btn') as HTMLButtonElement;
+            expect(btn).to.exist;
+            expect(btn.disabled).to.be.true;
+
+            document.body.removeChild(input);
+        });
+
+        it('visible and enabled when has-post-modifiers is set', async () => {
+            const el = await fixture<SluggiElement>(html`
+                <sluggi-element value="/test" has-post-modifiers></sluggi-element>
+            `);
+
+            const btn = el.shadowRoot!.querySelector('.sluggi-regenerate-btn') as HTMLButtonElement;
+            expect(btn).to.exist;
+            expect(btn.disabled).to.be.false;
+        });
+
+        it('hidden when no source fields or post-modifiers', async () => {
+            const el = await fixture<SluggiElement>(html`
+                <sluggi-element value="/test"></sluggi-element>
+            `);
+
+            expect(el.shadowRoot!.querySelector('.sluggi-regenerate-btn')).to.not.exist;
+        });
+
+        it('visible but disabled when locked', async () => {
+            const input = document.createElement('input');
+            input.setAttribute('data-sluggi-source', '');
+            input.setAttribute('data-formengine-input-name', 'data[pages][123][title]');
+            input.value = 'Test Title';
+            document.body.appendChild(input);
+
+            const el = await fixture<SluggiElement>(html`
+                <sluggi-element value="/test" is-locked></sluggi-element>
+            `);
+
+            const btn = el.shadowRoot!.querySelector('.sluggi-regenerate-btn') as HTMLButtonElement;
+            expect(btn).to.exist;
+            expect(btn.disabled).to.be.true;
+
+            document.body.removeChild(input);
+        });
+
+        it('visible but disabled when synced with source fields present', async () => {
             const titleInput = document.createElement('input');
             titleInput.setAttribute('data-sluggi-source', '');
             titleInput.setAttribute('data-formengine-input-name', 'data[pages][123][title]');
+            titleInput.value = 'Test Title';
             document.body.appendChild(titleInput);
 
             const el = await fixture<SluggiElement>(html`
                 <sluggi-element value="/test" is-synced></sluggi-element>
             `);
-            expect(el.shadowRoot!.querySelector('.sluggi-regenerate-btn')).to.not.exist;
+
+            const btn = el.shadowRoot!.querySelector('.sluggi-regenerate-btn') as HTMLButtonElement;
+            expect(btn).to.exist;
+            expect(btn.disabled).to.be.true;
 
             document.body.removeChild(titleInput);
         });
 
-        it('hides when source field is cleared via change event', async () => {
+        it('becomes disabled when source field is cleared via change event', async () => {
             const titleInput = document.createElement('input');
             titleInput.setAttribute('data-sluggi-source', '');
             titleInput.setAttribute('data-formengine-input-name', 'data[pages][123][title]');
@@ -634,14 +648,16 @@ describe('SluggiElement', () => {
             const el = await fixture<SluggiElement>(html`
                 <sluggi-element value="/test"></sluggi-element>
             `);
-            expect(el.shadowRoot!.querySelector('.sluggi-regenerate-btn')).to.exist;
+            const btn = el.shadowRoot!.querySelector('.sluggi-regenerate-btn') as HTMLButtonElement;
+            expect(btn).to.exist;
+            expect(btn.disabled).to.be.false;
 
             titleInput.value = '';
             titleInput.dispatchEvent(new Event('change', { bubbles: true }));
             await new Promise(r => setTimeout(r, 200));
             await el.updateComplete;
 
-            expect(el.shadowRoot!.querySelector('.sluggi-regenerate-btn')).to.not.exist;
+            expect(btn.disabled).to.be.true;
 
             document.body.removeChild(titleInput);
         });
@@ -777,7 +793,7 @@ describe('SluggiElement', () => {
             expect(el.shadowRoot!.querySelector('.sluggi-sync-toggle')).to.be.null;
         });
 
-        it('is hidden when isLocked is true (lock takes precedence)', async () => {
+        it('is disabled when isLocked is true (lock takes precedence)', async () => {
             const titleInput = document.createElement('input');
             titleInput.setAttribute('data-sluggi-source', '');
             titleInput.setAttribute('data-formengine-input-name', 'data[pages][456][title]');
@@ -796,7 +812,9 @@ describe('SluggiElement', () => {
                 ></sluggi-element>
             `);
 
-            expect(el.shadowRoot!.querySelector('.sluggi-sync-toggle')).to.be.null;
+            const syncToggle = el.shadowRoot!.querySelector('.sluggi-sync-toggle') as HTMLButtonElement;
+            expect(syncToggle).to.exist;
+            expect(syncToggle.disabled).to.be.true;
 
             document.body.removeChild(titleInput);
         });
@@ -1331,7 +1349,7 @@ describe('SluggiElement', () => {
             expect(updatedLockToggle?.classList.contains('is-locked')).to.be.true;
         });
 
-        it('is hidden when isSynced is true', async () => {
+        it('is disabled when isSynced is true', async () => {
             const el = await fixture<SluggiElement>(html`
                 <sluggi-element
                     value="/demo"
@@ -1344,7 +1362,9 @@ describe('SluggiElement', () => {
                 ></sluggi-element>
             `);
 
-            expect(el.shadowRoot!.querySelector('.sluggi-lock-toggle')).to.be.null;
+            const lockToggle = el.shadowRoot!.querySelector('.sluggi-lock-toggle') as HTMLButtonElement;
+            expect(lockToggle).to.exist;
+            expect(lockToggle.disabled).to.be.true;
         });
 
         it('updates hidden lock field when toggled', async () => {

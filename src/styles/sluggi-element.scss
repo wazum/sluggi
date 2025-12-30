@@ -71,12 +71,19 @@
   color: var(--sluggi-color);
   background-color: var(--sluggi-secondary-bg);
 
-  &:hover {
+  &:hover:not(:disabled) {
     background-color: var(--sluggi-btn-hover-bg);
   }
 
-  &:active {
+  &:active:not(:disabled) {
     background-color: var(--sluggi-btn-active-bg);
+  }
+
+  &.is-disabled,
+  &:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    pointer-events: none;
   }
 }
 
@@ -248,8 +255,15 @@
     border-radius: 0 var(--sluggi-border-radius) var(--sluggi-border-radius) 0;
     gap: 3px;
 
-    &:hover {
+    &:hover:not(:disabled) {
         background-color: var(--sluggi-tertiary-bg);
+    }
+
+    &.is-disabled,
+    &:disabled {
+        opacity: 0.4;
+        cursor: not-allowed;
+        pointer-events: none;
     }
 }
 
@@ -330,8 +344,15 @@
     border-radius: 0 var(--sluggi-border-radius) var(--sluggi-border-radius) 0;
     gap: 3px;
 
-    &:hover {
+    &:hover:not(:disabled) {
         background-color: var(--sluggi-tertiary-bg);
+    }
+
+    &.is-disabled,
+    &:disabled {
+        opacity: 0.4;
+        cursor: not-allowed;
+        pointer-events: none;
     }
 }
 
@@ -397,8 +418,15 @@
     border-left: 1px solid var(--sluggi-border-color);
     gap: 3px;
 
-    &:hover {
+    &:hover:not(:disabled) {
         background-color: var(--sluggi-tertiary-bg);
+    }
+
+    &.is-disabled,
+    &:disabled {
+        opacity: 0.4;
+        cursor: not-allowed;
+        pointer-events: none;
     }
 }
 
@@ -458,8 +486,8 @@
     to { transform: rotate(360deg); }
 }
 
-.sluggi-edit-btn:hover svg,
-.sluggi-editable:hover ~ .sluggi-controls .sluggi-edit-btn svg {
+.sluggi-edit-btn:not(:disabled):hover svg,
+.sluggi-editable:hover ~ .sluggi-controls .sluggi-edit-btn:not(:disabled) svg {
     animation: sluggi-shake 0.4s ease;
 }
 
@@ -469,7 +497,7 @@
     }
 }
 
-.sluggi-regenerate-btn:hover svg {
+.sluggi-regenerate-btn:not(:disabled):hover svg {
     animation: sluggi-rotate 0.5s ease;
 }
 

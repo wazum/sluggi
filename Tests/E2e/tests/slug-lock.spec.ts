@@ -80,7 +80,7 @@ test.describe('Slug Lock Toggle - TYPO3 Integration', () => {
     await expect(lockToggle).toHaveClass(/is-locked/);
   });
 
-  test('sync toggle is hidden when page is locked', async ({ page }) => {
+  test('sync toggle is disabled when page is locked', async ({ page }) => {
     await page.goto('/typo3/record/edit?edit[pages][33]=edit');
     const frame = page.frameLocator('iframe');
     await expect(frame.locator('h1')).toContainText('Edit Page', { timeout: 15000 });
@@ -90,10 +90,12 @@ test.describe('Slug Lock Toggle - TYPO3 Integration', () => {
     await expect(lockToggle).toHaveClass(/is-locked/);
 
     const syncToggle = slugElement.locator('.sluggi-sync-toggle');
-    await expect(syncToggle).not.toBeVisible();
+    await expect(syncToggle).toBeVisible();
+    await expect(syncToggle).toHaveClass(/is-disabled/);
+    await expect(syncToggle).toBeDisabled();
   });
 
-  test('locking page hides sync toggle', async ({ page }) => {
+  test('locking page disables sync toggle', async ({ page }) => {
     await page.goto('/typo3/record/edit?edit[pages][34]=edit');
     const frame = page.frameLocator('iframe');
     await expect(frame.locator('h1')).toContainText('Edit Page', { timeout: 15000 });
@@ -102,15 +104,18 @@ test.describe('Slug Lock Toggle - TYPO3 Integration', () => {
     const syncToggle = slugElement.locator('.sluggi-sync-toggle');
     const lockToggle = slugElement.locator('.sluggi-lock-toggle');
     await expect(syncToggle).toBeVisible();
+    await expect(syncToggle).not.toHaveClass(/is-disabled/);
     await expect(lockToggle).toBeVisible();
 
     await lockToggle.click();
     await expect(lockToggle).toHaveClass(/is-locked/);
 
-    await expect(syncToggle).not.toBeVisible();
+    await expect(syncToggle).toBeVisible();
+    await expect(syncToggle).toHaveClass(/is-disabled/);
+    await expect(syncToggle).toBeDisabled();
   });
 
-  test('synced page hides lock toggle', async ({ page }) => {
+  test('synced page disables lock toggle', async ({ page }) => {
     await page.goto('/typo3/record/edit?edit[pages][35]=edit');
     const frame = page.frameLocator('iframe');
     await expect(frame.locator('h1')).toContainText('Edit Page', { timeout: 15000 });
@@ -121,7 +126,9 @@ test.describe('Slug Lock Toggle - TYPO3 Integration', () => {
     await expect(syncToggle).toHaveClass(/is-synced/);
 
     const lockToggle = slugElement.locator('.sluggi-lock-toggle');
-    await expect(lockToggle).not.toBeVisible();
+    await expect(lockToggle).toBeVisible();
+    await expect(lockToggle).toHaveClass(/is-disabled/);
+    await expect(lockToggle).toBeDisabled();
   });
 
   test('toggling lock marks form as dirty and shows unsaved changes modal', async ({ page }) => {
