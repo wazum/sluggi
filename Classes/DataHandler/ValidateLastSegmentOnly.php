@@ -48,8 +48,6 @@ final readonly class ValidateLastSegmentOnly
         }
 
         if ($this->fullPathEditingService->isAllowedForRequest($fieldArray, $table)) {
-            unset($fieldArray['tx_sluggi_full_path']);
-
             return;
         }
 

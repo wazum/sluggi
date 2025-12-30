@@ -48,8 +48,6 @@ final readonly class ValidateHierarchyPermission
         }
 
         if ($this->fullPathEditingService->isAllowedForRequest($fieldArray, $table)) {
-            unset($fieldArray['tx_sluggi_full_path']);
-
             return;
         }
 
