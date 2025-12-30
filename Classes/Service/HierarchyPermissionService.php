@@ -7,6 +7,7 @@ namespace Wazum\Sluggi\Service;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\Authentication\BackendUserAuthentication;
 use TYPO3\CMS\Core\Type\Bitmask\Permission;
+use Wazum\Sluggi\Utility\SlugUtility;
 
 final readonly class HierarchyPermissionService
 {
@@ -20,7 +21,7 @@ final readonly class HierarchyPermissionService
         string $currentSlug,
     ): string {
         if ($editablePageUids === []) {
-            return $this->getParentPath($currentSlug);
+            return SlugUtility::getParentPath($currentSlug);
         }
 
         foreach (array_reverse($rootLine) as $page) {
@@ -33,11 +34,11 @@ final readonly class HierarchyPermissionService
             }
 
             if ($uid > 0 && in_array($uid, $editablePageUids, true)) {
-                return $this->getParentPath($slug);
+                return SlugUtility::getParentPath($slug);
             }
         }
 
-        return $this->getParentPath($currentSlug);
+        return SlugUtility::getParentPath($currentSlug);
     }
 
     public function validateSlugChange(string $lockedPrefix, string $oldSlug, string $newSlug): bool
@@ -107,19 +108,6 @@ final readonly class HierarchyPermissionService
         );
 
         return $this->getLockedPrefix($rootLine, $editableUids, $currentSlug);
-    }
-
-    private function getParentPath(string $slug): string
-    {
-        $slug = trim($slug, '/');
-        if ($slug === '') {
-            return '';
-        }
-
-        $parts = explode('/', $slug);
-        array_pop($parts);
-
-        return $parts === [] ? '' : '/' . implode('/', $parts);
     }
 
     private function getBackendUser(): ?BackendUserAuthentication

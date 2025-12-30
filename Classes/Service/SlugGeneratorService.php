@@ -136,7 +136,7 @@ final readonly class SlugGeneratorService
         $slug = ltrim($slug, '/');
 
         $slugHelper = $this->getSlugHelper();
-        $prefix = $this->getParentPath($slug);
+        $prefix = SlugUtility::getParentPath($slug);
 
         foreach ($postModifiers as $funcName) {
             $hookParameters = [
@@ -153,19 +153,6 @@ final readonly class SlugGeneratorService
         }
 
         return $this->sanitizeSlug($slug);
-    }
-
-    private function getParentPath(string $slug): string
-    {
-        $slug = trim($slug, '/');
-        if ($slug === '') {
-            return '';
-        }
-
-        $parts = explode('/', $slug);
-        array_pop($parts);
-
-        return $parts === [] ? '' : '/' . implode('/', $parts);
     }
 
     private function sanitizeSlug(string $slug): string

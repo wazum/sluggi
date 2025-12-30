@@ -50,4 +50,44 @@ final class SlugUtilityTest extends TestCase
     {
         self::assertSame($expected, SlugUtility::getLastSegment($slug));
     }
+
+    /**
+     * @return array<string, array{slug: string, expected: string}>
+     */
+    public static function parentPathDataProvider(): array
+    {
+        return [
+            'multi-segment slug' => [
+                'slug' => '/parent/child',
+                'expected' => '/parent',
+            ],
+            'single segment' => [
+                'slug' => '/page',
+                'expected' => '',
+            ],
+            'empty string' => [
+                'slug' => '',
+                'expected' => '',
+            ],
+            'trailing slash' => [
+                'slug' => '/parent/child/',
+                'expected' => '/parent',
+            ],
+            'deeply nested' => [
+                'slug' => '/a/b/c/d/e',
+                'expected' => '/a/b/c/d',
+            ],
+            'root slash only' => [
+                'slug' => '/',
+                'expected' => '',
+            ],
+        ];
+    }
+
+    #[Test]
+    #[DataProvider('parentPathDataProvider')]
+    public function getParentPathReturnsExpectedResult(string $slug, string $expected): void
+    {
+        self::assertSame($expected, SlugUtility::getParentPath($slug));
+    }
 }

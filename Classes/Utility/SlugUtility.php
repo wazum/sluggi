@@ -17,4 +17,17 @@ final class SlugUtility
 
         return array_pop($parts);
     }
+
+    public static function getParentPath(string $slug): string
+    {
+        $slug = trim($slug, '/');
+        if ($slug === '') {
+            return '';
+        }
+
+        $parts = explode('/', $slug);
+        array_pop($parts);
+
+        return $parts === [] ? '' : '/' . implode('/', $parts);
+    }
 }

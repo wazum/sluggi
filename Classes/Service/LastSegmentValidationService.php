@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Wazum\Sluggi\Service;
 
 use Wazum\Sluggi\Configuration\ExtensionConfiguration;
+use Wazum\Sluggi\Utility\SlugUtility;
 
 final readonly class LastSegmentValidationService
 {
@@ -24,19 +25,6 @@ final readonly class LastSegmentValidationService
 
     public function validateSlugChange(string $oldSlug, string $newSlug): bool
     {
-        return $this->getParentPath($oldSlug) === $this->getParentPath($newSlug);
-    }
-
-    private function getParentPath(string $slug): string
-    {
-        $slug = trim($slug, '/');
-        if ($slug === '') {
-            return '';
-        }
-
-        $parts = explode('/', $slug);
-        array_pop($parts);
-
-        return $parts === [] ? '' : '/' . implode('/', $parts);
+        return SlugUtility::getParentPath($oldSlug) === SlugUtility::getParentPath($newSlug);
     }
 }
