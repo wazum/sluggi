@@ -1,7 +1,7 @@
 "be_groups"
 ,"uid","pid","title","tables_modify","pagetypes_select","non_exclude_fields","db_mountpoints"
 ,1,0,"Editors","pages","1,254","pages:slug,pages:title","1"
-,2,0,"Editors with Full Path","pages","1,254","pages:slug,pages:title,pages:tx_sluggi_full_path","1"
+,2,0,"Editors with Full Path","pages","1,254","pages:slug,pages:title,pages:tx_sluggi_full_path,pages:slug_locked","1"
 
 "be_users"
 ,"uid","pid","username","password","admin","usergroup"

@@ -16,6 +16,7 @@ use Wazum\Sluggi\DataHandler\HandlePageMove;
 use Wazum\Sluggi\DataHandler\HandlePageUpdate;
 use Wazum\Sluggi\DataHandler\InitializeSyncForNewPage;
 use Wazum\Sluggi\DataHandler\HandleRecordUpdate;
+use Wazum\Sluggi\DataHandler\LockSlugOnFullPathEdit;
 use Wazum\Sluggi\DataHandler\PreventLockedSlugEdit;
 use Wazum\Sluggi\DataHandler\ValidateHierarchyPermission;
 use Wazum\Sluggi\DataHandler\ValidateLastSegmentOnly;
@@ -95,6 +96,9 @@ $GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['t3lib/class.t3lib_tcemain.php']['move
 
 $GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['t3lib/class.t3lib_tcemain.php']['processDatamapClass']['sluggi_sync_new'] =
     InitializeSyncForNewPage::class;
+
+$GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['t3lib/class.t3lib_tcemain.php']['processDatamapClass']['sluggi_lock_full_path'] =
+    LockSlugOnFullPathEdit::class;
 
 // Override core "URL Segment" label to "URL Path"
 $GLOBALS['TYPO3_CONF_VARS']['SYS']['locallangXMLOverride']['EXT:core/Resources/Private/Language/locallang_tca.xlf'][] =

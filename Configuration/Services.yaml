@@ -42,6 +42,9 @@ services:
   Wazum\Sluggi\DataHandler\InitializeSyncForNewPage:
     public: true
 
+  Wazum\Sluggi\DataHandler\LockSlugOnFullPathEdit:
+    public: true
+
   # Form/Element
   Wazum\Sluggi\Form\Element\SlugElementV12:
     public: true

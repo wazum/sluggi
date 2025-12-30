@@ -123,4 +123,50 @@ final class FullPathValidationTest extends FunctionalTestCase
 
         $this->assertCSVDataSet(__DIR__ . '/Fixtures/pages_full_path_changed.csv');
     }
+
+    #[Test]
+    public function fullPathEditLocksSlugWhenSlugChanges(): void
+    {
+        $this->setUpBackendUser(3);
+
+        $dataHandler = GeneralUtility::makeInstance(DataHandler::class);
+        $dataHandler->start(
+            [
+                'pages' => [
+                    3 => [
+                        'slug' => '/different-parent/child',
+                        'tx_sluggi_full_path' => '1',
+                    ],
+                ],
+            ],
+            []
+        );
+        $dataHandler->process_datamap();
+
+        $this->assertCSVDataSet(__DIR__ . '/Fixtures/pages_full_path_changed_locked.csv');
+        self::assertEmpty($dataHandler->errorLog, 'No errors expected');
+    }
+
+    #[Test]
+    public function fullPathEditDoesNotLockSlugWhenSlugUnchanged(): void
+    {
+        $this->setUpBackendUser(3);
+
+        $dataHandler = GeneralUtility::makeInstance(DataHandler::class);
+        $dataHandler->start(
+            [
+                'pages' => [
+                    3 => [
+                        'slug' => '/parent/child',
+                        'tx_sluggi_full_path' => '1',
+                    ],
+                ],
+            ],
+            []
+        );
+        $dataHandler->process_datamap();
+
+        $this->assertCSVDataSet(__DIR__ . '/Fixtures/pages_full_path_unchanged_not_locked.csv');
+        self::assertEmpty($dataHandler->errorLog, 'No errors expected');
+    }
 }
