@@ -836,8 +836,14 @@ export class SluggiElement extends LitElement {
         this.notifySyncFieldOfChange();
         this.updateSourceBadgeVisibility();
 
-        if (this.isSynced && this.hasNonEmptySourceFieldValue()) {
-            this.sendSlugProposal('recreate');
+        if (this.isSynced) {
+            if (this.isFullPathMode) {
+                this.isFullPathMode = false;
+                this.notifyFullPathFieldOfChange();
+            }
+            if (this.hasNonEmptySourceFieldValue()) {
+                this.sendSlugProposal('recreate');
+            }
         }
     }
 
@@ -878,6 +884,11 @@ export class SluggiElement extends LitElement {
     private toggleLock() {
         this.isLocked = !this.isLocked;
         this.notifyLockFieldOfChange();
+
+        if (this.isLocked && this.isFullPathMode) {
+            this.isFullPathMode = false;
+            this.notifyFullPathFieldOfChange();
+        }
     }
 
     private notifyLockFieldOfChange() {

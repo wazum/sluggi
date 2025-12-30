@@ -949,6 +949,41 @@ describe('SluggiElement', () => {
 
             document.body.removeChild(titleInput);
         });
+
+        it('enabling SYNC disables PATH toggle', async () => {
+            const titleInput = document.createElement('input');
+            titleInput.setAttribute('data-sluggi-source', '');
+            titleInput.setAttribute('data-formengine-input-name', 'data[pages][456][title]');
+            titleInput.value = 'Demo';
+            document.body.appendChild(titleInput);
+
+            const el = await fixture<SluggiElement>(html`
+                <sluggi-element
+                    value="/parent/child"
+                    last-segment-only
+                    sync-feature-enabled
+                    full-path-feature-enabled
+                ></sluggi-element>
+            `);
+
+            const pathToggle = el.shadowRoot!.querySelector('.sluggi-full-path-toggle') as HTMLElement;
+            const syncToggle = el.shadowRoot!.querySelector('.sluggi-sync-toggle') as HTMLElement;
+
+            expect(pathToggle).to.exist;
+            expect(syncToggle).to.exist;
+
+            pathToggle.click();
+            await el.updateComplete;
+            expect(pathToggle.classList.contains('is-active')).to.be.true;
+
+            syncToggle.click();
+            await el.updateComplete;
+
+            expect(syncToggle.classList.contains('is-synced')).to.be.true;
+            expect(pathToggle.classList.contains('is-active')).to.be.false;
+
+            document.body.removeChild(titleInput);
+        });
     });
 
     describe('Source Field Listening', () => {
@@ -1434,6 +1469,33 @@ describe('SluggiElement', () => {
 
             expect(el.shadowRoot!.querySelector('input.sluggi-input')).to.not.exist;
         });
+
+        it('enabling LOCK disables PATH toggle', async () => {
+            const el = await fixture<SluggiElement>(html`
+                <sluggi-element
+                    value="/parent/child"
+                    last-segment-only
+                    lock-feature-enabled
+                    full-path-feature-enabled
+                ></sluggi-element>
+            `);
+
+            const pathToggle = el.shadowRoot!.querySelector('.sluggi-full-path-toggle') as HTMLElement;
+            const lockToggle = el.shadowRoot!.querySelector('.sluggi-lock-toggle') as HTMLElement;
+
+            expect(pathToggle).to.exist;
+            expect(lockToggle).to.exist;
+
+            pathToggle.click();
+            await el.updateComplete;
+            expect(pathToggle.classList.contains('is-active')).to.be.true;
+
+            lockToggle.click();
+            await el.updateComplete;
+
+            expect(lockToggle.classList.contains('is-locked')).to.be.true;
+            expect(pathToggle.classList.contains('is-active')).to.be.false;
+        });
     });
 
     describe('Accessibility', () => {
@@ -1569,4 +1631,5 @@ describe('SluggiElement', () => {
             expect(el.shadowRoot!.querySelector('.sluggi-restriction-note')).to.be.null;
         });
     });
+
 });
