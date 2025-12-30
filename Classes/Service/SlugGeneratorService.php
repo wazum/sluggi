@@ -10,6 +10,7 @@ use TYPO3\CMS\Core\DataHandling\Model\RecordStateFactory;
 use TYPO3\CMS\Core\DataHandling\SlugHelper;
 use TYPO3\CMS\Core\Exception\SiteNotFoundException;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
+use Wazum\Sluggi\Utility\SlugUtility;
 
 final readonly class SlugGeneratorService
 {
@@ -55,7 +56,7 @@ final readonly class SlugGeneratorService
         ?int $pid = null,
     ): string {
         $parentSlug = rtrim($parentSlug, '/');
-        $childSegment = $this->getLastSegment($childSlug);
+        $childSegment = '/' . SlugUtility::getLastSegment($childSlug);
 
         if ($parentSlug === '' || $parentSlug === '/') {
             $slug = $childSegment;
@@ -92,17 +93,6 @@ final readonly class SlugGeneratorService
         $slug = (string)($record['slug'] ?? '');
 
         return $slug === '/' ? '' : $slug;
-    }
-
-    public function getLastSegment(string $slug): string
-    {
-        $slug = trim($slug, '/');
-        if ($slug === '') {
-            return '/';
-        }
-        $parts = explode('/', $slug);
-
-        return '/' . array_pop($parts);
     }
 
     /**

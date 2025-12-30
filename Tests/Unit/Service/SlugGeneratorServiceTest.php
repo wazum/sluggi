@@ -20,38 +20,6 @@ final class SlugGeneratorServiceTest extends TestCase
     }
 
     /**
-     * @return array<string, array{slug: string, expected: string}>
-     */
-    public static function lastSegmentDataProvider(): array
-    {
-        return [
-            'multi-segment slug' => [
-                'slug' => '/parent/child',
-                'expected' => '/child',
-            ],
-            'single segment' => [
-                'slug' => '/page',
-                'expected' => '/page',
-            ],
-            'empty string' => [
-                'slug' => '',
-                'expected' => '/',
-            ],
-            'trailing slash' => [
-                'slug' => '/parent/child/',
-                'expected' => '/child',
-            ],
-        ];
-    }
-
-    #[Test]
-    #[DataProvider('lastSegmentDataProvider')]
-    public function getLastSegmentReturnsExpectedResult(string $slug, string $expected): void
-    {
-        self::assertSame($expected, $this->subject->getLastSegment($slug));
-    }
-
-    /**
      * @return array<string, array{parentSlug: string, childSlug: string, expected: string}>
      */
     public static function slugCombinationDataProvider(): array

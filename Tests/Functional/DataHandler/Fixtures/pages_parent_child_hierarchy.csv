@@ -1,0 +1,15 @@
+"be_groups"
+,"uid","pid","title","tables_modify","pagetypes_select","non_exclude_fields","db_mountpoints"
+,1,0,"Editors with Full Path","pages","1,254","pages:slug,pages:title,pages:tx_sluggi_full_path","1"
+
+"be_users"
+,"uid","pid","username","password","admin","usergroup"
+,1,0,"admin","$2y$12$abc123",1,""
+,2,0,"editor_full_path","$2y$12$abc123",0,"1"
+
+"pages"
+,"uid","pid","title","slug","tx_sluggi_sync","doktype","perms_userid","perms_groupid","perms_user","perms_group","perms_everybody"
+,1,0,"Root Page","/",0,1,1,1,31,31,31
+,2,1,"Parent Page","/parent",0,1,1,1,31,31,31
+,3,2,"Child Page","/custom-parent/child",0,1,1,1,31,31,31
+,4,3,"Grandchild Page","/custom-parent/child/grandchild",0,1,1,1,31,31,31
