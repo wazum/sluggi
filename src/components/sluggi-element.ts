@@ -3,7 +3,7 @@ import { customElement, property, state, query } from 'lit/decorators.js';
 import Modal from '@typo3/backend/modal.js';
 import Severity from '@typo3/backend/severity.js';
 import type { ComponentMode } from '@/types';
-import { editIcon, refreshIcon, checkIcon, closeIcon, syncOnIcon, syncOffIcon, lockOnIcon, lockOffIcon, pathOnIcon, pathOffIcon } from './icons.js';
+import { editIcon, refreshIcon, checkIcon, closeIcon, syncOnIcon, syncOffIcon, lockOnIcon, lockOffIcon, pathOnIcon, pathOffIcon, copyIcon } from './icons.js';
 import styles from '../styles/sluggi-element.scss?inline';
 
 @customElement('sluggi-element')
@@ -63,6 +63,12 @@ export class SluggiElement extends LitElement {
 
     @property({ type: Boolean, attribute: 'full-path-feature-enabled' })
     fullPathFeatureEnabled = false;
+
+    @property({ type: Boolean, attribute: 'copy-url-feature-enabled' })
+    copyUrlFeatureEnabled = false;
+
+    @property({ type: String, attribute: 'page-url' })
+    pageUrl = '';
 
     // =========================================================================
     // Properties: Conflict State
@@ -129,6 +135,9 @@ export class SluggiElement extends LitElement {
 
     @state()
     private hasSourceFields = false;
+
+    @state()
+    private showCopyConfirmation = false;
 
     @query('input.sluggi-input')
     private inputElement?: HTMLInputElement;
@@ -301,6 +310,10 @@ export class SluggiElement extends LitElement {
     }
 
     private renderRestrictionNote() {
+        if (this.showCopyConfirmation) {
+            return html`<p class="sluggi-restriction-note sluggi-copy-confirmation">${this.labels['copyConfirmation'] || 'URL copied to clipboard.'}</p>`;
+        }
+
         if (!this.isSynced && !this.isLocked) return nothing;
 
         const message = this.isSynced
@@ -367,6 +380,7 @@ export class SluggiElement extends LitElement {
                 ${this.renderFullPathToggle()}
                 ${this.renderSyncToggle()}
                 ${this.renderLockToggle()}
+                ${this.renderCopyUrlButton()}
             `;
         }
 
@@ -421,6 +435,21 @@ export class SluggiElement extends LitElement {
                 @click="${disabled ? null : this.handleRegenerate}"
             >
                 ${refreshIcon}
+            </button>
+        `;
+    }
+
+    private renderCopyUrlButton() {
+        if (!this.copyUrlFeatureEnabled) return nothing;
+
+        return html`
+            <button
+                type="button"
+                class="btn btn-sm btn-default sluggi-copy-url-btn ${this.showCopyConfirmation ? 'is-copied' : ''}"
+                title="${this.labels['button.copyUrl'] || 'Copy page URL to clipboard'}"
+                @click="${this.handleCopyUrl}"
+            >
+                ${this.showCopyConfirmation ? checkIcon : copyIcon}
             </button>
         `;
     }
@@ -715,6 +744,24 @@ export class SluggiElement extends LitElement {
 
     private handleRegenerate() {
         this.sendSlugProposal('recreate');
+    }
+
+    private handleCopyUrl() {
+        const baseUrl = this.pageUrl.replace(/\/$/, '');
+        const fullUrl = baseUrl + this.value;
+
+        navigator.clipboard.writeText(fullUrl);
+        this.showCopyConfirmation = true;
+
+        setTimeout(() => {
+            this.showCopyConfirmation = false;
+        }, 2000);
+
+        this.dispatchEvent(new CustomEvent('sluggi-url-copied', {
+            bubbles: true,
+            composed: true,
+            detail: { url: fullUrl }
+        }));
     }
 
     private handleSourceFieldChange(event: Event) {

@@ -204,6 +204,33 @@ final class SlugElementRendererTest extends TestCase
         self::assertSame('data[pages][NEW6947faed9ea6d547219265][tx_sluggi_sync]', $result);
     }
 
+    #[Test]
+    public function buildAttributesIncludesCopyUrlFeatureEnabledWhenTrue(): void
+    {
+        $subject = new SlugElementRenderer();
+        $context = $this->createContext([
+            'copyUrlFeatureEnabled' => true,
+            'pageUrl' => 'https://example.com',
+        ]);
+
+        $result = $subject->buildAttributes($context, []);
+
+        self::assertArrayHasKey('copy-url-feature-enabled', $result);
+        self::assertSame('https://example.com', $result['page-url']);
+    }
+
+    #[Test]
+    public function buildAttributesOmitsCopyUrlFeatureEnabledWhenFalse(): void
+    {
+        $subject = new SlugElementRenderer();
+        $context = $this->createContext(['copyUrlFeatureEnabled' => false]);
+
+        $result = $subject->buildAttributes($context, []);
+
+        self::assertArrayNotHasKey('copy-url-feature-enabled', $result);
+        self::assertArrayNotHasKey('page-url', $result);
+    }
+
     /**
      * @param array<string, mixed> $overrides
      *

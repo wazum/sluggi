@@ -69,6 +69,12 @@
             <trans-unit id="toggle.path.off" resname="toggle.path.off">
                 <source>Click to edit full path</source>
             </trans-unit>
+            <trans-unit id="button.copyUrl" resname="button.copyUrl">
+                <source>Copy page URL to clipboard</source>
+            </trans-unit>
+            <trans-unit id="copyConfirmation" resname="copyConfirmation">
+                <source>URL copied to clipboard.</source>
+            </trans-unit>
         </body>
     </file>
 </xliff>

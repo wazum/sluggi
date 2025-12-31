@@ -135,4 +135,16 @@ final readonly class ExtensionConfiguration
     {
         return in_array($pageType, $this->getExcludedPageTypes(), true);
     }
+
+    public function isCopyUrlEnabled(): bool
+    {
+        try {
+            return (bool)$this->extensionConfiguration->get(
+                extension: 'sluggi',
+                path: 'copy_url'
+            );
+        } catch (Exception) {
+            return false;
+        }
+    }
 }

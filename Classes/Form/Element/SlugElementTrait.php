@@ -8,6 +8,7 @@ use TYPO3\CMS\Backend\Controller\FormSlugAjaxController;
 use TYPO3\CMS\Core\Page\JavaScriptModuleInstruction;
 use TYPO3\CMS\Core\Utility\MathUtility;
 use Wazum\Sluggi\Compatibility\Typo3Compatibility;
+use Wazum\Sluggi\Configuration\ExtensionConfiguration;
 use Wazum\Sluggi\Service\FullPathEditingService;
 use Wazum\Sluggi\Service\HierarchyPermissionService;
 use Wazum\Sluggi\Service\LastSegmentValidationService;
@@ -27,6 +28,7 @@ trait SlugElementTrait
     protected HierarchyPermissionService $hierarchyPermissionService;
     protected SlugGeneratorService $slugGeneratorService;
     protected FullPathEditingService $fullPathEditingService;
+    protected ExtensionConfiguration $extensionConfiguration;
 
     /**
      * @return array<string, mixed>
@@ -153,6 +155,8 @@ trait SlugElementTrait
             'lockedPrefix' => $lockedPrefix,
             'fullPathFeatureEnabled' => $this->isFullPathFeatureEnabled($table, $lastSegmentOnly, $lockedPrefix),
             'fullPathFieldName' => $this->slugElementRenderer->buildFullPathFieldName($table, $recordId),
+            'copyUrlFeatureEnabled' => $this->extensionConfiguration->isCopyUrlEnabled(),
+            'pageUrl' => $this->data['customData'][$fieldName]['slugPrefix'] ?? '',
         ];
     }
 
@@ -275,6 +279,8 @@ trait SlugElementTrait
             'toggle.lock.off' => $languageService->sL($prefix . 'toggle.lock.off'),
             'toggle.path.on' => $languageService->sL($prefix . 'toggle.path.on'),
             'toggle.path.off' => $languageService->sL($prefix . 'toggle.path.off'),
+            'button.copyUrl' => $languageService->sL($prefix . 'button.copyUrl'),
+            'copyConfirmation' => $languageService->sL($prefix . 'copyConfirmation'),
         ];
     }
 

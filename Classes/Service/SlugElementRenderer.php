@@ -59,6 +59,10 @@ final readonly class SlugElementRenderer
         if ($context['fullPathFeatureEnabled'] ?? false) {
             $attributes['full-path-feature-enabled'] = '';
         }
+        if ($context['copyUrlFeatureEnabled'] ?? false) {
+            $attributes['copy-url-feature-enabled'] = '';
+            $attributes['page-url'] = $context['pageUrl'] ?? '';
+        }
 
         return $attributes;
     }

@@ -1594,6 +1594,128 @@ describe('SluggiElement', () => {
         });
     });
 
+    describe('Copy URL Button', () => {
+        it('is hidden when copyUrlFeatureEnabled is false', async () => {
+            const el = await fixture<SluggiElement>(html`
+                <sluggi-element value="/demo"></sluggi-element>
+            `);
+
+            expect(el.shadowRoot!.querySelector('.sluggi-copy-url-btn')).to.be.null;
+        });
+
+        it('is visible when copyUrlFeatureEnabled is true', async () => {
+            const el = await fixture<SluggiElement>(html`
+                <sluggi-element
+                    value="/demo"
+                    copy-url-feature-enabled
+                    page-url="https://example.com"
+                ></sluggi-element>
+            `);
+
+            expect(el.shadowRoot!.querySelector('.sluggi-copy-url-btn')).to.exist;
+        });
+
+        it('copies full URL to clipboard when clicked', async () => {
+            let copiedText = '';
+            Object.defineProperty(navigator, 'clipboard', {
+                value: { writeText: async (text: string) => { copiedText = text; } },
+                writable: true,
+                configurable: true
+            });
+
+            const el = await fixture<SluggiElement>(html`
+                <sluggi-element
+                    value="/demo-page"
+                    copy-url-feature-enabled
+                    page-url="https://example.com"
+                ></sluggi-element>
+            `);
+
+            const copyBtn = el.shadowRoot!.querySelector('.sluggi-copy-url-btn') as HTMLButtonElement;
+            copyBtn.click();
+            await el.updateComplete;
+
+            expect(copiedText).to.equal('https://example.com/demo-page');
+        });
+
+        it('handles trailing slash in page-url correctly', async () => {
+            let copiedText = '';
+            Object.defineProperty(navigator, 'clipboard', {
+                value: { writeText: async (text: string) => { copiedText = text; } },
+                writable: true,
+                configurable: true
+            });
+
+            const el = await fixture<SluggiElement>(html`
+                <sluggi-element
+                    value="/demo-page"
+                    copy-url-feature-enabled
+                    page-url="https://example.com/"
+                ></sluggi-element>
+            `);
+
+            const copyBtn = el.shadowRoot!.querySelector('.sluggi-copy-url-btn') as HTMLButtonElement;
+            copyBtn.click();
+            await el.updateComplete;
+
+            expect(copiedText).to.equal('https://example.com/demo-page');
+        });
+
+        it('shows checkmark icon and confirmation message after copying', async () => {
+            Object.defineProperty(navigator, 'clipboard', {
+                value: { writeText: async () => {} },
+                writable: true,
+                configurable: true
+            });
+
+            const el = await fixture<SluggiElement>(html`
+                <sluggi-element
+                    value="/demo-page"
+                    copy-url-feature-enabled
+                    page-url="https://example.com"
+                ></sluggi-element>
+            `);
+
+            const copyBtn = el.shadowRoot!.querySelector('.sluggi-copy-url-btn') as HTMLButtonElement;
+            copyBtn.click();
+            await el.updateComplete;
+
+            expect(copyBtn.classList.contains('is-copied')).to.be.true;
+
+            const note = el.shadowRoot!.querySelector('.sluggi-copy-confirmation');
+            expect(note).to.exist;
+        });
+
+        it('reverts to original icon after timeout', async () => {
+            Object.defineProperty(navigator, 'clipboard', {
+                value: { writeText: async () => {} },
+                writable: true,
+                configurable: true
+            });
+
+            const el = await fixture<SluggiElement>(html`
+                <sluggi-element
+                    value="/demo-page"
+                    copy-url-feature-enabled
+                    page-url="https://example.com"
+                ></sluggi-element>
+            `);
+
+            const copyBtn = el.shadowRoot!.querySelector('.sluggi-copy-url-btn') as HTMLButtonElement;
+            copyBtn.click();
+            await el.updateComplete;
+
+            expect(copyBtn.classList.contains('is-copied')).to.be.true;
+
+            // Wait for timeout (2 seconds + buffer)
+            await new Promise(resolve => setTimeout(resolve, 2100));
+            await el.updateComplete;
+
+            expect(copyBtn.classList.contains('is-copied')).to.be.false;
+            expect(el.shadowRoot!.querySelector('.sluggi-copy-confirmation')).to.be.null;
+        });
+    });
+
     describe('Restriction Notes', () => {
         it('shows sync restriction note when isSynced', async () => {
             const el = await fixture<SluggiElement>(html`

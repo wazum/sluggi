@@ -91,6 +91,14 @@
                 <source>Click to edit full path</source>
                 <target>Klicken, um vollständigen Pfad zu bearbeiten</target>
             </trans-unit>
+            <trans-unit id="button.copyUrl" resname="button.copyUrl">
+                <source>Copy page URL to clipboard</source>
+                <target>Seiten-URL in Zwischenablage kopieren</target>
+            </trans-unit>
+            <trans-unit id="copyConfirmation" resname="copyConfirmation">
+                <source>URL copied to clipboard.</source>
+                <target>URL in Zwischenablage kopiert.</target>
+            </trans-unit>
         </body>
     </file>
 </xliff>

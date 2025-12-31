@@ -14,3 +14,5 @@ last_segment_only=0
 allow_full_path_editing=0
 # cat=basic; type=string; label=Exclude page types: Comma-separated list of doktypes that should not have slugs (e.g. 199,254,255 for Spacer, Sysfolder, Recycler)
 exclude_doktypes=
+# cat=basic; type=boolean; label=Enable copy URL button: When enabled, a button to copy the full page URL to clipboard is shown
+copy_url=0

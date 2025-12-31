@@ -302,4 +302,43 @@ final class ExtensionConfigurationTest extends TestCase
 
         self::assertTrue($subject->isSyncDefaultEnabled());
     }
+
+    #[Test]
+    public function isCopyUrlEnabledReturnsTrueWhenSettingIs1(): void
+    {
+        $coreConfig = $this->createMock(CoreExtensionConfiguration::class);
+        $coreConfig->method('get')
+            ->with('sluggi', 'copy_url')
+            ->willReturn('1');
+
+        $subject = new ExtensionConfiguration($coreConfig);
+
+        self::assertTrue($subject->isCopyUrlEnabled());
+    }
+
+    #[Test]
+    public function isCopyUrlEnabledReturnsFalseWhenSettingIs0(): void
+    {
+        $coreConfig = $this->createMock(CoreExtensionConfiguration::class);
+        $coreConfig->method('get')
+            ->with('sluggi', 'copy_url')
+            ->willReturn('0');
+
+        $subject = new ExtensionConfiguration($coreConfig);
+
+        self::assertFalse($subject->isCopyUrlEnabled());
+    }
+
+    #[Test]
+    public function isCopyUrlEnabledReturnsFalseWhenSettingIsMissing(): void
+    {
+        $coreConfig = $this->createMock(CoreExtensionConfiguration::class);
+        $coreConfig->method('get')
+            ->with('sluggi', 'copy_url')
+            ->willThrowException(new Exception('Configuration not found'));
+
+        $subject = new ExtensionConfiguration($coreConfig);
+
+        self::assertFalse($subject->isCopyUrlEnabled());
+    }
 }

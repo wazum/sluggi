@@ -6,8 +6,10 @@ namespace Wazum\Sluggi\Form\Element;
 
 use TYPO3\CMS\Backend\Form\Element\AbstractFormElement;
 use TYPO3\CMS\Backend\Form\NodeFactory;
+use TYPO3\CMS\Core\Configuration\ExtensionConfiguration as CoreExtensionConfiguration;
 use TYPO3\CMS\Core\Information\Typo3Version;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
+use Wazum\Sluggi\Configuration\ExtensionConfiguration;
 use Wazum\Sluggi\Service\FullPathEditingService;
 use Wazum\Sluggi\Service\HierarchyPermissionService;
 use Wazum\Sluggi\Service\LastSegmentValidationService;
@@ -72,5 +74,9 @@ final class SlugElementV12 extends AbstractFormElement
         $this->hierarchyPermissionService = GeneralUtility::makeInstance(HierarchyPermissionService::class);
         $this->slugGeneratorService = GeneralUtility::makeInstance(SlugGeneratorService::class);
         $this->fullPathEditingService = GeneralUtility::makeInstance(FullPathEditingService::class);
+        $this->extensionConfiguration = GeneralUtility::makeInstance(
+            ExtensionConfiguration::class,
+            GeneralUtility::makeInstance(CoreExtensionConfiguration::class)
+        );
     }
 }
