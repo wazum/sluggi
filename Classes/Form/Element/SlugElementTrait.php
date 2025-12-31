@@ -268,6 +268,7 @@ trait SlugElementTrait
             'conflict.button.useSuggestion' => $languageService->sL($prefix . 'conflict.button.useSuggestion'),
             'syncRestrictionNote' => $languageService->sL($prefix . 'restriction.sync'),
             'lockRestrictionNote' => $languageService->sL($prefix . 'restriction.lock'),
+            'fullPathNote' => $languageService->sL($prefix . 'restriction.fullPath'),
             'button.edit' => $languageService->sL($prefix . 'button.edit'),
             'button.regenerate' => $languageService->sL($prefix . 'button.regenerate'),
             'button.cancel' => $languageService->sL($prefix . 'button.cancel'),

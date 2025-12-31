@@ -314,11 +314,16 @@ export class SluggiElement extends LitElement {
             return html`<p class="sluggi-restriction-note sluggi-copy-confirmation">${this.labels['copyConfirmation'] || 'URL copied to clipboard.'}</p>`;
         }
 
-        if (!this.isSynced && !this.isLocked) return nothing;
+        if (!this.isSynced && !this.isLocked && !this.isFullPathMode) return nothing;
 
-        const message = this.isSynced
-            ? this.labels.syncRestrictionNote || 'The URL path is automatically synchronized with the source fields.'
-            : this.labels.lockRestrictionNote || 'The URL path is locked and cannot be edited.';
+        let message: string;
+        if (this.isSynced) {
+            message = this.labels.syncRestrictionNote || 'The URL path is automatically synchronized with the source fields.';
+        } else if (this.isLocked) {
+            message = this.labels.lockRestrictionNote || 'The URL path is locked and cannot be edited.';
+        } else {
+            message = this.labels.fullPathNote || 'Full path editing is enabled. You can modify the entire URL structure.';
+        }
 
         return html`<p class="sluggi-restriction-note">${message}</p>`;
     }

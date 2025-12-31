@@ -1752,6 +1752,45 @@ describe('SluggiElement', () => {
 
             expect(el.shadowRoot!.querySelector('.sluggi-restriction-note')).to.be.null;
         });
+
+        it('shows full path info note when full path mode is active', async () => {
+            const el = await fixture<SluggiElement>(html`
+                <sluggi-element
+                    value="/parent/child"
+                    last-segment-only
+                    full-path-feature-enabled
+                ></sluggi-element>
+            `);
+
+            const pathToggle = el.shadowRoot!.querySelector('.sluggi-full-path-toggle') as HTMLElement;
+            pathToggle.click();
+            await el.updateComplete;
+
+            const note = el.shadowRoot!.querySelector('.sluggi-restriction-note');
+            expect(note).to.exist;
+            expect(note?.textContent).to.contain('Full path editing');
+        });
+
+        it('hides full path info note when full path mode is deactivated', async () => {
+            const el = await fixture<SluggiElement>(html`
+                <sluggi-element
+                    value="/parent/child"
+                    last-segment-only
+                    full-path-feature-enabled
+                ></sluggi-element>
+            `);
+
+            const pathToggle = el.shadowRoot!.querySelector('.sluggi-full-path-toggle') as HTMLElement;
+            pathToggle.click();
+            await el.updateComplete;
+
+            expect(el.shadowRoot!.querySelector('.sluggi-restriction-note')).to.exist;
+
+            pathToggle.click();
+            await el.updateComplete;
+
+            expect(el.shadowRoot!.querySelector('.sluggi-restriction-note')).to.be.null;
+        });
     });
 
 });
