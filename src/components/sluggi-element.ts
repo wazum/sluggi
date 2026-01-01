@@ -1095,14 +1095,16 @@ export class SluggiElement extends LitElement {
 
         for (const element of sourceElements) {
             const inputName = element.getAttribute('data-formengine-input-name') || element.getAttribute('name') || '';
-            const match = inputName.match(/data\[[^\]]+\]\[[^\]]+\]\[([^\]]+)\]/);
-            const fieldName = match ? match[1] : null;
-            if (fieldName) {
-                this.sourceFieldElements.set(fieldName, element);
-                element.addEventListener('change', this.boundSourceFieldHandler);
-                element.addEventListener('input', this.boundSourceFieldInitHandler);
-                element.addEventListener('formengine:input:initialized', this.boundSourceFieldInitHandler);
-            }
+            const match = inputName.match(/data\[[^\]]+\]\[([^\]]+)\]\[([^\]]+)\]/);
+            if (!match) continue;
+
+            const [, elementRecordId, fieldName] = match;
+            if (elementRecordId !== this.recordId) continue;
+
+            this.sourceFieldElements.set(fieldName, element);
+            element.addEventListener('change', this.boundSourceFieldHandler);
+            element.addEventListener('input', this.boundSourceFieldInitHandler);
+            element.addEventListener('formengine:input:initialized', this.boundSourceFieldInitHandler);
         }
         this.hasSourceFields = this.sourceFieldElements.size > 0;
     }

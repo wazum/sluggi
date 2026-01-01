@@ -34,7 +34,7 @@ describe('SluggiElement', () => {
             const container = document.createElement('div');
             container.innerHTML = `
                 <input data-sluggi-source data-formengine-input-name="data[pages][123][title]" value="" />
-                <sluggi-element value="/parent/child" locked-prefix="/parent" command="new"></sluggi-element>
+                <sluggi-element value="/parent/child" locked-prefix="/parent" command="new" record-id="123"></sluggi-element>
             `;
             document.body.appendChild(container);
             const el = container.querySelector('sluggi-element') as SluggiElement;
@@ -107,6 +107,7 @@ describe('SluggiElement', () => {
             el.setAttribute('value', '/parent/child');
             el.setAttribute('locked-prefix', '/parent');
             el.setAttribute('command', 'new');
+            el.setAttribute('record-id', 'NEW123');
             document.body.appendChild(el);
 
             await el.updateComplete;
@@ -571,7 +572,7 @@ describe('SluggiElement', () => {
             document.body.appendChild(input);
 
             const el = await fixture<SluggiElement>(html`
-                <sluggi-element value="/test"></sluggi-element>
+                <sluggi-element value="/test" record-id="123"></sluggi-element>
             `);
 
             const btn = el.shadowRoot!.querySelector('.sluggi-regenerate-btn') as HTMLButtonElement;
@@ -589,7 +590,7 @@ describe('SluggiElement', () => {
             document.body.appendChild(input);
 
             const el = await fixture<SluggiElement>(html`
-                <sluggi-element value="/test"></sluggi-element>
+                <sluggi-element value="/test" record-id="123"></sluggi-element>
             `);
 
             const btn = el.shadowRoot!.querySelector('.sluggi-regenerate-btn') as HTMLButtonElement;
@@ -625,7 +626,7 @@ describe('SluggiElement', () => {
             document.body.appendChild(input);
 
             const el = await fixture<SluggiElement>(html`
-                <sluggi-element value="/test" is-locked lock-feature-enabled></sluggi-element>
+                <sluggi-element value="/test" record-id="123" is-locked lock-feature-enabled></sluggi-element>
             `);
 
             const btn = el.shadowRoot!.querySelector('.sluggi-regenerate-btn') as HTMLButtonElement;
@@ -643,7 +644,7 @@ describe('SluggiElement', () => {
             document.body.appendChild(titleInput);
 
             const el = await fixture<SluggiElement>(html`
-                <sluggi-element value="/test" is-synced sync-feature-enabled></sluggi-element>
+                <sluggi-element value="/test" record-id="123" is-synced sync-feature-enabled></sluggi-element>
             `);
 
             const btn = el.shadowRoot!.querySelector('.sluggi-regenerate-btn') as HTMLButtonElement;
@@ -661,7 +662,7 @@ describe('SluggiElement', () => {
             document.body.appendChild(titleInput);
 
             const el = await fixture<SluggiElement>(html`
-                <sluggi-element value="/test"></sluggi-element>
+                <sluggi-element value="/test" record-id="123"></sluggi-element>
             `);
             const btn = el.shadowRoot!.querySelector('.sluggi-regenerate-btn') as HTMLButtonElement;
             expect(btn).to.exist;
@@ -960,6 +961,7 @@ describe('SluggiElement', () => {
             const el = await fixture<SluggiElement>(html`
                 <sluggi-element
                     value="/parent/child"
+                    record-id="456"
                     last-segment-only
                     sync-feature-enabled
                     full-path-feature-enabled
@@ -1006,6 +1008,63 @@ describe('SluggiElement', () => {
             expect(values).to.deep.equal({ title: 'Test Title' });
 
             document.body.removeChild(titleInput);
+        });
+
+        it('only uses source fields matching its own record ID in multi-edit mode', async () => {
+            const title1 = document.createElement('input');
+            title1.setAttribute('data-sluggi-source', '');
+            title1.setAttribute('data-formengine-input-name', 'data[pages][100][title]');
+            title1.value = 'Page One Title';
+            document.body.appendChild(title1);
+
+            const title2 = document.createElement('input');
+            title2.setAttribute('data-sluggi-source', '');
+            title2.setAttribute('data-formengine-input-name', 'data[pages][200][title]');
+            title2.value = 'Page Two Title';
+            document.body.appendChild(title2);
+
+            const title3 = document.createElement('input');
+            title3.setAttribute('data-sluggi-source', '');
+            title3.setAttribute('data-formengine-input-name', 'data[pages][300][title]');
+            title3.value = 'Page Three Title';
+            document.body.appendChild(title3);
+
+            const el1 = document.createElement('sluggi-element') as SluggiElement;
+            el1.setAttribute('value', '/page-one');
+            el1.setAttribute('table-name', 'pages');
+            el1.setAttribute('record-id', '100');
+            document.body.appendChild(el1);
+
+            const el2 = document.createElement('sluggi-element') as SluggiElement;
+            el2.setAttribute('value', '/page-two');
+            el2.setAttribute('table-name', 'pages');
+            el2.setAttribute('record-id', '200');
+            document.body.appendChild(el2);
+
+            const el3 = document.createElement('sluggi-element') as SluggiElement;
+            el3.setAttribute('value', '/page-three');
+            el3.setAttribute('table-name', 'pages');
+            el3.setAttribute('record-id', '300');
+            document.body.appendChild(el3);
+
+            await el1.updateComplete;
+            await el2.updateComplete;
+            await el3.updateComplete;
+
+            const values1 = (el1 as any).collectFormFieldValues();
+            const values2 = (el2 as any).collectFormFieldValues();
+            const values3 = (el3 as any).collectFormFieldValues();
+
+            expect(values1, 'Element 1 should only see Page One Title').to.deep.equal({ title: 'Page One Title' });
+            expect(values2, 'Element 2 should only see Page Two Title').to.deep.equal({ title: 'Page Two Title' });
+            expect(values3, 'Element 3 should only see Page Three Title').to.deep.equal({ title: 'Page Three Title' });
+
+            document.body.removeChild(el1);
+            document.body.removeChild(el2);
+            document.body.removeChild(el3);
+            document.body.removeChild(title1);
+            document.body.removeChild(title2);
+            document.body.removeChild(title3);
         });
 
         it('collects values from multiple source fields', async () => {
