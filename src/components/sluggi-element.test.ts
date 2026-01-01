@@ -524,8 +524,7 @@ describe('SluggiElement', () => {
             el.setProposal('/parent-section/short-url-page');
             await el.updateComplete;
 
-            const pathToggle = el.shadowRoot!.querySelector('.sluggi-full-path-toggle');
-            expect(pathToggle?.classList.contains('is-active')).to.be.true;
+            expect((el as any).isFullPathMode).to.be.true;
         });
 
     });
@@ -951,7 +950,7 @@ describe('SluggiElement', () => {
             document.body.removeChild(titleInput);
         });
 
-        it('enabling SYNC disables PATH toggle', async () => {
+        it('enabling SYNC disables full path edit button', async () => {
             const titleInput = document.createElement('input');
             titleInput.setAttribute('data-sluggi-source', '');
             titleInput.setAttribute('data-formengine-input-name', 'data[pages][456][title]');
@@ -968,21 +967,18 @@ describe('SluggiElement', () => {
                 ></sluggi-element>
             `);
 
-            const pathToggle = el.shadowRoot!.querySelector('.sluggi-full-path-toggle') as HTMLElement;
+            const fullPathEditBtn = el.shadowRoot!.querySelector('.sluggi-full-path-edit-btn') as HTMLButtonElement;
             const syncToggle = el.shadowRoot!.querySelector('.sluggi-sync-toggle') as HTMLElement;
 
-            expect(pathToggle).to.exist;
+            expect(fullPathEditBtn).to.exist;
             expect(syncToggle).to.exist;
-
-            pathToggle.click();
-            await el.updateComplete;
-            expect(pathToggle.classList.contains('is-active')).to.be.true;
+            expect(fullPathEditBtn.disabled).to.be.false;
 
             syncToggle.click();
             await el.updateComplete;
 
             expect(syncToggle.classList.contains('is-synced')).to.be.true;
-            expect(pathToggle.classList.contains('is-active')).to.be.false;
+            expect(fullPathEditBtn.disabled).to.be.true;
 
             document.body.removeChild(titleInput);
         });
@@ -1529,7 +1525,7 @@ describe('SluggiElement', () => {
             expect(el.shadowRoot!.querySelector('input.sluggi-input')).to.not.exist;
         });
 
-        it('enabling LOCK disables PATH toggle', async () => {
+        it('enabling LOCK disables full path edit button', async () => {
             const el = await fixture<SluggiElement>(html`
                 <sluggi-element
                     value="/parent/child"
@@ -1539,21 +1535,18 @@ describe('SluggiElement', () => {
                 ></sluggi-element>
             `);
 
-            const pathToggle = el.shadowRoot!.querySelector('.sluggi-full-path-toggle') as HTMLElement;
+            const fullPathEditBtn = el.shadowRoot!.querySelector('.sluggi-full-path-edit-btn') as HTMLButtonElement;
             const lockToggle = el.shadowRoot!.querySelector('.sluggi-lock-toggle') as HTMLElement;
 
-            expect(pathToggle).to.exist;
+            expect(fullPathEditBtn).to.exist;
             expect(lockToggle).to.exist;
-
-            pathToggle.click();
-            await el.updateComplete;
-            expect(pathToggle.classList.contains('is-active')).to.be.true;
+            expect(fullPathEditBtn.disabled).to.be.false;
 
             lockToggle.click();
             await el.updateComplete;
 
             expect(lockToggle.classList.contains('is-locked')).to.be.true;
-            expect(pathToggle.classList.contains('is-active')).to.be.false;
+            expect(fullPathEditBtn.disabled).to.be.true;
         });
     });
 
@@ -1812,7 +1805,7 @@ describe('SluggiElement', () => {
             expect(el.shadowRoot!.querySelector('.sluggi-restriction-note')).to.be.null;
         });
 
-        it('shows full path info note when full path mode is active', async () => {
+        it('shows full path info note when full path edit mode is active', async () => {
             const el = await fixture<SluggiElement>(html`
                 <sluggi-element
                     value="/parent/child"
@@ -1821,34 +1814,13 @@ describe('SluggiElement', () => {
                 ></sluggi-element>
             `);
 
-            const pathToggle = el.shadowRoot!.querySelector('.sluggi-full-path-toggle') as HTMLElement;
-            pathToggle.click();
+            const fullPathEditBtn = el.shadowRoot!.querySelector('.sluggi-full-path-edit-btn') as HTMLElement;
+            fullPathEditBtn.click();
             await el.updateComplete;
 
             const note = el.shadowRoot!.querySelector('.sluggi-restriction-note');
             expect(note).to.exist;
             expect(note?.textContent).to.contain('Full path editing');
-        });
-
-        it('hides full path info note when full path mode is deactivated', async () => {
-            const el = await fixture<SluggiElement>(html`
-                <sluggi-element
-                    value="/parent/child"
-                    last-segment-only
-                    full-path-feature-enabled
-                ></sluggi-element>
-            `);
-
-            const pathToggle = el.shadowRoot!.querySelector('.sluggi-full-path-toggle') as HTMLElement;
-            pathToggle.click();
-            await el.updateComplete;
-
-            expect(el.shadowRoot!.querySelector('.sluggi-restriction-note')).to.exist;
-
-            pathToggle.click();
-            await el.updateComplete;
-
-            expect(el.shadowRoot!.querySelector('.sluggi-restriction-note')).to.be.null;
         });
     });
 
@@ -2074,6 +2046,84 @@ describe('SluggiElement', () => {
             await el.updateComplete;
 
             expect(menuTrigger.getAttribute('tabindex')).to.equal('-1');
+        });
+    });
+
+    describe('Full Path Edit Button', () => {
+        it('is visible next to edit button when restrictions apply', async () => {
+            const el = await fixture<SluggiElement>(html`
+                <sluggi-element
+                    value="/parent/child"
+                    last-segment-only
+                    full-path-feature-enabled
+                ></sluggi-element>
+            `);
+
+            const editBtn = el.shadowRoot!.querySelector('.sluggi-edit-btn');
+            const fullPathEditBtn = el.shadowRoot!.querySelector('.sluggi-full-path-edit-btn');
+            expect(editBtn).to.exist;
+            expect(fullPathEditBtn).to.exist;
+        });
+
+        it('enters edit mode with full path enabled when clicked', async () => {
+            const el = await fixture<SluggiElement>(html`
+                <sluggi-element
+                    value="/parent/child"
+                    last-segment-only
+                    full-path-feature-enabled
+                ></sluggi-element>
+            `);
+
+            const fullPathEditBtn = el.shadowRoot!.querySelector('.sluggi-full-path-edit-btn') as HTMLElement;
+            fullPathEditBtn.click();
+            await el.updateComplete;
+
+            const input = el.shadowRoot!.querySelector('input.sluggi-input');
+            expect(input).to.exist;
+
+            const prefix = el.shadowRoot!.querySelector('.sluggi-prefix');
+            expect(prefix).to.be.null;
+        });
+
+        it('is disabled when slug is locked', async () => {
+            const el = await fixture<SluggiElement>(html`
+                <sluggi-element
+                    value="/parent/child"
+                    last-segment-only
+                    full-path-feature-enabled
+                    lock-feature-enabled
+                    is-locked
+                ></sluggi-element>
+            `);
+
+            const fullPathEditBtn = el.shadowRoot!.querySelector('.sluggi-full-path-edit-btn') as HTMLButtonElement;
+            expect(fullPathEditBtn).to.exist;
+            expect(fullPathEditBtn.disabled).to.be.true;
+        });
+
+        it('is disabled when slug is synced', async () => {
+            const titleInput = document.createElement('input');
+            titleInput.setAttribute('data-sluggi-source', '');
+            titleInput.setAttribute('data-formengine-input-name', 'data[pages][456][title]');
+            titleInput.value = 'Demo';
+            document.body.appendChild(titleInput);
+
+            const el = await fixture<SluggiElement>(html`
+                <sluggi-element
+                    value="/parent/child"
+                    record-id="456"
+                    last-segment-only
+                    full-path-feature-enabled
+                    sync-feature-enabled
+                    is-synced
+                ></sluggi-element>
+            `);
+
+            const fullPathEditBtn = el.shadowRoot!.querySelector('.sluggi-full-path-edit-btn') as HTMLButtonElement;
+            expect(fullPathEditBtn).to.exist;
+            expect(fullPathEditBtn.disabled).to.be.true;
+
+            document.body.removeChild(titleInput);
         });
     });
 

@@ -47,7 +47,7 @@ Protect important URL paths from accidental changes:
 Restrict URL path editing capabilities for non-admin users:
 - **Last segment only**: Editors can only modify the final path segment
 - **Hierarchy permissions**: URL path editing is restricted based on page edit permissions in the rootline
-- **Full path editing toggle**: Allow permitted users to temporarily unlock full path editing via UI button
+- **Full path editing button**: Allow permitted users to directly enter full path edit mode via a dedicated button
 
 ### Excluded Page Types
 Configure page types (doktypes) that should not have URL paths, such as Sysfolder (254), Recycler (255), or Spacer (199).
@@ -70,7 +70,7 @@ Configure via **Admin Tools > Settings > Extension Configuration > sluggi**:
 | `lock` | Enable URL path locking feature | Off |
 | `lock_descendants` | Protect child paths when ancestor has locked URL path | Off |
 | `last_segment_only` | Non-admins can only edit the last URL segment | Off |
-| `allow_full_path_editing` | Show toggle button for full path editing (requires `last_segment_only`) | Off |
+| `allow_full_path_editing` | Show full path edit button (requires `last_segment_only`) | Off |
 | `exclude_doktypes` | Comma-separated list of doktypes without URL paths (e.g., `199,254,255`) | Empty |
 | `copy_url` | Show button to copy full page URL to clipboard | Off |
 | `collapsed_controls` | Hide controls behind a menu icon, expand on hover | Off |
@@ -82,7 +82,7 @@ Control which users can see and use _sluggi_ features via backend user/group per
 - `pages:slug` - Edit the URL path field
 - `pages:tx_sluggi_sync` - Toggle automatic synchronization
 - `pages:slug_locked` - Lock/unlock URL paths
-- `pages:tx_sluggi_full_path` - Use full path editing toggle
+- `pages:tx_sluggi_full_path` - Use full path editing button
 
 ## Upgrade Wizard
 

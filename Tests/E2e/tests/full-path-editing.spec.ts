@@ -1,7 +1,7 @@
 import {expect, FrameLocator, Locator, test} from '@playwright/test';
 import { waitForFormFrame } from '../fixtures/typo3-compat';
 
-test.describe('Full Path Editing - Editor Toggle', () => {
+test.describe('Full Path Editing - Editor Button', () => {
   let frame: FrameLocator;
   let slugElement: Locator;
 
@@ -18,49 +18,31 @@ test.describe('Full Path Editing - Editor Toggle', () => {
     slugElement = frame.locator('sluggi-element');
   });
 
-  test('full path toggle is visible with label when restrictions apply', async () => {
+  test('full path edit button is visible when restrictions apply', async () => {
     await expect(slugElement).toBeVisible();
     await expect(slugElement).toHaveAttribute('last-segment-only', '');
     await expect(slugElement).toHaveAttribute('full-path-feature-enabled', '');
 
-    const pathWrapper = slugElement.locator('.sluggi-full-path-wrapper');
-    await expect(pathWrapper).toBeVisible();
-
-    const pathLabel = pathWrapper.locator('.sluggi-full-path-label');
-    await expect(pathLabel).toHaveText('path');
-
-    const pathToggle = pathWrapper.locator('.sluggi-full-path-toggle');
-    await expect(pathToggle).toBeVisible();
+    const fullPathEditBtn = slugElement.locator('.sluggi-full-path-edit-btn');
+    await expect(fullPathEditBtn).toBeVisible();
   });
 
-  test('clicking path toggle changes visual state', async () => {
-    const pathToggle = slugElement.locator('.sluggi-full-path-toggle');
-    await expect(pathToggle).not.toHaveClass(/is-active/);
-
-    await pathToggle.click();
-
-    await expect(pathToggle).toHaveClass(/is-active/);
-  });
-
-  test('enabling full path mode removes locked prefix', async () => {
+  test('clicking full path edit button enters edit mode and removes prefix', async () => {
     const prefix = slugElement.locator('.sluggi-prefix');
     await expect(prefix).toBeVisible();
     await expect(prefix).toContainText('/parent-section');
 
-    const pathToggle = slugElement.locator('.sluggi-full-path-toggle');
-    await pathToggle.click();
-    await expect(pathToggle).toHaveClass(/is-active/);
+    const fullPathEditBtn = slugElement.locator('.sluggi-full-path-edit-btn');
+    await fullPathEditBtn.click();
 
+    const input = slugElement.locator('input.sluggi-input');
+    await expect(input).toBeVisible();
     await expect(prefix).not.toBeVisible();
   });
 
-  test('slashes are allowed in input when full path mode is enabled', async () => {
-    const pathToggle = slugElement.locator('.sluggi-full-path-toggle');
-    await pathToggle.click();
-    await expect(pathToggle).toHaveClass(/is-active/);
-
-    const editableArea = slugElement.locator('.sluggi-editable');
-    await editableArea.click();
+  test('slashes are allowed in input when using full path edit', async () => {
+    const fullPathEditBtn = slugElement.locator('.sluggi-full-path-edit-btn');
+    await fullPathEditBtn.click();
 
     const input = slugElement.locator('input.sluggi-input');
     await input.fill('new-parent/new-segment');
@@ -74,12 +56,8 @@ test.describe('Full Path Editing - Editor Toggle', () => {
   });
 
   test('dashes are preserved in full path mode when typing', async () => {
-    const pathToggle = slugElement.locator('.sluggi-full-path-toggle');
-    await pathToggle.click();
-    await expect(pathToggle).toHaveClass(/is-active/);
-
-    const editableArea = slugElement.locator('.sluggi-editable');
-    await editableArea.click();
+    const fullPathEditBtn = slugElement.locator('.sluggi-full-path-edit-btn');
+    await fullPathEditBtn.click();
 
     const input = slugElement.locator('input.sluggi-input');
     await input.clear();
@@ -95,11 +73,8 @@ test.describe('Full Path Editing - Editor Toggle', () => {
     await expect(editFrame.locator('h1')).toContainText('Edit Page', { timeout: 15000 });
 
     const slugEl = editFrame.locator('sluggi-element');
-    const pathToggle = slugEl.locator('.sluggi-full-path-toggle');
-    await pathToggle.click();
-
-    const editableArea = slugEl.locator('.sluggi-editable');
-    await editableArea.click();
+    const fullPathEditBtn = slugEl.locator('.sluggi-full-path-edit-btn');
+    await fullPathEditBtn.click();
 
     const input = slugEl.locator('input.sluggi-input');
     await input.fill('custom-path/nested-page');
@@ -117,7 +92,7 @@ test.describe('Full Path Editing - Editor Toggle', () => {
     await expect(savedHiddenField).toHaveValue('/custom-path/nested-page');
   });
 
-  test('full path toggle is disabled when slug is synced', async ({ page }) => {
+  test('full path edit button is disabled when slug is synced', async ({ page }) => {
     await page.goto('/typo3/record/edit?edit[pages][22]=edit');
     const editFrame = page.frameLocator('iframe');
     await expect(editFrame.locator('h1')).toContainText('Edit Page', { timeout: 15000 });
@@ -130,16 +105,18 @@ test.describe('Full Path Editing - Editor Toggle', () => {
     }
     await expect(syncToggle).toHaveClass(/is-synced/);
 
-    const pathToggle = slugEl.locator('.sluggi-full-path-toggle');
-    await expect(pathToggle).toBeVisible();
-    await expect(pathToggle).toHaveClass(/is-disabled/);
-    await expect(pathToggle).toBeDisabled();
+    const fullPathEditBtn = slugEl.locator('.sluggi-full-path-edit-btn');
+    await expect(fullPathEditBtn).toBeVisible();
+    await expect(fullPathEditBtn).toHaveClass(/is-disabled/);
+    await expect(fullPathEditBtn).toBeDisabled();
   });
 
-  test('toggling full path marks form as dirty', async ({ page }) => {
-    const pathToggle = slugElement.locator('.sluggi-full-path-toggle');
-    await pathToggle.click();
-    await expect(pathToggle).toHaveClass(/is-active/);
+  test('using full path edit marks form as dirty', async ({ page }) => {
+    const fullPathEditBtn = slugElement.locator('.sluggi-full-path-edit-btn');
+    await fullPathEditBtn.click();
+
+    const input = slugElement.locator('input.sluggi-input');
+    await input.press('Escape');
 
     await page.click('.scaffold-modulemenu [data-modulemenu-identifier="web_layout"]');
 
@@ -164,16 +141,12 @@ test.describe('Full Path Editing - Regenerate Behavior', () => {
     const frame = await waitForFormFrame(page);
 
     const slugElement = frame.locator('sluggi-element');
-    const pathToggle = slugElement.locator('.sluggi-full-path-toggle');
-    await expect(pathToggle).not.toHaveClass(/is-active/);
 
     const regenerateBtn = slugElement.locator('.sluggi-regenerate-btn');
     await expect(regenerateBtn).toBeVisible({ timeout: 10000 });
     await regenerateBtn.click();
 
     await slugElement.locator('.sluggi-spinner').waitFor({ state: 'hidden', timeout: 10000 }).catch(() => {});
-
-    await expect(pathToggle).not.toHaveClass(/is-active/);
 
     await frame.locator('button[name="_savedok"]').click();
     await page.waitForURL(/edit/, { timeout: 10000 });
@@ -183,23 +156,6 @@ test.describe('Full Path Editing - Regenerate Behavior', () => {
 
     const errorAlert = editFrame.locator('.alert-danger');
     await expect(errorAlert).not.toBeVisible();
-  });
-
-  test('regenerate auto-activates full path when slug was shortened', async ({ page }) => {
-    await page.goto('/typo3/record/edit?edit[pages][42]=edit');
-    const frame = await waitForFormFrame(page);
-
-    const slugElement = frame.locator('sluggi-element');
-    const pathToggle = slugElement.locator('.sluggi-full-path-toggle');
-    await expect(pathToggle).not.toHaveClass(/is-active/);
-
-    const regenerateBtn = slugElement.locator('.sluggi-regenerate-btn');
-    await expect(regenerateBtn).toBeVisible({ timeout: 10000 });
-    await regenerateBtn.click();
-
-    await slugElement.locator('.sluggi-spinner').waitFor({ state: 'hidden', timeout: 10000 }).catch(() => {});
-
-    await expect(pathToggle).toHaveClass(/is-active/);
   });
 
   test('regenerate with auto-activated full path saves successfully', async ({ page }) => {

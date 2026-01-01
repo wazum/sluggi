@@ -420,97 +420,6 @@
 }
 
 // =========================================================================
-// Full Path Toggle
-// =========================================================================
-
-.sluggi-full-path-wrapper {
-    display: flex;
-    align-self: stretch;
-}
-
-.sluggi-full-path-label {
-    font-size: 8px;
-    font-weight: 600;
-    color: var(--sluggi-secondary-color);
-    text-transform: uppercase;
-    letter-spacing: 0.3px;
-    line-height: 1;
-    margin-top: 3px;
-}
-
-.sluggi-full-path-toggle {
-    align-items: center;
-    justify-content: center;
-    background: var(--sluggi-secondary-bg);
-    border: none;
-    padding: 2px 10px 4px;
-    cursor: pointer;
-    transition: background-color 0.15s ease;
-    display: flex;
-    flex-direction: column;
-    border-left: 1px solid var(--sluggi-border-color);
-    border-radius: 0;
-    gap: 3px;
-
-    .sluggi-full-path-wrapper:last-child > & {
-        border-radius: 0 var(--sluggi-border-radius) var(--sluggi-border-radius) 0;
-    }
-
-    &:hover:not(:disabled) {
-        background-color: var(--sluggi-btn-hover-bg);
-    }
-
-    &:focus-visible {
-        position: relative;
-        z-index: 1;
-        outline: var(--sluggi-component-focus-outline);
-        outline-offset: 0;
-    }
-
-    &.is-disabled,
-    &:disabled {
-        opacity: 0.4;
-        cursor: not-allowed;
-        pointer-events: none;
-    }
-}
-
-.sluggi-full-path-icons {
-    position: relative;
-    width: 30px;
-    height: 18px;
-}
-
-.sluggi-full-path-icon {
-    position: absolute;
-    top: 0;
-    left: 0;
-    transition: opacity 0.35s ease-in-out;
-
-    svg {
-        display: block;
-    }
-}
-
-.sluggi-full-path-icon-on {
-    opacity: 0;
-}
-
-.sluggi-full-path-icon-off {
-    opacity: 1;
-}
-
-.sluggi-full-path-toggle.is-active {
-    .sluggi-full-path-icon-on {
-        opacity: 1;
-    }
-
-    .sluggi-full-path-icon-off {
-        opacity: 0;
-    }
-}
-
-// =========================================================================
 // Animations
 // =========================================================================
 
@@ -532,6 +441,7 @@
 }
 
 .sluggi-edit-btn:not(:disabled):hover svg,
+.sluggi-full-path-edit-btn:not(:disabled):hover svg,
 .sluggi-editable:hover ~ .sluggi-controls .sluggi-edit-btn:not(:disabled) svg {
     animation: sluggi-shake 0.4s ease;
 }
@@ -606,16 +516,14 @@
     // Reset all direct children to have no rounded corners
     > .btn,
     > .sluggi-sync-wrapper .sluggi-sync-toggle,
-    > .sluggi-lock-wrapper .sluggi-lock-toggle,
-    > .sluggi-full-path-wrapper .sluggi-full-path-toggle {
+    > .sluggi-lock-wrapper .sluggi-lock-toggle {
         border-radius: 0;
     }
 
     // Only the actual last child gets rounded corners
     > .btn:last-child,
     > .sluggi-sync-wrapper:last-child .sluggi-sync-toggle,
-    > .sluggi-lock-wrapper:last-child .sluggi-lock-toggle,
-    > .sluggi-full-path-wrapper:last-child .sluggi-full-path-toggle {
+    > .sluggi-lock-wrapper:last-child .sluggi-lock-toggle {
         border-radius: 0 var(--sluggi-border-radius) var(--sluggi-border-radius) 0;
     }
 }

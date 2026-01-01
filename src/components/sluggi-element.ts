@@ -3,7 +3,7 @@ import { customElement, property, state, query } from 'lit/decorators.js';
 import Modal from '@typo3/backend/modal.js';
 import Severity from '@typo3/backend/severity.js';
 import type { ComponentMode } from '@/types';
-import { editIcon, refreshIcon, checkIcon, closeIcon, syncOnIcon, syncOffIcon, lockOnIcon, lockOffIcon, pathOnIcon, pathOffIcon, copyIcon, menuIcon } from './icons.js';
+import { editIcon, fullPathEditIcon, refreshIcon, checkIcon, closeIcon, syncOnIcon, syncOffIcon, lockOnIcon, lockOffIcon, copyIcon, menuIcon } from './icons.js';
 import styles from '../styles/sluggi-element.scss?inline';
 
 @customElement('sluggi-element')
@@ -190,7 +190,7 @@ export class SluggiElement extends LitElement {
         return this.lockFeatureEnabled;
     }
 
-    private get showFullPathToggle(): boolean {
+    private get showFullPathEditButton(): boolean {
         if (!this.fullPathFeatureEnabled) return false;
         return this.lastSegmentOnly || !!this.lockedPrefix;
     }
@@ -213,7 +213,7 @@ export class SluggiElement extends LitElement {
         return this.isSynced;
     }
 
-    private get isFullPathToggleDisabled(): boolean {
+    private get isFullPathEditButtonDisabled(): boolean {
         return this.isLocked || this.isSynced;
     }
 
@@ -395,8 +395,8 @@ export class SluggiElement extends LitElement {
         if (this.mode === 'view') {
             const viewControls = html`
                 ${this.renderEditButton()}
+                ${this.renderFullPathEditButton()}
                 ${this.renderRegenerateButton()}
-                ${this.renderFullPathToggle()}
                 ${this.renderSyncToggle()}
                 ${this.renderLockToggle()}
                 ${this.renderCopyUrlButton()}
@@ -548,27 +548,21 @@ export class SluggiElement extends LitElement {
         `;
     }
 
-    private renderFullPathToggle() {
-        if (!this.showFullPathToggle) return nothing;
+    private renderFullPathEditButton() {
+        if (!this.showFullPathEditButton) return nothing;
 
-        const disabled = this.isFullPathToggleDisabled;
+        const disabled = this.isFullPathEditButtonDisabled;
         return html`
-            <div class="sluggi-full-path-wrapper">
-                <button
-                    type="button"
-                    class="sluggi-full-path-toggle ${this.isFullPathMode ? 'is-active' : ''} ${disabled ? 'is-disabled' : ''}"
-                    title="${this.isFullPathMode ? (this.labels['toggle.path.on'] || 'Full path editing enabled: click to restrict') : (this.labels['toggle.path.off'] || 'Click to edit full path')}"
-                    ?disabled="${disabled}"
-                    aria-disabled="${disabled}"
-                    @click="${disabled ? null : this.toggleFullPath}"
-                >
-                    <span class="sluggi-full-path-label">path</span>
-                    <span class="sluggi-full-path-icons">
-                        <span class="sluggi-full-path-icon sluggi-full-path-icon-on">${pathOnIcon}</span>
-                        <span class="sluggi-full-path-icon sluggi-full-path-icon-off">${pathOffIcon}</span>
-                    </span>
-                </button>
-            </div>
+            <button
+                type="button"
+                class="btn btn-sm btn-default sluggi-full-path-edit-btn ${disabled ? 'is-disabled' : ''}"
+                title="${this.labels['button.editFullPath'] || 'Edit full URL path'}"
+                ?disabled="${disabled}"
+                aria-disabled="${disabled}"
+                @click="${disabled ? null : this.enterFullPathEditMode}"
+            >
+                ${fullPathEditIcon}
+            </button>
         `;
     }
 
@@ -608,6 +602,8 @@ export class SluggiElement extends LitElement {
         this.conflictingSlug = fullNewValue;
         this.value = fullNewValue;
         this.mode = 'view';
+        this.isFullPathMode = false;
+        this.notifyFullPathFieldOfChange();
 
         if (oldValue !== this.value) {
             this.dispatchEvent(new CustomEvent('sluggi-change', {
@@ -924,6 +920,8 @@ export class SluggiElement extends LitElement {
     private cancelEdit() {
         this.mode = 'view';
         this.editValue = '';
+        this.isFullPathMode = false;
+        this.notifyFullPathFieldOfChange();
         this.dispatchEvent(new CustomEvent('sluggi-edit-cancel', { bubbles: true, composed: true }));
     }
 
@@ -1072,9 +1070,10 @@ export class SluggiElement extends LitElement {
     // Private Helpers: Full Path Feature
     // =========================================================================
 
-    private toggleFullPath() {
-        this.isFullPathMode = !this.isFullPathMode;
+    private enterFullPathEditMode() {
+        this.isFullPathMode = true;
         this.notifyFullPathFieldOfChange();
+        this.enterEditMode();
     }
 
     private notifyFullPathFieldOfChange() {

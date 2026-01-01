@@ -10,6 +10,10 @@ export const editIcon = html`
     </svg>
 `;
 
+export const fullPathEditIcon = html`
+    <span style="display:inline-flex;font-size:1rem;align-items:center;gap:1px;color:currentColor">${editIcon}+</span>
+`;
+
 export const refreshIcon = html`
     <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
         <path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/>
@@ -56,21 +60,6 @@ export const lockOnIcon = html`
 `;
 
 export const lockOffIcon = html`
-    <svg width="30" height="18" viewBox="0 0 36 20" fill="none">
-        <rect x="1" y="1" width="34" height="18" rx="9" fill="#6c757d" stroke="#6c757d" stroke-width="2"/>
-        <circle cx="10" cy="10" r="6" fill="white"/>
-    </svg>
-`;
-
-export const pathOnIcon = html`
-    <svg width="30" height="18" viewBox="0 0 36 20" fill="none">
-        <rect x="1" y="1" width="34" height="18" rx="9" fill="#0d6efd" stroke="#0d6efd" stroke-width="2"/>
-        <circle cx="26" cy="10" r="6" fill="white"/>
-        <path d="M24 10h4M26 8v4" stroke="#0d6efd" stroke-width="1.5" stroke-linecap="round"/>
-    </svg>
-`;
-
-export const pathOffIcon = html`
     <svg width="30" height="18" viewBox="0 0 36 20" fill="none">
         <rect x="1" y="1" width="34" height="18" rx="9" fill="#6c757d" stroke="#6c757d" stroke-width="2"/>
         <circle cx="10" cy="10" r="6" fill="white"/>
