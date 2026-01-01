@@ -113,6 +113,7 @@
     border: 1px solid var(--sluggi-border-color);
     border-radius: var(--sluggi-border-radius);
     min-height: 36px;
+    min-width: 500px;
     box-sizing: border-box;
     font-size: 12px;
     line-height: 18px;
@@ -138,10 +139,13 @@
 // =========================================================================
 
 .sluggi-prefix {
-    display: flex;
-    align-items: center;
+    display: block;
     color: var(--sluggi-secondary-color);
     white-space: nowrap;
+    overflow: clip;
+    text-overflow: ellipsis;
+    flex-shrink: 10;
+    min-width: 40px;
     padding: 8px 12px;
     background-color: var(--sluggi-secondary-bg);
     border-radius: var(--sluggi-border-radius) 0 0 var(--sluggi-border-radius);
@@ -150,15 +154,16 @@
 
 .sluggi-editable {
     cursor: pointer;
-    min-width: 0;
-    flex: 1;
+    min-width: 80px;
+    flex: 1 1 auto;
     font-weight: bold;
     line-height: inherit;
     padding: 8px 12px;
     display: block;
     color: var(--sluggi-color);
-    overflow-wrap: anywhere;
-    word-break: break-all;
+    white-space: nowrap;
+    overflow: clip;
+    text-overflow: ellipsis;
     border-radius: var(--sluggi-border-radius) 0 0 var(--sluggi-border-radius);
 
     &:focus-visible {
