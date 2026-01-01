@@ -434,6 +434,7 @@ export class SluggiElement extends LitElement {
                 class="btn btn-sm btn-default sluggi-cancel-btn"
                 title="${this.labels['button.cancel'] || 'Cancel editing'}"
                 @mousedown="${this.handleCancelButtonMousedown}"
+                @click="${this.handleCancelButtonClick}"
             >
                 ${closeIcon}
             </button>
@@ -442,6 +443,7 @@ export class SluggiElement extends LitElement {
                 class="btn btn-sm btn-default sluggi-save-btn"
                 title="${this.labels['button.save'] || 'Save URL path'}"
                 @mousedown="${this.handleSaveButtonMousedown}"
+                @click="${this.handleSaveButtonClick}"
             >
                 ${checkIcon}
             </button>
@@ -770,10 +772,15 @@ export class SluggiElement extends LitElement {
         }
     }
 
-    private handleBlur() {
-        if (this.mode === 'edit') {
-            this.saveSlug();
+    private handleBlur(e: FocusEvent) {
+        if (this.mode !== 'edit') return;
+
+        const relatedTarget = e.relatedTarget as HTMLElement | null;
+        if (relatedTarget && this.shadowRoot?.contains(relatedTarget)) {
+            return;
         }
+
+        this.saveSlug();
     }
 
     private handleSaveButtonMousedown(e: MouseEvent) {
@@ -781,8 +788,16 @@ export class SluggiElement extends LitElement {
         this.saveSlug();
     }
 
+    private handleSaveButtonClick() {
+        this.saveSlug();
+    }
+
     private handleCancelButtonMousedown(e: MouseEvent) {
         e.preventDefault();
+        this.cancelEdit();
+    }
+
+    private handleCancelButtonClick() {
         this.cancelEdit();
     }
 
