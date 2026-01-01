@@ -231,6 +231,28 @@ final class SlugElementRendererTest extends TestCase
         self::assertArrayNotHasKey('page-url', $result);
     }
 
+    #[Test]
+    public function buildAttributesIncludesCollapsedControlsWhenTrue(): void
+    {
+        $subject = new SlugElementRenderer();
+        $context = $this->createContext(['collapsedControlsEnabled' => true]);
+
+        $result = $subject->buildAttributes($context, []);
+
+        self::assertArrayHasKey('collapsed-controls', $result);
+    }
+
+    #[Test]
+    public function buildAttributesOmitsCollapsedControlsWhenFalse(): void
+    {
+        $subject = new SlugElementRenderer();
+        $context = $this->createContext(['collapsedControlsEnabled' => false]);
+
+        $result = $subject->buildAttributes($context, []);
+
+        self::assertArrayNotHasKey('collapsed-controls', $result);
+    }
+
     /**
      * @param array<string, mixed> $overrides
      *

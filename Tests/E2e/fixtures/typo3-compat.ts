@@ -174,3 +174,29 @@ export async function getListModuleUrl(page: Page, pageId: number | string): Pro
   }
   return `/typo3/module/content/records?id=${pageId}`;
 }
+
+/**
+ * Get the multi-record edit URL with columnsOnly parameter.
+ *
+ * TYPO3 12: columnsOnly is a comma-separated string (columnsOnly=field1,field2)
+ * TYPO3 13+: columnsOnly is a per-table array (columnsOnly[table][0]=field1&columnsOnly[table][1]=field2)
+ */
+export async function getMultiEditUrl(
+  page: Page,
+  table: string,
+  uids: (number | string)[],
+  columns: string[]
+): Promise<string> {
+  const version = await getTypo3Version(page);
+  const uidList = uids.join(',');
+  const baseUrl = `/typo3/record/edit?edit[${table}][${uidList}]=edit`;
+
+  if (version < 13) {
+    return `${baseUrl}&columnsOnly=${columns.join(',')}`;
+  }
+
+  const columnsParams = columns
+    .map((col, idx) => `columnsOnly[${table}][${idx}]=${col}`)
+    .join('&');
+  return `${baseUrl}&${columnsParams}`;
+}

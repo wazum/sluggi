@@ -3,7 +3,7 @@ import { customElement, property, state, query } from 'lit/decorators.js';
 import Modal from '@typo3/backend/modal.js';
 import Severity from '@typo3/backend/severity.js';
 import type { ComponentMode } from '@/types';
-import { editIcon, refreshIcon, checkIcon, closeIcon, syncOnIcon, syncOffIcon, lockOnIcon, lockOffIcon, pathOnIcon, pathOffIcon, copyIcon } from './icons.js';
+import { editIcon, refreshIcon, checkIcon, closeIcon, syncOnIcon, syncOffIcon, lockOnIcon, lockOffIcon, pathOnIcon, pathOffIcon, copyIcon, menuIcon } from './icons.js';
 import styles from '../styles/sluggi-element.scss?inline';
 
 @customElement('sluggi-element')
@@ -69,6 +69,9 @@ export class SluggiElement extends LitElement {
 
     @property({ type: String, attribute: 'page-url' })
     pageUrl = '';
+
+    @property({ type: Boolean, attribute: 'collapsed-controls', reflect: true })
+    collapsedControls = false;
 
     // =========================================================================
     // Properties: Conflict State
@@ -138,6 +141,11 @@ export class SluggiElement extends LitElement {
 
     @state()
     private showCopyConfirmation = false;
+
+    @state()
+    private controlsExpanded = false;
+
+    private hideTimeoutId: number | null = null;
 
     @query('input.sluggi-input')
     private inputElement?: HTMLInputElement;
@@ -296,7 +304,11 @@ export class SluggiElement extends LitElement {
 
     override render() {
         return html`
-            <div class="sluggi-wrapper ${this.isLocked ? 'locked' : ''}">
+            <div
+                class="sluggi-wrapper ${this.isLocked ? 'locked' : ''}"
+                @mouseenter="${this.handleWrapperMouseEnter}"
+                @mouseleave="${this.handleWrapperMouseLeave}"
+            >
                 ${this.computedPrefix ? html`<span class="sluggi-prefix">${this.computedPrefix}</span>` : nothing}
 
                 ${this.mode === 'view' ? this.renderViewMode() : this.renderEditMode()}
@@ -379,7 +391,7 @@ export class SluggiElement extends LitElement {
         }
 
         if (this.mode === 'view') {
-            return html`
+            const viewControls = html`
                 ${this.renderEditButton()}
                 ${this.renderRegenerateButton()}
                 ${this.renderFullPathToggle()}
@@ -387,6 +399,17 @@ export class SluggiElement extends LitElement {
                 ${this.renderLockToggle()}
                 ${this.renderCopyUrlButton()}
             `;
+
+            if (this.collapsedControls) {
+                return html`
+                    <div class="sluggi-collapsed-menu ${this.controlsExpanded ? 'expanded' : ''}">
+                        <span class="sluggi-menu-trigger">${menuIcon}</span>
+                        <div class="sluggi-menu-content">${viewControls}</div>
+                    </div>
+                `;
+            }
+
+            return viewControls;
         }
 
         return html`
@@ -767,6 +790,23 @@ export class SluggiElement extends LitElement {
             composed: true,
             detail: { url: fullUrl }
         }));
+    }
+
+    private handleWrapperMouseEnter() {
+        if (!this.collapsedControls) return;
+        if (this.hideTimeoutId !== null) {
+            clearTimeout(this.hideTimeoutId);
+            this.hideTimeoutId = null;
+        }
+        this.controlsExpanded = true;
+    }
+
+    private handleWrapperMouseLeave() {
+        if (!this.collapsedControls) return;
+        this.hideTimeoutId = window.setTimeout(() => {
+            this.controlsExpanded = false;
+            this.hideTimeoutId = null;
+        }, 1000);
     }
 
     private handleSourceFieldChange(event: Event) {

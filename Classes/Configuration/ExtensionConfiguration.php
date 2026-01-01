@@ -147,4 +147,16 @@ final readonly class ExtensionConfiguration
             return false;
         }
     }
+
+    public function isCollapsedControlsEnabled(): bool
+    {
+        try {
+            return (bool)$this->extensionConfiguration->get(
+                extension: 'sluggi',
+                path: 'collapsed_controls'
+            );
+        } catch (Exception) {
+            return false;
+        }
+    }
 }

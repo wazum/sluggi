@@ -157,6 +157,8 @@ trait SlugElementTrait
             'fullPathFieldName' => $this->slugElementRenderer->buildFullPathFieldName($table, $recordId),
             'copyUrlFeatureEnabled' => $this->extensionConfiguration->isCopyUrlEnabled(),
             'pageUrl' => $this->data['customData'][$fieldName]['slugPrefix'] ?? '',
+            'collapsedControlsEnabled' => $this->extensionConfiguration->isCollapsedControlsEnabled()
+                && empty($this->data['fieldListToRender']),
         ];
     }
 

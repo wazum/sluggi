@@ -341,4 +341,43 @@ final class ExtensionConfigurationTest extends TestCase
 
         self::assertFalse($subject->isCopyUrlEnabled());
     }
+
+    #[Test]
+    public function isCollapsedControlsEnabledReturnsTrueWhenSettingIs1(): void
+    {
+        $coreConfig = $this->createMock(CoreExtensionConfiguration::class);
+        $coreConfig->method('get')
+            ->with('sluggi', 'collapsed_controls')
+            ->willReturn('1');
+
+        $subject = new ExtensionConfiguration($coreConfig);
+
+        self::assertTrue($subject->isCollapsedControlsEnabled());
+    }
+
+    #[Test]
+    public function isCollapsedControlsEnabledReturnsFalseWhenSettingIs0(): void
+    {
+        $coreConfig = $this->createMock(CoreExtensionConfiguration::class);
+        $coreConfig->method('get')
+            ->with('sluggi', 'collapsed_controls')
+            ->willReturn('0');
+
+        $subject = new ExtensionConfiguration($coreConfig);
+
+        self::assertFalse($subject->isCollapsedControlsEnabled());
+    }
+
+    #[Test]
+    public function isCollapsedControlsEnabledReturnsFalseWhenSettingIsMissing(): void
+    {
+        $coreConfig = $this->createMock(CoreExtensionConfiguration::class);
+        $coreConfig->method('get')
+            ->with('sluggi', 'collapsed_controls')
+            ->willThrowException(new Exception('Configuration not found'));
+
+        $subject = new ExtensionConfiguration($coreConfig);
+
+        self::assertFalse($subject->isCollapsedControlsEnabled());
+    }
 }

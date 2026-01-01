@@ -63,6 +63,9 @@ final readonly class SlugElementRenderer
             $attributes['copy-url-feature-enabled'] = '';
             $attributes['page-url'] = $context['pageUrl'] ?? '';
         }
+        if ($context['collapsedControlsEnabled'] ?? false) {
+            $attributes['collapsed-controls'] = '';
+        }
 
         return $attributes;
     }

@@ -1793,4 +1793,115 @@ describe('SluggiElement', () => {
         });
     });
 
+    describe('Collapsed Controls', () => {
+        it('shows burger menu trigger when collapsed-controls is set', async () => {
+            const el = await fixture<SluggiElement>(html`
+                <sluggi-element
+                    value="/test"
+                    collapsed-controls
+                ></sluggi-element>
+            `);
+
+            const menuTrigger = el.shadowRoot!.querySelector('.sluggi-menu-trigger');
+            expect(menuTrigger).to.exist;
+        });
+
+        it('hides burger menu trigger when collapsed-controls is not set', async () => {
+            const el = await fixture<SluggiElement>(html`
+                <sluggi-element
+                    value="/test"
+                ></sluggi-element>
+            `);
+
+            const menuTrigger = el.shadowRoot!.querySelector('.sluggi-menu-trigger');
+            expect(menuTrigger).to.be.null;
+        });
+
+        it('expands controls on mouse enter', async () => {
+            const el = await fixture<SluggiElement>(html`
+                <sluggi-element
+                    value="/test"
+                    collapsed-controls
+                ></sluggi-element>
+            `);
+
+            const wrapper = el.shadowRoot!.querySelector('.sluggi-wrapper') as HTMLElement;
+            wrapper.dispatchEvent(new MouseEvent('mouseenter'));
+            await el.updateComplete;
+
+            const collapsedMenu = el.shadowRoot!.querySelector('.sluggi-collapsed-menu');
+            expect(collapsedMenu?.classList.contains('expanded')).to.be.true;
+        });
+
+        it('retracts controls after timeout on mouse leave', async () => {
+            const el = await fixture<SluggiElement>(html`
+                <sluggi-element
+                    value="/test"
+                    collapsed-controls
+                ></sluggi-element>
+            `);
+
+            const wrapper = el.shadowRoot!.querySelector('.sluggi-wrapper') as HTMLElement;
+            wrapper.dispatchEvent(new MouseEvent('mouseenter'));
+            await el.updateComplete;
+
+            expect(el.shadowRoot!.querySelector('.sluggi-collapsed-menu.expanded')).to.exist;
+
+            wrapper.dispatchEvent(new MouseEvent('mouseleave'));
+            await el.updateComplete;
+
+            expect(el.shadowRoot!.querySelector('.sluggi-collapsed-menu.expanded')).to.exist;
+
+            await new Promise(resolve => setTimeout(resolve, 2100));
+            await el.updateComplete;
+
+            expect(el.shadowRoot!.querySelector('.sluggi-collapsed-menu.expanded')).to.be.null;
+        });
+
+        it('cancels retract timeout when mouse re-enters', async () => {
+            const el = await fixture<SluggiElement>(html`
+                <sluggi-element
+                    value="/test"
+                    collapsed-controls
+                ></sluggi-element>
+            `);
+
+            const wrapper = el.shadowRoot!.querySelector('.sluggi-wrapper') as HTMLElement;
+            wrapper.dispatchEvent(new MouseEvent('mouseenter'));
+            await el.updateComplete;
+
+            wrapper.dispatchEvent(new MouseEvent('mouseleave'));
+            await el.updateComplete;
+
+            await new Promise(resolve => setTimeout(resolve, 1000));
+
+            wrapper.dispatchEvent(new MouseEvent('mouseenter'));
+            await el.updateComplete;
+
+            await new Promise(resolve => setTimeout(resolve, 1500));
+            await el.updateComplete;
+
+            expect(el.shadowRoot!.querySelector('.sluggi-collapsed-menu.expanded')).to.exist;
+        });
+
+        it('always shows controls directly in edit mode', async () => {
+            const el = await fixture<SluggiElement>(html`
+                <sluggi-element
+                    value="/test"
+                    collapsed-controls
+                ></sluggi-element>
+            `);
+
+            const editBtn = el.shadowRoot!.querySelector('.sluggi-edit-btn') as HTMLElement;
+            editBtn.click();
+            await el.updateComplete;
+
+            const menuTrigger = el.shadowRoot!.querySelector('.sluggi-menu-trigger');
+            expect(menuTrigger).to.be.null;
+
+            const saveBtn = el.shadowRoot!.querySelector('.sluggi-save-btn');
+            expect(saveBtn).to.exist;
+        });
+    });
+
 });

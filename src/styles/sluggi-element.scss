@@ -495,3 +495,48 @@
     color: var(--sluggi-secondary-color);
     font-style: italic;
 }
+
+// =========================================================================
+// Collapsed Controls Menu
+// =========================================================================
+
+.sluggi-collapsed-menu {
+    display: flex;
+    align-items: stretch;
+    overflow: hidden;
+}
+
+.sluggi-menu-trigger {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    align-self: stretch;
+    padding: 0 12px;
+    border-left: 1px solid var(--sluggi-border-color);
+    border-radius: 0 var(--sluggi-border-radius) var(--sluggi-border-radius) 0;
+    color: var(--sluggi-secondary-color);
+    transition: opacity 0.15s ease, width 0.2s ease;
+}
+
+.sluggi-menu-content {
+    display: flex;
+    max-width: 0;
+    opacity: 0;
+    overflow: hidden;
+    transition: max-width 0.25s ease-out, opacity 0.2s ease;
+}
+
+.sluggi-collapsed-menu.expanded {
+    .sluggi-menu-trigger {
+        opacity: 0;
+        width: 0;
+        padding: 0;
+        border: none;
+        overflow: hidden;
+    }
+
+    .sluggi-menu-content {
+        max-width: 500px;
+        opacity: 1;
+    }
+}
