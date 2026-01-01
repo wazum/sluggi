@@ -1902,6 +1902,120 @@ describe('SluggiElement', () => {
             const saveBtn = el.shadowRoot!.querySelector('.sluggi-save-btn');
             expect(saveBtn).to.exist;
         });
+
+        it('menu trigger is a button with proper ARIA attributes', async () => {
+            const el = await fixture<SluggiElement>(html`
+                <sluggi-element
+                    value="/test"
+                    collapsed-controls
+                ></sluggi-element>
+            `);
+
+            const menuTrigger = el.shadowRoot!.querySelector('.sluggi-menu-trigger') as HTMLButtonElement;
+            expect(menuTrigger.tagName).to.equal('BUTTON');
+            expect(menuTrigger.getAttribute('aria-expanded')).to.equal('false');
+            expect(menuTrigger.getAttribute('aria-haspopup')).to.equal('true');
+            expect(menuTrigger.getAttribute('aria-label')).to.exist;
+        });
+
+        it('expands controls on Enter key press', async () => {
+            const el = await fixture<SluggiElement>(html`
+                <sluggi-element
+                    value="/test"
+                    collapsed-controls
+                ></sluggi-element>
+            `);
+
+            const menuTrigger = el.shadowRoot!.querySelector('.sluggi-menu-trigger') as HTMLButtonElement;
+            menuTrigger.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+            await el.updateComplete;
+
+            const collapsedMenu = el.shadowRoot!.querySelector('.sluggi-collapsed-menu');
+            expect(collapsedMenu?.classList.contains('expanded')).to.be.true;
+            expect(menuTrigger.getAttribute('aria-expanded')).to.equal('true');
+        });
+
+        it('expands controls on Space key press', async () => {
+            const el = await fixture<SluggiElement>(html`
+                <sluggi-element
+                    value="/test"
+                    collapsed-controls
+                ></sluggi-element>
+            `);
+
+            const menuTrigger = el.shadowRoot!.querySelector('.sluggi-menu-trigger') as HTMLButtonElement;
+            menuTrigger.dispatchEvent(new KeyboardEvent('keydown', { key: ' ', bubbles: true }));
+            await el.updateComplete;
+
+            const collapsedMenu = el.shadowRoot!.querySelector('.sluggi-collapsed-menu');
+            expect(collapsedMenu?.classList.contains('expanded')).to.be.true;
+        });
+
+        it('closes menu and focuses trigger on Escape from menu content', async () => {
+            const el = await fixture<SluggiElement>(html`
+                <sluggi-element
+                    value="/test"
+                    collapsed-controls
+                ></sluggi-element>
+            `);
+
+            const menuTrigger = el.shadowRoot!.querySelector('.sluggi-menu-trigger') as HTMLButtonElement;
+            menuTrigger.click();
+            await el.updateComplete;
+
+            expect(el.shadowRoot!.querySelector('.sluggi-collapsed-menu.expanded')).to.exist;
+
+            const wrapper = el.shadowRoot!.querySelector('.sluggi-wrapper') as HTMLElement;
+            wrapper.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+            await el.updateComplete;
+
+            expect(el.shadowRoot!.querySelector('.sluggi-collapsed-menu.expanded')).to.be.null;
+        });
+
+        it('menu content has inert attribute when collapsed', async () => {
+            const el = await fixture<SluggiElement>(html`
+                <sluggi-element
+                    value="/test"
+                    collapsed-controls
+                ></sluggi-element>
+            `);
+
+            const menuContent = el.shadowRoot!.querySelector('.sluggi-menu-content') as HTMLElement;
+            expect(menuContent.hasAttribute('inert')).to.be.true;
+        });
+
+        it('menu content does not have inert attribute when expanded', async () => {
+            const el = await fixture<SluggiElement>(html`
+                <sluggi-element
+                    value="/test"
+                    collapsed-controls
+                ></sluggi-element>
+            `);
+
+            const menuTrigger = el.shadowRoot!.querySelector('.sluggi-menu-trigger') as HTMLButtonElement;
+            menuTrigger.click();
+            await el.updateComplete;
+
+            const menuContent = el.shadowRoot!.querySelector('.sluggi-menu-content') as HTMLElement;
+            expect(menuContent.hasAttribute('inert')).to.be.false;
+        });
+
+        it('menu trigger has tabindex -1 when expanded', async () => {
+            const el = await fixture<SluggiElement>(html`
+                <sluggi-element
+                    value="/test"
+                    collapsed-controls
+                ></sluggi-element>
+            `);
+
+            const menuTrigger = el.shadowRoot!.querySelector('.sluggi-menu-trigger') as HTMLButtonElement;
+            expect(menuTrigger.getAttribute('tabindex')).to.equal('0');
+
+            menuTrigger.click();
+            await el.updateComplete;
+
+            expect(menuTrigger.getAttribute('tabindex')).to.equal('-1');
+        });
     });
 
 });

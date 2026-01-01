@@ -512,10 +512,23 @@
     justify-content: center;
     align-self: stretch;
     padding: 0 12px;
+    border: none;
     border-left: 1px solid var(--sluggi-border-color);
     border-radius: 0 var(--sluggi-border-radius) var(--sluggi-border-radius) 0;
+    background: transparent;
     color: var(--sluggi-secondary-color);
-    transition: opacity 0.15s ease, width 0.2s ease;
+    cursor: pointer;
+    transition: opacity 0.15s ease, width 0.2s ease, background-color 0.15s ease;
+
+    &:hover,
+    &:focus-visible {
+        background-color: var(--sluggi-tertiary-bg);
+    }
+
+    &:focus-visible {
+        outline: 2px solid var(--sluggi-border-color);
+        outline-offset: -2px;
+    }
 }
 
 .sluggi-menu-content {

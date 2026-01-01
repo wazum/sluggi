@@ -308,6 +308,8 @@ export class SluggiElement extends LitElement {
                 class="sluggi-wrapper ${this.isLocked ? 'locked' : ''}"
                 @mouseenter="${this.handleWrapperMouseEnter}"
                 @mouseleave="${this.handleWrapperMouseLeave}"
+                @keydown="${this.handleWrapperKeydown}"
+                @focusout="${this.handleWrapperFocusout}"
             >
                 ${this.computedPrefix ? html`<span class="sluggi-prefix">${this.computedPrefix}</span>` : nothing}
 
@@ -403,8 +405,22 @@ export class SluggiElement extends LitElement {
             if (this.collapsedControls) {
                 return html`
                     <div class="sluggi-collapsed-menu ${this.controlsExpanded ? 'expanded' : ''}">
-                        <span class="sluggi-menu-trigger">${menuIcon}</span>
-                        <div class="sluggi-menu-content">${viewControls}</div>
+                        <button
+                            type="button"
+                            class="sluggi-menu-trigger"
+                            aria-expanded="${this.controlsExpanded}"
+                            aria-haspopup="true"
+                            aria-label="${this.labels['button.menu'] || 'Toggle controls menu'}"
+                            @click="${this.handleMenuTriggerClick}"
+                            @keydown="${this.handleMenuTriggerKeydown}"
+                            tabindex="${this.controlsExpanded ? '-1' : '0'}"
+                        >${menuIcon}</button>
+                        <div
+                            class="sluggi-menu-content"
+                            role="group"
+                            aria-label="Slug controls"
+                            .inert="${!this.controlsExpanded}"
+                        >${viewControls}</div>
                     </div>
                 `;
             }
@@ -807,6 +823,51 @@ export class SluggiElement extends LitElement {
             this.controlsExpanded = false;
             this.hideTimeoutId = null;
         }, 1000);
+    }
+
+    private handleMenuTriggerClick() {
+        this.controlsExpanded = !this.controlsExpanded;
+        if (this.controlsExpanded) {
+            this.focusFirstMenuButton();
+        }
+    }
+
+    private handleMenuTriggerKeydown(e: KeyboardEvent) {
+        if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            this.controlsExpanded = true;
+            this.focusFirstMenuButton();
+        } else if (e.key === 'Escape' && this.controlsExpanded) {
+            e.preventDefault();
+            this.controlsExpanded = false;
+        }
+    }
+
+    private focusFirstMenuButton() {
+        this.updateComplete.then(() => {
+            const menuContent = this.shadowRoot?.querySelector('.sluggi-menu-content');
+            const firstButton = menuContent?.querySelector('button:not(:disabled)') as HTMLButtonElement | null;
+            firstButton?.focus();
+        });
+    }
+
+    private handleWrapperKeydown(e: KeyboardEvent) {
+        if (e.key === 'Escape' && this.collapsedControls && this.controlsExpanded) {
+            e.preventDefault();
+            this.controlsExpanded = false;
+            const menuTrigger = this.shadowRoot?.querySelector('.sluggi-menu-trigger') as HTMLButtonElement | null;
+            menuTrigger?.focus();
+        }
+    }
+
+    private handleWrapperFocusout(e: FocusEvent) {
+        if (!this.collapsedControls || !this.controlsExpanded) return;
+
+        const relatedTarget = e.relatedTarget as Node | null;
+        const wrapper = this.shadowRoot?.querySelector('.sluggi-wrapper');
+        if (wrapper && relatedTarget && !wrapper.contains(relatedTarget)) {
+            this.controlsExpanded = false;
+        }
     }
 
     private handleSourceFieldChange(event: Event) {

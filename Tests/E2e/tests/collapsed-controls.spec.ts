@@ -57,6 +57,58 @@ test.describe('Collapsed Controls', () => {
       await expect(menuContent).not.toBeVisible();
       await expect(menuTrigger).toBeVisible();
     });
+
+    test('burger menu is keyboard accessible', async ({ page }) => {
+      await page.goto('/typo3/record/edit?edit[pages][43]=edit');
+      const frame = page.frameLocator('iframe');
+      await expect(frame.locator('h1')).toContainText('Edit Page', { timeout: 15000 });
+
+      const slugElement = frame.locator('sluggi-element');
+      const menuTrigger = slugElement.locator('.sluggi-menu-trigger');
+      const menuContent = slugElement.locator('.sluggi-menu-content');
+
+      await expect(menuTrigger).toHaveAttribute('aria-expanded', 'false');
+      await menuTrigger.focus();
+      await expect(menuContent).not.toBeVisible();
+
+      await menuTrigger.press('Enter');
+      await expect(menuContent).toBeVisible({ timeout: 1000 });
+      await expect(menuTrigger).toHaveAttribute('aria-expanded', 'true');
+
+      const editButton = slugElement.locator('.sluggi-edit-btn');
+      await expect(editButton).toBeFocused();
+    });
+
+    test('Escape closes menu and returns focus to trigger', async ({ page }) => {
+      await page.goto('/typo3/record/edit?edit[pages][43]=edit');
+      const frame = page.frameLocator('iframe');
+      await expect(frame.locator('h1')).toContainText('Edit Page', { timeout: 15000 });
+
+      const slugElement = frame.locator('sluggi-element');
+      const menuTrigger = slugElement.locator('.sluggi-menu-trigger');
+      const menuContent = slugElement.locator('.sluggi-menu-content');
+      const editButton = slugElement.locator('.sluggi-edit-btn');
+
+      await menuTrigger.focus();
+      await menuTrigger.press('Enter');
+      await expect(menuContent).toBeVisible({ timeout: 1000 });
+      await expect(editButton).toBeFocused();
+
+      await editButton.press('Escape');
+      await expect(menuContent).not.toBeVisible();
+      await expect(menuTrigger).toBeFocused();
+    });
+
+    test('hidden buttons are not focusable when menu is collapsed', async ({ page }) => {
+      await page.goto('/typo3/record/edit?edit[pages][43]=edit');
+      const frame = page.frameLocator('iframe');
+      await expect(frame.locator('h1')).toContainText('Edit Page', { timeout: 15000 });
+
+      const slugElement = frame.locator('sluggi-element');
+      const menuContent = slugElement.locator('.sluggi-menu-content');
+
+      await expect(menuContent).toHaveAttribute('inert', '');
+    });
   });
 
   test.describe('multi-edit mode', () => {
