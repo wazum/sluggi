@@ -27,6 +27,8 @@ Replaces the default slug field with a custom `<sluggi-element>` web component:
 - Automatic URL path proposals based on configured source fields (title, nav_title, etc.)
 - Conflict detection with resolution options
 - Visual indicators on source fields that influence URL path generation
+- Copy page URL to clipboard button (optional)
+- Collapsed controls mode for compact UI display (optional)
 
 ### Automatic Synchronization
 When enabled, URL paths automatically regenerate when source fields change:
@@ -39,12 +41,13 @@ Protect important URL paths from accidental changes:
 - Lock individual page URL paths
 - Optionally protect descendant paths when ancestor changes
 - Locked URL paths skip automatic regeneration
+- Auto-lock when full path is manually edited
 
 ### Access Control
 Restrict URL path editing capabilities for non-admin users:
 - **Last segment only**: Editors can only modify the final path segment
-- **Hierarchy permissions**: URL path editing requires permission on the parent page
-- **Full path editing toggle**: Allow permitted users to unlock full path editing via UI button
+- **Hierarchy permissions**: URL path editing is restricted based on page edit permissions in the rootline
+- **Full path editing toggle**: Allow permitted users to temporarily unlock full path editing via UI button
 
 ### Excluded Page Types
 Configure page types (doktypes) that should not have URL paths, such as Sysfolder (254), Recycler (255), or Spacer (199).
@@ -62,12 +65,15 @@ Configure via **Admin Tools > Settings > Extension Configuration > sluggi**:
 | Setting | Description | Default |
 |---------|-------------|---------|
 | `synchronize` | Enable automatic URL path regeneration when source fields change | On |
+| `synchronize_default` | Enable sync by default for new pages | On |
 | `synchronize_tables` | Comma-separated list of tables for auto-sync (e.g., `tx_news_domain_model_news`) | Empty |
 | `lock` | Enable URL path locking feature | Off |
 | `lock_descendants` | Protect child paths when ancestor has locked URL path | Off |
 | `last_segment_only` | Non-admins can only edit the last URL segment | Off |
-| `allow_full_path_editing` | Show toggle button for full path editing (with restrictions) | Off |
+| `allow_full_path_editing` | Show toggle button for full path editing (requires `last_segment_only`) | Off |
 | `exclude_doktypes` | Comma-separated list of doktypes without URL paths (e.g., `199,254,255`) | Empty |
+| `copy_url` | Show button to copy full page URL to clipboard | Off |
+| `collapsed_controls` | Hide controls behind a menu icon, expand on hover | Off |
 
 ## Field Access
 
@@ -94,6 +100,15 @@ TYPO3 core's slug generator treats slashes in source fields (title, nav_title) a
 - Regenerate button clicks
 - Auto-sync when title changes
 - Page tree inline editing
+
+### Self-Referencing Redirects
+
+_sluggi_ automatically prevents EXT:redirects from creating redirects that point to themselves.
+
+## Suggested Extensions
+
+- [news-redirect-slug-change](https://github.com/georgringer/news-redirect-slug-change) - Generate redirects when news slugs change
+- [ig-slug](https://github.com/internetgalerie/ig-slug) - Rebuild URL slugs in bulk
 
 ## License
 
