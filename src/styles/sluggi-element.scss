@@ -173,7 +173,7 @@
 
     &.locked,
     &.synced {
-        cursor: default;
+        cursor: not-allowed;
     }
 
     &.no-edit {
