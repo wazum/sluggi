@@ -326,7 +326,7 @@ export class SluggiElement extends LitElement {
 
     private renderRestrictionNote() {
         if (this.showCopyConfirmation) {
-            return html`<p class="sluggi-restriction-note sluggi-copy-confirmation">${this.labels['copyConfirmation'] || 'URL copied to clipboard.'}</p>`;
+            return html`<p class="sluggi-note sluggi-copy-confirmation" role="status" aria-live="polite">${this.labels['copyConfirmation'] || 'URL copied to clipboard.'}</p>`;
         }
 
         if (!this.isSynced && !this.isLocked && !this.isFullPathMode) return nothing;
@@ -340,7 +340,7 @@ export class SluggiElement extends LitElement {
             message = this.labels.fullPathNote || 'Full path editing is enabled. You can modify the entire URL structure.';
         }
 
-        return html`<p class="sluggi-restriction-note">${message}</p>`;
+        return html`<p class="sluggi-note" role="status" aria-live="polite">${message}</p>`;
     }
 
     private renderViewMode() {

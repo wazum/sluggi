@@ -1777,9 +1777,11 @@ describe('SluggiElement', () => {
                 ></sluggi-element>
             `);
 
-            const note = el.shadowRoot!.querySelector('.sluggi-restriction-note');
+            const note = el.shadowRoot!.querySelector('.sluggi-note');
             expect(note).to.exist;
             expect(note?.textContent).to.contain('synchronized');
+            expect(note?.getAttribute('role')).to.equal('status');
+            expect(note?.getAttribute('aria-live')).to.equal('polite');
         });
 
         it('shows lock restriction note when isLocked', async () => {
@@ -1790,7 +1792,7 @@ describe('SluggiElement', () => {
                 ></sluggi-element>
             `);
 
-            const note = el.shadowRoot!.querySelector('.sluggi-restriction-note');
+            const note = el.shadowRoot!.querySelector('.sluggi-note');
             expect(note).to.exist;
             expect(note?.textContent).to.contain('locked');
         });
@@ -1802,7 +1804,7 @@ describe('SluggiElement', () => {
                 ></sluggi-element>
             `);
 
-            expect(el.shadowRoot!.querySelector('.sluggi-restriction-note')).to.be.null;
+            expect(el.shadowRoot!.querySelector('.sluggi-note')).to.be.null;
         });
 
         it('shows full path info note when full path edit mode is active', async () => {
@@ -1818,7 +1820,7 @@ describe('SluggiElement', () => {
             fullPathEditBtn.click();
             await el.updateComplete;
 
-            const note = el.shadowRoot!.querySelector('.sluggi-restriction-note');
+            const note = el.shadowRoot!.querySelector('.sluggi-note');
             expect(note).to.exist;
             expect(note?.textContent).to.contain('Full path editing');
         });
