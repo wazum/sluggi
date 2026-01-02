@@ -309,6 +309,7 @@ export class SluggiElement extends LitElement {
                 @mouseenter="${this.handleWrapperMouseEnter}"
                 @mouseleave="${this.handleWrapperMouseLeave}"
                 @keydown="${this.handleWrapperKeydown}"
+                @focusin="${this.handleWrapperFocusin}"
                 @focusout="${this.handleWrapperFocusout}"
             >
                 ${this.computedPrefix ? html`<span class="sluggi-prefix">${this.computedPrefix}</span>` : nothing}
@@ -831,6 +832,10 @@ export class SluggiElement extends LitElement {
     private handleWrapperMouseLeave() {
         if (!this.collapsedControls) return;
         this.hideTimeoutId = window.setTimeout(() => {
+            const wrapper = this.shadowRoot?.querySelector('.sluggi-wrapper');
+            if (wrapper?.contains(this.shadowRoot?.activeElement ?? null)) {
+                return;
+            }
             this.controlsExpanded = false;
             this.hideTimeoutId = null;
         }, 1000);
@@ -868,6 +873,14 @@ export class SluggiElement extends LitElement {
             this.controlsExpanded = false;
             const menuTrigger = this.shadowRoot?.querySelector('.sluggi-menu-trigger') as HTMLButtonElement | null;
             menuTrigger?.focus();
+        }
+    }
+
+    private handleWrapperFocusin() {
+        if (!this.collapsedControls) return;
+        if (this.hideTimeoutId !== null) {
+            clearTimeout(this.hideTimeoutId);
+            this.hideTimeoutId = null;
         }
     }
 
