@@ -30,9 +30,13 @@ export default defineConfig({
       testMatch: 'fixtures/restricted-editor-auth.setup.ts',
     },
     {
+      name: 'setup-collapsed-admin',
+      testMatch: 'fixtures/collapsed-admin-auth.setup.ts',
+    },
+    {
       name: 'chromium',
       testDir: './tests',
-      testIgnore: ['**/last-segment-only.spec.ts', '**/hierarchy-permission.spec.ts', '**/field-access-restriction.spec.ts', '**/full-path-editing.spec.ts'],
+      testIgnore: ['**/last-segment-only.spec.ts', '**/hierarchy-permission.spec.ts', '**/field-access-restriction.spec.ts', '**/full-path-editing.spec.ts', '**/collapsed-controls.spec.ts'],
       use: {
         ...devices['Desktop Chrome'],
         storageState: '.auth/user.json',
@@ -58,6 +62,16 @@ export default defineConfig({
         storageState: '.auth/restricted-editor.json',
       },
       dependencies: ['setup-restricted-editor'],
+    },
+    {
+      name: 'collapsed-admin',
+      testDir: './tests',
+      testMatch: ['**/collapsed-controls.spec.ts'],
+      use: {
+        ...devices['Desktop Chrome'],
+        storageState: '.auth/collapsed-admin.json',
+      },
+      dependencies: ['setup-collapsed-admin'],
     },
   ],
 

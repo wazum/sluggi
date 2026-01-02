@@ -15,6 +15,7 @@ use Wazum\Sluggi\Service\SlugElementRenderer;
 use Wazum\Sluggi\Service\SlugGeneratorService;
 use Wazum\Sluggi\Service\SlugLockService;
 use Wazum\Sluggi\Service\SlugSyncService;
+use Wazum\Sluggi\Service\UserSettingsService;
 
 if ((new Typo3Version())->getMajorVersion() < 13) {
     return;
@@ -63,6 +64,7 @@ final class SlugElementV14 extends AbstractFormElement
         SlugGeneratorService $slugGeneratorService,
         FullPathEditingService $fullPathEditingService,
         ExtensionConfiguration $extensionConfiguration,
+        UserSettingsService $userSettingsService,
     ) {
         $this->slugElementRenderer = $slugElementRenderer;
         $this->slugSyncService = $slugSyncService;
@@ -73,5 +75,6 @@ final class SlugElementV14 extends AbstractFormElement
         $this->slugGeneratorService = $slugGeneratorService;
         $this->fullPathEditingService = $fullPathEditingService;
         $this->extensionConfiguration = $extensionConfiguration;
+        $this->userSettingsService = $userSettingsService;
     }
 }

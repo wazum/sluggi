@@ -90,6 +90,9 @@ services:
   Wazum\Sluggi\Service\SlugSyncService:
     public: true
 
+  Wazum\Sluggi\Service\UserSettingsService:
+    public: true
+
   # EventListener
   Wazum\Sluggi\EventListener\PreventSelfReferencingRedirect:
     tags:

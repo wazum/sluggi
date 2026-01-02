@@ -75,6 +75,9 @@
             <trans-unit id="copyConfirmation" resname="copyConfirmation">
                 <source>URL copied to clipboard.</source>
             </trans-unit>
+            <trans-unit id="userSettings.collapsedControls" resname="userSettings.collapsedControls">
+                <source>Sluggi: Use compact controls menu</source>
+            </trans-unit>
         </body>
     </file>
 </xliff>

@@ -16,12 +16,16 @@ VALUES (3, 0, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 0, 0, 'Restricted Editors', 'p
 -- =============================================
 -- Backend Users
 -- =============================================
-DELETE FROM `be_users` WHERE `uid` IN (2, 3);
+DELETE FROM `be_users` WHERE `uid` IN (2, 3, 4);
 
 -- Admin (password: docker)
 INSERT INTO `be_users` (`uid`, `pid`, `tstamp`, `crdate`, `username`, `password`, `admin`, `usergroup`, `disable`, `deleted`)
 VALUES (1, 0, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 'admin', '$argon2id$v=19$m=65536,t=4,p=1$cDN1QXFkY21Rd1NGR2YwMQ$6co8ugqO4m6sdtCw08XSe9ayMuKNzgUDKpcfU9sSODg', 1, '', 0, 0)
 ON DUPLICATE KEY UPDATE `tstamp` = UNIX_TIMESTAMP(), `username` = VALUES(`username`), `password` = VALUES(`password`), `admin` = 1, `disable` = 0, `deleted` = 0;
+
+-- Collapsed Controls Admin (password: docker, uc includes sluggiCollapsedControls for collapsed-controls E2E test)
+INSERT INTO `be_users` (`uid`, `pid`, `tstamp`, `crdate`, `username`, `password`, `admin`, `usergroup`, `disable`, `deleted`, `uc`)
+VALUES (4, 0, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 'collapsed_admin', '$argon2id$v=19$m=65536,t=4,p=1$cDN1QXFkY21Rd1NGR2YwMQ$6co8ugqO4m6sdtCw08XSe9ayMuKNzgUDKpcfU9sSODg', 1, '', 0, 0, 'a:1:{s:23:"sluggiCollapsedControls";s:1:"1";}');
 
 -- Editor (group 2, options=3 enables "Mount from groups: DB Mounts + File Mounts")
 INSERT INTO `be_users` (`uid`, `pid`, `tstamp`, `crdate`, `username`, `password`, `admin`, `usergroup`, `options`, `disable`, `deleted`)

@@ -73,7 +73,14 @@ Configure via **Admin Tools > Settings > Extension Configuration > sluggi**:
 | `allow_full_path_editing` | Show full path edit button (requires `last_segment_only`) | Off |
 | `exclude_doktypes` | Comma-separated list of doktypes without URL paths (e.g., `199,254,255`) | Empty |
 | `copy_url` | Show button to copy full page URL to clipboard | Off |
-| `collapsed_controls` | Hide controls behind a menu icon, expand on hover | Off |
+
+## User Settings
+
+Individual users can configure their preferences via **User Settings > Personalization**:
+
+| Setting | Description | Default |
+|---------|-------------|---------|
+| `Sluggi: Use compact controls menu` | Hide controls behind a menu icon, expand on hover | Off |
 
 ## Field Access
 

@@ -17,6 +17,7 @@ use Wazum\Sluggi\Service\SlugElementRenderer;
 use Wazum\Sluggi\Service\SlugGeneratorService;
 use Wazum\Sluggi\Service\SlugLockService;
 use Wazum\Sluggi\Service\SlugSyncService;
+use Wazum\Sluggi\Service\UserSettingsService;
 
 trait SlugElementTrait
 {
@@ -29,6 +30,7 @@ trait SlugElementTrait
     protected SlugGeneratorService $slugGeneratorService;
     protected FullPathEditingService $fullPathEditingService;
     protected ExtensionConfiguration $extensionConfiguration;
+    protected UserSettingsService $userSettingsService;
 
     /**
      * @return array<string, mixed>
@@ -157,7 +159,7 @@ trait SlugElementTrait
             'fullPathFieldName' => $this->slugElementRenderer->buildFullPathFieldName($table, $recordId),
             'copyUrlFeatureEnabled' => $this->extensionConfiguration->isCopyUrlEnabled(),
             'pageUrl' => $this->data['customData'][$fieldName]['slugPrefix'] ?? '',
-            'collapsedControlsEnabled' => $this->extensionConfiguration->isCollapsedControlsEnabled()
+            'collapsedControlsEnabled' => $this->userSettingsService->isCollapsedControlsEnabled()
                 && empty($this->data['fieldListToRender']),
         ];
     }

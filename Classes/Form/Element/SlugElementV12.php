@@ -18,6 +18,7 @@ use Wazum\Sluggi\Service\SlugElementRenderer;
 use Wazum\Sluggi\Service\SlugGeneratorService;
 use Wazum\Sluggi\Service\SlugLockService;
 use Wazum\Sluggi\Service\SlugSyncService;
+use Wazum\Sluggi\Service\UserSettingsService;
 
 if ((new Typo3Version())->getMajorVersion() >= 13) {
     return;
@@ -78,5 +79,6 @@ final class SlugElementV12 extends AbstractFormElement
             ExtensionConfiguration::class,
             GeneralUtility::makeInstance(CoreExtensionConfiguration::class)
         );
+        $this->userSettingsService = GeneralUtility::makeInstance(UserSettingsService::class);
     }
 }

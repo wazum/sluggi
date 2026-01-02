@@ -263,13 +263,6 @@ jobs:
                   'synchronize' => '1',
                   'lock' => '1',
               ],
-              'collapsed-controls' => [
-                  'exclude_doktypes' => '254',
-                  'last_segment_only' => '0',
-                  'synchronize' => '1',
-                  'lock' => '1',
-                  'collapsed_controls' => '1',
-              ],
               default => [
                   'exclude_doktypes' => '254',
                   'last_segment_only' => '0',
