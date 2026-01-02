@@ -1,0 +1,5 @@
+"pages"
+,"uid","pid","title","slug","tx_sluggi_sync","doktype","perms_userid","perms_groupid","perms_user","perms_group","perms_everybody"
+,11,1,"Sync Parent","/sync-parent",1,1,2,1,31,31,1
+,12,11,"Sync Child","/sync-parent/sync-child",1,1,2,1,31,31,1
+,13,12,"Sync Grandchild","/sync-parent/sync-child/sync-grandchild",1,1,2,1,31,31,1

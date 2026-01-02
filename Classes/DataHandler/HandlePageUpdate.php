@@ -11,6 +11,7 @@ use TYPO3\CMS\Redirects\Service\SlugService;
 use Wazum\Sluggi\Service\SlugGeneratorService;
 use Wazum\Sluggi\Service\SlugLockService;
 use Wazum\Sluggi\Service\SlugSyncService;
+use Wazum\Sluggi\Utility\DataHandlerUtility;
 
 final readonly class HandlePageUpdate
 {
@@ -37,7 +38,7 @@ final readonly class HandlePageUpdate
             return;
         }
 
-        if ($this->isNestedHookInvocation($dataHandler)) {
+        if (DataHandlerUtility::isNestedSlugUpdate($dataHandler)) {
             return;
         }
 
@@ -90,15 +91,5 @@ final readonly class HandlePageUpdate
 
         $changeItem = $changeItem->withChanged(array_merge($record, $fieldArray));
         $this->slugService->rebuildSlugsForSlugChange($pageId, $changeItem, $correlationId);
-    }
-
-    private function isNestedHookInvocation(DataHandler $dataHandler): bool
-    {
-        $correlationId = $dataHandler->getCorrelationId();
-        if ($correlationId === null) {
-            return false;
-        }
-
-        return in_array(SlugService::CORRELATION_ID_IDENTIFIER, $correlationId->getAspects(), true);
     }
 }

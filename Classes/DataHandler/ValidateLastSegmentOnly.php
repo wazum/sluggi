@@ -9,8 +9,8 @@ use TYPO3\CMS\Core\Authentication\BackendUserAuthentication;
 use TYPO3\CMS\Core\DataHandling\DataHandler;
 use Wazum\Sluggi\Service\FullPathEditingService;
 use Wazum\Sluggi\Service\LastSegmentValidationService;
+use Wazum\Sluggi\Utility\DataHandlerUtility;
 use Wazum\Sluggi\Utility\FlashMessageUtility;
-use Wazum\Sluggi\Utility\SlugUtility;
 
 final readonly class ValidateLastSegmentOnly
 {
@@ -51,17 +51,17 @@ final readonly class ValidateLastSegmentOnly
             return;
         }
 
-        $record = BackendUtility::getRecordWSOL('pages', (int)$id, 'slug,pid');
+        if (DataHandlerUtility::isNestedSlugUpdate($dataHandler)) {
+            return;
+        }
+
+        $record = BackendUtility::getRecordWSOL('pages', (int)$id, 'slug');
         if ($record === null) {
             return;
         }
 
         $oldSlug = (string)$record['slug'];
         $newSlug = (string)$fieldArray['slug'];
-
-        if ($this->isCascadeUpdateFromParent($record, $oldSlug, $newSlug)) {
-            return;
-        }
 
         if (!$this->validationService->validateSlugChange($oldSlug, $newSlug)) {
             unset($fieldArray['slug']);
@@ -80,42 +80,6 @@ final readonly class ValidateLastSegmentOnly
                 'Slug change blocked'
             );
         }
-    }
-
-    /**
-     * Detect cascade updates from parent page slug changes.
-     * TYPO3 automatically updates child slugs when a parent slug changes.
-     * We allow these by checking: same last segment + new slug matches parent prefix.
-     *
-     * @param array<string, mixed> $record
-     */
-    private function isCascadeUpdateFromParent(array $record, string $oldSlug, string $newSlug): bool
-    {
-        $parentPageId = (int)($record['pid'] ?? 0);
-        if ($parentPageId <= 0) {
-            return false;
-        }
-
-        $parentRecord = BackendUtility::getRecordWSOL('pages', $parentPageId, 'slug');
-        if ($parentRecord === null) {
-            return false;
-        }
-
-        $parentSlug = (string)$parentRecord['slug'];
-        if ($parentSlug === '' || $parentSlug === '/') {
-            return false;
-        }
-
-        $oldLastSegment = SlugUtility::getLastSegment($oldSlug);
-        $newLastSegment = SlugUtility::getLastSegment($newSlug);
-
-        if ($oldLastSegment !== $newLastSegment) {
-            return false;
-        }
-
-        $expectedSlug = rtrim($parentSlug, '/') . '/' . $newLastSegment;
-
-        return $newSlug === $expectedSlug;
     }
 
     private function getBackendUser(): ?BackendUserAuthentication

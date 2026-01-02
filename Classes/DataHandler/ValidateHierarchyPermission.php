@@ -10,6 +10,7 @@ use TYPO3\CMS\Core\DataHandling\DataHandler;
 use Wazum\Sluggi\Configuration\ExtensionConfiguration;
 use Wazum\Sluggi\Service\FullPathEditingService;
 use Wazum\Sluggi\Service\HierarchyPermissionService;
+use Wazum\Sluggi\Utility\DataHandlerUtility;
 use Wazum\Sluggi\Utility\FlashMessageUtility;
 
 final readonly class ValidateHierarchyPermission
@@ -48,6 +49,10 @@ final readonly class ValidateHierarchyPermission
         }
 
         if ($this->fullPathEditingService->isAllowedForRequest($fieldArray, $table)) {
+            return;
+        }
+
+        if (DataHandlerUtility::isNestedSlugUpdate($dataHandler)) {
             return;
         }
 

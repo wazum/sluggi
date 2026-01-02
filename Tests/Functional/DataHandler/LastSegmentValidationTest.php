@@ -123,4 +123,52 @@ final class LastSegmentValidationTest extends FunctionalTestCase
 
         self::assertSame('/completely/different/path', $row['slug']);
     }
+
+    #[Test]
+    public function syncTriggeredCascadePassesForNonAdmin(): void
+    {
+        $GLOBALS['TYPO3_CONF_VARS']['EXTENSIONS']['sluggi']['synchronize'] = '1';
+        $GLOBALS['TYPO3_CONF_VARS']['EXTENSIONS']['sluggi']['synchronize_default'] = '1';
+        Typo3Compatibility::writeSiteConfiguration('test', [
+            'rootPageId' => 1,
+            'base' => '/',
+            'languages' => [
+                [
+                    'languageId' => 0,
+                    'title' => 'English',
+                    'locale' => 'en_US.UTF-8',
+                    'base' => '/',
+                ],
+            ],
+            'settings' => [
+                'redirects' => [
+                    'autoUpdateSlugs' => true,
+                    'autoCreateRedirects' => false,
+                ],
+            ],
+        ]);
+
+        $this->importCSVDataSet(__DIR__ . '/Fixtures/pages_sync_cascade.csv');
+        $this->setUpBackendUser(2);
+
+        $dataHandler = GeneralUtility::makeInstance(DataHandler::class);
+        $dataHandler->start(
+            [
+                'pages' => [
+                    11 => [
+                        'title' => 'New Sync Parent',
+                    ],
+                ],
+            ],
+            []
+        );
+        $dataHandler->process_datamap();
+
+        self::assertEmpty(
+            $dataHandler->errorLog,
+            'Non-admin cascade update should pass. Errors: ' . implode(', ', $dataHandler->errorLog)
+        );
+
+        $this->assertCSVDataSet(__DIR__ . '/Fixtures/pages_sync_cascade_expected.csv');
+    }
 }
