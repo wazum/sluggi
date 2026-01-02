@@ -21,6 +21,12 @@ services:
   Wazum\Sluggi\DataHandler\HandlePageCopy:
     public: true
 
+  Wazum\Sluggi\DataHandler\HandlePageUndelete:
+    public: true
+
+  Wazum\Sluggi\DataHandler\HandleRecordUndelete:
+    public: true
+
   Wazum\Sluggi\DataHandler\HandlePageMove:
     public: true
 

@@ -1,0 +1,6 @@
+"pages"
+,"uid","pid","title","slug","tx_sluggi_sync","doktype","deleted"
+,1,0,"Root Page","/",0,1,0
+,2,1,"Parent","/parent",0,1,0
+,3,2,"Child","/parent/child",0,1,0
+,4,2,"Child","/parent/child-1",0,1,0

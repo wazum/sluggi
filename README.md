@@ -58,6 +58,12 @@ Enable automatic URL path synchronization for any table with a TCA slug field (e
 - URL paths regenerate when any source field defined in `generatorOptions.fields` changes
 - Supports multi-field generation (e.g., `['title', 'subtitle']` with `fieldSeparator`)
 
+### Duplicate Slug Prevention
+Automatically prevents duplicate slugs in scenarios where TYPO3 core doesn't:
+- **Page/record copy**: Copied pages get unique slugs based on target location
+- **Page move**: Child page slugs update to reflect new parent path
+- **Recycler restore**: Restored records get unique slugs if conflicts exist
+
 ## Configuration
 
 Configure via **Admin Tools > Settings > Extension Configuration > sluggi**:
@@ -112,6 +118,17 @@ TYPO3 core's slug generator treats slashes in source fields (title, nav_title) a
 ### Self-Referencing Redirects
 
 _sluggi_ automatically prevents EXT:redirects from creating redirects that point to themselves.
+
+### Recycler Restore Protection
+
+When restoring deleted pages or records from the recycler, TYPO3 core does not check for slug conflicts. This can result in duplicate slugs causing 500 errors or routing issues.
+
+**_sluggi_ automatically validates and regenerates slugs** when records are restored:
+
+- **Pages**: Always validated, using site-based uniqueness
+- **Other tables**: Validated when configured in `synchronize_tables`, respecting the TCA `eval` setting (`unique`, `uniqueInPid`, or `uniqueInSite`)
+
+If a conflict is detected, sluggi appends a numeric suffix (e.g., `/my-page` becomes `/my-page-1`).
 
 ## Suggested Extensions
 

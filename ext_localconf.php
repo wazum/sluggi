@@ -15,7 +15,9 @@ use Wazum\Sluggi\Controller\FormSlugAjaxControllerV14;
 use Wazum\Sluggi\DataHandler\ClearSlugForExcludedDoktypes;
 use Wazum\Sluggi\DataHandler\HandlePageCopy;
 use Wazum\Sluggi\DataHandler\HandlePageMove;
+use Wazum\Sluggi\DataHandler\HandlePageUndelete;
 use Wazum\Sluggi\DataHandler\HandlePageUpdate;
+use Wazum\Sluggi\DataHandler\HandleRecordUndelete;
 use Wazum\Sluggi\DataHandler\InitializeSyncForNewPage;
 use Wazum\Sluggi\DataHandler\HandleRecordUpdate;
 use Wazum\Sluggi\DataHandler\LockSlugOnFullPathEdit;
@@ -96,6 +98,12 @@ $GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['t3lib/class.t3lib_tcemain.php']['proc
 
 $GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['t3lib/class.t3lib_tcemain.php']['processCmdmapClass']['sluggi_copy'] =
     HandlePageCopy::class;
+
+$GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['t3lib/class.t3lib_tcemain.php']['processCmdmapClass']['sluggi_undelete'] =
+    HandlePageUndelete::class;
+
+$GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['t3lib/class.t3lib_tcemain.php']['processCmdmapClass']['sluggi_record_undelete'] =
+    HandleRecordUndelete::class;
 
 $GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['t3lib/class.t3lib_tcemain.php']['moveRecordClass']['sluggi_move'] =
     HandlePageMove::class;

@@ -1,0 +1,4 @@
+"tx_sluggitest_article"
+,"uid","pid","title","subtitle","slug","deleted"
+,1,0,"Article One","Subtitle","article-one/subtitle",0
+,2,0,"Article One","Subtitle","article-one/subtitle-1",0
