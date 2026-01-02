@@ -27,4 +27,20 @@ final class TestSlugPostModifier
 
         return $slug;
     }
+
+    /**
+     * PostModifier that appends workspace ID to slug for testing.
+     *
+     * @param array{slug: string, workspaceId: int, configuration: array<string, mixed>, record: array<string, mixed>, pid: int, prefix: string, tableName: string, fieldName: string} $params
+     */
+    public function appendWorkspaceId(array $params): string
+    {
+        $workspaceId = $params['workspaceId'];
+
+        if ($workspaceId > 0) {
+            return $params['slug'] . '-ws' . $workspaceId;
+        }
+
+        return $params['slug'];
+    }
 }

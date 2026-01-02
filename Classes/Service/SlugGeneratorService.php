@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Wazum\Sluggi\Service;
 
 use TYPO3\CMS\Backend\Utility\BackendUtility;
+use TYPO3\CMS\Core\Authentication\BackendUserAuthentication;
 use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\DataHandling\Model\RecordStateFactory;
 use TYPO3\CMS\Core\DataHandling\SlugHelper;
@@ -141,7 +142,7 @@ final readonly class SlugGeneratorService
         foreach ($postModifiers as $funcName) {
             $hookParameters = [
                 'slug' => $slug,
-                'workspaceId' => 0,
+                'workspaceId' => $this->getWorkspaceId(),
                 'configuration' => $fieldConfig,
                 'record' => $record,
                 'pid' => $pid,
@@ -174,7 +175,19 @@ final readonly class SlugGeneratorService
             SlugHelper::class,
             $table,
             $slugField,
-            $fieldConfig
+            $fieldConfig,
+            $this->getWorkspaceId()
         );
+    }
+
+    private function getWorkspaceId(): int
+    {
+        // @phpstan-ignore nullsafe.neverNull
+        return $this->getBackendUser()?->workspace ?? 0;
+    }
+
+    private function getBackendUser(): ?BackendUserAuthentication
+    {
+        return $GLOBALS['BE_USER'] ?? null;
     }
 }

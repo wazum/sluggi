@@ -73,6 +73,23 @@ final class PostModifierTest extends FunctionalTestCase
         }
     }
 
+    private function setUpTestWithWorkspacePostModifier(string $fixture): void
+    {
+        parent::setUp();
+        $this->importCSVDataSet(__DIR__ . '/Fixtures/' . $fixture);
+        $this->setUpSite();
+        $this->setUpBackendUser(1);
+        $GLOBALS['LANG'] = GeneralUtility::makeInstance(LanguageServiceFactory::class)->create('default');
+
+        $GLOBALS['TCA']['pages']['columns']['slug']['config']['generatorOptions']['postModifiers'] = [
+            TestSlugPostModifier::class . '->appendWorkspaceId',
+        ];
+
+        if (Typo3Compatibility::hasTcaSchemaFactory()) {
+            GeneralUtility::makeInstance(TcaSchemaFactory::class)->load($GLOBALS['TCA'], true);
+        }
+    }
+
     #[Test]
     public function postModifierIsAppliedWhenPageIsMoved(): void
     {
@@ -136,5 +153,25 @@ final class PostModifierTest extends FunctionalTestCase
         $dataHandler->process_datamap();
 
         $this->assertCSVDataSet(__DIR__ . '/Fixtures/pages_after_postmodifier_new.csv');
+    }
+
+    #[Test]
+    public function postModifierReceivesCorrectWorkspaceIdWhenSlugIsGenerated(): void
+    {
+        $this->setUpTestWithWorkspacePostModifier('pages_for_workspace_postmodifier.csv');
+
+        // Set backend user to workspace 1
+        $GLOBALS['BE_USER']->workspace = 1;
+
+        // Use SlugGeneratorService directly to test workspace ID is passed to postModifiers
+        $generatorService = GeneralUtility::makeInstance(\Wazum\Sluggi\Service\SlugGeneratorService::class);
+
+        // Generate slug for a page - the postModifier should receive workspaceId=1
+        // and append "-ws1" to the slug
+        $record = ['uid' => 99, 'title' => 'Test Page'];
+        $slug = $generatorService->generate($record, 2);
+
+        // If workspaceId is correctly passed as 1, the suffix "-ws1" should be appended
+        self::assertStringEndsWith('-ws1', $slug, 'PostModifier should receive workspaceId=1 and append -ws1 suffix');
     }
 }
