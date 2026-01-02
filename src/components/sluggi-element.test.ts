@@ -2129,4 +2129,133 @@ describe('SluggiElement', () => {
         });
     });
 
+    describe('Spurious Change Event Prevention', () => {
+        it('does NOT dispatch change on full-path field when canceling edit without changes', async () => {
+            const container = document.createElement('div');
+            container.innerHTML = `
+                <sluggi-element
+                    value="/test"
+                    full-path-feature-enabled
+                    last-segment-only
+                ></sluggi-element>
+                <input type="hidden" class="sluggi-full-path-field" value="0" />
+            `;
+            document.body.appendChild(container);
+
+            const el = container.querySelector('sluggi-element') as SluggiElement;
+            const fullPathField = container.querySelector('.sluggi-full-path-field') as HTMLInputElement;
+            await el.updateComplete;
+
+            let changeEventCount = 0;
+            fullPathField.addEventListener('change', () => changeEventCount++);
+
+            const editable = el.shadowRoot!.querySelector('.sluggi-editable') as HTMLElement;
+            editable.click();
+            await el.updateComplete;
+
+            const input = el.shadowRoot!.querySelector('input.sluggi-input') as HTMLInputElement;
+            input.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+            await el.updateComplete;
+
+            expect(changeEventCount, 'Should not dispatch change event on cancel without changes').to.equal(0);
+
+            document.body.removeChild(container);
+        });
+
+        it('does NOT dispatch change on full-path field when saving same value', async () => {
+            const container = document.createElement('div');
+            container.innerHTML = `
+                <sluggi-element
+                    value="/test"
+                    full-path-feature-enabled
+                    last-segment-only
+                ></sluggi-element>
+                <input type="hidden" class="sluggi-full-path-field" value="0" />
+            `;
+            document.body.appendChild(container);
+
+            const el = container.querySelector('sluggi-element') as SluggiElement;
+            const fullPathField = container.querySelector('.sluggi-full-path-field') as HTMLInputElement;
+            await el.updateComplete;
+
+            let changeEventCount = 0;
+            fullPathField.addEventListener('change', () => changeEventCount++);
+
+            const editable = el.shadowRoot!.querySelector('.sluggi-editable') as HTMLElement;
+            editable.click();
+            await el.updateComplete;
+
+            const input = el.shadowRoot!.querySelector('input.sluggi-input') as HTMLInputElement;
+            input.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+            await el.updateComplete;
+
+            expect(changeEventCount, 'Should not dispatch change event when saving same value').to.equal(0);
+
+            document.body.removeChild(container);
+        });
+
+        it('does NOT dispatch change when setProposal receives same value', async () => {
+            const container = document.createElement('div');
+            container.innerHTML = `
+                <sluggi-element
+                    value="/test-slug"
+                ></sluggi-element>
+                <input type="hidden" class="sluggi-hidden-field" value="/test-slug" />
+            `;
+            document.body.appendChild(container);
+
+            const el = container.querySelector('sluggi-element') as SluggiElement;
+            const hiddenField = container.querySelector('.sluggi-hidden-field') as HTMLInputElement;
+            await el.updateComplete;
+
+            let changeEventCount = 0;
+            hiddenField.addEventListener('change', () => changeEventCount++);
+
+            el.setProposal('/test-slug', false);
+            await el.updateComplete;
+
+            expect(changeEventCount, 'Should not dispatch change when proposal equals current value').to.equal(0);
+            expect(hiddenField.classList.contains('has-change'), 'Should not add has-change class').to.be.false;
+
+            document.body.removeChild(container);
+        });
+
+        it('does NOT mark form as dirty when clicking into edit then clicking away without changes', async () => {
+            const container = document.createElement('div');
+            container.innerHTML = `
+                <sluggi-element
+                    value="/test"
+                    full-path-feature-enabled
+                    last-segment-only
+                ></sluggi-element>
+                <input type="hidden" class="sluggi-hidden-field" value="/test" />
+                <input type="hidden" class="sluggi-full-path-field" value="0" />
+            `;
+            document.body.appendChild(container);
+
+            const el = container.querySelector('sluggi-element') as SluggiElement;
+            const hiddenField = container.querySelector('.sluggi-hidden-field') as HTMLInputElement;
+            const fullPathField = container.querySelector('.sluggi-full-path-field') as HTMLInputElement;
+            await el.updateComplete;
+
+            let hiddenFieldChanged = false;
+            let fullPathFieldChanged = false;
+            hiddenField.addEventListener('change', () => hiddenFieldChanged = true);
+            fullPathField.addEventListener('change', () => fullPathFieldChanged = true);
+
+            const editable = el.shadowRoot!.querySelector('.sluggi-editable') as HTMLElement;
+            editable.click();
+            await el.updateComplete;
+
+            const input = el.shadowRoot!.querySelector('input.sluggi-input') as HTMLInputElement;
+            input.dispatchEvent(new FocusEvent('blur', { bubbles: true }));
+            await el.updateComplete;
+
+            expect(hiddenFieldChanged, 'Hidden field should not be changed').to.be.false;
+            expect(fullPathFieldChanged, 'Full path field should not be changed').to.be.false;
+
+            document.body.removeChild(container);
+        });
+    });
+
 });

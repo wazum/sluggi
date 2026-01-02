@@ -645,15 +645,18 @@ export class SluggiElement extends LitElement {
             this.conflictingSlug = conflictingSlug || this.conflictingSlug || this.value;
             this.showConflictModal();
         } else {
+            const oldValue = this.value;
             this.value = proposal;
             this.slugGenerated = true;
             this.clearConflictState();
-            this.dispatchEvent(new CustomEvent('sluggi-change', {
-                bubbles: true,
-                composed: true,
-                detail: { value: this.value }
-            }));
-            this.notifyFormEngineOfChange();
+            if (oldValue !== this.value) {
+                this.dispatchEvent(new CustomEvent('sluggi-change', {
+                    bubbles: true,
+                    composed: true,
+                    detail: { value: this.value }
+                }));
+                this.notifyFormEngineOfChange();
+            }
         }
     }
 
@@ -1092,9 +1095,12 @@ export class SluggiElement extends LitElement {
     private notifyFullPathFieldOfChange() {
         const fullPathInput = this.parentElement?.querySelector('.sluggi-full-path-field') as HTMLInputElement | null;
         if (fullPathInput) {
-            fullPathInput.value = this.isFullPathMode ? '1' : '0';
-            fullPathInput.classList.add('has-change');
-            fullPathInput.dispatchEvent(new Event('change', { bubbles: true }));
+            const newValue = this.isFullPathMode ? '1' : '0';
+            if (fullPathInput.value !== newValue) {
+                fullPathInput.value = newValue;
+                fullPathInput.classList.add('has-change');
+                fullPathInput.dispatchEvent(new Event('change', { bubbles: true }));
+            }
         }
     }
 
