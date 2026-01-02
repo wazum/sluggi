@@ -341,4 +341,43 @@ final class ExtensionConfigurationTest extends TestCase
 
         self::assertFalse($subject->isCopyUrlEnabled());
     }
+
+    #[Test]
+    public function isPreserveUnderscoreEnabledReturnsTrueWhenSettingIs1(): void
+    {
+        $coreConfig = $this->createMock(CoreExtensionConfiguration::class);
+        $coreConfig->method('get')
+            ->with('sluggi', 'preserve_underscore')
+            ->willReturn('1');
+
+        $subject = new ExtensionConfiguration($coreConfig);
+
+        self::assertTrue($subject->isPreserveUnderscoreEnabled());
+    }
+
+    #[Test]
+    public function isPreserveUnderscoreEnabledReturnsFalseWhenSettingIs0(): void
+    {
+        $coreConfig = $this->createMock(CoreExtensionConfiguration::class);
+        $coreConfig->method('get')
+            ->with('sluggi', 'preserve_underscore')
+            ->willReturn('0');
+
+        $subject = new ExtensionConfiguration($coreConfig);
+
+        self::assertFalse($subject->isPreserveUnderscoreEnabled());
+    }
+
+    #[Test]
+    public function isPreserveUnderscoreEnabledReturnsFalseWhenSettingIsMissing(): void
+    {
+        $coreConfig = $this->createMock(CoreExtensionConfiguration::class);
+        $coreConfig->method('get')
+            ->with('sluggi', 'preserve_underscore')
+            ->willThrowException(new Exception('Configuration not found'));
+
+        $subject = new ExtensionConfiguration($coreConfig);
+
+        self::assertFalse($subject->isPreserveUnderscoreEnabled());
+    }
 }

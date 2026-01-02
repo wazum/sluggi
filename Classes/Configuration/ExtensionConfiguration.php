@@ -147,4 +147,16 @@ final readonly class ExtensionConfiguration
             return false;
         }
     }
+
+    public function isPreserveUnderscoreEnabled(): bool
+    {
+        try {
+            return (bool)$this->extensionConfiguration->get(
+                extension: 'sluggi',
+                path: 'preserve_underscore'
+            );
+        } catch (Exception) {
+            return false;
+        }
+    }
 }

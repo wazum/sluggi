@@ -16,3 +16,5 @@ allow_full_path_editing=0
 exclude_doktypes=
 # cat=basic; type=boolean; label=Enable copy URL button: When enabled, a button to copy the full page URL to clipboard is shown
 copy_url=0
+# cat=basic; type=boolean; label=Preserve underscores in slugs: When enabled, underscores are not replaced by dashes during slug generation (RFC 3986 allows both characters)
+preserve_underscore=0

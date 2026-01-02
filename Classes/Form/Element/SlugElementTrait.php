@@ -161,6 +161,7 @@ trait SlugElementTrait
             'pageUrl' => $this->data['customData'][$fieldName]['slugPrefix'] ?? '',
             'collapsedControlsEnabled' => $this->userSettingsService->isCollapsedControlsEnabled()
                 && empty($this->data['fieldListToRender']),
+            'preserveUnderscore' => $this->extensionConfiguration->isPreserveUnderscoreEnabled(),
         ];
     }
 

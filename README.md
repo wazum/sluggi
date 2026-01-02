@@ -73,6 +73,7 @@ Configure via **Admin Tools > Settings > Extension Configuration > sluggi**:
 | `allow_full_path_editing` | Show full path edit button (requires `last_segment_only`) | Off |
 | `exclude_doktypes` | Comma-separated list of doktypes without URL paths (e.g., `199,254,255`) | Empty |
 | `copy_url` | Show button to copy full page URL to clipboard | Off |
+| `preserve_underscore` | Keep underscores in URL paths instead of replacing with dashes (RFC 3986 compliant) | Off |
 
 ## User Settings
 

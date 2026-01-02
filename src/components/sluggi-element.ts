@@ -73,6 +73,9 @@ export class SluggiElement extends LitElement {
     @property({ type: Boolean, attribute: 'collapsed-controls', reflect: true })
     collapsedControls = false;
 
+    @property({ type: Boolean, attribute: 'preserve-underscore' })
+    preserveUnderscore = false;
+
     // =========================================================================
     // Properties: Conflict State
     // =========================================================================
@@ -1208,13 +1211,21 @@ export class SluggiElement extends LitElement {
         const fallbackEscaped = fallback.replace(/[-.*+?^${}()|[\]\\]/g, '\\$&');
 
         value = value.toLowerCase();
-        value = value.replace(/[ \t\u00A0+_]+/g, fallback);
+
+        if (this.preserveUnderscore) {
+            value = value.replace(/[ \t\u00A0+]+/g, fallback);
+        } else {
+            value = value.replace(/[ \t\u00A0+_]+/g, fallback);
+        }
 
         if (fallback !== '-') {
             value = value.replace(/-+/g, fallback);
         }
 
-        value = value.replace(new RegExp(`[^\\p{L}\\p{M}0-9\\/${fallbackEscaped}]`, 'gu'), '');
+        const allowedChars = this.preserveUnderscore
+            ? `\\p{L}\\p{M}0-9\\/_${fallbackEscaped}`
+            : `\\p{L}\\p{M}0-9\\/${fallbackEscaped}`;
+        value = value.replace(new RegExp(`[^${allowedChars}]`, 'gu'), '');
 
         if (fallback) {
             value = value.replace(new RegExp(`${fallbackEscaped}{2,}`, 'g'), fallback);

@@ -6,6 +6,8 @@ use Psr\Http\Message\ServerRequestInterface;
 use TYPO3\CMS\Backend\Controller\FormSlugAjaxController as CoreFormSlugAjaxController;
 use TYPO3\CMS\Backend\Form\FormDataProvider\TcaColumnsProcessCommon;
 use TYPO3\CMS\Core\Http\ApplicationType;
+use TYPO3\CMS\Core\DataHandling\SlugHelper as CoreSlugHelper;
+use Wazum\Sluggi\DataHandling\SlugHelper;
 use TYPO3\CMS\Core\Page\PageRenderer;
 use Wazum\Sluggi\Compatibility\Typo3Compatibility;
 use Wazum\Sluggi\Controller\FormSlugAjaxControllerV12;
@@ -32,6 +34,10 @@ $GLOBALS['TYPO3_CONF_VARS']['SYS']['Objects'][CoreFormSlugAjaxController::class]
     'className' => Typo3Compatibility::getMajorVersion() >= 14
         ? FormSlugAjaxControllerV14::class
         : FormSlugAjaxControllerV12::class,
+];
+
+$GLOBALS['TYPO3_CONF_VARS']['SYS']['Objects'][CoreSlugHelper::class] = [
+    'className' => SlugHelper::class,
 ];
 
 // Form elements

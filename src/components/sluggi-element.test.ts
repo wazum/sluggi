@@ -345,6 +345,43 @@ describe('SluggiElement', () => {
             });
         });
 
+        describe('preserve-underscore mode', () => {
+            const testCases = [
+                { input: 'hello_world', expected: 'hello_world', desc: 'preserves underscore' },
+                { input: 'my_test_page', expected: 'my_test_page', desc: 'preserves multiple underscores' },
+                { input: 'hello_world test', expected: 'hello_world-test', desc: 'preserves underscore, converts space to dash' },
+                { input: 'hello_world+test', expected: 'hello_world-test', desc: 'preserves underscore, converts plus to dash' },
+            ];
+
+            testCases.forEach(({ input, expected, desc }) => {
+                it(`${desc}: "${input}" → "${expected}"`, async () => {
+                    const el = await fixture<SluggiElement>(html`
+                        <sluggi-element value="/page" preserve-underscore></sluggi-element>
+                    `);
+
+                    const inputEl = await enterEditMode(el);
+                    inputEl.value = input;
+                    inputEl.dispatchEvent(new Event('input', { bubbles: true }));
+                    await el.updateComplete;
+
+                    expect(inputEl.value).to.equal(expected);
+                });
+            });
+
+            it('converts underscore to fallback when preserve disabled', async () => {
+                const el = await fixture<SluggiElement>(html`
+                    <sluggi-element value="/page"></sluggi-element>
+                `);
+
+                const inputEl = await enterEditMode(el);
+                inputEl.value = 'hello_world';
+                inputEl.dispatchEvent(new Event('input', { bubbles: true }));
+                await el.updateComplete;
+
+                expect(inputEl.value).to.equal('hello-world');
+            });
+        });
+
         describe('hyphen handling', () => {
             const duringEditCases = [
                 { input: 'test-', desc: 'trailing' },

@@ -66,6 +66,9 @@ final readonly class SlugElementRenderer
         if ($context['collapsedControlsEnabled'] ?? false) {
             $attributes['collapsed-controls'] = '';
         }
+        if ($context['preserveUnderscore'] ?? false) {
+            $attributes['preserve-underscore'] = '';
+        }
 
         return $attributes;
     }
