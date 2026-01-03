@@ -76,6 +76,9 @@ export class SluggiElement extends LitElement {
     @property({ type: Boolean, attribute: 'preserve-underscore' })
     preserveUnderscore = false;
 
+    @property({ type: Boolean, attribute: 'redirect-control' })
+    redirectControlEnabled = false;
+
     // =========================================================================
     // Properties: Conflict State
     // =========================================================================
@@ -148,6 +151,14 @@ export class SluggiElement extends LitElement {
     @state()
     private controlsExpanded = false;
 
+    /** @deprecated Make private when dropping TYPO3 12 support (used by compat/typo3-v12-form-submit.ts) */
+    @state()
+    originalValue = '';
+
+    /** @deprecated Make private when dropping TYPO3 12 support (used by compat/typo3-v12-form-submit.ts) */
+    @state()
+    redirectChoiceMade = false;
+
     private hideTimeoutId: number | null = null;
 
     @query('input.sluggi-input')
@@ -170,8 +181,10 @@ export class SluggiElement extends LitElement {
 
     override connectedCallback() {
         super.connectedCallback();
+        this.originalValue = this.value;
         this.setupSourceFieldListeners();
         this.observeSourceFieldInitialization();
+        this.setupFormSubmitListener();
     }
 
     override disconnectedCallback() {
@@ -179,6 +192,7 @@ export class SluggiElement extends LitElement {
         this.removeSourceFieldListeners();
         this.sourceFieldObserver?.disconnect();
         this.sourceFieldObserver = null;
+        this.removeFormSubmitListener();
     }
 
     // =========================================================================
@@ -1010,6 +1024,122 @@ export class SluggiElement extends LitElement {
                 },
             ]
         );
+    }
+
+    // =========================================================================
+    // Private Helpers: Redirect Control
+    // =========================================================================
+
+    private setupFormSubmitListener(): void {
+        if (!this.redirectControlEnabled) return;
+
+        // TYPO3 FormEngine doesn't fire standard 'submit' events - intercept save button clicks
+        // Using the same handler function means addEventListener won't add duplicates
+        this.ownerDocument.addEventListener('click', SluggiElement.handleSaveButtonClick, true);
+    }
+
+    private removeFormSubmitListener(): void {
+        // Listener is at document level and shared, no cleanup needed per instance
+    }
+
+    private static handleSaveButtonClick(event: MouseEvent): void {
+        const target = event.target as HTMLElement;
+        const saveButton = target.closest('button[name="_savedok"]') as HTMLButtonElement | null;
+        if (!saveButton) return;
+
+        const form = SluggiElement.findAssociatedForm(saveButton);
+        if (!form) return;
+
+        const sluggiElements = form.querySelectorAll('sluggi-element') as NodeListOf<SluggiElement>;
+        if (sluggiElements.length === 0) return;
+
+        const elementsNeedingModal = Array.from(sluggiElements).filter(el =>
+            el.redirectControlEnabled && !el.redirectChoiceMade && el.value !== el.originalValue
+        );
+        if (elementsNeedingModal.length === 0) return;
+
+        event.preventDefault();
+        event.stopPropagation();
+        event.stopImmediatePropagation();
+
+        SluggiElement.showRedirectModalForAll(elementsNeedingModal, form);
+    }
+
+    private static findAssociatedForm(button: HTMLButtonElement): HTMLFormElement | null {
+        const formId = button.getAttribute('form');
+        if (formId) {
+            return document.getElementById(formId) as HTMLFormElement | null;
+        }
+        return button.closest('form');
+    }
+
+    private static showRedirectModalForAll(elements: SluggiElement[], form: HTMLFormElement): void {
+        for (const el of elements) {
+            el.redirectChoiceMade = true;
+        }
+
+        const firstElement = elements[0];
+        const title = firstElement.getLabel('redirectModal.title');
+        const message = firstElement.getLabel('redirectModal.message');
+        const messageRecursive = firstElement.getLabel('redirectModal.messageRecursive');
+        const skipButton = firstElement.getLabel('redirectModal.button.skip');
+        const createButton = firstElement.getLabel('redirectModal.button.create');
+
+        Modal.confirm(
+            title,
+            `${message}\n\n${messageRecursive}`,
+            Severity.info,
+            [
+                {
+                    text: skipButton,
+                    btnClass: 'btn-default',
+                    trigger: () => {
+                        Modal.dismiss();
+                        SluggiElement.applyRedirectChoiceToAll(elements, false);
+                        SluggiElement.submitForm(form);
+                    },
+                },
+                {
+                    text: createButton,
+                    active: true,
+                    btnClass: 'btn-primary',
+                    trigger: () => {
+                        Modal.dismiss();
+                        SluggiElement.applyRedirectChoiceToAll(elements, true);
+                        SluggiElement.submitForm(form);
+                    },
+                },
+            ]
+        );
+    }
+
+    private static applyRedirectChoiceToAll(elements: SluggiElement[], createRedirects: boolean): void {
+        for (const el of elements) {
+            el.setRedirectField(createRedirects);
+        }
+    }
+
+    private setRedirectField(createRedirects: boolean): void {
+        const field = this.parentElement?.querySelector('.sluggi-redirect-field') as HTMLInputElement | null;
+        if (field) {
+            field.value = createRedirects ? '1' : '0';
+            field.classList.add('has-change');
+            field.dispatchEvent(new Event('change', { bubbles: true }));
+        }
+
+        localStorage.setItem('sluggi-redirect-choice', JSON.stringify({
+            pageId: this.pageId,
+            createRedirects,
+            timestamp: Date.now(),
+        }));
+    }
+
+    private static submitForm(form: HTMLFormElement): void {
+        const doSaveField = form.querySelector('input[name="doSave"]') as HTMLInputElement | null;
+        if (doSaveField) {
+            doSaveField.value = '1';
+        }
+        form.requestSubmit();
     }
 
     // =========================================================================

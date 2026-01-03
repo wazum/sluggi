@@ -69,6 +69,9 @@ final readonly class SlugElementRenderer
         if ($context['preserveUnderscore'] ?? false) {
             $attributes['preserve-underscore'] = '';
         }
+        if ($context['redirectControlEnabled'] ?? false) {
+            $attributes['redirect-control'] = '';
+        }
 
         return $attributes;
     }
@@ -103,5 +106,10 @@ final readonly class SlugElementRenderer
     public function buildFullPathFieldName(string $table, int|string $recordId): string
     {
         return sprintf('data[%s][%s][tx_sluggi_full_path]', $table, $recordId);
+    }
+
+    public function buildRedirectFieldName(string $table, int|string $recordId): string
+    {
+        return sprintf('data[%s][%s][tx_sluggi_redirect]', $table, $recordId);
     }
 }

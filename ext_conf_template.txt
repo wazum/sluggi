@@ -18,3 +18,5 @@ exclude_doktypes=
 copy_url=0
 # cat=basic; type=boolean; label=Preserve underscores in slugs: When enabled, underscores are not replaced by dashes during slug generation (RFC 3986 allows both characters)
 preserve_underscore=0
+# cat=redirect; type=boolean; label=Show redirect control: When enabled, a modal dialog is shown when changing a slug to let users decide if redirects should be created
+redirect_control=0

@@ -162,6 +162,10 @@ trait SlugElementTrait
             'collapsedControlsEnabled' => $this->userSettingsService->isCollapsedControlsEnabled()
                 && empty($this->data['fieldListToRender']),
             'preserveUnderscore' => $this->extensionConfiguration->isPreserveUnderscoreEnabled(),
+            'redirectControlEnabled' => $table === 'pages'
+                && $command !== 'new'
+                && $this->extensionConfiguration->isRedirectControlEnabled(),
+            'redirectFieldName' => $this->slugElementRenderer->buildRedirectFieldName($table, $recordId),
         ];
     }
 
@@ -218,6 +222,12 @@ trait SlugElementTrait
                                 value="0"
                                 data-formengine-input-name="%s"
                             />
+                            <input type="hidden"
+                                class="sluggi-redirect-field"
+                                name="%s"
+                                value="1"
+                                data-formengine-input-name="%s"
+                            />
                         </div>
                         <div class="form-wizards-item-bottom">%s</div>
                     </div>
@@ -238,6 +248,8 @@ trait SlugElementTrait
             htmlspecialchars($context['lockFieldName']),
             htmlspecialchars($context['fullPathFieldName']),
             htmlspecialchars($context['fullPathFieldName']),
+            htmlspecialchars($context['redirectFieldName']),
+            htmlspecialchars($context['redirectFieldName']),
             $fieldWizardHtml
         );
     }
@@ -287,6 +299,11 @@ trait SlugElementTrait
             'toggle.path.off' => $languageService->sL($prefix . 'toggle.path.off'),
             'button.copyUrl' => $languageService->sL($prefix . 'button.copyUrl'),
             'copyConfirmation' => $languageService->sL($prefix . 'copyConfirmation'),
+            'redirectModal.title' => $languageService->sL($prefix . 'redirectModal.title'),
+            'redirectModal.message' => $languageService->sL($prefix . 'redirectModal.message'),
+            'redirectModal.messageRecursive' => $languageService->sL($prefix . 'redirectModal.messageRecursive'),
+            'redirectModal.button.create' => $languageService->sL($prefix . 'redirectModal.button.create'),
+            'redirectModal.button.skip' => $languageService->sL($prefix . 'redirectModal.button.skip'),
         ];
     }
 

@@ -380,4 +380,43 @@ final class ExtensionConfigurationTest extends TestCase
 
         self::assertFalse($subject->isPreserveUnderscoreEnabled());
     }
+
+    #[Test]
+    public function isRedirectControlEnabledReturnsTrueWhenSettingIs1(): void
+    {
+        $coreConfig = $this->createMock(CoreExtensionConfiguration::class);
+        $coreConfig->method('get')
+            ->with('sluggi', 'redirect_control')
+            ->willReturn('1');
+
+        $subject = new ExtensionConfiguration($coreConfig);
+
+        self::assertTrue($subject->isRedirectControlEnabled());
+    }
+
+    #[Test]
+    public function isRedirectControlEnabledReturnsFalseWhenSettingIs0(): void
+    {
+        $coreConfig = $this->createMock(CoreExtensionConfiguration::class);
+        $coreConfig->method('get')
+            ->with('sluggi', 'redirect_control')
+            ->willReturn('0');
+
+        $subject = new ExtensionConfiguration($coreConfig);
+
+        self::assertFalse($subject->isRedirectControlEnabled());
+    }
+
+    #[Test]
+    public function isRedirectControlEnabledReturnsTrueWhenSettingIsMissing(): void
+    {
+        $coreConfig = $this->createMock(CoreExtensionConfiguration::class);
+        $coreConfig->method('get')
+            ->with('sluggi', 'redirect_control')
+            ->willThrowException(new Exception('Configuration not found'));
+
+        $subject = new ExtensionConfiguration($coreConfig);
+
+        self::assertTrue($subject->isRedirectControlEnabled());
+    }
 }

@@ -11,6 +11,7 @@ export default defineConfig({
         rollupOptions: {
             input: {
                 'JavaScript/sluggi-element': resolve(__dirname, 'src/index.ts'),
+                'JavaScript/redirect-notification-handler': resolve(__dirname, 'src/redirect-notification-handler.ts'),
                 'Css/sluggi-source-badge': resolve(__dirname, 'src/styles/sluggi-source-badge.scss'),
             },
             external: [/^@typo3\/.*/],

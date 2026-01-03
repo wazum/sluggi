@@ -78,6 +78,21 @@
             <trans-unit id="userSettings.collapsedControls" resname="userSettings.collapsedControls">
                 <source>Sluggi: Use compact controls menu</source>
             </trans-unit>
+            <trans-unit id="redirectModal.title" resname="redirectModal.title">
+                <source>Create Redirects?</source>
+            </trans-unit>
+            <trans-unit id="redirectModal.message" resname="redirectModal.message">
+                <source>You are changing the URL path. Do you want to create a redirect from the old URL to the new one?</source>
+            </trans-unit>
+            <trans-unit id="redirectModal.messageRecursive" resname="redirectModal.messageRecursive">
+                <source>This will also apply to all child pages whose URLs change as a result.</source>
+            </trans-unit>
+            <trans-unit id="redirectModal.button.create" resname="redirectModal.button.create">
+                <source>Create Redirects</source>
+            </trans-unit>
+            <trans-unit id="redirectModal.button.skip" resname="redirectModal.button.skip">
+                <source>Don't Create Redirects</source>
+            </trans-unit>
         </body>
     </file>
 </xliff>

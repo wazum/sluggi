@@ -159,4 +159,16 @@ final readonly class ExtensionConfiguration
             return false;
         }
     }
+
+    public function isRedirectControlEnabled(): bool
+    {
+        try {
+            return (bool)$this->extensionConfiguration->get(
+                extension: 'sluggi',
+                path: 'redirect_control'
+            );
+        } catch (Exception) {
+            return true;
+        }
+    }
 }

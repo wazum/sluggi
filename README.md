@@ -58,6 +58,11 @@ Enable automatic URL path synchronization for any table with a TCA slug field (e
 - URL paths regenerate when any source field defined in `generatorOptions.fields` changes
 - Supports multi-field generation (e.g., `['title', 'subtitle']` with `fieldSeparator`)
 
+### Redirect Control
+When enabled, a modal dialog appears when saving a page with a changed URL path:
+- Choose whether to create redirects from the old URL to the new one
+- The choice applies recursively to all child pages affected by the change
+
 ### Duplicate Slug Prevention
 Automatically prevents duplicate slugs in scenarios where TYPO3 core doesn't:
 - **Page/record copy**: Copied pages get unique slugs based on target location
@@ -80,6 +85,7 @@ Configure via **Admin Tools > Settings > Extension Configuration > sluggi**:
 | `exclude_doktypes` | Comma-separated list of doktypes without URL paths (e.g., `199,254,255`) | Empty |
 | `copy_url` | Show button to copy full page URL to clipboard | Off |
 | `preserve_underscore` | Keep underscores in URL paths instead of replacing with dashes (RFC 3986 compliant) | Off |
+| `redirect_control` | Show modal when changing a slug to let users decide if redirects should be created | Off |
 
 ## User Settings
 

@@ -105,3 +105,10 @@ services:
       - name: event.listener
         identifier: 'sluggi/prevent-self-referencing-redirect'
         event: TYPO3\CMS\Redirects\Event\ModifyAutoCreateRedirectRecordBeforePersistingEvent
+
+  Wazum\Sluggi\EventListener\SkipRedirectOnRequest:
+    tags:
+      - name: event.listener
+        identifier: 'sluggi/skip-redirect-on-request'
+        event: TYPO3\CMS\Redirects\Event\SlugRedirectChangeItemCreatedEvent
+        after: 'redirects-add-plain-slug-replacement-source,redirects-add-page-type-zero-source'

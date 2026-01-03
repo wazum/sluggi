@@ -74,6 +74,18 @@ $GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['t3lib/class.t3lib_pagerenderer.php'][
         $request = $GLOBALS['TYPO3_REQUEST'] ?? null;
         if ($request instanceof ServerRequestInterface && ApplicationType::fromRequest($request)->isBackend()) {
             $pageRenderer->addCssFile('EXT:sluggi/Resources/Public/Css/sluggi-source-badge.css');
+
+            // Load redirect notification handler when redirect control is enabled
+            try {
+                $redirectControlEnabled = (bool)(\TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance(
+                    \TYPO3\CMS\Core\Configuration\ExtensionConfiguration::class
+                )->get('sluggi', 'redirect_control') ?? true);
+            } catch (\Exception) {
+                $redirectControlEnabled = true;
+            }
+            if ($redirectControlEnabled) {
+                $pageRenderer->loadJavaScriptModule('@wazum/sluggi/redirect-notification-handler.js');
+            }
         }
     };
 

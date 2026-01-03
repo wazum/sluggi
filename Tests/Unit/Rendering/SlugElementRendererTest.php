@@ -253,6 +253,48 @@ final class SlugElementRendererTest extends TestCase
         self::assertArrayNotHasKey('collapsed-controls', $result);
     }
 
+    #[Test]
+    public function buildRedirectFieldNameWithIntegerRecordId(): void
+    {
+        $subject = new SlugElementRenderer();
+
+        $result = $subject->buildRedirectFieldName('pages', 123);
+
+        self::assertSame('data[pages][123][tx_sluggi_redirect]', $result);
+    }
+
+    #[Test]
+    public function buildRedirectFieldNameWithNewRecordId(): void
+    {
+        $subject = new SlugElementRenderer();
+
+        $result = $subject->buildRedirectFieldName('pages', 'NEW6947faed9ea6d547219265');
+
+        self::assertSame('data[pages][NEW6947faed9ea6d547219265][tx_sluggi_redirect]', $result);
+    }
+
+    #[Test]
+    public function buildAttributesIncludesRedirectControlEnabledWhenTrue(): void
+    {
+        $subject = new SlugElementRenderer();
+        $context = $this->createContext(['redirectControlEnabled' => true]);
+
+        $result = $subject->buildAttributes($context, []);
+
+        self::assertArrayHasKey('redirect-control', $result);
+    }
+
+    #[Test]
+    public function buildAttributesOmitsRedirectControlEnabledWhenFalse(): void
+    {
+        $subject = new SlugElementRenderer();
+        $context = $this->createContext(['redirectControlEnabled' => false]);
+
+        $result = $subject->buildAttributes($context, []);
+
+        self::assertArrayNotHasKey('redirect-control', $result);
+    }
+
     /**
      * @param array<string, mixed> $overrides
      *
@@ -277,6 +319,7 @@ final class SlugElementRendererTest extends TestCase
             'syncFeatureEnabled' => false,
             'isSynced' => false,
             'lastSegmentOnly' => false,
+            'redirectControlEnabled' => false,
         ], $overrides);
     }
 }

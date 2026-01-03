@@ -103,6 +103,26 @@
                 <source>Sluggi: Use compact controls menu</source>
                 <target>Sluggi: Kompaktes Steuerungsmenü verwenden</target>
             </trans-unit>
+            <trans-unit id="redirectModal.title" resname="redirectModal.title">
+                <source>Create Redirects?</source>
+                <target>Weiterleitungen erstellen?</target>
+            </trans-unit>
+            <trans-unit id="redirectModal.message" resname="redirectModal.message">
+                <source>You are changing the URL path. Do you want to create a redirect from the old URL to the new one?</source>
+                <target>Sie ändern den URL-Pfad. Möchten Sie eine Weiterleitung von der alten URL zur neuen erstellen?</target>
+            </trans-unit>
+            <trans-unit id="redirectModal.messageRecursive" resname="redirectModal.messageRecursive">
+                <source>This will also apply to all child pages whose URLs change as a result.</source>
+                <target>Dies gilt auch für alle Unterseiten, deren URLs sich dadurch ändern.</target>
+            </trans-unit>
+            <trans-unit id="redirectModal.button.create" resname="redirectModal.button.create">
+                <source>Create Redirects</source>
+                <target>Weiterleitungen erstellen</target>
+            </trans-unit>
+            <trans-unit id="redirectModal.button.skip" resname="redirectModal.button.skip">
+                <source>Don't Create Redirects</source>
+                <target>Keine Weiterleitungen erstellen</target>
+            </trans-unit>
         </body>
     </file>
 </xliff>

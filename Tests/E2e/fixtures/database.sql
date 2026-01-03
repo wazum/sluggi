@@ -296,3 +296,26 @@ ON DUPLICATE KEY UPDATE `title` = VALUES(`title`), `slug` = VALUES(`slug`), `tx_
 INSERT INTO `pages` (`uid`, `pid`, `title`, `slug`, `doktype`, `is_siteroot`, `hidden`, `deleted`, `tstamp`, `crdate`, `tx_sluggi_sync`, `slug_locked`, `perms_userid`, `perms_groupid`, `perms_user`, `perms_group`, `perms_everybody`)
 VALUES (44, 1, 'Multi Edit Test', '/multi-edit-test', 1, 0, 0, 0, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 1, 0, 1, 0, 31, 31, 31)
 ON DUPLICATE KEY UPDATE `title` = VALUES(`title`), `slug` = VALUES(`slug`), `tx_sluggi_sync` = 1, `slug_locked` = 0, `perms_userid` = 1, `perms_groupid` = 0, `perms_user` = 31, `perms_group` = 31, `perms_everybody` = 31;
+
+-- =============================================
+-- redirect-control-multi-edit.spec.ts (uses pages 45-48)
+-- =============================================
+-- Page 45: Parent page for multi-edit redirect tests
+INSERT INTO `pages` (`uid`, `pid`, `title`, `slug`, `doktype`, `is_siteroot`, `hidden`, `deleted`, `tstamp`, `crdate`, `tx_sluggi_sync`, `perms_userid`, `perms_groupid`, `perms_user`, `perms_group`, `perms_everybody`)
+VALUES (45, 1, 'Multi Edit Parent', '/multi-edit-parent', 1, 0, 0, 0, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 0, 1, 0, 31, 31, 31)
+ON DUPLICATE KEY UPDATE `title` = VALUES(`title`), `slug` = VALUES(`slug`), `tx_sluggi_sync` = 0, `perms_userid` = 1, `perms_groupid` = 0, `perms_user` = 31, `perms_group` = 31, `perms_everybody` = 31;
+
+-- Page 46: Child 1 for multi-edit redirect tests
+INSERT INTO `pages` (`uid`, `pid`, `title`, `slug`, `doktype`, `is_siteroot`, `hidden`, `deleted`, `tstamp`, `crdate`, `tx_sluggi_sync`, `perms_userid`, `perms_groupid`, `perms_user`, `perms_group`, `perms_everybody`)
+VALUES (46, 45, 'Multi Edit Child 1', '/multi-edit-parent/child-1', 1, 0, 0, 0, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 0, 1, 0, 31, 31, 31)
+ON DUPLICATE KEY UPDATE `title` = VALUES(`title`), `slug` = VALUES(`slug`), `tx_sluggi_sync` = 0, `perms_userid` = 1, `perms_groupid` = 0, `perms_user` = 31, `perms_group` = 31, `perms_everybody` = 31;
+
+-- Page 47: Child 2 for multi-edit redirect tests
+INSERT INTO `pages` (`uid`, `pid`, `title`, `slug`, `doktype`, `is_siteroot`, `hidden`, `deleted`, `tstamp`, `crdate`, `tx_sluggi_sync`, `perms_userid`, `perms_groupid`, `perms_user`, `perms_group`, `perms_everybody`)
+VALUES (47, 45, 'Multi Edit Child 2', '/multi-edit-parent/child-2', 1, 0, 0, 0, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 0, 1, 0, 31, 31, 31)
+ON DUPLICATE KEY UPDATE `title` = VALUES(`title`), `slug` = VALUES(`slug`), `tx_sluggi_sync` = 0, `perms_userid` = 1, `perms_groupid` = 0, `perms_user` = 31, `perms_group` = 31, `perms_everybody` = 31;
+
+-- Page 48: Child 3 for multi-edit redirect tests
+INSERT INTO `pages` (`uid`, `pid`, `title`, `slug`, `doktype`, `is_siteroot`, `hidden`, `deleted`, `tstamp`, `crdate`, `tx_sluggi_sync`, `perms_userid`, `perms_groupid`, `perms_user`, `perms_group`, `perms_everybody`)
+VALUES (48, 45, 'Multi Edit Child 3', '/multi-edit-parent/child-3', 1, 0, 0, 0, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 0, 1, 0, 31, 31, 31)
+ON DUPLICATE KEY UPDATE `title` = VALUES(`title`), `slug` = VALUES(`slug`), `tx_sluggi_sync` = 0, `perms_userid` = 1, `perms_groupid` = 0, `perms_user` = 31, `perms_group` = 31, `perms_everybody` = 31;
