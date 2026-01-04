@@ -2,7 +2,7 @@
     "name": "wazum/sluggi",
     "type": "typo3-cms-extension",
     "license": "GPL-2.0-or-later",
-    "description": "Enhanced TYPO3 URL slug management (The little TYPO3 Slug Helper)",
+    "description": "TYPO3 extension for URL slug management with inline editing, auto-sync, locking, access control, and redirects",
     "homepage": "https://github.com/wazum/sluggi",
     "minimum-stability": "stable",
     "prefer-stable": true,
@@ -14,11 +14,15 @@
     ],
     "keywords": [
         "typo3",
-        "backend",
         "slug",
         "url",
+        "seo",
         "speaking url",
-        "routing"
+        "url path",
+        "url segment",
+        "routing",
+        "redirect",
+        "realurl"
     ],
     "require": {
         "php": "^8.2",

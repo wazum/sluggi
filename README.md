@@ -1,11 +1,20 @@
-# sluggi - Enhanced TYPO3 URL Path Management
+# sluggi - TYPO3 URL Slug Management
 
 [![Tests](https://github.com/wazum/sluggi/workflows/Tests/badge.svg)](https://github.com/wazum/sluggi/actions)
 [![PHP](https://img.shields.io/badge/PHP-8.2%20|%208.3%20|%208.4-blue.svg)](https://www.php.net/)
 [![TYPO3](https://img.shields.io/badge/TYPO3-12.4%20|%2013.4%20|%2014-orange.svg)](https://typo3.org/)
 [![License](https://img.shields.io/badge/License-GPL%20v2-blue.svg)](LICENSE)
 
-A TYPO3 extension that replaces the core slug field with an improved interface featuring inline editing, automatic synchronization, conflict detection, and fine-grained access control.
+A TYPO3 extension that replaces the default slug field with a modern interface for URL path management.
+
+- **Automatic synchronization** - URL paths update when page titles change, including all child pages
+- **Works for any table** - pages, news, or any record with a TCA slug field
+- **Conflict detection** - detects duplicate URLs and proposes unique alternatives
+- **Locking** - protect critical URLs from accidental changes
+- **Access control** - last segment only editing or hierarchy-based permissions for non-admins
+- **Duplicate prevention** - unique slugs on copy, move, and recycler restore
+- **Redirect control** - optional modal lets editors decide whether to create redirects
+- **Slug normalization** - fixes slashes in titles creating unintended segments, optional underscore preservation (RFC 3986)
 
 ## Requirements
 
@@ -22,46 +31,78 @@ composer require wazum/sluggi
 ## Features
 
 ### Modern URL Path Editor
-Replaces the default slug field with a custom `<sluggi-element>` web component:
-- Inline editing with immediate feedback
-- Automatic URL path proposals based on configured source fields (title, nav_title, etc.)
-- Conflict detection with resolution options
-- Visual indicators on source fields that influence URL path generation
-- Copy page URL to clipboard button (optional)
-- Collapsed controls mode for compact UI display (optional)
+
+Replaces the default slug field with a custom `<sluggi-element>` web component featuring inline editing, automatic proposals, and conflict detection.
+
+![Default view](Documentation/sluggi_default_view.png)
+
+With all features enabled, the editor provides sync toggle, lock toggle, full path editing, and clipboard copy:
+
+![Full editor view](Documentation/sluggi_full_editor_view.png)
 
 ### Automatic Synchronization
-When enabled, URL paths automatically regenerate when source fields change:
-- Toggle sync per-page via checkbox in the backend
+
+When enabled, URL paths automatically regenerate when source fields change. A badge on the title field indicates it's a slug source:
+
+![Sync enabled](Documentation/sluggi_sync.png)
+
+- Toggle sync per-page via the SYNC switch
 - Child page URL paths update when parent paths change
 - Redirects are created automatically (via EXT:redirects)
 
 ### URL Path Locking
+
 Protect important URL paths from accidental changes:
-- Lock individual page URL paths
+
+![Locked URL path](Documentation/sluggi_lock.png)
+
+- Locked paths cannot be edited and skip automatic regeneration
 - Optionally protect descendant paths when ancestor changes
-- Locked URL paths skip automatic regeneration
 - Auto-lock when full path is manually edited
 
+### Copy URL to Clipboard
+
+One-click copy of the full page URL:
+
+![URL copied to clipboard](Documentation/sluggi_url_copied_clipboard.png)
+
 ### Access Control
-Restrict URL path editing capabilities for non-admin users:
-- **Last segment only**: Editors can only modify the final path segment
-- **Hierarchy permissions**: URL path editing is restricted based on page edit permissions in the rootline
-- **Full path editing button**: Allow permitted users to directly enter full path edit mode via a dedicated button
+
+Restrict URL path editing capabilities for non-admin users.
+
+**Last segment only:** Editors can only modify the final path segment while the parent path remains read-only:
+
+![Last segment only editing](Documentation/sluggi_last_segment_only.png)
+
+**Full path editing:** A dedicated button allows permitted users to edit the entire path:
+
+![Full path edit button](Documentation/sluggi_edit_full_path_url.png)
+
+![Full path editing enabled](Documentation/sluggi_transient_full_path_edit.png)
+
+**Hierarchy permissions:** URL path editing is restricted based on page edit permissions in the rootline. Users can only edit segments for pages they have permission to edit:
+
+![Hierarchy permissions](Documentation/sluggi_restricted_permissions.png)
+
+### Redirect Control
+
+When enabled, a modal dialog appears when saving a page with a changed URL path:
+
+![Redirect control modal](Documentation/sluggi_create_redirects.png)
+
+- Choose whether to create redirects from the old URL to the new one
+- The choice applies recursively to all child pages affected by the change
 
 ### Excluded Page Types
+
 Configure page types (doktypes) that should not have URL paths, such as Sysfolder (254), Recycler (255), or Spacer (199).
 
 ### Synchronization for Other Tables
+
 Enable automatic URL path synchronization for any table with a TCA slug field (e.g., `tx_news_domain_model_news`):
 - Configure tables via `synchronize_tables` setting
 - URL paths regenerate when any source field defined in `generatorOptions.fields` changes
 - Supports multi-field generation (e.g., `['title', 'subtitle']` with `fieldSeparator`)
-
-### Redirect Control
-When enabled, a modal dialog appears when saving a page with a changed URL path:
-- Choose whether to create redirects from the old URL to the new one
-- The choice applies recursively to all child pages affected by the change
 
 ### Duplicate Slug Prevention
 Automatically prevents duplicate slugs in scenarios where TYPO3 core doesn't:
