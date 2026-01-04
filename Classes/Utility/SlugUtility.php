@@ -30,4 +30,15 @@ final class SlugUtility
 
         return $parts === [] ? '' : '/' . implode('/', $parts);
     }
+
+    public static function slugMatchesHierarchy(string $slug, string $parentSlug): bool
+    {
+        $parentSlug = rtrim($parentSlug, '/');
+
+        if ($parentSlug === '' || $parentSlug === '/') {
+            return true;
+        }
+
+        return str_starts_with($slug, $parentSlug . '/');
+    }
 }
