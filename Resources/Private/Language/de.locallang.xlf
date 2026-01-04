@@ -123,6 +123,10 @@
                 <source>Don't Create Redirects</source>
                 <target>Keine Weiterleitungen erstellen</target>
             </trans-unit>
+            <trans-unit id="redirectModal.button.cancel" resname="redirectModal.button.cancel">
+                <source>Cancel</source>
+                <target>Abbrechen</target>
+            </trans-unit>
         </body>
     </file>
 </xliff>

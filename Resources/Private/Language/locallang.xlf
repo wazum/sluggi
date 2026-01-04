@@ -93,6 +93,9 @@
             <trans-unit id="redirectModal.button.skip" resname="redirectModal.button.skip">
                 <source>Don't Create Redirects</source>
             </trans-unit>
+            <trans-unit id="redirectModal.button.cancel" resname="redirectModal.button.cancel">
+                <source>Cancel</source>
+            </trans-unit>
         </body>
     </file>
 </xliff>

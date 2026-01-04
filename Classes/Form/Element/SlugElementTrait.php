@@ -304,6 +304,7 @@ trait SlugElementTrait
             'redirectModal.messageRecursive' => $languageService->sL($prefix . 'redirectModal.messageRecursive'),
             'redirectModal.button.create' => $languageService->sL($prefix . 'redirectModal.button.create'),
             'redirectModal.button.skip' => $languageService->sL($prefix . 'redirectModal.button.skip'),
+            'redirectModal.button.cancel' => $languageService->sL($prefix . 'redirectModal.button.cancel'),
         ];
     }
 

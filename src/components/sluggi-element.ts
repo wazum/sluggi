@@ -1082,6 +1082,7 @@ export class SluggiElement extends LitElement {
         const title = firstElement.getLabel('redirectModal.title');
         const message = firstElement.getLabel('redirectModal.message');
         const messageRecursive = firstElement.getLabel('redirectModal.messageRecursive');
+        const cancelButton = firstElement.getLabel('redirectModal.button.cancel');
         const skipButton = firstElement.getLabel('redirectModal.button.skip');
         const createButton = firstElement.getLabel('redirectModal.button.create');
 
@@ -1091,8 +1092,18 @@ export class SluggiElement extends LitElement {
             Severity.info,
             [
                 {
-                    text: skipButton,
+                    text: cancelButton,
                     btnClass: 'btn-default',
+                    trigger: () => {
+                        Modal.dismiss();
+                        for (const el of elements) {
+                            el.redirectChoiceMade = false;
+                        }
+                    },
+                },
+                {
+                    text: skipButton,
+                    btnClass: 'btn-warning',
                     trigger: () => {
                         Modal.dismiss();
                         SluggiElement.applyRedirectChoiceToAll(elements, false);
