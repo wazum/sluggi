@@ -21,7 +21,7 @@ test.describe('Redirect Control - TYPO3 Integration', () => {
     await editableArea.click();
 
     const input = slugElement.locator('input.sluggi-input');
-    await input.fill('redirect-test-changed');
+    await input.fill(`redirect-test-changed-${Date.now()}`);
     await input.press('Enter');
 
     await slugElement.locator('.sluggi-spinner').waitFor({ state: 'hidden', timeout: 10000 }).catch(() => {});
@@ -66,7 +66,7 @@ test.describe('Redirect Control - TYPO3 Integration', () => {
     await editableArea.click();
 
     const input = slugElement.locator('input.sluggi-input');
-    await input.fill('redirect-create-test');
+    await input.fill(`redirect-create-test-${Date.now()}`);
     await input.press('Enter');
 
     await slugElement.locator('.sluggi-spinner').waitFor({ state: 'hidden', timeout: 10000 }).catch(() => {});
@@ -100,7 +100,7 @@ test.describe('Redirect Control - TYPO3 Integration', () => {
     await editableArea.click();
 
     const input = slugElement.locator('input.sluggi-input');
-    await input.fill('redirect-skip-test');
+    await input.fill(`redirect-skip-test-${Date.now()}`);
     await input.press('Enter');
 
     await slugElement.locator('.sluggi-spinner').waitFor({ state: 'hidden', timeout: 10000 }).catch(() => {});
@@ -134,7 +134,7 @@ test.describe('Redirect Control - TYPO3 Integration', () => {
     await editableArea.click();
 
     const input = slugElement.locator('input.sluggi-input');
-    await input.fill('notification-test');
+    await input.fill(`notification-test-${Date.now()}`);
     await input.press('Enter');
 
     await slugElement.locator('.sluggi-spinner').waitFor({ state: 'hidden', timeout: 10000 }).catch(() => {});
