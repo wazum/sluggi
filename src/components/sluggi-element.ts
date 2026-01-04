@@ -620,8 +620,6 @@ export class SluggiElement extends LitElement {
         this.conflictingSlug = fullNewValue;
         this.value = fullNewValue;
         this.mode = 'view';
-        this.isFullPathMode = false;
-        this.notifyFullPathFieldOfChange();
 
         if (oldValue !== this.value) {
             this.dispatchEvent(new CustomEvent('sluggi-change', {

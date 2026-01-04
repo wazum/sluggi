@@ -2164,6 +2164,43 @@ describe('SluggiElement', () => {
 
             document.body.removeChild(titleInput);
         });
+
+        it('sets full-path field to 1 when confirming full path edit with changes', async () => {
+            const container = document.createElement('div');
+            container.innerHTML = `
+                <sluggi-element
+                    value="/parent/original"
+                    prefix="/parent"
+                    full-path-feature-enabled
+                    last-segment-only
+                ></sluggi-element>
+                <input type="hidden" class="sluggi-hidden-field" value="/parent/original" />
+                <input type="hidden" class="sluggi-full-path-field" value="0" />
+            `;
+            document.body.appendChild(container);
+
+            const el = container.querySelector('sluggi-element') as SluggiElement;
+            const fullPathField = container.querySelector('.sluggi-full-path-field') as HTMLInputElement;
+            await el.updateComplete;
+
+            expect(fullPathField.value).to.equal('0');
+
+            const fullPathEditBtn = el.shadowRoot!.querySelector('.sluggi-full-path-edit-btn') as HTMLButtonElement;
+            fullPathEditBtn.click();
+            await el.updateComplete;
+
+            expect(fullPathField.value).to.equal('1');
+
+            const input = el.shadowRoot!.querySelector('input.sluggi-input') as HTMLInputElement;
+            input.value = 'new-full-path';
+            input.dispatchEvent(new Event('input', { bubbles: true }));
+            input.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+            await el.updateComplete;
+
+            expect(fullPathField.value, 'Full path field should remain 1 after confirming edit').to.equal('1');
+
+            document.body.removeChild(container);
+        });
     });
 
     describe('Spurious Change Event Prevention', () => {
