@@ -2201,6 +2201,39 @@ describe('SluggiElement', () => {
 
             document.body.removeChild(container);
         });
+
+        it('does NOT prepend prefix when confirming full path edit', async () => {
+            const container = document.createElement('div');
+            container.innerHTML = `
+                <sluggi-element
+                    value="/parent/original"
+                    prefix="/parent"
+                    full-path-feature-enabled
+                    last-segment-only
+                ></sluggi-element>
+                <input type="hidden" class="sluggi-hidden-field" value="/parent/original" />
+                <input type="hidden" class="sluggi-full-path-field" value="0" />
+            `;
+            document.body.appendChild(container);
+
+            const el = container.querySelector('sluggi-element') as SluggiElement;
+            const hiddenField = container.querySelector('.sluggi-hidden-field') as HTMLInputElement;
+            await el.updateComplete;
+
+            const fullPathEditBtn = el.shadowRoot!.querySelector('.sluggi-full-path-edit-btn') as HTMLButtonElement;
+            fullPathEditBtn.click();
+            await el.updateComplete;
+
+            const input = el.shadowRoot!.querySelector('input.sluggi-input') as HTMLInputElement;
+            input.value = 'new-root/new-segment';
+            input.dispatchEvent(new Event('input', { bubbles: true }));
+            input.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+            await el.updateComplete;
+
+            expect(hiddenField.value, 'Slug should be the full path without prefix prepended').to.equal('/new-root/new-segment');
+
+            document.body.removeChild(container);
+        });
     });
 
     describe('Spurious Change Event Prevention', () => {

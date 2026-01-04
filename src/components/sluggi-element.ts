@@ -307,7 +307,7 @@ export class SluggiElement extends LitElement {
 
     private get hiddenInputValue(): string {
         if (this.isFullPathMode) {
-            return this.prefix + this.editableValue;
+            return this.value;
         }
         if (this.lastSegmentOnly || this.lockedPrefix) {
             return this.computedPrefix + this.editableValue;
@@ -957,7 +957,7 @@ export class SluggiElement extends LitElement {
     }
 
     private buildFullSlug(segment: string): string {
-        if (this.lastSegmentOnly || this.lockedPrefix) {
+        if ((this.lastSegmentOnly || this.lockedPrefix) && !this.isFullPathMode) {
             return this.computedPrefix + segment;
         }
         return segment;
