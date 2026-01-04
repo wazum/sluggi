@@ -96,6 +96,18 @@
             <trans-unit id="redirectModal.button.cancel" resname="redirectModal.button.cancel">
                 <source>Cancel</source>
             </trans-unit>
+            <trans-unit id="error.lastSegmentOnly.title" resname="error.lastSegmentOnly.title">
+                <source>Slug change blocked</source>
+            </trans-unit>
+            <trans-unit id="error.lastSegmentOnly.message" resname="error.lastSegmentOnly.message">
+                <source>You can only edit the last segment of the URL slug.</source>
+            </trans-unit>
+            <trans-unit id="error.hierarchyPermission.title" resname="error.hierarchyPermission.title">
+                <source>Slug change blocked</source>
+            </trans-unit>
+            <trans-unit id="error.hierarchyPermission.message" resname="error.hierarchyPermission.message">
+                <source>You cannot modify path segments above your permission level.</source>
+            </trans-unit>
         </body>
     </file>
 </xliff>

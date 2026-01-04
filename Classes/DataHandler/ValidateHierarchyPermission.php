@@ -7,6 +7,7 @@ namespace Wazum\Sluggi\DataHandler;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\Authentication\BackendUserAuthentication;
 use TYPO3\CMS\Core\DataHandling\DataHandler;
+use TYPO3\CMS\Core\Localization\LanguageServiceFactory;
 use Wazum\Sluggi\Configuration\ExtensionConfiguration;
 use Wazum\Sluggi\Service\FullPathEditingService;
 use Wazum\Sluggi\Service\HierarchyPermissionService;
@@ -19,6 +20,7 @@ final readonly class ValidateHierarchyPermission
         private HierarchyPermissionService $hierarchyPermissionService,
         private FullPathEditingService $fullPathEditingService,
         private ExtensionConfiguration $extensionConfiguration,
+        private LanguageServiceFactory $languageServiceFactory,
     ) {
     }
 
@@ -74,20 +76,32 @@ final readonly class ValidateHierarchyPermission
         if (!$this->hierarchyPermissionService->validateSlugChange($lockedPrefix, $oldSlug, $newSlug)) {
             unset($fieldArray['slug']);
 
+            $title = $this->translate('error.hierarchyPermission.title');
+            $message = $this->translate('error.hierarchyPermission.message');
+
             $dataHandler->log(
                 'pages',
                 $pageId,
                 2,
                 null,
                 1,
-                'Slug change blocked: You cannot modify path segments above your permission level.'
+                $title . ': ' . $message
             );
 
-            FlashMessageUtility::addError(
-                'You cannot modify path segments above your permission level.',
-                'Slug change blocked'
-            );
+            FlashMessageUtility::addError($message, $title);
         }
+    }
+
+    private function translate(string $key): string
+    {
+        $backendUser = $this->getBackendUser();
+        if ($backendUser === null) {
+            return $key;
+        }
+
+        return $this->languageServiceFactory
+            ->createFromUserPreferences($backendUser)
+            ->sL('LLL:EXT:sluggi/Resources/Private/Language/locallang.xlf:' . $key);
     }
 
     private function getBackendUser(): ?BackendUserAuthentication

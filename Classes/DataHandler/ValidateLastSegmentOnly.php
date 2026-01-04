@@ -7,6 +7,7 @@ namespace Wazum\Sluggi\DataHandler;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\Authentication\BackendUserAuthentication;
 use TYPO3\CMS\Core\DataHandling\DataHandler;
+use TYPO3\CMS\Core\Localization\LanguageServiceFactory;
 use Wazum\Sluggi\Service\FullPathEditingService;
 use Wazum\Sluggi\Service\LastSegmentValidationService;
 use Wazum\Sluggi\Utility\DataHandlerUtility;
@@ -17,6 +18,7 @@ final readonly class ValidateLastSegmentOnly
     public function __construct(
         private LastSegmentValidationService $validationService,
         private FullPathEditingService $fullPathEditingService,
+        private LanguageServiceFactory $languageServiceFactory,
     ) {
     }
 
@@ -66,20 +68,32 @@ final readonly class ValidateLastSegmentOnly
         if (!$this->validationService->validateSlugChange($oldSlug, $newSlug)) {
             unset($fieldArray['slug']);
 
+            $title = $this->translate('error.lastSegmentOnly.title');
+            $message = $this->translate('error.lastSegmentOnly.message');
+
             $dataHandler->log(
                 'pages',
                 (int)$id,
                 2,
                 null,
                 1,
-                'Slug change blocked: You can only edit the last segment of the URL slug.'
+                $title . ': ' . $message
             );
 
-            FlashMessageUtility::addError(
-                'You can only edit the last segment of the URL slug.',
-                'Slug change blocked'
-            );
+            FlashMessageUtility::addError($message, $title);
         }
+    }
+
+    private function translate(string $key): string
+    {
+        $backendUser = $this->getBackendUser();
+        if ($backendUser === null) {
+            return $key;
+        }
+
+        return $this->languageServiceFactory
+            ->createFromUserPreferences($backendUser)
+            ->sL('LLL:EXT:sluggi/Resources/Private/Language/locallang.xlf:' . $key);
     }
 
     private function getBackendUser(): ?BackendUserAuthentication
