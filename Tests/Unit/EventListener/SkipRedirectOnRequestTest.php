@@ -35,7 +35,7 @@ final class SkipRedirectOnRequestTest extends TestCase
         $subject($event);
 
         $resultItem = $event->getSlugRedirectChangeItem();
-        self::assertGreaterThan(0, count($resultItem->getSourcesCollection()->all()));
+        self::assertCount(1, $resultItem->getSourcesCollection()->all());
     }
 
     #[Test]
@@ -48,7 +48,22 @@ final class SkipRedirectOnRequestTest extends TestCase
         $subject($event);
 
         $resultItem = $event->getSlugRedirectChangeItem();
-        self::assertGreaterThan(0, count($resultItem->getSourcesCollection()->all()));
+        self::assertCount(1, $resultItem->getSourcesCollection()->all());
+    }
+
+    #[Test]
+    public function redirectIsCreatedWhenRequestHasEmptyBody(): void
+    {
+        $GLOBALS['TYPO3_REQUEST'] = (new ServerRequest())->withParsedBody([]);
+
+        $changeItem = $this->createChangeItemWithSources(2);
+        $event = new SlugRedirectChangeItemCreatedEvent($changeItem);
+
+        $subject = new SkipRedirectOnRequest();
+        $subject($event);
+
+        $resultItem = $event->getSlugRedirectChangeItem();
+        self::assertCount(1, $resultItem->getSourcesCollection()->all());
     }
 
     #[Test]
@@ -67,7 +82,7 @@ final class SkipRedirectOnRequestTest extends TestCase
     }
 
     #[Test]
-    public function toggleIsReadFromCorrectPageInRequest(): void
+    public function explicitToggleOnTakesPrecedenceOverOtherPagesToggleOff(): void
     {
         $body = [
             'data' => [
@@ -86,11 +101,11 @@ final class SkipRedirectOnRequestTest extends TestCase
         $subject($event);
 
         $resultItem = $event->getSlugRedirectChangeItem();
-        self::assertGreaterThan(0, count($resultItem->getSourcesCollection()->all()));
+        self::assertCount(1, $resultItem->getSourcesCollection()->all());
     }
 
     #[Test]
-    public function toggleIsOffForDifferentPageInRequest(): void
+    public function explicitToggleOffIsRespectedRegardlessOfOtherPages(): void
     {
         $body = [
             'data' => [
@@ -113,7 +128,7 @@ final class SkipRedirectOnRequestTest extends TestCase
     }
 
     #[Test]
-    public function childPageInheritsParentRedirectToggleOff(): void
+    public function noRedirectCreatedWhenAnyPageInRequestHasToggleOff(): void
     {
         $body = [
             'data' => [
@@ -131,7 +146,7 @@ final class SkipRedirectOnRequestTest extends TestCase
         $subject($event);
 
         $resultItem = $event->getSlugRedirectChangeItem();
-        self::assertCount(0, $resultItem->getSourcesCollection()->all(), 'Child page should inherit redirect=off from parent in request');
+        self::assertCount(0, $resultItem->getSourcesCollection()->all(), 'Page without explicit toggle should skip redirect when any page in request has toggle off');
     }
 
     private function setRedirectToggleInRequest(int $pageUid, bool $createRedirect): void
