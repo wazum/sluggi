@@ -53,7 +53,7 @@ final readonly class SlugNormalizer
         $value = mb_strtolower($value, 'utf-8');
         $extractedSlug = trim($value, $fallbackCharacter . '/');
 
-        $appendTrailingSlash = $extractedSlug !== '' && substr($value, -1) === '/';
+        $appendTrailingSlash = $extractedSlug !== '' && str_ends_with($value, '/');
         $value = $extractedSlug . ($appendTrailingSlash ? '/' : '');
 
         return $value;
