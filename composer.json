@@ -26,9 +26,9 @@
     ],
     "require": {
         "php": "^8.2",
-        "typo3/cms-core": "^12.4 || ^13.4 || ^14.0",
-        "typo3/cms-backend": "^12.4 || ^13.4 || ^14.0",
-        "typo3/cms-redirects": "^12.4 || ^13.4 || ^14.0"
+        "typo3/cms-core": "^12.4 || ^13.4 || ^14.1",
+        "typo3/cms-backend": "^12.4 || ^13.4 || ^14.1",
+        "typo3/cms-redirects": "^12.4 || ^13.4 || ^14.1"
     },
     "suggest": {
         "georgringer/news-redirect-slug-change": "Generate redirects when news slugs change",
@@ -38,11 +38,11 @@
         "friendsofphp/php-cs-fixer": "^3.65",
         "phpstan/phpstan": "^2.0",
         "phpunit/phpunit": "^10.5 || ^11.5",
-        "typo3/cms-fluid-styled-content": "^12.4 || ^13.4 || ^14.0",
-        "typo3/cms-frontend": "^12.4 || ^13.4 || ^14.0",
-        "typo3/cms-install": "^12.4 || ^13.4 || ^14.0",
-        "typo3/cms-rte-ckeditor": "^12.4 || ^13.4 || ^14.0",
-        "typo3/cms-setup": "^12.4 || ^13.4 || ^14.0",
+        "typo3/cms-fluid-styled-content": "^12.4 || ^13.4 || ^14.1",
+        "typo3/cms-frontend": "^12.4 || ^13.4 || ^14.1",
+        "typo3/cms-install": "^12.4 || ^13.4 || ^14.1",
+        "typo3/cms-rte-ckeditor": "^12.4 || ^13.4 || ^14.1",
+        "typo3/cms-setup": "^12.4 || ^13.4 || ^14.1",
         "typo3/testing-framework": "^7.0 || ^8.0 || ^9.0"
     },
     "autoload": {

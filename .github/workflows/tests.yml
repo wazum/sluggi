@@ -75,11 +75,11 @@ jobs:
             typo3: '13.4'
           # TYPO3 14.x
           - php: '8.2'
-            typo3: '14.0'
+            typo3: '14.1'
           - php: '8.3'
-            typo3: '14.0'
+            typo3: '14.1'
           - php: '8.4'
-            typo3: '14.0'
+            typo3: '14.1'
 
     steps:
       - uses: actions/checkout@v4
@@ -120,11 +120,11 @@ jobs:
             typo3: '13.4'
           # TYPO3 14.x
           - php: '8.2'
-            typo3: '14.0'
+            typo3: '14.1'
           - php: '8.3'
-            typo3: '14.0'
+            typo3: '14.1'
           - php: '8.4'
-            typo3: '14.0'
+            typo3: '14.1'
 
     steps:
       - uses: actions/checkout@v4
@@ -155,22 +155,30 @@ jobs:
           # TYPO3 12.4 LTS
           - php: '8.2'
             typo3: '12.4'
+            dist: '12.4'
           - php: '8.3'
             typo3: '12.4'
+            dist: '12.4'
           # TYPO3 13.4 LTS
           - php: '8.2'
             typo3: '13.4'
+            dist: '13.4'
           - php: '8.3'
             typo3: '13.4'
+            dist: '13.4'
           - php: '8.4'
             typo3: '13.4'
-          # TYPO3 14.x
+            dist: '13.4'
+          # TYPO3 14.x (dist 14.0 as 14.1 not yet released)
           - php: '8.2'
-            typo3: '14.0'
+            typo3: '14.1'
+            dist: '14.0'
           - php: '8.3'
-            typo3: '14.0'
+            typo3: '14.1'
+            dist: '14.0'
           - php: '8.4'
-            typo3: '14.0'
+            typo3: '14.1'
+            dist: '14.0'
 
     services:
       mysql:
@@ -198,14 +206,14 @@ jobs:
           node-version: '20'
 
       - name: Create TYPO3 project
-        run: composer create-project typo3/cms-base-distribution:^${{ matrix.typo3 }} typo3-test --no-interaction
+        run: composer create-project typo3/cms-base-distribution:^${{ matrix.dist }} typo3-test --no-interaction
 
       - name: Install sluggi extension
         run: |
           cd typo3-test
           composer config --unset platform.php
           composer config repositories.sluggi path ../
-          composer require wazum/sluggi:@dev --no-interaction
+          composer require "typo3/cms-core:^${{ matrix.typo3 }}" wazum/sluggi:@dev --no-interaction --with-all-dependencies
 
       - name: Setup TYPO3
         run: |
