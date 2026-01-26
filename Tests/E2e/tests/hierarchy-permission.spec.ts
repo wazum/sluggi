@@ -1,5 +1,5 @@
 import { test, expect, FrameLocator, Locator } from '@playwright/test';
-import { expandPageTreeNode, getPageTreeNode } from '../fixtures/typo3-compat';
+import { expandPageTreeNode, getPageTreeNode, waitForPageTree } from '../fixtures/typo3-compat';
 
 test.describe('Hierarchy Permission - Editor Slug Restrictions', () => {
   let frame: FrameLocator;
@@ -56,9 +56,7 @@ test.describe('Hierarchy Permission - Editor Slug Restrictions', () => {
 
   test('new page has correct locked-prefix based on hierarchy permissions', async ({ page }) => {
     await page.goto('/typo3/module/web/layout');
-
-    const pageTree = page.locator('.scaffold-content-navigation-component');
-    await expect(pageTree).toBeVisible({ timeout: 10000 });
+    await waitForPageTree(page, 10000);
 
     // Editor has mount point at page 27, so it's directly visible
     const instituteNode = await getPageTreeNode(page, 27);

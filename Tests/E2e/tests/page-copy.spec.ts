@@ -1,11 +1,10 @@
 import { test, expect } from '@playwright/test';
-import { expandPageTreeNode, getPageTreeItemByName, getListModuleUrl } from '../fixtures/typo3-compat';
+import { expandPageTreeNode, getPageTreeItemByName, getListModuleUrl, waitForPageTree } from '../fixtures/typo3-compat';
 
 test.describe('Page Copy - Slug Update', () => {
   test('copying a page into another updates slug with parent prefix', async ({ page }) => {
     await page.goto('/typo3/module/web/layout');
-    const pageTree = page.locator('.scaffold-content-navigation-component');
-    await expect(pageTree).toBeVisible({ timeout: 15000 });
+    await waitForPageTree(page);
 
     await expandPageTreeNode(page, 1);
 

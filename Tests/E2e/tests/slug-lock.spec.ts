@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { waitForPageTree, clickModuleMenuItem } from '../fixtures/typo3-compat';
 
 test.describe('Slug Lock Toggle - TYPO3 Integration', () => {
   test.use({
@@ -69,7 +70,7 @@ test.describe('Slug Lock Toggle - TYPO3 Integration', () => {
     await page.waitForURL(/edit/, { timeout: 10000 });
 
     await page.goto('/typo3/module/web/layout');
-    await expect(page.locator('.scaffold-content-navigation-component')).toBeVisible({ timeout: 10000 });
+    await waitForPageTree(page, 10000);
 
     await page.goto('/typo3/record/edit?edit[pages][32]=edit');
     frame = page.frameLocator('iframe');
@@ -143,7 +144,7 @@ test.describe('Slug Lock Toggle - TYPO3 Integration', () => {
     await lockToggle.click();
     await expect(lockToggle).toHaveClass(/is-locked/);
 
-    await page.click('.scaffold-modulemenu [data-modulemenu-identifier="web_layout"]');
+    await clickModuleMenuItem(page, 'Layout', 'web_layout');
 
     const modal = page.locator('.modal');
     await expect(modal).toBeVisible({ timeout: 5000 });

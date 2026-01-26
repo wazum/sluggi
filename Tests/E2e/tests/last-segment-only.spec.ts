@@ -1,5 +1,5 @@
 import { test, expect, FrameLocator, Locator } from '@playwright/test';
-import { expandPageTreeNode, getPageTreeNode, getPageTreeNodeLabel, getPageTreeEditInput } from '../fixtures/typo3-compat';
+import { expandPageTreeNode, getPageTreeNode, getPageTreeNodeLabel, getPageTreeEditInput, waitForPageTree } from '../fixtures/typo3-compat';
 
 test.describe('Last Segment Only - Editor Restrictions', () => {
   let frame: FrameLocator;
@@ -110,9 +110,7 @@ test.describe('Last Segment Only - Editor Restrictions', () => {
 
   test('new page via context menu shows parent prefix as locked (issue #128)', async ({ page }) => {
     await page.goto('/typo3/module/web/layout');
-
-    const pageTree = page.locator('.scaffold-content-navigation-component');
-    await expect(pageTree).toBeVisible({ timeout: 10000 });
+    await waitForPageTree(page, 10000);
 
     // Editor has mount point at page 18, so it's directly visible
     const parentNode = await getPageTreeNode(page, 18);
@@ -148,9 +146,7 @@ test.describe('Last Segment Only - Editor Restrictions', () => {
 
   test('slash in title via page tree inline edit does not create extra segment', async ({ page }) => {
     await page.goto('/typo3/module/web/layout');
-
-    const pageTree = page.locator('.scaffold-content-navigation-component');
-    await expect(pageTree).toBeVisible({ timeout: 10000 });
+    await waitForPageTree(page, 10000);
 
     // Expand parent section node (editor has mount point at page 18, no access to root)
     await expandPageTreeNode(page, 18);

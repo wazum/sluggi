@@ -1,5 +1,5 @@
 import {expect, FrameLocator, Locator, test} from '@playwright/test';
-import { waitForFormFrame } from '../fixtures/typo3-compat';
+import { waitForFormFrame, clickModuleMenuItem } from '../fixtures/typo3-compat';
 
 test.describe('Full Path Editing - Editor Button', () => {
   let frame: FrameLocator;
@@ -118,7 +118,7 @@ test.describe('Full Path Editing - Editor Button', () => {
     const input = slugElement.locator('input.sluggi-input');
     await input.press('Escape');
 
-    await page.click('.scaffold-modulemenu [data-modulemenu-identifier="web_layout"]');
+    await clickModuleMenuItem(page, 'Layout', 'web_layout');
 
     const modal = page.locator('.modal');
     await expect(modal).toBeVisible({ timeout: 5000 });

@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { waitForPageTree, clickModuleMenuItem } from '../fixtures/typo3-compat';
 
 test.describe('Slug Sync Toggle - TYPO3 Integration', () => {
   test('sync toggle button is visible with label', async ({ page }) => {
@@ -122,7 +123,7 @@ test.describe('Slug Sync Toggle - TYPO3 Integration', () => {
     await page.waitForURL(/edit/, { timeout: 10000 });
 
     await page.goto('/typo3/module/web/layout');
-    await expect(page.locator('.scaffold-content-navigation-component')).toBeVisible({ timeout: 10000 });
+    await waitForPageTree(page, 10000);
 
     await page.goto('/typo3/record/edit?edit[pages][14]=edit');
     frame = page.frameLocator('iframe');
@@ -146,7 +147,7 @@ test.describe('Slug Sync Toggle - TYPO3 Integration', () => {
     await slugElement.locator('.sluggi-spinner').waitFor({ state: 'hidden', timeout: 10000 }).catch(() => {});
     await expect(syncToggle).toHaveClass(/is-synced/);
 
-    await page.click('.scaffold-modulemenu [data-modulemenu-identifier="web_layout"]');
+    await clickModuleMenuItem(page, 'Layout', 'web_layout');
 
     const modal = page.locator('.modal');
     await expect(modal).toBeVisible({ timeout: 5000 });

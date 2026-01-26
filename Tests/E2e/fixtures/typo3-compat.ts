@@ -3,10 +3,9 @@ import { Page, Locator, expect } from '@playwright/test';
 /**
  * TYPO3 version compatibility layer for E2E tests.
  *
- * Contains ONLY functions that have different behavior between TYPO3 versions.
- * Do not add generic helper functions here.
+ * TYPO3 14 is the default. Legacy handling for TYPO3 12/13.
  *
- * @deprecated Remove this file when dropping TYPO3 12 support
+ * @deprecated Remove legacy code when dropping TYPO3 12 support
  */
 
 let cachedVersion: number | null = null;
@@ -31,11 +30,57 @@ export async function getTypo3Version(page: Page): Promise<number> {
 
 /**
  * Check if running on TYPO3 12 (legacy version).
- * Note: TYPO3 13.4+ uses the same page tree format as TYPO3 14.
+ * @deprecated TYPO3 12 support will be removed
  */
 export async function isTypo3LegacyVersion(page: Page): Promise<boolean> {
   const version = await getTypo3Version(page);
   return version === 12;
+}
+
+/**
+ * Get page tree container locator.
+ *
+ * TYPO3 14+: Uses web component typo3-backend-navigation-component-pagetree
+ * TYPO3 12/13: Uses .scaffold-content-navigation-component class
+ */
+export async function getPageTreeContainer(page: Page): Promise<Locator> {
+  const version = await getTypo3Version(page);
+
+  if (version < 14) {
+    return page.locator('.scaffold-content-navigation-component');
+  }
+
+  return page.locator('typo3-backend-navigation-component-pagetree');
+}
+
+/**
+ * Wait for the page tree to be visible.
+ */
+export async function waitForPageTree(page: Page, timeout = 15000): Promise<void> {
+  const version = await getTypo3Version(page);
+
+  if (version < 14) {
+    await expect(page.locator('.scaffold-content-navigation-component')).toBeVisible({ timeout });
+  } else {
+    await expect(page.getByRole('tree')).toBeVisible({ timeout });
+  }
+}
+
+/**
+ * Click a module menu item by name.
+ *
+ * TYPO3 14+: Uses role-based selector
+ * TYPO3 12/13: Uses data-modulemenu-identifier attribute
+ */
+export async function clickModuleMenuItem(page: Page, name: string, moduleIdentifier?: string): Promise<void> {
+  const version = await getTypo3Version(page);
+
+  if (version < 14) {
+    const identifier = moduleIdentifier || `web_${name.toLowerCase()}`;
+    await page.click(`.scaffold-modulemenu [data-modulemenu-identifier="${identifier}"]`);
+  } else {
+    await page.getByRole('menuitem', { name }).click();
+  }
 }
 
 /**
@@ -45,10 +90,10 @@ export async function isTypo3LegacyVersion(page: Page): Promise<boolean> {
  * TYPO3 13+: Uses data-id="X" attribute
  */
 export async function getPageTreeNode(page: Page, pageId: number | string): Promise<Locator> {
-  const pageTree = page.locator('.scaffold-content-navigation-component');
-  const isLegacy = await isTypo3LegacyVersion(page);
+  const version = await getTypo3Version(page);
+  const pageTree = await getPageTreeContainer(page);
 
-  if (isLegacy) {
+  if (version === 12) {
     return pageTree.getByRole('treeitem', { name: new RegExp(`^id=${pageId} - `) }).first();
   }
 
@@ -59,10 +104,9 @@ export async function getPageTreeNode(page: Page, pageId: number | string): Prom
  * Expand a page tree node by clicking its toggle.
  */
 export async function expandPageTreeNode(page: Page, pageId: number | string): Promise<void> {
-  const isLegacy = await isTypo3LegacyVersion(page);
-  const pageTree = page.locator('.scaffold-content-navigation-component');
+  const version = await getTypo3Version(page);
 
-  if (isLegacy) {
+  if (version === 12) {
     const node = page.locator(`#identifier-0_${pageId}`).first();
     await node.waitFor({ state: 'attached', timeout: 10000 });
 
@@ -73,6 +117,7 @@ export async function expandPageTreeNode(page: Page, pageId: number | string): P
       await expect(node).toHaveAttribute('aria-expanded', 'true', { timeout: 10000 });
     }
   } else {
+    const pageTree = await getPageTreeContainer(page);
     const node = pageTree.locator(`[data-id="${pageId}"]`);
     await expect(node).toBeVisible({ timeout: 10000 });
 
@@ -94,9 +139,9 @@ export async function expandPageTreeNode(page: Page, pageId: number | string): P
  * TYPO3 13+: Tree items have just "Name" format
  */
 export async function getPageTreeItemByName(page: Page, name: string | RegExp): Promise<Locator> {
-  const isLegacy = await isTypo3LegacyVersion(page);
+  const version = await getTypo3Version(page);
 
-  if (isLegacy) {
+  if (version === 12) {
     const pattern = typeof name === 'string'
       ? new RegExp(`id=\\d+ - ${name}`)
       : new RegExp(`id=\\d+ - ${name.source}`);
@@ -110,7 +155,7 @@ export async function getPageTreeItemByName(page: Page, name: string | RegExp): 
  * Get inline edit input locator for page tree.
  */
 export async function getPageTreeEditInput(page: Page): Promise<Locator> {
-  const pageTree = page.locator('.scaffold-content-navigation-component');
+  const pageTree = await getPageTreeContainer(page);
   return pageTree.locator('input.node-edit');
 }
 
@@ -125,17 +170,17 @@ export async function getPageTreeNodeLabel(page: Page, pageId: number | string):
  * Open page tree options menu and reload tree.
  */
 export async function reloadPageTree(page: Page): Promise<void> {
-  const isLegacy = await isTypo3LegacyVersion(page);
-  const pageTree = page.locator('.scaffold-content-navigation-component');
+  const version = await getTypo3Version(page);
 
-  if (isLegacy) {
+  if (version === 12) {
     await page.locator('#typo3-pagetree-toolbar').getByRole('button').click();
-    await page.getByRole('button', { name: 'Reload the tree from server' }).click();
   } else {
     await page.getByRole('button', { name: 'Open page tree options menu' }).click();
-    await page.getByRole('button', { name: 'Reload the tree from server' }).click();
   }
 
+  await page.getByRole('button', { name: 'Reload the tree from server' }).click();
+
+  const pageTree = await getPageTreeContainer(page);
   await pageTree.locator('.node-loader').waitFor({ state: 'hidden', timeout: 10000 }).catch(() => {});
   await expect(pageTree.locator('[role="treeitem"]').first()).toBeVisible({ timeout: 10000 });
 }

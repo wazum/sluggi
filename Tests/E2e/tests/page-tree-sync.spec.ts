@@ -1,12 +1,10 @@
 import {expect, test} from '@playwright/test';
-import { expandPageTreeNode, getPageTreeNode, getPageTreeNodeLabel, getPageTreeEditInput } from '../fixtures/typo3-compat';
+import { expandPageTreeNode, getPageTreeNode, getPageTreeNodeLabel, getPageTreeEditInput, waitForPageTree } from '../fixtures/typo3-compat';
 
 test.describe('Page Tree Inline Editing with Sync', () => {
   test('slug updates when title is changed via page tree inline editing', async ({ page }) => {
     await page.goto('/typo3/module/web/layout');
-
-    const pageTree = page.locator('.scaffold-content-navigation-component');
-    await expect(pageTree).toBeVisible({ timeout: 10000 });
+    await waitForPageTree(page, 10000);
 
     // Expand root node to show child pages
     await expandPageTreeNode(page, 1);
