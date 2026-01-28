@@ -1,3 +1,13 @@
+declare global {
+    interface Window {
+        TYPO3?: {
+            settings?: {
+                ajaxUrls?: Record<string, string>;
+            };
+        };
+    }
+}
+
 declare module '@typo3/backend/modal.js' {
     interface ModalButton {
         text: string;

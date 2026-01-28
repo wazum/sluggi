@@ -1399,8 +1399,7 @@ export class SluggiElement extends LitElement {
     }
 
     private getAjaxUrl(): string | null {
-        const typo3 = (window as unknown as { TYPO3?: { settings?: { ajaxUrls?: Record<string, string> } } }).TYPO3;
-        return typo3?.settings?.ajaxUrls?.record_slug_suggest ?? null;
+        return window.TYPO3?.settings?.ajaxUrls?.record_slug_suggest ?? null;
     }
 }
 
