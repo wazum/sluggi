@@ -193,6 +193,14 @@ export class SluggiElement extends LitElement {
         this.sourceFieldObserver?.disconnect();
         this.sourceFieldObserver = null;
         this.removeFormSubmitListener();
+        if (this.hideTimeoutId !== null) {
+            clearTimeout(this.hideTimeoutId);
+            this.hideTimeoutId = null;
+        }
+        if (this.sourceFieldInputTimeout !== null) {
+            clearTimeout(this.sourceFieldInputTimeout);
+            this.sourceFieldInputTimeout = null;
+        }
     }
 
     // =========================================================================
@@ -1037,7 +1045,8 @@ export class SluggiElement extends LitElement {
     }
 
     private removeFormSubmitListener(): void {
-        // Listener is at document level and shared, no cleanup needed per instance
+        if (!this.redirectControlEnabled) return;
+        this.ownerDocument.removeEventListener('click', SluggiElement.handleSaveButtonClick, true);
     }
 
     private static handleSaveButtonClick(event: MouseEvent): void {
