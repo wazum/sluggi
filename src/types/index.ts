@@ -10,6 +10,21 @@ export type ProposalMode = 'auto' | 'recreate' | 'manual';
 
 export type ComponentMode = 'view' | 'edit';
 
+export interface ToggleConfig {
+    name: string;
+    isActive: boolean;
+    isDisabled: boolean;
+    activeClass: string;
+    iconBaseClass: string;
+    labelOn: string;
+    labelOff: string;
+    defaultLabelOn: string;
+    defaultLabelOff: string;
+    iconOn: unknown;
+    iconOff: unknown;
+    onToggle: () => void;
+}
+
 declare global {
     interface Window {
         TYPO3: {

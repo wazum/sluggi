@@ -2,7 +2,7 @@ import { LitElement, html, unsafeCSS, nothing } from 'lit';
 import { customElement, property, state, query } from 'lit/decorators.js';
 import Modal from '@typo3/backend/modal.js';
 import Severity from '@typo3/backend/severity.js';
-import type { ComponentMode } from '@/types';
+import type { ComponentMode, ToggleConfig } from '@/types';
 import { editIcon, fullPathEditIcon, refreshIcon, checkIcon, closeIcon, syncOnIcon, syncOffIcon, lockOnIcon, lockOffIcon, copyIcon, menuIcon } from './icons.js';
 import styles from '../styles/sluggi-element.scss?inline';
 
@@ -529,45 +529,59 @@ export class SluggiElement extends LitElement {
     private renderSyncToggle() {
         if (!this.showSyncToggle) return nothing;
 
-        const disabled = this.isSyncToggleDisabled;
-        return html`
-            <div class="sluggi-sync-wrapper">
-                <button
-                    type="button"
-                    class="sluggi-sync-toggle ${this.isSynced ? 'is-synced' : ''} ${disabled ? 'is-disabled' : ''}"
-                    title="${this.isSynced ? (this.labels['toggle.sync.on'] || 'Auto-sync enabled: URL path updates with title') : (this.labels['toggle.sync.off'] || 'Auto-sync disabled: click to enable')}"
-                    ?disabled="${disabled}"
-                    aria-disabled="${disabled}"
-                    @click="${disabled ? null : this.toggleSync}"
-                >
-                    <span class="sluggi-sync-label">sync</span>
-                    <span class="sluggi-sync-icons">
-                        <span class="sluggi-sync-icon sluggi-sync-icon-on">${syncOnIcon}</span>
-                        <span class="sluggi-sync-icon sluggi-sync-icon-off">${syncOffIcon}</span>
-                    </span>
-                </button>
-            </div>
-        `;
+        return this.renderToggle({
+            name: 'sync',
+            isActive: this.isSynced,
+            isDisabled: this.isSyncToggleDisabled,
+            activeClass: 'is-synced',
+            iconBaseClass: 'sluggi-sync-icon',
+            labelOn: this.labels['toggle.sync.on'],
+            labelOff: this.labels['toggle.sync.off'],
+            defaultLabelOn: 'Auto-sync enabled: URL path updates with title',
+            defaultLabelOff: 'Auto-sync disabled: click to enable',
+            iconOn: syncOnIcon,
+            iconOff: syncOffIcon,
+            onToggle: this.toggleSync,
+        });
     }
 
     private renderLockToggle() {
         if (!this.showLockToggle) return nothing;
 
-        const disabled = this.isLockToggleDisabled;
+        return this.renderToggle({
+            name: 'lock',
+            isActive: this.isLocked,
+            isDisabled: this.isLockToggleDisabled,
+            activeClass: 'is-locked',
+            iconBaseClass: 'sluggi-lock-icon-toggle',
+            labelOn: this.labels['toggle.lock.on'],
+            labelOff: this.labels['toggle.lock.off'],
+            defaultLabelOn: 'URL path is locked: click to unlock',
+            defaultLabelOff: 'URL path is unlocked: click to lock',
+            iconOn: lockOnIcon,
+            iconOff: lockOffIcon,
+            onToggle: this.toggleLock,
+        });
+    }
+
+    private renderToggle(config: ToggleConfig) {
+        const { name, isActive, isDisabled, activeClass, iconBaseClass, labelOn, labelOff, defaultLabelOn, defaultLabelOff, iconOn, iconOff, onToggle } = config;
+        const title = isActive ? (labelOn || defaultLabelOn) : (labelOff || defaultLabelOff);
+
         return html`
-            <div class="sluggi-lock-wrapper">
+            <div class="sluggi-${name}-wrapper">
                 <button
                     type="button"
-                    class="sluggi-lock-toggle ${this.isLocked ? 'is-locked' : ''} ${disabled ? 'is-disabled' : ''}"
-                    title="${this.isLocked ? (this.labels['toggle.lock.on'] || 'URL path is locked: click to unlock') : (this.labels['toggle.lock.off'] || 'URL path is unlocked: click to lock')}"
-                    ?disabled="${disabled}"
-                    aria-disabled="${disabled}"
-                    @click="${disabled ? null : this.toggleLock}"
+                    class="sluggi-${name}-toggle ${isActive ? activeClass : ''} ${isDisabled ? 'is-disabled' : ''}"
+                    title="${title}"
+                    ?disabled="${isDisabled}"
+                    aria-disabled="${isDisabled}"
+                    @click="${isDisabled ? null : onToggle}"
                 >
-                    <span class="sluggi-lock-label">lock</span>
-                    <span class="sluggi-lock-icons">
-                        <span class="sluggi-lock-icon-toggle sluggi-lock-icon-on">${lockOnIcon}</span>
-                        <span class="sluggi-lock-icon-toggle sluggi-lock-icon-off">${lockOffIcon}</span>
+                    <span class="sluggi-${name}-label">${name}</span>
+                    <span class="sluggi-${name}-icons">
+                        <span class="${iconBaseClass} sluggi-${name}-icon-on">${iconOn}</span>
+                        <span class="${iconBaseClass} sluggi-${name}-icon-off">${iconOff}</span>
                     </span>
                 </button>
             </div>
