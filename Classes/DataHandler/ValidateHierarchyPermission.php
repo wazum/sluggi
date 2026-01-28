@@ -73,7 +73,7 @@ final readonly class ValidateHierarchyPermission
             return;
         }
 
-        if (!$this->hierarchyPermissionService->validateSlugChange($lockedPrefix, $oldSlug, $newSlug)) {
+        if (!$this->hierarchyPermissionService->validateSlugChange($lockedPrefix, $newSlug)) {
             unset($fieldArray['slug']);
 
             $title = $this->translate('error.hierarchyPermission.title');

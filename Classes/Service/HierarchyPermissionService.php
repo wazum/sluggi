@@ -41,7 +41,7 @@ final readonly class HierarchyPermissionService
         return SlugUtility::getParentPath($currentSlug);
     }
 
-    public function validateSlugChange(string $lockedPrefix, string $oldSlug, string $newSlug): bool
+    public function validateSlugChange(string $lockedPrefix, string $newSlug): bool
     {
         if ($lockedPrefix === '') {
             return true;

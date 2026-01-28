@@ -119,10 +119,9 @@ final class HierarchyPermissionServiceTest extends TestCase
         $subject = new HierarchyPermissionService();
 
         $lockedPrefix = '/home/department';
-        $oldSlug = '/home/department/institute';
         $newSlug = '/home/department/new-institute';
 
-        $result = $subject->validateSlugChange($lockedPrefix, $oldSlug, $newSlug);
+        $result = $subject->validateSlugChange($lockedPrefix, $newSlug);
 
         self::assertTrue($result);
     }
@@ -133,10 +132,9 @@ final class HierarchyPermissionServiceTest extends TestCase
         $subject = new HierarchyPermissionService();
 
         $lockedPrefix = '/home/department';
-        $oldSlug = '/home/department/institute';
         $newSlug = '/home/other-department/institute';
 
-        $result = $subject->validateSlugChange($lockedPrefix, $oldSlug, $newSlug);
+        $result = $subject->validateSlugChange($lockedPrefix, $newSlug);
 
         self::assertFalse($result);
     }
@@ -147,46 +145,40 @@ final class HierarchyPermissionServiceTest extends TestCase
         $subject = new HierarchyPermissionService();
 
         $lockedPrefix = '';
-        $oldSlug = '/home/department/institute';
         $newSlug = '/completely/different/path';
 
-        $result = $subject->validateSlugChange($lockedPrefix, $oldSlug, $newSlug);
+        $result = $subject->validateSlugChange($lockedPrefix, $newSlug);
 
         self::assertTrue($result);
     }
 
     /**
-     * @return array<string, array{oldSlug: string, newSlug: string, lockedPrefix: string, expected: bool}>
+     * @return array<string, array{newSlug: string, lockedPrefix: string, expected: bool}>
      */
     public static function slugValidationDataProvider(): array
     {
         return [
             'changing only last segment is valid' => [
-                'oldSlug' => '/home/department/institute',
                 'newSlug' => '/home/department/new-name',
                 'lockedPrefix' => '/home/department',
                 'expected' => true,
             ],
             'changing segment within editable range is valid' => [
-                'oldSlug' => '/home/department/institute/about',
                 'newSlug' => '/home/department/new-institute/new-about',
                 'lockedPrefix' => '/home',
                 'expected' => true,
             ],
             'changing locked segment is invalid' => [
-                'oldSlug' => '/home/department/institute',
                 'newSlug' => '/home/other-dept/institute',
                 'lockedPrefix' => '/home/department',
                 'expected' => false,
             ],
             'removing locked segment is invalid' => [
-                'oldSlug' => '/home/department/institute',
                 'newSlug' => '/home/institute',
                 'lockedPrefix' => '/home/department',
                 'expected' => false,
             ],
             'adding segment within editable range is valid' => [
-                'oldSlug' => '/home/department/institute',
                 'newSlug' => '/home/department/institute/sub-page',
                 'lockedPrefix' => '/home',
                 'expected' => true,
@@ -197,14 +189,13 @@ final class HierarchyPermissionServiceTest extends TestCase
     #[Test]
     #[DataProvider('slugValidationDataProvider')]
     public function validateSlugChangeReturnsExpectedResult(
-        string $oldSlug,
         string $newSlug,
         string $lockedPrefix,
         bool $expected,
     ): void {
         $subject = new HierarchyPermissionService();
 
-        $result = $subject->validateSlugChange($lockedPrefix, $oldSlug, $newSlug);
+        $result = $subject->validateSlugChange($lockedPrefix, $newSlug);
 
         self::assertSame($expected, $result);
     }
