@@ -10,6 +10,7 @@ final readonly class SlugSyncService
 {
     public function __construct(
         private ExtensionConfiguration $extensionConfiguration,
+        private SlugConfigurationService $slugConfigurationService,
     ) {
     }
 
@@ -49,8 +50,7 @@ final readonly class SlugSyncService
      */
     public function hasSourceFieldChanged(string $table, array $fieldArray): bool
     {
-        $configService = new SlugConfigurationService();
-        $sourceFields = $configService->getSourceFields($table);
+        $sourceFields = $this->slugConfigurationService->getSourceFields($table);
 
         return array_intersect($sourceFields, array_keys($fieldArray)) !== [];
     }
@@ -60,8 +60,7 @@ final readonly class SlugSyncService
      */
     public function hasNonEmptySourceFieldValue(string $table, array $record): bool
     {
-        $configService = new SlugConfigurationService();
-        $sourceFields = $configService->getSourceFields($table);
+        $sourceFields = $this->slugConfigurationService->getSourceFields($table);
 
         foreach ($sourceFields as $field) {
             $value = $record[$field] ?? '';

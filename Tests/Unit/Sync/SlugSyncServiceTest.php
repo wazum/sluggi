@@ -8,6 +8,7 @@ use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 use TYPO3\CMS\Core\Configuration\ExtensionConfiguration as CoreExtensionConfiguration;
 use Wazum\Sluggi\Configuration\ExtensionConfiguration;
+use Wazum\Sluggi\Service\SlugConfigurationService;
 use Wazum\Sluggi\Service\SlugSyncService;
 
 final class SlugSyncServiceTest extends TestCase
@@ -18,7 +19,7 @@ final class SlugSyncServiceTest extends TestCase
         $coreConfig = $this->createMock(CoreExtensionConfiguration::class);
         $coreConfig->method('get')->with('sluggi', 'synchronize')->willReturn('1');
 
-        $subject = new SlugSyncService(new ExtensionConfiguration($coreConfig));
+        $subject = new SlugSyncService(new ExtensionConfiguration($coreConfig), new SlugConfigurationService());
 
         self::assertTrue($subject->isSyncFeatureEnabled());
     }
@@ -29,7 +30,7 @@ final class SlugSyncServiceTest extends TestCase
         $coreConfig = $this->createMock(CoreExtensionConfiguration::class);
         $coreConfig->method('get')->with('sluggi', 'synchronize')->willReturn('0');
 
-        $subject = new SlugSyncService(new ExtensionConfiguration($coreConfig));
+        $subject = new SlugSyncService(new ExtensionConfiguration($coreConfig), new SlugConfigurationService());
 
         self::assertFalse($subject->isSyncFeatureEnabled());
     }
@@ -40,7 +41,7 @@ final class SlugSyncServiceTest extends TestCase
         $coreConfig = $this->createMock(CoreExtensionConfiguration::class);
         $coreConfig->method('get')->with('sluggi', 'synchronize')->willReturn('1');
 
-        $subject = new SlugSyncService(new ExtensionConfiguration($coreConfig));
+        $subject = new SlugSyncService(new ExtensionConfiguration($coreConfig), new SlugConfigurationService());
 
         $result = $subject->shouldSync(['tx_sluggi_sync' => 1]);
 
@@ -53,7 +54,7 @@ final class SlugSyncServiceTest extends TestCase
         $coreConfig = $this->createMock(CoreExtensionConfiguration::class);
         $coreConfig->method('get')->with('sluggi', 'synchronize')->willReturn('0');
 
-        $subject = new SlugSyncService(new ExtensionConfiguration($coreConfig));
+        $subject = new SlugSyncService(new ExtensionConfiguration($coreConfig), new SlugConfigurationService());
 
         $result = $subject->shouldSync(['tx_sluggi_sync' => 1]);
 
@@ -66,7 +67,7 @@ final class SlugSyncServiceTest extends TestCase
         $coreConfig = $this->createMock(CoreExtensionConfiguration::class);
         $coreConfig->method('get')->with('sluggi', 'synchronize')->willReturn('1');
 
-        $subject = new SlugSyncService(new ExtensionConfiguration($coreConfig));
+        $subject = new SlugSyncService(new ExtensionConfiguration($coreConfig), new SlugConfigurationService());
 
         $result = $subject->shouldSync(['tx_sluggi_sync' => 0]);
 
@@ -84,7 +85,7 @@ final class SlugSyncServiceTest extends TestCase
         ];
 
         $coreConfig = $this->createMock(CoreExtensionConfiguration::class);
-        $subject = new SlugSyncService(new ExtensionConfiguration($coreConfig));
+        $subject = new SlugSyncService(new ExtensionConfiguration($coreConfig), new SlugConfigurationService());
 
         $result = $subject->hasSourceFieldChanged('pages', ['title' => 'New Title']);
 
@@ -102,7 +103,7 @@ final class SlugSyncServiceTest extends TestCase
         ];
 
         $coreConfig = $this->createMock(CoreExtensionConfiguration::class);
-        $subject = new SlugSyncService(new ExtensionConfiguration($coreConfig));
+        $subject = new SlugSyncService(new ExtensionConfiguration($coreConfig), new SlugConfigurationService());
 
         $result = $subject->hasSourceFieldChanged('pages', ['hidden' => 1]);
 
@@ -115,7 +116,7 @@ final class SlugSyncServiceTest extends TestCase
         $coreConfig = $this->createMock(CoreExtensionConfiguration::class);
         $coreConfig->method('get')->with('sluggi', 'synchronize')->willReturn('0');
 
-        $subject = new SlugSyncService(new ExtensionConfiguration($coreConfig));
+        $subject = new SlugSyncService(new ExtensionConfiguration($coreConfig), new SlugConfigurationService());
 
         $result = $subject->shouldShowSourceBadge('new', ['tx_sluggi_sync' => 0]);
 
@@ -128,7 +129,7 @@ final class SlugSyncServiceTest extends TestCase
         $coreConfig = $this->createMock(CoreExtensionConfiguration::class);
         $coreConfig->method('get')->with('sluggi', 'synchronize')->willReturn('1');
 
-        $subject = new SlugSyncService(new ExtensionConfiguration($coreConfig));
+        $subject = new SlugSyncService(new ExtensionConfiguration($coreConfig), new SlugConfigurationService());
 
         $result = $subject->shouldShowSourceBadge('edit', ['tx_sluggi_sync' => 1]);
 
@@ -141,7 +142,7 @@ final class SlugSyncServiceTest extends TestCase
         $coreConfig = $this->createMock(CoreExtensionConfiguration::class);
         $coreConfig->method('get')->with('sluggi', 'synchronize')->willReturn('1');
 
-        $subject = new SlugSyncService(new ExtensionConfiguration($coreConfig));
+        $subject = new SlugSyncService(new ExtensionConfiguration($coreConfig), new SlugConfigurationService());
 
         $result = $subject->shouldShowSourceBadge('edit', ['tx_sluggi_sync' => 0]);
 
@@ -154,7 +155,7 @@ final class SlugSyncServiceTest extends TestCase
         $coreConfig = $this->createMock(CoreExtensionConfiguration::class);
         $coreConfig->method('get')->with('sluggi', 'synchronize')->willReturn('0');
 
-        $subject = new SlugSyncService(new ExtensionConfiguration($coreConfig));
+        $subject = new SlugSyncService(new ExtensionConfiguration($coreConfig), new SlugConfigurationService());
 
         $result = $subject->shouldShowSourceBadge('edit', ['tx_sluggi_sync' => 1]);
 
