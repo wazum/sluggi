@@ -16,26 +16,12 @@ final readonly class ExtensionConfiguration
 
     public function isSyncEnabled(): bool
     {
-        try {
-            return (bool)$this->extensionConfiguration->get(
-                extension: 'sluggi',
-                path: 'synchronize'
-            );
-        } catch (Exception) {
-            return false;
-        }
+        return $this->getBool('synchronize');
     }
 
     public function isSyncDefaultEnabled(): bool
     {
-        try {
-            return (bool)$this->extensionConfiguration->get(
-                extension: 'sluggi',
-                path: 'synchronize_default'
-            );
-        } catch (Exception) {
-            return true;
-        }
+        return $this->getBool('synchronize_default', true);
     }
 
     /**
@@ -43,19 +29,12 @@ final readonly class ExtensionConfiguration
      */
     public function getSynchronizeTables(): array
     {
-        try {
-            $value = (string)$this->extensionConfiguration->get(
-                extension: 'sluggi',
-                path: 'synchronize_tables'
-            );
-            if ($value === '') {
-                return [];
-            }
-
-            return array_values(array_filter(array_map(trim(...), explode(',', $value))));
-        } catch (Exception) {
+        $value = $this->getString('synchronize_tables');
+        if ($value === '') {
             return [];
         }
+
+        return array_values(array_filter(array_map(trim(...), explode(',', $value))));
     }
 
     public function isTableSynchronizeEnabled(string $table): bool
@@ -65,50 +44,22 @@ final readonly class ExtensionConfiguration
 
     public function isLockEnabled(): bool
     {
-        try {
-            return (bool)$this->extensionConfiguration->get(
-                extension: 'sluggi',
-                path: 'lock'
-            );
-        } catch (Exception) {
-            return false;
-        }
+        return $this->getBool('lock');
     }
 
     public function isLockDescendantsEnabled(): bool
     {
-        try {
-            return $this->isLockEnabled() && (bool)$this->extensionConfiguration->get(
-                extension: 'sluggi',
-                path: 'lock_descendants'
-            );
-        } catch (Exception) {
-            return false;
-        }
+        return $this->isLockEnabled() && $this->getBool('lock_descendants');
     }
 
     public function isLastSegmentOnlyEnabled(): bool
     {
-        try {
-            return (bool)$this->extensionConfiguration->get(
-                extension: 'sluggi',
-                path: 'last_segment_only'
-            );
-        } catch (Exception) {
-            return false;
-        }
+        return $this->getBool('last_segment_only');
     }
 
     public function isFullPathEditingEnabled(): bool
     {
-        try {
-            return (bool)$this->extensionConfiguration->get(
-                extension: 'sluggi',
-                path: 'allow_full_path_editing'
-            );
-        } catch (Exception) {
-            return false;
-        }
+        return $this->getBool('allow_full_path_editing');
     }
 
     /**
@@ -116,19 +67,12 @@ final readonly class ExtensionConfiguration
      */
     public function getExcludedPageTypes(): array
     {
-        try {
-            $value = (string)$this->extensionConfiguration->get(
-                extension: 'sluggi',
-                path: 'exclude_doktypes'
-            );
-            if ($value === '') {
-                return [];
-            }
-
-            return array_values(array_map(intval(...), array_filter(explode(',', $value))));
-        } catch (Exception) {
+        $value = $this->getString('exclude_doktypes');
+        if ($value === '') {
             return [];
         }
+
+        return array_values(array_map(intval(...), array_filter(explode(',', $value))));
     }
 
     public function isPageTypeExcluded(int $pageType): bool
@@ -138,37 +82,34 @@ final readonly class ExtensionConfiguration
 
     public function isCopyUrlEnabled(): bool
     {
-        try {
-            return (bool)$this->extensionConfiguration->get(
-                extension: 'sluggi',
-                path: 'copy_url'
-            );
-        } catch (Exception) {
-            return false;
-        }
+        return $this->getBool('copy_url');
     }
 
     public function isPreserveUnderscoreEnabled(): bool
     {
-        try {
-            return (bool)$this->extensionConfiguration->get(
-                extension: 'sluggi',
-                path: 'preserve_underscore'
-            );
-        } catch (Exception) {
-            return false;
-        }
+        return $this->getBool('preserve_underscore');
     }
 
     public function isRedirectControlEnabled(): bool
     {
+        return $this->getBool('redirect_control', true);
+    }
+
+    private function getBool(string $path, bool $default = false): bool
+    {
         try {
-            return (bool)$this->extensionConfiguration->get(
-                extension: 'sluggi',
-                path: 'redirect_control'
-            );
+            return (bool)$this->extensionConfiguration->get(extension: 'sluggi', path: $path);
         } catch (Exception) {
-            return true;
+            return $default;
+        }
+    }
+
+    private function getString(string $path, string $default = ''): string
+    {
+        try {
+            return (string)$this->extensionConfiguration->get(extension: 'sluggi', path: $path);
+        } catch (Exception) {
+            return $default;
         }
     }
 }
