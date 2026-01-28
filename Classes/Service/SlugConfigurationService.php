@@ -97,6 +97,17 @@ final readonly class SlugConfigurationService
         return $result;
     }
 
+    public function getSlugFieldName(string $table): ?string
+    {
+        foreach ($GLOBALS['TCA'][$table]['columns'] ?? [] as $fieldName => $fieldConfig) {
+            if (($fieldConfig['config']['type'] ?? '') === 'slug') {
+                return $fieldName;
+            }
+        }
+
+        return null;
+    }
+
     /**
      * Normalizes field config by splitting comma-separated strings into arrays.
      * TYPO3 core supports both ['nav_title, title'] and [['nav_title', 'title']].
@@ -114,16 +125,5 @@ final readonly class SlugConfigurationService
                 : $field,
             $fields
         );
-    }
-
-    public function getSlugFieldName(string $table): ?string
-    {
-        foreach ($GLOBALS['TCA'][$table]['columns'] ?? [] as $fieldName => $fieldConfig) {
-            if (($fieldConfig['config']['type'] ?? '') === 'slug') {
-                return $fieldName;
-            }
-        }
-
-        return null;
     }
 }

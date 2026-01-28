@@ -74,6 +74,22 @@ final readonly class HierarchyPermissionService
         return $editableUids;
     }
 
+    public function getLockedPrefixForPage(int $pageId, string $currentSlug): string
+    {
+        $backendUser = $this->getBackendUser();
+        if ($backendUser === null || $backendUser->isAdmin()) {
+            return '';
+        }
+
+        $rootLine = $this->getRootLineWithPermissions($pageId);
+        $editableUids = $this->getEditablePageUids(
+            $rootLine,
+            fn (array $page): bool => $backendUser->doesUserHaveAccess($page, Permission::PAGE_EDIT)
+        );
+
+        return $this->getLockedPrefix($rootLine, $editableUids, $currentSlug);
+    }
+
     /**
      * @return array<int, array<string, mixed>>
      */
@@ -92,22 +108,6 @@ final readonly class HierarchyPermissionService
                 'slug',
             ]
         );
-    }
-
-    public function getLockedPrefixForPage(int $pageId, string $currentSlug): string
-    {
-        $backendUser = $this->getBackendUser();
-        if ($backendUser === null || $backendUser->isAdmin()) {
-            return '';
-        }
-
-        $rootLine = $this->getRootLineWithPermissions($pageId);
-        $editableUids = $this->getEditablePageUids(
-            $rootLine,
-            fn (array $page): bool => $backendUser->doesUserHaveAccess($page, Permission::PAGE_EDIT)
-        );
-
-        return $this->getLockedPrefix($rootLine, $editableUids, $currentSlug);
     }
 
     private function getBackendUser(): ?BackendUserAuthentication
