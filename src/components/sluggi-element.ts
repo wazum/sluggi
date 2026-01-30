@@ -337,7 +337,7 @@ export class SluggiElement extends LitElement {
                 @focusin="${this.handleWrapperFocusin}"
                 @focusout="${this.handleWrapperFocusout}"
             >
-                ${this.computedPrefix ? html`<span class="sluggi-prefix">${this.computedPrefix}</span>` : nothing}
+                ${this.computedPrefix ? html`<span class="sluggi-prefix" title="${this.computedPrefix}">${this.computedPrefix}</span>` : nothing}
 
                 ${this.mode === 'view' ? this.renderViewMode() : this.renderEditMode()}
 
@@ -383,6 +383,7 @@ export class SluggiElement extends LitElement {
                 class="${classes}"
                 role="${isEditable ? 'button' : nothing}"
                 tabindex="${isEditable ? '0' : '-1'}"
+                title="${editable || '/'}"
                 aria-label="${isEditable ? `Click to edit slug: ${editable}` : editable}"
                 @click="${this.handleEditableClick}"
                 @keydown="${this.handleEditableKeydown}"

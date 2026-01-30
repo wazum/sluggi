@@ -95,7 +95,7 @@ import S from"@typo3/backend/modal.js";import Y from"@typo3/backend/severity.js"
                 @focusin="${this.handleWrapperFocusin}"
                 @focusout="${this.handleWrapperFocusout}"
             >
-                ${this.computedPrefix?p`<span class="sluggi-prefix">${this.computedPrefix}</span>`:h}
+                ${this.computedPrefix?p`<span class="sluggi-prefix" title="${this.computedPrefix}">${this.computedPrefix}</span>`:h}
 
                 ${this.mode==="view"?this.renderViewMode():this.renderEditMode()}
 
@@ -109,6 +109,7 @@ import S from"@typo3/backend/modal.js";import Y from"@typo3/backend/severity.js"
                 class="${t}"
                 role="${i?"button":h}"
                 tabindex="${i?"0":"-1"}"
+                title="${e||"/"}"
                 aria-label="${i?`Click to edit slug: ${e}`:e}"
                 @click="${this.handleEditableClick}"
                 @keydown="${this.handleEditableKeydown}"
