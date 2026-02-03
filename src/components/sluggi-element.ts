@@ -159,6 +159,8 @@ export class SluggiElement extends LitElement {
     @state()
     redirectChoiceMade = false;
 
+    private valueBeforeSync = '';
+
     private hideTimeoutId: number | null = null;
 
     @query('input.sluggi-input')
@@ -1190,6 +1192,7 @@ export class SluggiElement extends LitElement {
         this.updateSourceBadgeVisibility();
 
         if (this.isSynced) {
+            this.valueBeforeSync = this.value;
             if (this.isFullPathMode) {
                 this.isFullPathMode = false;
                 this.notifyFullPathFieldOfChange();
@@ -1197,6 +1200,10 @@ export class SluggiElement extends LitElement {
             if (this.hasNonEmptySourceFieldValue()) {
                 this.sendSlugProposal('recreate');
             }
+        } else if (this.valueBeforeSync) {
+            this.value = this.valueBeforeSync;
+            this.valueBeforeSync = '';
+            this.notifyFormEngineOfChange();
         }
     }
 

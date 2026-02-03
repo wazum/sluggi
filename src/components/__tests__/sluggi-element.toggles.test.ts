@@ -236,6 +236,45 @@ describe('SluggiElement - Toggles', () => {
             document.body.removeChild(titleInput);
         });
 
+        it('reverts to pre-sync value when toggling sync OFF without saving', async () => {
+            const titleInput = document.createElement('input');
+            titleInput.setAttribute('data-sluggi-source', '');
+            titleInput.setAttribute('data-formengine-input-name', 'data[pages][456][title]');
+            titleInput.value = 'Some Title';
+            document.body.appendChild(titleInput);
+
+            const el = await fixture<SluggiElement>(html`
+                <sluggi-element
+                    value="/my-custom-slug"
+                    page-id="123"
+                    record-id="456"
+                    table-name="pages"
+                    field-name="slug"
+                    sync-feature-enabled
+                ></sluggi-element>
+            `);
+
+            expect(el.value).to.equal('/my-custom-slug');
+
+            const syncToggle = el.shadowRoot!.querySelector('.sluggi-sync-toggle') as HTMLElement;
+            syncToggle.click();
+            await el.updateComplete;
+
+            expect(el.isSynced).to.be.true;
+
+            el.setProposal('/some-title');
+            await el.updateComplete;
+            expect(el.value).to.equal('/some-title');
+
+            syncToggle.click();
+            await el.updateComplete;
+
+            expect(el.isSynced).to.be.false;
+            expect(el.value).to.equal('/my-custom-slug');
+
+            document.body.removeChild(titleInput);
+        });
+
         it('enabling SYNC disables full path edit button', async () => {
             const titleInput = document.createElement('input');
             titleInput.setAttribute('data-sluggi-source', '');
