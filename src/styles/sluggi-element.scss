@@ -4,6 +4,7 @@
 
 :host {
     display: block;
+    container-type: inline-size;
 }
 
 // =========================================================================
@@ -545,5 +546,38 @@
         overflow: visible;
         transition: max-width 0.35s cubic-bezier(0.4, 0, 0.2, 1),
                     opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1) 0.05s;
+    }
+}
+
+@container (max-width: 550px) {
+    .sluggi-wrapper {
+        flex-wrap: wrap;
+        min-width: 0;
+        overflow: clip;
+    }
+
+    .sluggi-prefix {
+        border-radius: var(--sluggi-border-radius) 0 0 0;
+    }
+
+    .sluggi-editable {
+        border-radius: 0 var(--sluggi-border-radius) 0 0;
+    }
+
+    .sluggi-controls {
+        border-top: 1px solid var(--sluggi-border-color);
+        width: 100%;
+        justify-content: flex-end;
+        margin-left: 0;
+        background: var(--sluggi-secondary-bg);
+
+        .btn:last-child {
+            border-radius: 0 0 var(--sluggi-border-radius) 0;
+        }
+
+        .sluggi-sync-wrapper:last-child .sluggi-sync-toggle,
+        .sluggi-lock-wrapper:last-child .sluggi-lock-toggle {
+            border-radius: 0 0 var(--sluggi-border-radius) 0;
+        }
     }
 }
