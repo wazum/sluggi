@@ -370,7 +370,7 @@ export class SluggiElement extends LitElement {
 
     private renderViewMode() {
         const isEditable = !this.isLocked && !this.isSynced;
-        const editable = this.editableValue;
+        const editable = this.editableValue || '/';
         const classes = [
             'sluggi-editable',
             this.isLocked ? 'locked' : '',
@@ -378,16 +378,21 @@ export class SluggiElement extends LitElement {
             this.hasNoControls ? 'no-edit' : '',
         ].filter(Boolean).join(' ');
 
+        const lastSlashIndex = editable.lastIndexOf('/');
+        const hasMultipleSegments = lastSlashIndex > 0;
+        const pathPart = hasMultipleSegments ? editable.substring(0, lastSlashIndex) : '';
+        const endPart = hasMultipleSegments ? editable.substring(lastSlashIndex) : editable;
+
         return html`
             <span
                 class="${classes}"
                 role="${isEditable ? 'button' : nothing}"
                 tabindex="${isEditable ? '0' : '-1'}"
-                title="${editable || '/'}"
+                title="${editable}"
                 aria-label="${isEditable ? `Click to edit slug: ${editable}` : editable}"
                 @click="${this.handleEditableClick}"
                 @keydown="${this.handleEditableKeydown}"
-            >${editable || '/'}${this.showPlaceholder ? html`<span class="sluggi-placeholder">/new-page</span>` : nothing}</span>
+            >${pathPart ? html`<span class="sluggi-editable-path">${pathPart}</span>` : nothing}<span class="sluggi-editable-end">${endPart}</span>${this.showPlaceholder ? html`<span class="sluggi-placeholder">/new-page</span>` : nothing}</span>
         `;
     }
 
