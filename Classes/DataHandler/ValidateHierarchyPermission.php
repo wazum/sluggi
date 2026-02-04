@@ -58,7 +58,7 @@ final readonly class ValidateHierarchyPermission
         }
 
         $newSlug = (string)$fieldArray['slug'];
-        $isNewRecord = !is_int($id) && !ctype_digit((string)$id);
+        $isNewRecord = DataHandlerUtility::isNewRecord($id);
 
         $lockedPrefix = $isNewRecord
             ? $this->resolveLockedPrefixForNewRecord($fieldArray)

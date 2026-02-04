@@ -56,7 +56,7 @@ final readonly class ValidateLastSegmentOnly
         }
 
         $newSlug = (string)$fieldArray['slug'];
-        $isNewRecord = !is_int($id) && !ctype_digit((string)$id);
+        $isNewRecord = DataHandlerUtility::isNewRecord($id);
 
         $expectedParentPath = $isNewRecord
             ? $this->resolveParentSlugForNewRecord($fieldArray)

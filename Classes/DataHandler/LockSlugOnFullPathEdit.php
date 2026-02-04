@@ -8,6 +8,7 @@ use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\DataHandling\DataHandler;
 use Wazum\Sluggi\Service\FullPathEditingService;
 use Wazum\Sluggi\Service\SlugGeneratorService;
+use Wazum\Sluggi\Utility\DataHandlerUtility;
 use Wazum\Sluggi\Utility\SlugUtility;
 
 final readonly class LockSlugOnFullPathEdit
@@ -31,7 +32,7 @@ final readonly class LockSlugOnFullPathEdit
             return;
         }
 
-        if (!is_int($id) && !ctype_digit($id)) {
+        if (DataHandlerUtility::isNewRecord($id)) {
             return;
         }
 

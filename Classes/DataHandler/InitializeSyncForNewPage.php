@@ -6,6 +6,7 @@ namespace Wazum\Sluggi\DataHandler;
 
 use TYPO3\CMS\Core\DataHandling\DataHandler;
 use Wazum\Sluggi\Configuration\ExtensionConfiguration;
+use Wazum\Sluggi\Utility\DataHandlerUtility;
 
 final readonly class InitializeSyncForNewPage
 {
@@ -27,7 +28,7 @@ final readonly class InitializeSyncForNewPage
             return;
         }
 
-        if (!$this->isNewRecord($id)) {
+        if (!DataHandlerUtility::isNewRecord($id)) {
             return;
         }
 
@@ -44,10 +45,5 @@ final readonly class InitializeSyncForNewPage
         }
 
         $fieldArray['tx_sluggi_sync'] = 1;
-    }
-
-    private function isNewRecord(string|int $id): bool
-    {
-        return is_string($id) && str_starts_with($id, 'NEW');
     }
 }
