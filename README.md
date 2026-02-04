@@ -116,7 +116,7 @@ Remove URL paths from page types that don't need them (Sysfolder, Recycler, Spac
 
 ## Configuration
 
-All features work out of the box with sensible defaults. Fine-tune via **Admin Tools > Settings > Extension Configuration > sluggi**:
+All features work out of the box with sensible defaults. Fine-tune via **System > Settings > Extension Configuration > sluggi**:
 
 | Setting | Description | Default |
 |---------|-------------|---------|
