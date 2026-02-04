@@ -1,3 +1,13 @@
+# cat=basic; type=string; label=Exclude page types: Comma-separated list of doktypes that should not have slugs (e.g. 199,254,255 for Spacer, Sysfolder, Recycler)
+exclude_doktypes=
+# cat=basic; type=boolean; label=Preserve underscores in slugs: When enabled, underscores are not replaced by dashes during slug generation (RFC 3986 allows both characters)
+preserve_underscore=0
+# cat=basic; type=boolean; label=Enable copy URL button: When enabled, a button to copy the full page URL to clipboard is shown
+copy_url=1
+# cat=basic; type=boolean; label=Allow standard editors to edit only the last segment of the URL slug
+last_segment_only=0
+# cat=basic; type=boolean; label=Allow full path editing: When enabled with last_segment_only or hierarchy permissions, permitted users can unlock full path editing via a toggle button
+allow_full_path_editing=0
 # cat=sync; type=boolean; label=Enable automatic slug synchronization: When enabled, slug will be automatically regenerated when source fields change
 synchronize=1
 # cat=sync; type=boolean; label=Enable sync by default for new pages: When enabled, new pages will have slug synchronization enabled by default
@@ -8,15 +18,5 @@ synchronize_tables=
 lock=0
 # cat=lock; type=boolean; label=Lock descendants: When enabled, children of a locked page are also protected from slug updates caused by ancestor changes
 lock_descendants=0
-# cat=basic; type=boolean; label=Allow standard editors to edit only the last segment of the URL slug
-last_segment_only=0
-# cat=basic; type=boolean; label=Allow full path editing: When enabled with last_segment_only or hierarchy permissions, permitted users can unlock full path editing via a toggle button
-allow_full_path_editing=0
-# cat=basic; type=string; label=Exclude page types: Comma-separated list of doktypes that should not have slugs (e.g. 199,254,255 for Spacer, Sysfolder, Recycler)
-exclude_doktypes=
-# cat=basic; type=boolean; label=Enable copy URL button: When enabled, a button to copy the full page URL to clipboard is shown
-copy_url=0
-# cat=basic; type=boolean; label=Preserve underscores in slugs: When enabled, underscores are not replaced by dashes during slug generation (RFC 3986 allows both characters)
-preserve_underscore=0
 # cat=redirect; type=boolean; label=Show redirect control: When enabled, a modal dialog is shown when changing a slug to let users decide if redirects should be created
 redirect_control=0
