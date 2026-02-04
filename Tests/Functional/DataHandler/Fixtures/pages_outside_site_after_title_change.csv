@@ -1,0 +1,7 @@
+"pages"
+,"uid","pid","title","slug","tx_sluggi_sync","doktype","sys_language_uid","l10n_parent","hidden"
+,1,0,"Root Page","/",0,1,0,0,0
+,2,1,"Site Page","/site-page",1,1,0,0,0
+,100,0,"Structural Folder","",0,254,0,0,0
+,101,100,"Updated Customer","/updated-customer",1,1,0,0,0
+,102,101,"Sub Page","/customer-a/sub-page",1,1,0,0,0
