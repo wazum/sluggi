@@ -149,6 +149,24 @@ All features work out of the box with sensible defaults. Fine-tune via **System 
 |---------|-------------|---------|
 | `redirect_control` | Show a modal when a URL changes, letting the editor decide whether to create a redirect. Gives editors control instead of silently creating redirects they may not want. The choice applies recursively to all affected child pages. | Off |
 
+For deployment or version-controlled configuration, set values in `config/system/additional.php`:
+
+```php
+$GLOBALS['TYPO3_CONF_VARS']['EXTENSIONS']['sluggi'] = [
+    'synchronize' => '1',
+    'synchronize_default' => '1',
+    'synchronize_tables' => 'tx_news_domain_model_news',
+    'lock' => '1',
+    'lock_descendants' => '0',
+    'last_segment_only' => '1',
+    'allow_full_path_editing' => '1',
+    'exclude_doktypes' => '199,254,255',
+    'copy_url' => '1',
+    'preserve_underscore' => '0',
+    'redirect_control' => '1',
+];
+```
+
 ## Permissions
 
 Every sluggi feature integrates with TYPO3's standard backend user and group permissions. You decide per user group which editors can see and use which controls – the same way you manage access to any other field in TYPO3:
