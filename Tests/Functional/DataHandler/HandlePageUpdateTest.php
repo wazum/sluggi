@@ -100,6 +100,52 @@ final class HandlePageUpdateTest extends FunctionalTestCase
     }
 
     #[Test]
+    public function translatedSlugUsesTranslatedParentPrefixWhenTitleChanges(): void
+    {
+        Typo3Compatibility::writeSiteConfiguration('test', [
+            'rootPageId' => 1,
+            'base' => '/',
+            'languages' => [
+                [
+                    'languageId' => 0,
+                    'title' => 'English',
+                    'locale' => 'en_US.UTF-8',
+                    'base' => '/',
+                ],
+                [
+                    'languageId' => 1,
+                    'title' => 'German',
+                    'locale' => 'de_DE.UTF-8',
+                    'base' => '/de/',
+                ],
+            ],
+            'settings' => [
+                'redirects' => [
+                    'autoUpdateSlugs' => true,
+                    'autoCreateRedirects' => false,
+                ],
+            ],
+        ]);
+
+        $this->importCSVDataSet(__DIR__ . '/Fixtures/pages_sync_translated.csv');
+
+        $dataHandler = GeneralUtility::makeInstance(DataHandler::class);
+        $dataHandler->start(
+            [
+                'pages' => [
+                    5 => [
+                        'title' => 'Neue Kind Seite',
+                    ],
+                ],
+            ],
+            []
+        );
+        $dataHandler->process_datamap();
+
+        $this->assertCSVDataSet(__DIR__ . '/Fixtures/pages_after_sync_translated_title_change.csv');
+    }
+
+    #[Test]
     public function childSlugIsUpdatedWhenParentTitleChanges(): void
     {
         $this->importCSVDataSet(__DIR__ . '/Fixtures/pages_child.csv');

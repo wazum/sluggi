@@ -65,7 +65,15 @@ final readonly class HandlePageUpdate
             return;
         }
 
-        $newSlug = $this->generatorService->generate($merged, (int)$record['pid']);
+        $languageId = (int)($record['sys_language_uid'] ?? 0);
+        $parentSlug = $this->generatorService->getParentSlug((int)$record['pid'], $languageId);
+        $generatedSlug = $this->generatorService->generate($merged, (int)$record['pid']);
+        $newSlug = $this->generatorService->combineWithParent(
+            $parentSlug,
+            $generatedSlug,
+            $merged,
+            (int)$record['pid'],
+        );
         $fieldArray['slug'] = $newSlug;
 
         if ($newSlug !== $record['slug']) {
