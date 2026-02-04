@@ -10,14 +10,17 @@ use TYPO3\CMS\Core\DataHandling\DataHandler;
 use TYPO3\CMS\Core\Localization\LanguageServiceFactory;
 use Wazum\Sluggi\Service\FullPathEditingService;
 use Wazum\Sluggi\Service\LastSegmentValidationService;
+use Wazum\Sluggi\Service\SlugGeneratorService;
 use Wazum\Sluggi\Utility\DataHandlerUtility;
 use Wazum\Sluggi\Utility\FlashMessageUtility;
+use Wazum\Sluggi\Utility\SlugUtility;
 
 final readonly class ValidateLastSegmentOnly
 {
     public function __construct(
         private LastSegmentValidationService $validationService,
         private FullPathEditingService $fullPathEditingService,
+        private SlugGeneratorService $slugGeneratorService,
         private LanguageServiceFactory $languageServiceFactory,
     ) {
     }
@@ -35,17 +38,12 @@ final readonly class ValidateLastSegmentOnly
             return;
         }
 
-        if (!is_int($id) && !ctype_digit($id)) {
-            return;
-        }
-
         $backendUser = $this->getBackendUser();
         if ($backendUser === null) {
             return;
         }
 
-        $isAdmin = $backendUser->isAdmin();
-        if (!$this->validationService->shouldRestrictUser($isAdmin)) {
+        if (!$this->validationService->shouldRestrictUser($backendUser->isAdmin())) {
             return;
         }
 
@@ -57,31 +55,58 @@ final readonly class ValidateLastSegmentOnly
             return;
         }
 
-        $record = BackendUtility::getRecordWSOL('pages', (int)$id, 'slug');
-        if ($record === null) {
+        $newSlug = (string)$fieldArray['slug'];
+        $isNewRecord = !is_int($id) && !ctype_digit((string)$id);
+
+        $expectedParentPath = $isNewRecord
+            ? $this->resolveParentSlugForNewRecord($fieldArray)
+            : $this->resolveParentSlugForExistingRecord((int)$id);
+
+        if ($expectedParentPath === null) {
             return;
         }
 
-        $oldSlug = (string)$record['slug'];
-        $newSlug = (string)$fieldArray['slug'];
-
-        if (!$this->validationService->validateSlugChange($oldSlug, $newSlug)) {
-            unset($fieldArray['slug']);
-
-            $title = $this->translate('error.lastSegmentOnly.title');
-            $message = $this->translate('error.lastSegmentOnly.message');
-
-            $dataHandler->log(
-                'pages',
-                (int)$id,
-                2,
-                null,
-                1,
-                $title . ': ' . $message
-            );
-
-            FlashMessageUtility::addError($message, $title);
+        if (SlugUtility::getParentPath($newSlug) === $expectedParentPath) {
+            return;
         }
+
+        if ($isNewRecord) {
+            $fieldArray['slug'] = $expectedParentPath . '/' . SlugUtility::getLastSegment($newSlug);
+        } else {
+            unset($fieldArray['slug']);
+            $this->logValidationError($dataHandler, (int)$id);
+        }
+    }
+
+    /**
+     * @param array<string, mixed> $fieldArray
+     */
+    private function resolveParentSlugForNewRecord(array $fieldArray): ?string
+    {
+        $pid = (int)($fieldArray['pid'] ?? 0);
+        if ($pid <= 0) {
+            return null;
+        }
+
+        return $this->slugGeneratorService->getParentSlug($pid);
+    }
+
+    private function resolveParentSlugForExistingRecord(int $id): ?string
+    {
+        $record = BackendUtility::getRecordWSOL('pages', $id, 'slug');
+
+        return $record !== null
+            ? SlugUtility::getParentPath((string)$record['slug'])
+            : null;
+    }
+
+    private function logValidationError(DataHandler $dataHandler, int $id): void
+    {
+        $title = $this->translate('error.lastSegmentOnly.title');
+        $message = $this->translate('error.lastSegmentOnly.message');
+
+        $dataHandler->log('pages', $id, 2, null, 1, $title . ': ' . $message);
+        FlashMessageUtility::addError($message, $title);
     }
 
     private function translate(string $key): string

@@ -1,0 +1,6 @@
+"pages"
+,"uid","pid","title","slug","doktype"
+,1,0,"Root Page","/",1
+,2,1,"Parent Page","/parent",1
+,3,2,"Child Page","/parent/child",1
+,4,2,"New Page","/parent/new-page",1
