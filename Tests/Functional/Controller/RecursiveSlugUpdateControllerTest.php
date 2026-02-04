@@ -73,6 +73,21 @@ final class RecursiveSlugUpdateControllerTest extends FunctionalTestCase
     }
 
     #[Test]
+    public function rejectsNonAdminUser(): void
+    {
+        $this->setUpBackendUser(2);
+        $GLOBALS['LANG'] = GeneralUtility::makeInstance(LanguageServiceFactory::class)->create('default');
+
+        $controller = $this->get(RecursiveSlugUpdateController::class);
+        $response = $controller->updateAction($this->createRequest(2));
+
+        self::assertSame(403, $response->getStatusCode());
+
+        $body = json_decode((string)$response->getBody(), true);
+        self::assertFalse($body['success']);
+    }
+
+    #[Test]
     public function regeneratesChildSlugBasedOnParentPath(): void
     {
         $controller = $this->get(RecursiveSlugUpdateController::class);

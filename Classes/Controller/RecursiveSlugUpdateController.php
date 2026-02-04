@@ -35,6 +35,10 @@ final readonly class RecursiveSlugUpdateController
 
     public function updateAction(ServerRequestInterface $request): ResponseInterface
     {
+        if (!$GLOBALS['BE_USER']->isAdmin()) {
+            return new JsonResponse(['success' => false, 'message' => 'Admin access required'], 403);
+        }
+
         $pageId = (int)($request->getQueryParams()['id'] ?? 0);
         if ($pageId <= 0) {
             return new JsonResponse(['success' => false, 'message' => 'Invalid page ID'], 400);
