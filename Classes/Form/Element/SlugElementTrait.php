@@ -297,6 +297,8 @@ trait SlugElementTrait
             'toggle.lock.off' => $languageService->sL($prefix . 'toggle.lock.off'),
             'toggle.path.on' => $languageService->sL($prefix . 'toggle.path.on'),
             'toggle.path.off' => $languageService->sL($prefix . 'toggle.path.off'),
+            'button.menu' => $languageService->sL($prefix . 'button.menu'),
+            'button.editFullPath' => $languageService->sL($prefix . 'button.editFullPath'),
             'button.copyUrl' => $languageService->sL($prefix . 'button.copyUrl'),
             'copyConfirmation' => $languageService->sL($prefix . 'copyConfirmation'),
             'redirectModal.title' => $languageService->sL($prefix . 'redirectModal.title'),

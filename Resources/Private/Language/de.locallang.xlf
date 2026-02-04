@@ -91,6 +91,14 @@
                 <source>Click to edit full path</source>
                 <target>Klicken, um vollständigen Pfad zu bearbeiten</target>
             </trans-unit>
+            <trans-unit id="button.menu" resname="button.menu">
+                <source>Toggle controls menu</source>
+                <target>Steuerungsmenü ein-/ausblenden</target>
+            </trans-unit>
+            <trans-unit id="button.editFullPath" resname="button.editFullPath">
+                <source>Edit full URL path</source>
+                <target>Vollständigen URL-Pfad bearbeiten</target>
+            </trans-unit>
             <trans-unit id="button.copyUrl" resname="button.copyUrl">
                 <source>Copy page URL to clipboard</source>
                 <target>Seiten-URL in Zwischenablage kopieren</target>
@@ -138,6 +146,10 @@
             <trans-unit id="contextMenu.recursiveSlugUpdate.confirm.message" resname="contextMenu.recursiveSlugUpdate.confirm.message">
                 <source>This will regenerate URL paths for all child pages based on their source fields. Continue?</source>
                 <target>Die URL-Pfade aller Unterseiten werden anhand ihrer Quellfelder neu generiert. Fortfahren?</target>
+            </trans-unit>
+            <trans-unit id="contextMenu.recursiveSlugUpdate.button.cancel" resname="contextMenu.recursiveSlugUpdate.button.cancel">
+                <source>Cancel</source>
+                <target>Abbrechen</target>
             </trans-unit>
             <trans-unit id="contextMenu.recursiveSlugUpdate.success" resname="contextMenu.recursiveSlugUpdate.success">
                 <source>URL paths updated successfully.</source>

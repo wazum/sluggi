@@ -21,7 +21,7 @@ function recursiveSlugUpdate(_table: string, uid: string): void {
         SeverityEnum.warning,
         [
             {
-                text: TYPO3.lang['button.cancel'] || 'Cancel',
+                text: TYPO3.lang['contextMenu.recursiveSlugUpdate.button.cancel'] || 'Cancel',
                 active: true,
                 btnClass: 'btn-default',
                 trigger: (): void => {

@@ -69,6 +69,12 @@
             <trans-unit id="toggle.path.off" resname="toggle.path.off">
                 <source>Click to edit full path</source>
             </trans-unit>
+            <trans-unit id="button.menu" resname="button.menu">
+                <source>Toggle controls menu</source>
+            </trans-unit>
+            <trans-unit id="button.editFullPath" resname="button.editFullPath">
+                <source>Edit full URL path</source>
+            </trans-unit>
             <trans-unit id="button.copyUrl" resname="button.copyUrl">
                 <source>Copy page URL to clipboard</source>
             </trans-unit>
@@ -116,6 +122,9 @@
             </trans-unit>
             <trans-unit id="contextMenu.recursiveSlugUpdate.confirm.message" resname="contextMenu.recursiveSlugUpdate.confirm.message">
                 <source>This will regenerate URL paths for all child pages based on their source fields. Continue?</source>
+            </trans-unit>
+            <trans-unit id="contextMenu.recursiveSlugUpdate.button.cancel" resname="contextMenu.recursiveSlugUpdate.button.cancel">
+                <source>Cancel</source>
             </trans-unit>
             <trans-unit id="contextMenu.recursiveSlugUpdate.success" resname="contextMenu.recursiveSlugUpdate.success">
                 <source>URL paths updated successfully.</source>
