@@ -133,6 +133,28 @@ export async function expandPageTreeNode(page: Page, pageId: number | string): P
 }
 
 /**
+ * Scroll the page tree to make bottom items visible.
+ *
+ * TYPO3 12/13 use SVG-based virtual rendering that only renders
+ * visible nodes. Scrolling the container triggers rendering of
+ * off-screen nodes.
+ */
+export async function scrollPageTreeToBottom(page: Page): Promise<void> {
+  const version = await getTypo3Version(page);
+  if (version >= 14) {
+    return;
+  }
+
+  await page.evaluate(async () => {
+    const wrapper = document.querySelector('.svg-tree-wrapper');
+    if (wrapper) {
+      wrapper.scrollTop = wrapper.scrollHeight;
+      await new Promise(r => setTimeout(r, 300));
+    }
+  });
+}
+
+/**
  * Get page tree item locator by page name.
  *
  * TYPO3 12: Tree items have "id=X - Name" format

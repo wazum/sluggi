@@ -319,3 +319,16 @@ ON DUPLICATE KEY UPDATE `title` = VALUES(`title`), `slug` = VALUES(`slug`), `tx_
 INSERT INTO `pages` (`uid`, `pid`, `title`, `slug`, `doktype`, `is_siteroot`, `hidden`, `deleted`, `tstamp`, `crdate`, `tx_sluggi_sync`, `perms_userid`, `perms_groupid`, `perms_user`, `perms_group`, `perms_everybody`)
 VALUES (48, 45, 'Multi Edit Child 3', '/multi-edit-parent/child-3', 1, 0, 0, 0, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 0, 1, 0, 31, 31, 31)
 ON DUPLICATE KEY UPDATE `title` = VALUES(`title`), `slug` = VALUES(`slug`), `tx_sluggi_sync` = 0, `perms_userid` = 1, `perms_groupid` = 0, `perms_user` = 31, `perms_group` = 31, `perms_everybody` = 31;
+
+-- =============================================
+-- recursive-slug-update.spec.ts (uses pages 49, 50)
+-- =============================================
+-- Page 49: Parent page with correct slug
+INSERT INTO `pages` (`uid`, `pid`, `title`, `slug`, `doktype`, `is_siteroot`, `hidden`, `deleted`, `tstamp`, `crdate`, `tx_sluggi_sync`, `perms_userid`, `perms_groupid`, `perms_user`, `perms_group`, `perms_everybody`)
+VALUES (49, 1, 'Recursive Parent', '/recursive-parent', 1, 0, 0, 0, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 1, 1, 0, 31, 31, 31)
+ON DUPLICATE KEY UPDATE `title` = VALUES(`title`), `slug` = VALUES(`slug`), `tx_sluggi_sync` = 1, `perms_userid` = 1, `perms_groupid` = 0, `perms_user` = 31, `perms_group` = 31, `perms_everybody` = 31;
+
+-- Page 50: Child with WRONG parent prefix (simulates reverted/stale slug)
+INSERT INTO `pages` (`uid`, `pid`, `title`, `slug`, `doktype`, `is_siteroot`, `hidden`, `deleted`, `tstamp`, `crdate`, `tx_sluggi_sync`, `perms_userid`, `perms_groupid`, `perms_user`, `perms_group`, `perms_everybody`)
+VALUES (50, 49, 'Recursive Child', '/wrong-prefix/recursive-child', 1, 0, 0, 0, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 1, 1, 0, 31, 31, 31)
+ON DUPLICATE KEY UPDATE `title` = VALUES(`title`), `slug` = VALUES(`slug`), `tx_sluggi_sync` = 1, `perms_userid` = 1, `perms_groupid` = 0, `perms_user` = 31, `perms_group` = 31, `perms_everybody` = 31;

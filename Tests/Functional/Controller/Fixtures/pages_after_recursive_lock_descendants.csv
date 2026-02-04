@@ -1,0 +1,7 @@
+"pages"
+,"uid","pid","title","slug","tx_sluggi_sync","slug_locked","doktype","sys_language_uid"
+,1,0,"Root Page","/",0,0,1,0
+,2,1,"Parent Page","/parent",1,0,1,0
+,3,2,"Child Page","/parent/child-page",1,0,1,0
+,5,2,"Locked Parent","/parent/locked-parent",1,1,1,0
+,8,5,"Grandchild Under Locked","/old/grandchild",1,0,1,0

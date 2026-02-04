@@ -84,6 +84,18 @@ Let editors decide whether to create redirects when a URL changes:
 
 The choice applies recursively to all affected child pages. Self-referencing redirects are prevented automatically.
 
+### Re-apply URL Paths Recursively
+
+Right-click any page in the page tree and select **More options > Re-apply URL paths recursively** to regenerate URL paths for all descendant pages based on their current source fields (title, nav_title):
+
+![Context menu](Documentation/sluggi_context_update.png)
+
+- Useful after reverting a slug change via TYPO3's undo notification, or when child pages have stale prefixes
+- Slugs are regenerated from scratch using source fields – not by prefix replacement
+- Hidden pages are included, locked pages are skipped (descendants still update unless `lock_descendants` is enabled)
+- All changes share a single correlation ID – TYPO3's undo notification lets you revert everything at once
+- Admin users only
+
 ### Copy URL to Clipboard
 
 ![URL copied](Documentation/sluggi_url_copied_clipboard.png)

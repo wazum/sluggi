@@ -108,6 +108,18 @@
             <trans-unit id="error.hierarchyPermission.message" resname="error.hierarchyPermission.message">
                 <source>You cannot modify path segments above your permission level.</source>
             </trans-unit>
+            <trans-unit id="contextMenu.recursiveSlugUpdate" resname="contextMenu.recursiveSlugUpdate">
+                <source>Re-apply URL paths recursively</source>
+            </trans-unit>
+            <trans-unit id="contextMenu.recursiveSlugUpdate.confirm.title" resname="contextMenu.recursiveSlugUpdate.confirm.title">
+                <source>Regenerate URL Paths</source>
+            </trans-unit>
+            <trans-unit id="contextMenu.recursiveSlugUpdate.confirm.message" resname="contextMenu.recursiveSlugUpdate.confirm.message">
+                <source>This will regenerate URL paths for all child pages based on their source fields. Continue?</source>
+            </trans-unit>
+            <trans-unit id="contextMenu.recursiveSlugUpdate.success" resname="contextMenu.recursiveSlugUpdate.success">
+                <source>URL paths updated successfully.</source>
+            </trans-unit>
         </body>
     </file>
 </xliff>

@@ -1,12 +1,9 @@
-declare global {
-    interface Window {
-        TYPO3?: {
-            settings?: {
-                ajaxUrls?: Record<string, string>;
-            };
-        };
-    }
-}
+declare const TYPO3: {
+    settings: {
+        ajaxUrls: Record<string, string>;
+    };
+    lang: Record<string, string>;
+};
 
 declare module '@typo3/backend/modal.js' {
     interface ModalButton {
@@ -34,4 +31,40 @@ declare module '@typo3/backend/severity.js' {
     };
 
     export default Severity;
+}
+
+declare module '@typo3/backend/enum/severity.js' {
+    export enum SeverityEnum {
+        notice = -2,
+        info = -1,
+        ok = 0,
+        warning = 1,
+        error = 2,
+    }
+}
+
+declare module '@typo3/backend/notification.js' {
+    const Notification: {
+        info(title: string, message: string, duration?: number, actions?: unknown[]): void;
+        success(title: string, message: string, duration?: number, actions?: unknown[]): void;
+        warning(title: string, message: string, duration?: number, actions?: unknown[]): void;
+        error(title: string, message: string, duration?: number, actions?: unknown[]): void;
+    };
+
+    export default Notification;
+}
+
+declare module '@typo3/core/ajax/ajax-request.js' {
+    interface AjaxResponse {
+        resolve(): Promise<unknown>;
+    }
+
+    class AjaxRequest {
+        constructor(url: string);
+        withQueryArguments(params: Record<string, string>): this;
+        get(): Promise<AjaxResponse>;
+        post(data: Record<string, unknown>): Promise<AjaxResponse>;
+    }
+
+    export default AjaxRequest;
 }

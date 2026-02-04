@@ -99,6 +99,10 @@ services:
   Wazum\Sluggi\Service\UserSettingsService:
     public: true
 
+  # Controller
+  Wazum\Sluggi\Controller\RecursiveSlugUpdateController:
+    public: true
+
   # EventListener
   Wazum\Sluggi\EventListener\PreventSelfReferencingRedirect:
     tags:

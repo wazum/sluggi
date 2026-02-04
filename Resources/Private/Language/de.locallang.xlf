@@ -127,6 +127,22 @@
                 <source>Cancel</source>
                 <target>Abbrechen</target>
             </trans-unit>
+            <trans-unit id="contextMenu.recursiveSlugUpdate" resname="contextMenu.recursiveSlugUpdate">
+                <source>Re-apply URL paths recursively</source>
+                <target>URL-Pfade rekursiv neu generieren</target>
+            </trans-unit>
+            <trans-unit id="contextMenu.recursiveSlugUpdate.confirm.title" resname="contextMenu.recursiveSlugUpdate.confirm.title">
+                <source>Regenerate URL Paths</source>
+                <target>URL-Pfade neu generieren</target>
+            </trans-unit>
+            <trans-unit id="contextMenu.recursiveSlugUpdate.confirm.message" resname="contextMenu.recursiveSlugUpdate.confirm.message">
+                <source>This will regenerate URL paths for all child pages based on their source fields. Continue?</source>
+                <target>Die URL-Pfade aller Unterseiten werden anhand ihrer Quellfelder neu generiert. Fortfahren?</target>
+            </trans-unit>
+            <trans-unit id="contextMenu.recursiveSlugUpdate.success" resname="contextMenu.recursiveSlugUpdate.success">
+                <source>URL paths updated successfully.</source>
+                <target>URL-Pfade erfolgreich aktualisiert.</target>
+            </trans-unit>
         </body>
     </file>
 </xliff>
