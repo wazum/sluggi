@@ -1,3 +1,4 @@
 "tx_sluggitest_article"
 ,"uid","title","subtitle","slug"
 ,1,"Updated Title","Original Subtitle","updated-title/original-subtitle"
+,2,"Other Title","Other Subtitle","other-title/other-subtitle"

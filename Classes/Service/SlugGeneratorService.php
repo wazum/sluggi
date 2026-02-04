@@ -7,6 +7,7 @@ namespace Wazum\Sluggi\Service;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\Authentication\BackendUserAuthentication;
 use TYPO3\CMS\Core\Database\ConnectionPool;
+use TYPO3\CMS\Core\DataHandling\Model\RecordState;
 use TYPO3\CMS\Core\DataHandling\Model\RecordStateFactory;
 use TYPO3\CMS\Core\DataHandling\SlugHelper;
 use TYPO3\CMS\Core\Exception\SiteNotFoundException;
@@ -37,14 +38,15 @@ final readonly class SlugGeneratorService
         $slug = $slugHelper->generate($sanitizedRecord, $pid);
 
         $prependSlash = (bool)($fieldConfig['prependSlash'] ?? ($table === 'pages'));
+        $eval = (string)($fieldConfig['eval'] ?? '');
 
-        try {
-            $uniqueSlug = $slugHelper->buildSlugForUniqueInSite($slug, $state);
+        $uniqueSlug = match ($eval) {
+            'unique' => $slugHelper->buildSlugForUniqueInTable($slug, $state),
+            'uniqueInPid' => $slugHelper->buildSlugForUniqueInPid($slug, $state),
+            default => $this->buildSlugForUniqueInSiteOrFallback($slugHelper, $slug, $state),
+        };
 
-            return $prependSlash ? '/' . ltrim($uniqueSlug, '/') : $uniqueSlug;
-        } catch (SiteNotFoundException) {
-            return $prependSlash ? '/' . ltrim($slug, '/') : $slug;
-        }
+        return $prependSlash ? '/' . ltrim($uniqueSlug, '/') : $uniqueSlug;
     }
 
     /**
@@ -94,6 +96,18 @@ final readonly class SlugGeneratorService
         $slug = (string)($record['slug'] ?? '');
 
         return $slug === '/' ? '' : $slug;
+    }
+
+    private function buildSlugForUniqueInSiteOrFallback(
+        SlugHelper $slugHelper,
+        string $slug,
+        RecordState $state,
+    ): string {
+        try {
+            return $slugHelper->buildSlugForUniqueInSite($slug, $state);
+        } catch (SiteNotFoundException) {
+            return $slug;
+        }
     }
 
     /**

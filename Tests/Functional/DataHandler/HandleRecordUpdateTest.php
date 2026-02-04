@@ -76,6 +76,35 @@ final class HandleRecordUpdateTest extends FunctionalTestCase
     }
 
     #[Test]
+    public function slugGetsUniqueSuffixWhenConflictExistsInTable(): void
+    {
+        $dataHandler = GeneralUtility::makeInstance(DataHandler::class);
+        $dataHandler->start(
+            [
+                'tx_sluggitest_article' => [
+                    2 => [
+                        'title' => 'Original Title',
+                        'subtitle' => 'Original Subtitle',
+                    ],
+                ],
+            ],
+            []
+        );
+        $dataHandler->process_datamap();
+
+        $row = $this->getConnectionPool()
+            ->getConnectionForTable('tx_sluggitest_article')
+            ->select(['slug'], 'tx_sluggitest_article', ['uid' => 2])
+            ->fetchAssociative();
+
+        self::assertNotSame(
+            'original-title/original-subtitle',
+            $row['slug'],
+            'Slug must be unique across the table (eval=unique) and get a suffix'
+        );
+    }
+
+    #[Test]
     public function slugIsRegeneratedWhenBothFieldsChange(): void
     {
         $dataHandler = GeneralUtility::makeInstance(DataHandler::class);

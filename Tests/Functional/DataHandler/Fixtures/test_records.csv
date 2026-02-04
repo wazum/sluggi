@@ -5,3 +5,4 @@
 "tx_sluggitest_article"
 ,"uid","pid","title","subtitle","slug"
 ,1,0,"Original Title","Original Subtitle","original-title/original-subtitle"
+,2,0,"Other Title","Other Subtitle","other-title/other-subtitle"
