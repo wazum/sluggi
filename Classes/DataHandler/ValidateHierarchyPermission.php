@@ -7,13 +7,11 @@ namespace Wazum\Sluggi\DataHandler;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\Authentication\BackendUserAuthentication;
 use TYPO3\CMS\Core\DataHandling\DataHandler;
-use TYPO3\CMS\Core\Localization\LanguageServiceFactory;
 use Wazum\Sluggi\Configuration\ExtensionConfiguration;
 use Wazum\Sluggi\Service\FullPathEditingService;
 use Wazum\Sluggi\Service\HierarchyPermissionService;
 use Wazum\Sluggi\Service\SlugGeneratorService;
 use Wazum\Sluggi\Utility\DataHandlerUtility;
-use Wazum\Sluggi\Utility\FlashMessageUtility;
 use Wazum\Sluggi\Utility\SlugUtility;
 
 final readonly class ValidateHierarchyPermission
@@ -23,7 +21,6 @@ final readonly class ValidateHierarchyPermission
         private FullPathEditingService $fullPathEditingService,
         private SlugGeneratorService $slugGeneratorService,
         private ExtensionConfiguration $extensionConfiguration,
-        private LanguageServiceFactory $languageServiceFactory,
     ) {
     }
 
@@ -76,7 +73,7 @@ final readonly class ValidateHierarchyPermission
             $fieldArray['slug'] = rtrim($lockedPrefix, '/') . '/' . SlugUtility::getLastSegment($newSlug);
         } else {
             unset($fieldArray['slug']);
-            $this->logValidationError($dataHandler, (int)$id);
+            DataHandlerUtility::logSlugValidationError($dataHandler, (int)$id, 'error.hierarchyPermission');
         }
     }
 
@@ -105,27 +102,6 @@ final readonly class ValidateHierarchyPermission
         }
 
         return $this->hierarchyPermissionService->getLockedPrefixForPage($id, (string)$record['slug']);
-    }
-
-    private function logValidationError(DataHandler $dataHandler, int $id): void
-    {
-        $title = $this->translate('error.hierarchyPermission.title');
-        $message = $this->translate('error.hierarchyPermission.message');
-
-        $dataHandler->log('pages', $id, 2, null, 1, $title . ': ' . $message);
-        FlashMessageUtility::addError($message, $title);
-    }
-
-    private function translate(string $key): string
-    {
-        $backendUser = $this->getBackendUser();
-        if ($backendUser === null) {
-            return $key;
-        }
-
-        return $this->languageServiceFactory
-            ->createFromUserPreferences($backendUser)
-            ->sL('LLL:EXT:sluggi/Resources/Private/Language/locallang.xlf:' . $key);
     }
 
     private function getBackendUser(): ?BackendUserAuthentication
