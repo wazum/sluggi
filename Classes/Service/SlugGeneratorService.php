@@ -98,6 +98,29 @@ final readonly class SlugGeneratorService
         return $slug === '/' ? '' : $slug;
     }
 
+    /**
+     * @param array<string, mixed> $record
+     */
+    public function ensureUnique(
+        string $slug,
+        array $record,
+        int $pid,
+        int $uid,
+        string $table = 'pages',
+        string $slugField = 'slug',
+    ): string {
+        $fieldConfig = $GLOBALS['TCA'][$table]['columns'][$slugField]['config'] ?? [];
+        $slugHelper = $this->getSlugHelperForTable($table, $slugField, $fieldConfig);
+        $state = RecordStateFactory::forName($table)->fromArray($record, $pid, $uid);
+        $eval = (string)($fieldConfig['eval'] ?? '');
+
+        return match ($eval) {
+            'unique' => $slugHelper->buildSlugForUniqueInTable($slug, $state),
+            'uniqueInPid' => $slugHelper->buildSlugForUniqueInPid($slug, $state),
+            default => $this->buildSlugForUniqueInSiteOrFallback($slugHelper, $slug, $state),
+        };
+    }
+
     private function buildSlugForUniqueInSiteOrFallback(
         SlugHelper $slugHelper,
         string $slug,

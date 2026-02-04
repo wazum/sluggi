@@ -6,9 +6,6 @@ namespace Wazum\Sluggi\DataHandler;
 
 use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\DataHandling\DataHandler;
-use TYPO3\CMS\Core\DataHandling\Model\RecordStateFactory;
-use TYPO3\CMS\Core\DataHandling\SlugHelper;
-use TYPO3\CMS\Core\Utility\GeneralUtility;
 use Wazum\Sluggi\Service\SlugGeneratorService;
 
 final readonly class HandlePageCopy
@@ -77,23 +74,12 @@ final readonly class HandlePageCopy
             $parentPid,
         );
 
-        $state = RecordStateFactory::forName('pages')->fromArray($targetPage, $parentPid, $targetUid);
-        $newSlug = $this->getSlugHelper()->buildSlugForUniqueInSite($newSlug, $state);
+        $newSlug = $this->slugGeneratorService->ensureUnique($newSlug, $targetPage, $parentPid, $targetUid);
 
         $pasteDataMap['pages'][$targetUid]['slug'] = $newSlug;
         $pasteDataMap['pages'][$targetUid]['slug_locked'] = 0;
 
         // Track this slug for child pages that might reference it
         $processedSlugs[$targetUid] = $newSlug;
-    }
-
-    private function getSlugHelper(): SlugHelper
-    {
-        return GeneralUtility::makeInstance(
-            SlugHelper::class,
-            'pages',
-            'slug',
-            $GLOBALS['TCA']['pages']['columns']['slug']['config'] ?? []
-        );
     }
 }

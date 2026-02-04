@@ -6,12 +6,16 @@ namespace Wazum\Sluggi\DataHandler;
 
 use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\DataHandling\DataHandler;
-use TYPO3\CMS\Core\DataHandling\Model\RecordStateFactory;
-use TYPO3\CMS\Core\DataHandling\SlugHelper;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
+use Wazum\Sluggi\Service\SlugGeneratorService;
 
 final readonly class HandlePageUndelete
 {
+    public function __construct(
+        private SlugGeneratorService $slugGeneratorService,
+    ) {
+    }
+
     public function processCmdmap_postProcess(
         string $command,
         string $table,
@@ -33,8 +37,7 @@ final readonly class HandlePageUndelete
             return;
         }
 
-        $state = RecordStateFactory::forName('pages')->fromArray($page, (int)$page['pid'], (int)$id);
-        $uniqueSlug = $this->getSlugHelper()->buildSlugForUniqueInSite($currentSlug, $state);
+        $uniqueSlug = $this->slugGeneratorService->ensureUnique($currentSlug, $page, (int)$page['pid'], (int)$id);
 
         if ($uniqueSlug !== $currentSlug) {
             $updateDataHandler = GeneralUtility::makeInstance(DataHandler::class);
@@ -44,15 +47,5 @@ final readonly class HandlePageUndelete
             );
             $updateDataHandler->process_datamap();
         }
-    }
-
-    private function getSlugHelper(): SlugHelper
-    {
-        return GeneralUtility::makeInstance(
-            SlugHelper::class,
-            'pages',
-            'slug',
-            $GLOBALS['TCA']['pages']['columns']['slug']['config'] ?? []
-        );
     }
 }
