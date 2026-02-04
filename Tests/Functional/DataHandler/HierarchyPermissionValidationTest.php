@@ -146,6 +146,30 @@ final class HierarchyPermissionValidationTest extends FunctionalTestCase
     }
 
     #[Test]
+    public function editorNewPageCannotBypassHierarchyPermission(): void
+    {
+        $this->setUpBackendUser(2);
+
+        $dataHandler = GeneralUtility::makeInstance(DataHandler::class);
+        $dataHandler->start(
+            [
+                'pages' => [
+                    'NEW1' => [
+                        'pid' => 4,
+                        'title' => 'New Page',
+                        'slug' => '/totally/different/new-page',
+                        'doktype' => 1,
+                    ],
+                ],
+            ],
+            []
+        );
+        $dataHandler->process_datamap();
+
+        $this->assertCSVDataSet(__DIR__ . '/Fixtures/pages_hierarchy_new_page_blocked.csv');
+    }
+
+    #[Test]
     public function editorCannotRemoveLockedSegments(): void
     {
         $this->setUpBackendUser(2);

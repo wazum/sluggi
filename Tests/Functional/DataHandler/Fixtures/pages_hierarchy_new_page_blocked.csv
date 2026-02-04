@@ -1,0 +1,8 @@
+"pages"
+,"uid","pid","title","slug","doktype"
+,1,0,"Root Page","/",1
+,2,1,"Home","/home",1
+,3,2,"Department","/home/department",1
+,4,3,"Institute","/home/department/institute",1
+,5,4,"About Us","/home/department/institute/about-us",1
+,6,4,"New Page","/home/department/new-page",1
