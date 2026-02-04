@@ -82,7 +82,7 @@ Let editors decide whether to create redirects when a URL changes:
 
 ![Redirect modal](Documentation/sluggi_create_redirects.png)
 
-The choice applies recursively to all affected child pages. Self-referencing redirects are prevented automatically.
+The choice applies recursively to all affected child pages. Self-referencing redirects are prevented automatically, and stale redirect cleanup only affects auto-created redirects – manually created redirects are never touched.
 
 ### Re-apply URL Paths Recursively
 

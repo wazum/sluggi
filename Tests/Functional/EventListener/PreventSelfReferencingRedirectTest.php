@@ -75,12 +75,12 @@ final class PreventSelfReferencingRedirectTest extends FunctionalTestCase
         );
         $dataHandler->process_datamap();
 
-        $allRedirects = $this->getAllRedirects();
-        self::assertCount(1, $allRedirects, 'Only one redirect should exist after rename back');
-        self::assertSame('/page-b', $allRedirects[0]['source_path'], 'Redirect should be from /page-b');
+        $activeRedirects = $this->getRedirectsForPage();
+        self::assertCount(1, $activeRedirects, 'Only one active redirect should exist after rename back');
+        self::assertSame('/page-b', $activeRedirects[0]['source_path'], 'Redirect should be from /page-b');
 
-        $sourcePaths = array_column($allRedirects, 'source_path');
-        self::assertNotContains('/page-a', $sourcePaths, 'No redirect from /page-a should exist');
+        $sourcePaths = array_column($activeRedirects, 'source_path');
+        self::assertNotContains('/page-a', $sourcePaths, 'No active redirect from /page-a should exist');
     }
 
     #[Test]
@@ -171,6 +171,67 @@ final class PreventSelfReferencingRedirectTest extends FunctionalTestCase
         );
     }
 
+    #[Test]
+    public function softDeletedRedirectsAreNotHardDeletedByCleanup(): void
+    {
+        $connection = GeneralUtility::makeInstance(ConnectionPool::class)
+            ->getConnectionForTable('sys_redirect');
+        $connection->insert('sys_redirect', [
+            'source_host' => '*',
+            'source_path' => '/page-b',
+            'target' => '/old-target',
+            'target_statuscode' => 301,
+            'creation_type' => 0,
+            'deleted' => 1,
+        ]);
+        $softDeletedUid = (int)$connection->lastInsertId();
+
+        $dataHandler = GeneralUtility::makeInstance(DataHandler::class);
+        $dataHandler->start(
+            ['pages' => [2 => ['slug' => '/page-b']]],
+            []
+        );
+        $dataHandler->process_datamap();
+
+        $allRedirects = $this->getAllRedirects();
+        $softDeleted = array_filter(
+            $allRedirects,
+            static fn (array $r) => (int)$r['uid'] === $softDeletedUid
+        );
+
+        self::assertCount(1, $softDeleted, 'Soft-deleted redirect must not be hard-deleted by cleanup');
+    }
+
+    #[Test]
+    public function manualRedirectsAreNotDeletedByCleanup(): void
+    {
+        $connection = GeneralUtility::makeInstance(ConnectionPool::class)
+            ->getConnectionForTable('sys_redirect');
+        $connection->insert('sys_redirect', [
+            'source_host' => '*',
+            'source_path' => '/page-b',
+            'target' => '/intentional-target',
+            'target_statuscode' => 301,
+            'creation_type' => 1,
+        ]);
+        $manualRedirectUid = (int)$connection->lastInsertId();
+
+        $dataHandler = GeneralUtility::makeInstance(DataHandler::class);
+        $dataHandler->start(
+            ['pages' => [2 => ['slug' => '/page-b']]],
+            []
+        );
+        $dataHandler->process_datamap();
+
+        $allRedirects = $this->getAllRedirects();
+        $manualRedirect = array_filter(
+            $allRedirects,
+            static fn (array $r) => (int)$r['uid'] === $manualRedirectUid
+        );
+
+        self::assertCount(1, $manualRedirect, 'Manually created redirect must not be deleted by cleanup');
+    }
+
     private function getRedirectsForPage(): array
     {
         $connection = GeneralUtility::makeInstance(ConnectionPool::class)
@@ -183,27 +244,16 @@ final class PreventSelfReferencingRedirectTest extends FunctionalTestCase
         )->fetchAllAssociative();
     }
 
-    private function getDeletedRedirects(): array
-    {
-        $connection = GeneralUtility::makeInstance(ConnectionPool::class)
-            ->getConnectionForTable('sys_redirect');
-
-        return $connection->select(
-            ['*'],
-            'sys_redirect',
-            ['deleted' => 1]
-        )->fetchAllAssociative();
-    }
-
     private function getAllRedirects(): array
     {
-        $connection = GeneralUtility::makeInstance(ConnectionPool::class)
-            ->getConnectionForTable('sys_redirect');
+        $queryBuilder = GeneralUtility::makeInstance(ConnectionPool::class)
+            ->getQueryBuilderForTable('sys_redirect');
+        $queryBuilder->getRestrictions()->removeAll();
 
-        return $connection->select(
-            ['*'],
-            'sys_redirect',
-            []
-        )->fetchAllAssociative();
+        return $queryBuilder
+            ->select('*')
+            ->from('sys_redirect')
+            ->executeQuery()
+            ->fetchAllAssociative();
     }
 }

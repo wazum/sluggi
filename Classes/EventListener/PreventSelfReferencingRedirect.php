@@ -49,13 +49,17 @@ final readonly class PreventSelfReferencingRedirect
     private function deleteExistingRedirectsForSlug(string $slug, string $sourceHost): void
     {
         $queryBuilder = $this->connectionPool->getQueryBuilderForTable('sys_redirect');
-        $queryBuilder->getRestrictions()->removeAll();
 
+        // QueryBuilder restrictions only apply to SELECT, so we must scope DELETE explicitly:
+        // - deleted = 0: preserve soft-deleted records
+        // - creation_type = 0 (automatically created): preserve manually created redirects (1)
         $queryBuilder
             ->delete('sys_redirect')
             ->where(
                 $queryBuilder->expr()->eq('source_path', $queryBuilder->createNamedParameter($slug)),
-                $queryBuilder->expr()->eq('source_host', $queryBuilder->createNamedParameter($sourceHost))
+                $queryBuilder->expr()->eq('source_host', $queryBuilder->createNamedParameter($sourceHost)),
+                $queryBuilder->expr()->eq('creation_type', 0),
+                $queryBuilder->expr()->eq('deleted', 0)
             )
             ->executeStatement();
     }
