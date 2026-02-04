@@ -159,7 +159,7 @@ Users can enable compact controls via **User Settings > Personalization** to col
 ## Suggested Extensions
 
 - [news-redirect-slug-change](https://github.com/georgringer/news-redirect-slug-change) – Redirects when news slugs change
-- [ig-slug](https://github.com/internetgalerie/ig-slug) – Rebuild URL slugs in bulk
+- [ig-slug](https://github.com/internetgalerie/ig_slug) – Rebuild URL slugs in bulk
 - [masi](https://github.com/b13/masi) – Exclude specific page slugs from subpage URL generation
 
 ## License
