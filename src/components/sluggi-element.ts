@@ -149,6 +149,9 @@ export class SluggiElement extends LitElement {
     private showCopyConfirmation = false;
 
     @state()
+    private copiedUrl = '';
+
+    @state()
     private controlsExpanded = false;
 
     /** @deprecated Make private when dropping TYPO3 12 support (used by compat/typo3-v12-form-submit.ts) */
@@ -357,7 +360,10 @@ export class SluggiElement extends LitElement {
 
     private renderRestrictionNote() {
         if (this.showCopyConfirmation) {
-            return html`<p class="sluggi-note sluggi-copy-confirmation" role="status" aria-live="polite">${this.labels['copyConfirmation'] || 'URL copied to clipboard.'}</p>`;
+            return html`<p class="sluggi-note sluggi-copy-confirmation" role="status" aria-live="polite">
+                ${this.labels['copyConfirmation'] || 'URL copied to clipboard.'}
+                <a href="${this.copiedUrl}" target="_blank" rel="noopener noreferrer" class="sluggi-open-url-link">${this.labels['openInNewTab'] || 'Open in new tab'}</a>
+            </p>`;
         }
 
         if (!this.isSynced && !this.isLocked && !this.isFullPathMode) return nothing;
@@ -859,11 +865,13 @@ export class SluggiElement extends LitElement {
         const fullUrl = baseUrl + this.value;
 
         navigator.clipboard.writeText(fullUrl);
+        this.copiedUrl = fullUrl;
         this.showCopyConfirmation = true;
 
         setTimeout(() => {
             this.showCopyConfirmation = false;
-        }, 2000);
+            this.copiedUrl = '';
+        }, 4000);
 
         this.dispatchEvent(new CustomEvent('sluggi-url-copied', {
             bubbles: true,

@@ -467,6 +467,11 @@
     font-size: 11px;
     color: var(--sluggi-secondary-color);
     font-style: italic;
+
+    a {
+        color: var(--typo3-text-color-base, #000);
+        margin-left: 0.5em;
+    }
 }
 
 // =========================================================================

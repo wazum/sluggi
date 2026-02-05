@@ -107,6 +107,10 @@
                 <source>URL copied to clipboard.</source>
                 <target>URL in Zwischenablage kopiert.</target>
             </trans-unit>
+            <trans-unit id="openInNewTab" resname="openInNewTab">
+                <source>Open in new tab</source>
+                <target>In neuem Tab öffnen</target>
+            </trans-unit>
             <trans-unit id="userSettings.collapsedControls" resname="userSettings.collapsedControls">
                 <source>Sluggi: Use compact controls menu</source>
                 <target>Sluggi: Kompaktes Steuerungsmenü verwenden</target>

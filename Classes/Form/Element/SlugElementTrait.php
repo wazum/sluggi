@@ -303,6 +303,7 @@ trait SlugElementTrait
             'button.editFullPath' => $languageService->sL($prefix . 'button.editFullPath'),
             'button.copyUrl' => $languageService->sL($prefix . 'button.copyUrl'),
             'copyConfirmation' => $languageService->sL($prefix . 'copyConfirmation'),
+            'openInNewTab' => $languageService->sL($prefix . 'openInNewTab'),
             'redirectModal.title' => $languageService->sL($prefix . 'redirectModal.title'),
             'redirectModal.message' => $languageService->sL($prefix . 'redirectModal.message'),
             'redirectModal.messageRecursive' => $languageService->sL($prefix . 'redirectModal.messageRecursive'),

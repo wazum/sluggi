@@ -250,6 +250,32 @@ describe('SluggiElement - Buttons', () => {
             expect(note).to.exist;
         });
 
+        it('shows open-in-new-tab link with correct URL after copying', async () => {
+            Object.defineProperty(navigator, 'clipboard', {
+                value: { writeText: async () => {} },
+                writable: true,
+                configurable: true
+            });
+
+            const el = await fixture<SluggiElement>(html`
+                <sluggi-element
+                    value="/demo-page"
+                    copy-url-feature-enabled
+                    page-url="https://example.com"
+                ></sluggi-element>
+            `);
+
+            const copyBtn = el.shadowRoot!.querySelector('.sluggi-copy-url-btn') as HTMLButtonElement;
+            copyBtn.click();
+            await el.updateComplete;
+
+            const link = el.shadowRoot!.querySelector('.sluggi-copy-confirmation a') as HTMLAnchorElement;
+            expect(link).to.exist;
+            expect(link.href).to.equal('https://example.com/demo-page');
+            expect(link.target).to.equal('_blank');
+            expect(link.rel).to.equal('noopener noreferrer');
+        });
+
         it('reverts to original icon after timeout', async () => {
             Object.defineProperty(navigator, 'clipboard', {
                 value: { writeText: async () => {} },
@@ -271,7 +297,7 @@ describe('SluggiElement - Buttons', () => {
 
             expect(copyBtn.classList.contains('is-copied')).to.be.true;
 
-            await new Promise(resolve => setTimeout(resolve, 2100));
+            await new Promise(resolve => setTimeout(resolve, 4100));
             await el.updateComplete;
 
             expect(copyBtn.classList.contains('is-copied')).to.be.false;
