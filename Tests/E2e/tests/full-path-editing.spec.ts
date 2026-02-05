@@ -111,22 +111,6 @@ test.describe('Full Path Editing - Editor Button', () => {
     await expect(fullPathEditBtn).toBeDisabled();
   });
 
-  test('using full path edit marks form as dirty', async ({ page }) => {
-    const fullPathEditBtn = slugElement.locator('.sluggi-full-path-edit-btn');
-    await fullPathEditBtn.click();
-
-    const input = slugElement.locator('input.sluggi-input');
-    await input.press('Escape');
-
-    await clickModuleMenuItem(page, 'Layout', 'web_layout');
-
-    const modal = page.locator('.modal');
-    await expect(modal).toBeVisible({ timeout: 5000 });
-    await expect(modal).toContainText(/unsaved/i);
-
-    await modal.locator('button[name="no"]').click();
-    await expect(modal).not.toBeVisible();
-  });
 });
 
 test.describe('Full Path Editing - Regenerate Behavior', () => {

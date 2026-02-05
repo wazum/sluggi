@@ -160,6 +160,8 @@ export class SluggiElement extends LitElement {
     redirectChoiceMade = false;
 
     private valueBeforeSync = '';
+    private initialSyncValue = '';
+    private initialLockValue = '';
 
     private hideTimeoutId: number | null = null;
 
@@ -184,6 +186,8 @@ export class SluggiElement extends LitElement {
     override connectedCallback() {
         super.connectedCallback();
         this.originalValue = this.value;
+        this.initialSyncValue = (this.parentElement?.querySelector('.sluggi-sync-field') as HTMLInputElement | null)?.value ?? '';
+        this.initialLockValue = (this.parentElement?.querySelector('.sluggi-lock-field') as HTMLInputElement | null)?.value ?? '';
         this.setupSourceFieldListeners();
         this.observeSourceFieldInitialization();
         this.setupFormSubmitListener();
@@ -1201,9 +1205,12 @@ export class SluggiElement extends LitElement {
                 this.sendSlugProposal('recreate');
             }
         } else if (this.valueBeforeSync) {
+            const changed = this.value !== this.valueBeforeSync;
             this.value = this.valueBeforeSync;
             this.valueBeforeSync = '';
-            this.notifyFormEngineOfChange();
+            if (changed) {
+                this.notifyFormEngineOfChange();
+            }
         }
     }
 
@@ -1232,8 +1239,7 @@ export class SluggiElement extends LitElement {
         const syncInput = this.parentElement?.querySelector('.sluggi-sync-field') as HTMLInputElement | null;
         if (syncInput) {
             syncInput.value = this.isSynced ? '1' : '0';
-            syncInput.classList.add('has-change');
-            syncInput.dispatchEvent(new Event('change', { bubbles: true }));
+            syncInput.classList.toggle('has-change', syncInput.value !== this.initialSyncValue);
         }
     }
 
@@ -1255,8 +1261,7 @@ export class SluggiElement extends LitElement {
         const lockInput = this.parentElement?.querySelector('.sluggi-lock-field') as HTMLInputElement | null;
         if (lockInput) {
             lockInput.value = this.isLocked ? '1' : '0';
-            lockInput.classList.add('has-change');
-            lockInput.dispatchEvent(new Event('change', { bubbles: true }));
+            lockInput.classList.toggle('has-change', lockInput.value !== this.initialLockValue);
         }
     }
 
@@ -1273,12 +1278,7 @@ export class SluggiElement extends LitElement {
     private notifyFullPathFieldOfChange() {
         const fullPathInput = this.parentElement?.querySelector('.sluggi-full-path-field') as HTMLInputElement | null;
         if (fullPathInput) {
-            const newValue = this.isFullPathMode ? '1' : '0';
-            if (fullPathInput.value !== newValue) {
-                fullPathInput.value = newValue;
-                fullPathInput.classList.add('has-change');
-                fullPathInput.dispatchEvent(new Event('change', { bubbles: true }));
-            }
+            fullPathInput.value = this.isFullPathMode ? '1' : '0';
         }
     }
 

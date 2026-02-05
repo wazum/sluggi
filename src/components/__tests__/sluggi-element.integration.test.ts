@@ -265,5 +265,139 @@ describe('SluggiElement - Integration', () => {
 
             document.body.removeChild(container);
         });
+
+        it('removes has-change from sync field when toggled back to initial state', async () => {
+            const container = document.createElement('div');
+            container.innerHTML = `
+                <input data-sluggi-source data-formengine-input-name="data[pages][456][title]" value="Demo" />
+                <sluggi-element
+                    value="/demo"
+                    page-id="123"
+                    record-id="456"
+                    table-name="pages"
+                    field-name="slug"
+                    sync-feature-enabled
+                ></sluggi-element>
+                <input type="hidden" class="sluggi-hidden-field" value="/demo" />
+                <input type="hidden" class="sluggi-sync-field" value="0" />
+            `;
+            document.body.appendChild(container);
+
+            const el = container.querySelector('sluggi-element') as SluggiElement;
+            const syncField = container.querySelector('.sluggi-sync-field') as HTMLInputElement;
+            await el.updateComplete;
+
+            const syncToggle = el.shadowRoot!.querySelector('.sluggi-sync-toggle') as HTMLElement;
+
+            syncToggle.click();
+            await el.updateComplete;
+            expect(syncField.classList.contains('has-change'), 'Sync field should have has-change after toggle ON').to.be.true;
+
+            el.setProposal('/demo', false);
+            await el.updateComplete;
+
+            syncToggle.click();
+            await el.updateComplete;
+            expect(syncField.classList.contains('has-change'), 'Sync field should not have has-change after toggle back').to.be.false;
+
+            document.body.removeChild(container);
+        });
+
+        it('removes has-change from lock field when toggled back to initial state', async () => {
+            const container = document.createElement('div');
+            container.innerHTML = `
+                <sluggi-element
+                    value="/demo"
+                    page-id="123"
+                    record-id="456"
+                    table-name="pages"
+                    field-name="slug"
+                    lock-feature-enabled
+                ></sluggi-element>
+                <input type="hidden" class="sluggi-hidden-field" value="/demo" />
+                <input type="hidden" class="sluggi-lock-field" value="0" />
+            `;
+            document.body.appendChild(container);
+
+            const el = container.querySelector('sluggi-element') as SluggiElement;
+            const lockField = container.querySelector('.sluggi-lock-field') as HTMLInputElement;
+            await el.updateComplete;
+
+            const lockToggle = el.shadowRoot!.querySelector('.sluggi-lock-toggle') as HTMLElement;
+
+            lockToggle.click();
+            await el.updateComplete;
+            expect(lockField.classList.contains('has-change'), 'Lock field should have has-change after toggle ON').to.be.true;
+
+            lockToggle.click();
+            await el.updateComplete;
+            expect(lockField.classList.contains('has-change'), 'Lock field should not have has-change after toggle back').to.be.false;
+
+            document.body.removeChild(container);
+        });
+
+        it('does NOT mark slug field as dirty when toggling sync ON then OFF without slug change', async () => {
+            const container = document.createElement('div');
+            container.innerHTML = `
+                <input data-sluggi-source data-formengine-input-name="data[pages][456][title]" value="Demo" />
+                <sluggi-element
+                    value="/demo"
+                    page-id="123"
+                    record-id="456"
+                    table-name="pages"
+                    field-name="slug"
+                    sync-feature-enabled
+                ></sluggi-element>
+                <input type="hidden" class="sluggi-hidden-field" value="/demo" />
+                <input type="hidden" class="sluggi-sync-field" value="0" />
+            `;
+            document.body.appendChild(container);
+
+            const el = container.querySelector('sluggi-element') as SluggiElement;
+            const hiddenField = container.querySelector('.sluggi-hidden-field') as HTMLInputElement;
+            await el.updateComplete;
+
+            const syncToggle = el.shadowRoot!.querySelector('.sluggi-sync-toggle') as HTMLElement;
+
+            syncToggle.click();
+            await el.updateComplete;
+
+            el.setProposal('/demo', false);
+            await el.updateComplete;
+
+            syncToggle.click();
+            await el.updateComplete;
+
+            expect(hiddenField.classList.contains('has-change'), 'Slug hidden field should NOT have has-change when value did not change').to.be.false;
+
+            document.body.removeChild(container);
+        });
+
+        it('does NOT mark form as dirty when regenerating slug that is already correct', async () => {
+            const container = document.createElement('div');
+            container.innerHTML = `
+                <input data-sluggi-source data-formengine-input-name="data[pages][456][title]" value="Demo" />
+                <sluggi-element
+                    value="/demo"
+                    page-id="123"
+                    record-id="456"
+                    table-name="pages"
+                    field-name="slug"
+                ></sluggi-element>
+                <input type="hidden" class="sluggi-hidden-field" value="/demo" />
+            `;
+            document.body.appendChild(container);
+
+            const el = container.querySelector('sluggi-element') as SluggiElement;
+            const hiddenField = container.querySelector('.sluggi-hidden-field') as HTMLInputElement;
+            await el.updateComplete;
+
+            el.setProposal('/demo', false);
+            await el.updateComplete;
+
+            expect(hiddenField.classList.contains('has-change'), 'Slug field should not have has-change').to.be.false;
+
+            document.body.removeChild(container);
+        });
     });
 });
