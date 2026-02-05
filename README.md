@@ -1,4 +1,4 @@
-# sluggi – The URL Path Manager TYPO3 deserves
+# _sluggi_ – The URL Path Manager TYPO3 deserves
 
 [![Tests](https://github.com/wazum/sluggi/workflows/Tests/badge.svg)](https://github.com/wazum/sluggi/actions)
 [![PHP](https://img.shields.io/badge/PHP-8.2%20|%208.3%20|%208.4-blue.svg)](https://www.php.net/)
@@ -37,13 +37,13 @@ composer require wazum/sluggi
 
 ### Modern URL Path Editor
 
-Out of the box, sluggi replaces the default slug field with a clean, focused interface:
+Out of the box, _sluggi_ replaces the default slug field with a clean, focused interface:
 
 ![Default view](Documentation/sluggi_default_view.png)
 
 ### Auto-Sync: Change a Title, Update the URL
 
-When sync is enabled, URL paths regenerate automatically when source fields (title, nav_title) change. A badge on the title field shows it drives the URL:
+When sync is enabled, URL paths regenerate automatically when source fields (e.g. title, nav_title) change. A badge on the source field shows it drives the URL:
 
 ![Sync badge](Documentation/sluggi_sync.png)
 
@@ -86,7 +86,7 @@ The choice applies recursively to all affected child pages. Self-referencing red
 
 ### Re-apply URL Paths Recursively
 
-Right-click any page in the page tree and select **More options > Re-apply URL paths recursively** to regenerate URL paths for all descendant pages based on their current source fields (title, nav_title):
+Right-click any page in the page tree and select **More options > Re-apply URL paths recursively** to regenerate URL paths for all descendant pages based on their current source fields (e.g. title, nav_title):
 
 ![Context menu](Documentation/sluggi_context_update.png)
 
@@ -102,7 +102,7 @@ Right-click any page in the page tree and select **More options > Re-apply URL p
 
 ### Slug Normalization
 
-TYPO3 core turns a title like "Products/Services" into `/products/services` (two segments) instead of `/products-services` (one segment). sluggi fixes this globally – for manual edits, auto-sync, regeneration, and page tree inline editing. Optional underscore preservation (RFC 3986) is also available.
+TYPO3 core turns a title like "Products/Services" into `/products/services` (two segments) instead of `/products-services` (one segment). _sluggi_ fixes this globally – for manual edits, auto-sync, regeneration, and page tree inline editing. Optional underscore preservation (RFC 3986) is also available.
 
 ### Duplicate Prevention Where TYPO3 Core Doesn't
 
@@ -116,7 +116,7 @@ Remove URL paths from page types that don't need them (Sysfolder, Recycler, Spac
 
 ## Configuration
 
-All features work out of the box with sensible defaults. Fine-tune via **System > Settings > Extension Configuration > sluggi**:
+All features work out of the box with sensible defaults. Fine-tune via **System > Settings > Extension Configuration > _sluggi_**:
 
 **Basic**
 
@@ -169,7 +169,7 @@ $GLOBALS['TYPO3_CONF_VARS']['EXTENSIONS']['sluggi'] = [
 
 ## Permissions
 
-Every sluggi feature integrates with TYPO3's standard backend user and group permissions. You decide per user group which editors can see and use which controls – the same way you manage access to any other field in TYPO3:
+Every _sluggi_ feature integrates with TYPO3's standard backend user and group permissions. You decide per user group which editors can see and use which controls – the same way you manage access to any other field in TYPO3:
 
 | Field | Permission controls |
 |-------|---------------------|
@@ -196,6 +196,25 @@ Example setup for a typical editorial team:
 ## User Settings
 
 Users can enable compact controls via **User Settings > Personalization** to collapse controls behind a menu icon.
+
+## Slug Source Fields
+
+_sluggi_ reads the source fields for slug generation from the standard TCA [`generatorOptions.fields`](https://docs.typo3.org/m/typo3/reference-tca/main/en-us/ColumnsConfig/Type/Slug/Index.html) configuration of the `slug` column. All referenced fields are automatically detected — they get a badge in the backend and the frontend component listens to them for real-time sync.
+
+```php
+'slug' => [
+    'config' => [
+        'type' => 'slug',
+        'generatorOptions' => [
+            'fields' => [['nav_title', 'title']],
+        ],
+    ],
+],
+```
+
+For more configuration options (e.g. multiple fields, fallback chains, field separators), see the [TYPO3 TCA slug documentation](https://docs.typo3.org/m/typo3/reference-tca/main/en-us/ColumnsConfig/Type/Slug/Index.html).
+
+For non-page tables, add the table name to the `synchronize_tables` extension setting. The slug is then auto-regenerated whenever a source field changes on save.
 
 ## Requirements
 
