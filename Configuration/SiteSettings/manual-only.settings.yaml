@@ -1,0 +1,19 @@
+# Manual slug management, no automatic updates or redirects
+#
+# Disables both recursive child slug updates and automatic redirect creation.
+# Slug changes affect only the page being edited. Use this when your URL
+# structure is managed manually and you need full control over every change.
+#
+# Note: sluggi's auto-sync feature (regenerating a slug when the page title
+# changes) still works independently of these settings. To disable auto-sync,
+# set the sluggi extension configuration option "synchronize" to false.
+#
+# Import in config/sites/<your-site>/settings.yaml:
+#   imports:
+#     - { resource: 'EXT:sluggi/Configuration/SiteSettings/manual-only.settings.yaml' }
+
+redirects:
+  autoUpdateSlugs: false
+  autoCreateRedirects: false
+  redirectTTL: 0
+  httpStatusCode: 307

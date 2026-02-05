@@ -7,7 +7,7 @@
 
 URLs that stay in sync when titles change. Automatic redirects. Duplicate prevention on copy, move, and recycler restore. Locking, access control, conflict detection – everything you need to manage URL paths with confidence.
 
-One `composer require`, zero configuration needed.
+One `composer require`, sensible defaults – [highly configurable](#configuration) when you need it.
 
 ![sluggi editor](Documentation/sluggi_full_editor_view.png)
 
@@ -166,6 +166,90 @@ $GLOBALS['TYPO3_CONF_VARS']['EXTENSIONS']['sluggi'] = [
     'redirect_control' => '1',
 ];
 ```
+
+## Site Configuration: Redirects & Recursive Slug Updates
+
+_sluggi_ requires [EXT:redirects](https://docs.typo3.org/c/typo3/cms-redirects/main/en-us/) which controls what happens when a page slug changes: whether child pages update recursively, whether redirects are created, how long they live, and which HTTP status code they use.
+
+These settings are configured **per site** via [TYPO3 site sets](https://docs.typo3.org/m/typo3/reference-coreapi/main/en-us/ApiOverview/SiteHandling/SiteSettings.html). To activate them, add the `typo3/redirects` set to your site's `config.yaml` and override the defaults in `settings.yaml`.
+
+### Step 1: Add the redirects site set
+
+In `config/sites/<your-site>/config.yaml`, add `typo3/redirects` to the `dependencies` list:
+
+```yaml
+base: 'https://example.com/'
+rootPageId: 1
+dependencies:
+  - typo3/redirects
+languages:
+  # ...
+```
+
+### Step 2: Override settings
+
+Create `config/sites/<your-site>/settings.yaml` with the settings you want to change:
+
+```yaml
+redirects:
+  autoUpdateSlugs: true
+  autoCreateRedirects: true
+  redirectTTL: 0
+  httpStatusCode: 301
+```
+
+### Available Settings
+
+| Setting | Type | Default | Description |
+|---------|------|---------|-------------|
+| `redirects.autoUpdateSlugs` | bool | `true` | Recursively update child page slugs when a parent slug changes. Works together with _sluggi_'s auto-sync – when a title change triggers a slug update on a parent page, all descendants get their slug prefix replaced automatically. |
+| `redirects.autoCreateRedirects` | bool | `true` | Create redirect records from old to new URL when a slug changes. Only applies in the **live workspace** – editing in a workspace does not create redirects until the change is published. |
+| `redirects.redirectTTL` | int | `0` | Lifetime in **days** for auto-created redirects. `0` means no expiration. When set, the redirect's `endtime` is calculated as creation time + TTL days. |
+| `redirects.httpStatusCode` | int | `307` | HTTP status code for auto-created redirects. Does not affect manually created redirects. Common values: `301` (Moved Permanently – best for SEO), `302` (Found), `307` (Temporary Redirect – the default). |
+
+> **How this relates to sluggi:** When _sluggi_'s auto-sync regenerates a slug (because the page title changed), EXT:redirects picks up the change and applies the settings above. If `autoUpdateSlugs` is enabled, child pages update recursively. If `autoCreateRedirects` is enabled, redirect records are created for the old URLs. The `redirectTTL` and `httpStatusCode` settings control the properties of those redirect records. When _sluggi_'s `redirect_control` feature is enabled, editors can override `autoCreateRedirects` on a per-change basis via a modal dialog.
+
+### Ready-to-Use Configuration Presets
+
+_sluggi_ ships ready-to-use presets in [`Configuration/SiteSettings/`](Configuration/SiteSettings/). TYPO3's YAML loader supports [`imports`](https://docs.typo3.org/m/typo3/reference-coreapi/main/en-us/ApiOverview/YamlApi/Index.html#imports) with `EXT:` paths, so you can reference them directly from your `settings.yaml` without copying files.
+
+Create `config/sites/<your-site>/settings.yaml` with an import:
+
+```yaml
+imports:
+  - { resource: 'EXT:sluggi/Configuration/SiteSettings/recommended.settings.yaml' }
+```
+
+You can override individual values after the import:
+
+```yaml
+imports:
+  - { resource: 'EXT:sluggi/Configuration/SiteSettings/recommended.settings.yaml' }
+
+# Override just the TTL from the preset
+redirects:
+  redirectTTL: 180
+```
+
+**Available presets:**
+
+| Preset | Status code | TTL | Description |
+|--------|:-----------:|:---:|-------------|
+| [recommended](Configuration/SiteSettings/recommended.settings.yaml) | 301 | permanent | Best for production sites where SEO matters |
+| [temporary-with-ttl](Configuration/SiteSettings/temporary-with-ttl.settings.yaml) | 307 | 90 days | Sites with frequently changing content (news, events, campaigns) |
+| [no-auto-redirects](Configuration/SiteSettings/no-auto-redirects.settings.yaml) | – | – | Recursive slug updates only, redirects managed externally or manually |
+| [manual-only](Configuration/SiteSettings/manual-only.settings.yaml) | – | – | No recursive updates, no auto-redirects, full manual control |
+
+### How It All Fits Together
+
+| What happens | `autoUpdateSlugs` | `autoCreateRedirects` | sluggi `synchronize` | sluggi `redirect_control` |
+|---|:---:|:---:|:---:|:---:|
+| Title changes → slug updates | – | – | **controls this** | – |
+| Parent slug changes → child slugs update | **controls this** | – | – | – |
+| Old URL → redirect to new URL | – | **controls this** | – | – |
+| Editor chooses whether to create redirect | – | must be `true` | – | **controls this** |
+
+For the full EXT:redirects documentation, see the [TYPO3 Redirects Setup](https://docs.typo3.org/c/typo3/cms-redirects/main/en-us/Setup/Index.html). For details on TYPO3 site sets and settings, see [Site Settings](https://docs.typo3.org/m/typo3/reference-coreapi/main/en-us/ApiOverview/SiteHandling/SiteSettings.html).
 
 ## Permissions
 

@@ -1,0 +1,19 @@
+# Child slug updates only, no automatic redirects
+#
+# Child pages still update recursively when a parent slug changes, but no
+# redirect records are created. Use this if you manage redirects externally
+# (e.g. in a reverse proxy or CDN) or if your editors handle redirects
+# manually through the TYPO3 Redirects backend module.
+#
+# When sluggi's "redirect_control" feature is enabled, editors will not see
+# the redirect creation modal since auto-creation is disabled entirely.
+#
+# Import in config/sites/<your-site>/settings.yaml:
+#   imports:
+#     - { resource: 'EXT:sluggi/Configuration/SiteSettings/no-auto-redirects.settings.yaml' }
+
+redirects:
+  autoUpdateSlugs: true
+  autoCreateRedirects: false
+  redirectTTL: 0
+  httpStatusCode: 307

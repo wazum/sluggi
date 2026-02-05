@@ -1,0 +1,16 @@
+# Recommended: Permanent redirects, recursive slug updates, no expiration
+#
+# Best for most production sites. When a page slug changes, all child pages
+# update automatically and permanent (301) redirects are created from the old
+# URLs to the new ones. Redirects never expire, so existing links and search
+# engine rankings are preserved indefinitely.
+#
+# Import in config/sites/<your-site>/settings.yaml:
+#   imports:
+#     - { resource: 'EXT:sluggi/Configuration/SiteSettings/recommended.settings.yaml' }
+
+redirects:
+  autoUpdateSlugs: true
+  autoCreateRedirects: true
+  redirectTTL: 0
+  httpStatusCode: 301

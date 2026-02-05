@@ -1,0 +1,16 @@
+# Temporary redirects with automatic expiration
+#
+# Uses 307 (Temporary Redirect) with a 90-day TTL. Useful when URLs change
+# frequently (e.g. news, events, campaigns) and you don't want old redirects
+# piling up forever. Search engines keep indexing the new URL while old links
+# still work for 90 days.
+#
+# Import in config/sites/<your-site>/settings.yaml:
+#   imports:
+#     - { resource: 'EXT:sluggi/Configuration/SiteSettings/temporary-with-ttl.settings.yaml' }
+
+redirects:
+  autoUpdateSlugs: true
+  autoCreateRedirects: true
+  redirectTTL: 90
+  httpStatusCode: 307
