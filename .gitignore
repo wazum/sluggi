@@ -8,3 +8,4 @@ var
 Tests/.phpunit.cache
 Tests/E2e/.auth
 Tests/E2e/test-results
+demo-dist

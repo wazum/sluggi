@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>sluggi – The URL Path Manager TYPO3 deserves</title>
+    <link rel="stylesheet" href="demo.css">
+</head>
+<body>
+    <header>
+        <h1>sluggi</h1>
+        <p class="demo-tagline">The URL Path Manager TYPO3 deserves.</p>
+        <p class="demo-pitch">URLs that stay in sync when titles change. Automatic redirects. Duplicate prevention on copy, move, and recycler restore. Locking, access control, conflict detection – everything you need to manage URL paths with confidence.</p>
+        <p class="demo-links"><a href="https://github.com/wazum/sluggi">GitHub &amp; Documentation</a></p>
+    </header>
+
+    <main>
+        <h2>Installation</h2>
+        <code>
+            composer require wazum/sluggi
+        </code>
+
+        <h2>Demo</h2>
+        <!-- Default -->
+        <section class="demo-card">
+            <h2>Default <span class="demo-domain">(https://example.com)</span></h2>
+            <p>What you get after <code>composer require wazum/sluggi</code>. Click the slug to edit inline, or regenerate it from the title.</p>
+
+            <label class="demo-field-label">Page title</label>
+            <div>
+                <span class="input-group-text sluggi-source-badge" style="display:none" title="This field influences the URL slug"><span class="sluggi-source-badge__icon"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg></span></span>
+                <input type="text" class="demo-field-input" value="My Example Page"
+                    data-sluggi-source
+                    data-formengine-input-name="data[pages][1][title]"
+                    data-formengine-input-initialized="true" />
+            </div>
+
+            <fieldset class="demo-slug-fieldset">
+                <legend class="demo-slug-legend">
+                    <svg class="demo-chain-icon" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+                    URL Segment <span class="demo-domain">(https://example.com)</span>
+                </legend>
+                <div class="demo-element-wrapper">
+                    <sluggi-element
+                        value="/my-example-page"
+                        page-id="1"
+                        record-id="1"
+                        table-name="pages"
+                        field-name="slug"
+                        language="0"
+                        signature="demo"
+                        command="edit"
+                        parent-page-id="0"
+                    ></sluggi-element>
+                    <input type="hidden" class="sluggi-hidden-field" name="data[pages][1][slug]" value="/my-example-page" />
+                    <input type="hidden" class="sluggi-sync-field" name="data[pages][1][tx_sluggi_sync]" value="0" />
+                    <input type="hidden" class="sluggi-lock-field" name="data[pages][1][slug_locked]" value="0" />
+                    <input type="hidden" class="sluggi-full-path-field" value="0" />
+                    <input type="hidden" class="sluggi-redirect-field" value="0" />
+                </div>
+            </fieldset>
+        </section>
+
+        <!-- Auto-Sync -->
+        <section class="demo-card">
+            <h2>Auto-Sync</h2>
+            <p>Rename a page, the URL follows. Change the title below and watch the slug update automatically.</p>
+
+            <label class="demo-field-label">Page title</label>
+            <div>
+                <span class="input-group-text sluggi-source-badge" style="display:none" title="This field influences the URL slug"><span class="sluggi-source-badge__icon"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg></span></span>
+                <input type="text" class="demo-field-input" value="About Us"
+                    data-sluggi-source
+                    data-formengine-input-name="data[pages][2][title]"
+                    data-formengine-input-initialized="true" />
+            </div>
+
+            <fieldset class="demo-slug-fieldset">
+                <legend class="demo-slug-legend">
+                    <svg class="demo-chain-icon" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+                    URL Segment <span class="demo-domain">(https://example.com)</span>
+                </legend>
+                <div class="demo-element-wrapper">
+                    <sluggi-element
+                        value="/about-us"
+                        sync-feature-enabled
+                        is-synced
+                        page-id="2"
+                        record-id="2"
+                        table-name="pages"
+                        field-name="slug"
+                        language="0"
+                        signature="demo"
+                        command="edit"
+                        parent-page-id="0"
+                    ></sluggi-element>
+                    <input type="hidden" class="sluggi-hidden-field" name="data[pages][2][slug]" value="/about-us" />
+                    <input type="hidden" class="sluggi-sync-field" name="data[pages][2][tx_sluggi_sync]" value="1" />
+                    <input type="hidden" class="sluggi-lock-field" name="data[pages][2][slug_locked]" value="0" />
+                    <input type="hidden" class="sluggi-full-path-field" value="0" />
+                    <input type="hidden" class="sluggi-redirect-field" value="0" />
+                </div>
+            </fieldset>
+        </section>
+
+        <!-- Locking -->
+        <section class="demo-card">
+            <h2>Locking</h2>
+            <p>Pin critical URLs so nobody accidentally breaks them. Click the lock toggle to unlock.</p>
+
+            <fieldset class="demo-slug-fieldset" style="margin-top: 0;">
+                <legend class="demo-slug-legend">
+                    <svg class="demo-chain-icon" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+                    URL Segment <span class="demo-domain">(https://example.com)</span>
+                </legend>
+                <div class="demo-element-wrapper">
+                    <sluggi-element
+                        value="/locked-page"
+                        lock-feature-enabled
+                        is-locked
+                        page-id="3"
+                        record-id="3"
+                        table-name="pages"
+                        field-name="slug"
+                        language="0"
+                        signature="demo"
+                        command="edit"
+                        parent-page-id="0"
+                    ></sluggi-element>
+                    <input type="hidden" class="sluggi-hidden-field" name="data[pages][3][slug]" value="/locked-page" />
+                    <input type="hidden" class="sluggi-sync-field" name="data[pages][3][tx_sluggi_sync]" value="0" />
+                    <input type="hidden" class="sluggi-lock-field" name="data[pages][3][slug_locked]" value="1" />
+                    <input type="hidden" class="sluggi-full-path-field" value="0" />
+                    <input type="hidden" class="sluggi-redirect-field" value="0" />
+                </div>
+            </fieldset>
+        </section>
+
+        <!-- Access Control -->
+        <section class="demo-card">
+            <h2>Access Control</h2>
+            <p>Restrict what editors can change. Two independent mechanisms keep your URL hierarchy safe.</p>
+
+            <h3 class="demo-subheading">Last Segment Only</h3>
+            <p class="demo-subdescription">Non-admin editors can only change the final path segment. The parent path stays read-only.</p>
+
+            <fieldset class="demo-slug-fieldset" style="margin-top: 0;">
+                <legend class="demo-slug-legend">
+                    <svg class="demo-chain-icon" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+                    URL Segment <span class="demo-domain">(https://example.com)</span>
+                </legend>
+                <div class="demo-element-wrapper">
+                    <sluggi-element
+                        value="/products/electronics/smartphones"
+                        last-segment-only
+                        page-id="4"
+                        record-id="4"
+                        table-name="pages"
+                        field-name="slug"
+                        language="0"
+                        signature="demo"
+                        command="edit"
+                        parent-page-id="0"
+                    ></sluggi-element>
+                    <input type="hidden" class="sluggi-hidden-field" name="data[pages][4][slug]" value="/products/electronics/smartphones" />
+                    <input type="hidden" class="sluggi-sync-field" name="data[pages][4][tx_sluggi_sync]" value="0" />
+                    <input type="hidden" class="sluggi-lock-field" name="data[pages][4][slug_locked]" value="0" />
+                    <input type="hidden" class="sluggi-full-path-field" value="0" />
+                    <input type="hidden" class="sluggi-redirect-field" value="0" />
+                </div>
+            </fieldset>
+
+            <h3 class="demo-subheading">Full Path Editing</h3>
+            <p class="demo-subdescription">The <strong>+</strong> button lets permitted users temporarily unlock the full path. The slug auto-locks afterwards to prevent sync from overwriting the custom path.</p>
+
+            <fieldset class="demo-slug-fieldset" style="margin-top: 0;">
+                <legend class="demo-slug-legend">
+                    <svg class="demo-chain-icon" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+                    URL Segment <span class="demo-domain">(https://example.com)</span>
+                </legend>
+                <div class="demo-element-wrapper">
+                    <sluggi-element
+                        value="/products/electronics/smartphones"
+                        last-segment-only
+                        full-path-feature-enabled
+                        page-id="7"
+                        record-id="7"
+                        table-name="pages"
+                        field-name="slug"
+                        language="0"
+                        signature="demo"
+                        command="edit"
+                        parent-page-id="0"
+                    ></sluggi-element>
+                    <input type="hidden" class="sluggi-hidden-field" name="data[pages][7][slug]" value="/products/electronics/smartphones" />
+                    <input type="hidden" class="sluggi-sync-field" name="data[pages][7][tx_sluggi_sync]" value="0" />
+                    <input type="hidden" class="sluggi-lock-field" name="data[pages][7][slug_locked]" value="0" />
+                    <input type="hidden" class="sluggi-full-path-field" value="0" />
+                    <input type="hidden" class="sluggi-redirect-field" value="0" />
+                </div>
+            </fieldset>
+
+            <h3 class="demo-subheading">Hierarchy Permissions</h3>
+            <p class="demo-subdescription">Editing is restricted based on the editor's page tree permissions. Only segments below pages they can access are editable.</p>
+
+            <fieldset class="demo-slug-fieldset" style="margin-top: 0;">
+                <legend class="demo-slug-legend">
+                    <svg class="demo-chain-icon" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+                    URL Segment <span class="demo-domain">(https://example.com)</span>
+                </legend>
+                <div class="demo-element-wrapper">
+                    <sluggi-element
+                        value="/faculty/research/publications/annual-report"
+                        locked-prefix="/faculty/research"
+                        page-id="6"
+                        record-id="6"
+                        table-name="pages"
+                        field-name="slug"
+                        language="0"
+                        signature="demo"
+                        command="edit"
+                        parent-page-id="0"
+                    ></sluggi-element>
+                    <input type="hidden" class="sluggi-hidden-field" name="data[pages][6][slug]" value="/faculty/research/publications/annual-report" />
+                    <input type="hidden" class="sluggi-sync-field" name="data[pages][6][tx_sluggi_sync]" value="0" />
+                    <input type="hidden" class="sluggi-lock-field" name="data[pages][6][slug_locked]" value="0" />
+                    <input type="hidden" class="sluggi-full-path-field" value="0" />
+                    <input type="hidden" class="sluggi-redirect-field" value="0" />
+                </div>
+            </fieldset>
+        </section>
+
+        <!-- Compact Mode -->
+        <section class="demo-card">
+            <h2>Compact Mode</h2>
+            <p>All controls behind a single menu button. Each user can enable this in their personal settings.</p>
+
+            <label class="demo-field-label">Page title</label>
+            <div>
+                <span class="input-group-text sluggi-source-badge" style="display:none" title="This field influences the URL slug"><span class="sluggi-source-badge__icon"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg></span></span>
+                <input type="text" class="demo-field-input" value="Contact"
+                    data-sluggi-source
+                    data-formengine-input-name="data[pages][5][title]"
+                    data-formengine-input-initialized="true" />
+            </div>
+
+            <fieldset class="demo-slug-fieldset">
+                <legend class="demo-slug-legend">
+                    <svg class="demo-chain-icon" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+                    URL Segment <span class="demo-domain">(https://example.com)</span>
+                </legend>
+                <div class="demo-element-wrapper">
+                    <sluggi-element
+                        value="/contact"
+                        collapsed-controls
+                        sync-feature-enabled
+                        lock-feature-enabled
+                        page-id="5"
+                        record-id="5"
+                        table-name="pages"
+                        field-name="slug"
+                        language="0"
+                        signature="demo"
+                        command="edit"
+                        parent-page-id="0"
+                    ></sluggi-element>
+                    <input type="hidden" class="sluggi-hidden-field" name="data[pages][5][slug]" value="/contact" />
+                    <input type="hidden" class="sluggi-sync-field" name="data[pages][5][tx_sluggi_sync]" value="0" />
+                    <input type="hidden" class="sluggi-lock-field" name="data[pages][5][slug_locked]" value="0" />
+                    <input type="hidden" class="sluggi-full-path-field" value="0" />
+                    <input type="hidden" class="sluggi-redirect-field" value="0" />
+                </div>
+            </fieldset>
+        </section>
+
+        <!-- New Page -->
+        <section class="demo-card">
+            <h2>New Page</h2>
+            <p>Type a title and the slug is generated on the fly. Conflicts are detected before you save.</p>
+
+            <label class="demo-field-label">Page title</label>
+            <div>
+                <span class="input-group-text sluggi-source-badge" style="display:none" title="This field influences the URL slug"><span class="sluggi-source-badge__icon"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg></span></span>
+                <input type="text" class="demo-field-input" value=""
+                    data-sluggi-source
+                    data-formengine-input-name="data[pages][NEW1][title]"
+                    data-formengine-input-initialized="true"
+                    placeholder="Enter a page title…" />
+            </div>
+
+            <fieldset class="demo-slug-fieldset">
+                <legend class="demo-slug-legend">
+                    <svg class="demo-chain-icon" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+                    URL Segment <span class="demo-domain">(https://example.com)</span>
+                </legend>
+                <div class="demo-element-wrapper">
+                    <sluggi-element
+                        value=""
+                        sync-feature-enabled
+                        page-id="0"
+                        record-id="NEW1"
+                        table-name="pages"
+                        field-name="slug"
+                        language="0"
+                        signature="demo"
+                        command="new"
+                        parent-page-id="1"
+                    ></sluggi-element>
+                    <input type="hidden" class="sluggi-hidden-field" name="data[pages][NEW1][slug]" value="" />
+                    <input type="hidden" class="sluggi-sync-field" name="data[pages][NEW1][tx_sluggi_sync]" value="1" />
+                    <input type="hidden" class="sluggi-lock-field" name="data[pages][NEW1][slug_locked]" value="0" />
+                    <input type="hidden" class="sluggi-full-path-field" value="0" />
+                    <input type="hidden" class="sluggi-redirect-field" value="0" />
+                </div>
+            </fieldset>
+        </section>
+
+        <!-- Everything Combined -->
+        <section class="demo-card">
+            <h2>Everything Combined</h2>
+            <p>Sync, locking, access control, clipboard copy, and regeneration – all on a deeply nested university page.</p>
+
+            <label class="demo-field-label">Page title</label>
+            <div>
+                <span class="input-group-text sluggi-source-badge" style="display:none" title="This field influences the URL slug"><span class="sluggi-source-badge__icon"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg></span></span>
+                <input type="text" class="demo-field-input" value="About Us"
+                    data-sluggi-source
+                    data-formengine-input-name="data[pages][8][title]"
+                    data-formengine-input-initialized="true" />
+            </div>
+
+            <fieldset class="demo-slug-fieldset">
+                <legend class="demo-slug-legend">
+                    <svg class="demo-chain-icon" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+                    URL Segment <span class="demo-domain">(https://example.com)</span>
+                </legend>
+                <div class="demo-element-wrapper">
+                    <sluggi-element
+                        value="/organization/department/institute/about-us"
+                        prefix="/organization/department/institute"
+                        sync-feature-enabled
+                        lock-feature-enabled
+                        full-path-feature-enabled
+                        last-segment-only
+                        copy-url-feature-enabled
+                        page-url="https://example.com/organization/department/institute/about-us"
+                        page-id="8"
+                        record-id="8"
+                        table-name="pages"
+                        field-name="slug"
+                        language="0"
+                        signature="demo"
+                        command="edit"
+                        parent-page-id="1"
+                    ></sluggi-element>
+                    <input type="hidden" class="sluggi-hidden-field" name="data[pages][8][slug]" value="/organization/department/institute/about-us" />
+                    <input type="hidden" class="sluggi-sync-field" name="data[pages][8][tx_sluggi_sync]" value="0" />
+                    <input type="hidden" class="sluggi-lock-field" name="data[pages][8][slug_locked]" value="0" />
+                    <input type="hidden" class="sluggi-full-path-field" value="0" />
+                    <input type="hidden" class="sluggi-redirect-field" value="0" />
+                </div>
+            </fieldset>
+        </section>
+    </main>
+
+    <script type="module" src="demo.ts"></script>
+</body>
+</html>

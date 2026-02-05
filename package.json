@@ -7,7 +7,9 @@
         "build": "vite build",
         "typecheck": "tsc --noEmit",
         "test": "web-test-runner",
-        "test:watch": "web-test-runner --watch"
+        "test:watch": "web-test-runner --watch",
+        "demo:dev": "vite --config vite.config.demo.ts",
+        "demo:build": "vite build --config vite.config.demo.ts"
     },
     "devDependencies": {
         "@open-wc/testing": "^4.0.0",

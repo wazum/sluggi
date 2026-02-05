@@ -9,6 +9,8 @@ URLs that stay in sync when titles change. Automatic redirects. Duplicate preven
 
 One `composer require`, sensible defaults – [highly configurable](#configuration) when you need it.
 
+> **[Try the interactive demo](https://wazum.github.io/sluggi/)** – see every feature live in your browser, no installation required.
+
 ![sluggi editor](Documentation/sluggi_full_editor_view.png)
 
 ## Installation
