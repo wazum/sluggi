@@ -57,6 +57,7 @@ trait SlugElementTrait
         );
 
         $resultArray['html'] = $this->wrapWithFieldsetAndLegend($html, $context['slugPrefix']);
+        $resultArray['labelHasBeenHandled'] = true;
         $resultArray['javaScriptModules'][] = JavaScriptModuleInstruction::create('@wazum/sluggi/sluggi-element.js');
 
         return $resultArray;
