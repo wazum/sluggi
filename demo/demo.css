@@ -124,6 +124,63 @@ main {
     gap: 1.5rem;
 }
 
+/* Headings in main */
+
+main > h2 {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-size: 1.125rem;
+    font-weight: 600;
+    margin: 0;
+}
+
+/* Code block with copy button */
+
+.demo-code-block {
+    display: flex;
+    align-items: center;
+    background: var(--typo3-surface-container-low);
+    border: 1px solid var(--demo-border);
+    border-radius: 6px;
+    padding: 0.625rem 0.75rem;
+}
+
+.demo-code-block code {
+    flex: 1;
+    background: none;
+    padding: 0;
+    border-radius: 0;
+    font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace;
+    font-size: 0.8125rem;
+    user-select: all;
+}
+
+.demo-copy-button {
+    flex-shrink: 0;
+    background: none;
+    border: none;
+    padding: 0.25rem;
+    cursor: pointer;
+    color: var(--demo-text-secondary);
+    line-height: 0;
+}
+
+.demo-copy-button:hover {
+    color: var(--demo-text);
+}
+
+.demo-copy-button .demo-check-icon {
+    display: none;
+}
+
+.demo-copy-button.copied .demo-copy-icon {
+    display: none;
+}
+
+.demo-copy-button.copied .demo-check-icon {
+    display: block;
+    color: #22c55e;
+}
+
 /* Card */
 
 .demo-card {
