@@ -1,0 +1,15 @@
+"be_groups"
+,"uid","pid","title","tables_modify","pagetypes_select","non_exclude_fields","db_mountpoints"
+,1,0,"Editors","pages","1,254","pages:slug,pages:title","2"
+
+"be_users"
+,"uid","pid","username","password","admin","usergroup"
+,1,0,"admin","$2y$12$abc123",1,""
+,2,0,"editor","$2y$12$abc123",0,"1"
+
+"pages"
+,"uid","pid","title","slug","tx_sluggi_sync","slug_locked","doktype","perms_userid","perms_groupid","perms_user","perms_group","perms_everybody"
+,1,0,"Root Page","/",0,0,1,1,0,31,0,0
+,2,1,"Parent","/parent",0,0,1,2,1,31,31,0
+,3,2,"Locked Page","/parent/locked-page",0,1,1,2,1,31,31,0
+,4,2,"Open Page","/parent/open-page",0,0,1,2,1,31,31,0

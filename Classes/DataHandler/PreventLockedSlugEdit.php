@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Wazum\Sluggi\DataHandler;
 
 use TYPO3\CMS\Backend\Utility\BackendUtility;
+use TYPO3\CMS\Core\Authentication\BackendUserAuthentication;
 use TYPO3\CMS\Core\DataHandling\DataHandler;
 use Wazum\Sluggi\Service\SlugLockService;
 
@@ -56,6 +57,20 @@ final readonly class PreventLockedSlugEdit
     private function isBeingUnlocked(array $fieldArray): bool
     {
         return array_key_exists('slug_locked', $fieldArray)
-            && !$fieldArray['slug_locked'];
+            && !$fieldArray['slug_locked']
+            && $this->canUserModifyLockField();
+    }
+
+    private function canUserModifyLockField(): bool
+    {
+        $backendUser = $this->getBackendUser();
+
+        return $backendUser->isAdmin()
+            || $backendUser->check('non_exclude_fields', 'pages:slug_locked');
+    }
+
+    private function getBackendUser(): BackendUserAuthentication
+    {
+        return $GLOBALS['BE_USER'];
     }
 }

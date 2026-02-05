@@ -142,6 +142,60 @@ final class LockedSlugTest extends FunctionalTestCase
     }
 
     #[Test]
+    public function editorCanEditUnlockedSlugWithoutLockPermission(): void
+    {
+        parent::setUp();
+        $this->importCSVDataSet(__DIR__ . '/Fixtures/pages_locked_no_lock_permission.csv');
+        $this->setUpSite();
+        $this->setUpBackendUser(2);
+        $GLOBALS['LANG'] = GeneralUtility::makeInstance(LanguageServiceFactory::class)->create('default');
+
+        $dataHandler = GeneralUtility::makeInstance(DataHandler::class);
+        $dataHandler->start(['pages' => [4 => ['slug' => '/parent/changed']]], []);
+        $dataHandler->process_datamap();
+
+        $row = $this->getConnectionPool()
+            ->getConnectionForTable('pages')
+            ->select(['slug'], 'pages', ['uid' => 4])
+            ->fetchAssociative();
+
+        self::assertSame('/parent/changed', $row['slug']);
+        self::assertEmpty($dataHandler->errorLog);
+    }
+
+    #[Test]
+    public function lockedSlugNotBypassedByInjectingUnlockWithoutPermission(): void
+    {
+        parent::setUp();
+        $this->importCSVDataSet(__DIR__ . '/Fixtures/pages_locked_no_lock_permission.csv');
+        $this->setUpSite();
+        $this->setUpBackendUser(2);
+        $GLOBALS['LANG'] = GeneralUtility::makeInstance(LanguageServiceFactory::class)->create('default');
+
+        $dataHandler = GeneralUtility::makeInstance(DataHandler::class);
+        $dataHandler->start(
+            [
+                'pages' => [
+                    3 => [
+                        'slug' => '/parent/hacked-slug',
+                        'slug_locked' => 0,
+                    ],
+                ],
+            ],
+            []
+        );
+        $dataHandler->process_datamap();
+
+        $row = $this->getConnectionPool()
+            ->getConnectionForTable('pages')
+            ->select(['slug', 'slug_locked'], 'pages', ['uid' => 3])
+            ->fetchAssociative();
+
+        self::assertSame('/parent/locked-page', $row['slug'], 'Slug must not change when user lacks slug_locked permission');
+        self::assertSame(1, (int)$row['slug_locked'], 'Lock must remain active');
+    }
+
+    #[Test]
     public function lockedChildSlugNotUpdatedWhenParentChanges(): void
     {
         $this->setUpTest('pages_locked_child.csv');
