@@ -298,6 +298,9 @@ export class SluggiElement extends LitElement {
             return this.value;
         }
         if (this.lastSegmentOnly && this.value) {
+            if (this.lockedPrefix && this.value === this.lockedPrefix) {
+                return '/';
+            }
             const parts = this.value.split('/').filter(Boolean);
             if (parts.length > 0) {
                 return '/' + parts[parts.length - 1];
@@ -404,7 +407,7 @@ export class SluggiElement extends LitElement {
                 aria-label="${isEditable ? `Click to edit slug: ${editable}` : editable}"
                 @click="${this.handleEditableClick}"
                 @keydown="${this.handleEditableKeydown}"
-            >${pathPart ? html`<span class="sluggi-editable-path">${pathPart}</span>` : nothing}<span class="sluggi-editable-end">${endPart}</span>${this.showPlaceholder ? html`<span class="sluggi-placeholder">/new-page</span>` : nothing}</span>
+            >${pathPart ? html`<span class="sluggi-editable-path">${pathPart}</span>` : nothing}<span class="sluggi-editable-end">${endPart}</span>${this.showPlaceholder ? html`<span class="sluggi-placeholder">new-page</span>` : nothing}</span>
         `;
     }
 

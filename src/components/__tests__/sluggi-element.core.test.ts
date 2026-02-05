@@ -27,14 +27,14 @@ describe('SluggiElement - Core', () => {
             const container = document.createElement('div');
             container.innerHTML = `
                 <input data-sluggi-source data-formengine-input-name="data[pages][123][title]" value="" />
-                <sluggi-element value="/parent/child" locked-prefix="/parent" command="new" record-id="123"></sluggi-element>
+                <sluggi-element value="/parent" locked-prefix="/parent" command="new" record-id="123"></sluggi-element>
             `;
             document.body.appendChild(container);
             const el = container.querySelector('sluggi-element') as SluggiElement;
             await el.updateComplete;
 
             const editable = el.shadowRoot!.querySelector('.sluggi-editable');
-            expect(editable?.textContent).to.contain('/new-page');
+            expect(editable?.textContent).to.equal('/new-page');
             expect(el.shadowRoot!.querySelector('.sluggi-placeholder')).to.exist;
             document.body.removeChild(container);
         });
