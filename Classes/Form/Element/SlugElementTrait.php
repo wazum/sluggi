@@ -6,6 +6,7 @@ namespace Wazum\Sluggi\Form\Element;
 
 use TYPO3\CMS\Backend\Controller\FormSlugAjaxController;
 use TYPO3\CMS\Core\Page\JavaScriptModuleInstruction;
+use TYPO3\CMS\Core\Site\Entity\Site;
 use TYPO3\CMS\Core\Utility\MathUtility;
 use Wazum\Sluggi\Compatibility\Typo3Compatibility;
 use Wazum\Sluggi\Configuration\ExtensionConfiguration;
@@ -164,7 +165,8 @@ trait SlugElementTrait
             'preserveUnderscore' => $this->extensionConfiguration->isPreserveUnderscoreEnabled(),
             'redirectControlEnabled' => $table === 'pages'
                 && $command !== 'new'
-                && $this->extensionConfiguration->isRedirectControlEnabled(),
+                && $this->extensionConfiguration->isRedirectControlEnabled()
+                && $this->isSiteAutoCreateRedirectsEnabled(),
             'redirectFieldName' => $this->slugElementRenderer->buildRedirectFieldName($table, $recordId),
         ];
     }
@@ -381,6 +383,16 @@ trait SlugElementTrait
         return $this->fullPathEditingService->isEnabled()
             && $hasRestriction
             && $this->canUserAccessFullPathField($table);
+    }
+
+    private function isSiteAutoCreateRedirectsEnabled(): bool
+    {
+        $site = $this->data['site'] ?? null;
+        if (!$site instanceof Site) {
+            return true;
+        }
+
+        return (bool)$site->getSettings()->get('redirects.autoCreateRedirects', true);
     }
 
     /**

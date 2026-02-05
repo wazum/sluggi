@@ -112,4 +112,32 @@ final class SlugElementRedirectControlTest extends FunctionalTestCase
         self::assertStringContainsString('sluggi-redirect-field', $html);
         self::assertStringContainsString('tx_sluggi_redirect', $html);
     }
+
+    #[Test]
+    public function redirectControlAttributeIsAbsentWhenSiteDisablesAutoCreateRedirects(): void
+    {
+        $GLOBALS['TYPO3_CONF_VARS']['EXTENSIONS']['sluggi']['redirect_control'] = '1';
+
+        Typo3Compatibility::writeSiteConfiguration('test', [
+            'rootPageId' => 1,
+            'base' => '/',
+            'languages' => [
+                [
+                    'languageId' => 0,
+                    'title' => 'English',
+                    'locale' => 'en_US.UTF-8',
+                    'base' => '/',
+                ],
+            ],
+            'settings' => [
+                'redirects' => [
+                    'autoCreateRedirects' => false,
+                ],
+            ],
+        ]);
+
+        $html = $this->renderSlugElement(2);
+
+        self::assertStringNotContainsString('redirect-control', $html);
+    }
 }
