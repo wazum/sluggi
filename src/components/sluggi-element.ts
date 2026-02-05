@@ -407,7 +407,7 @@ export class SluggiElement extends LitElement {
                 aria-label="${isEditable ? `Click to edit slug: ${editable}` : editable}"
                 @click="${this.handleEditableClick}"
                 @keydown="${this.handleEditableKeydown}"
-            >${pathPart ? html`<span class="sluggi-editable-path">${pathPart}</span>` : nothing}<span class="sluggi-editable-end">${endPart}</span>${this.showPlaceholder ? html`<span class="sluggi-placeholder">new-page</span>` : nothing}</span>
+            >${pathPart ? html`<span class="sluggi-editable-path">${pathPart}</span>` : nothing}<span class="sluggi-editable-end">${endPart}</span>${this.showPlaceholder ? html`<span class="sluggi-placeholder">${this.labels['placeholder.newPage'] || 'new-page'}</span>` : nothing}</span>
         `;
     }
 

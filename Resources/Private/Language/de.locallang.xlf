@@ -139,6 +139,10 @@
                 <source>Cancel</source>
                 <target>Abbrechen</target>
             </trans-unit>
+            <trans-unit id="placeholder.newPage" resname="placeholder.newPage">
+                <source>new-page</source>
+                <target>neue-seite</target>
+            </trans-unit>
             <trans-unit id="contextMenu.recursiveSlugUpdate" resname="contextMenu.recursiveSlugUpdate">
                 <source>Re-apply URL paths recursively</source>
                 <target>URL-Pfade rekursiv neu generieren</target>

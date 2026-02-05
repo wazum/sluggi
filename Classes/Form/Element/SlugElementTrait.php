@@ -304,6 +304,7 @@ trait SlugElementTrait
             'button.copyUrl' => $languageService->sL($prefix . 'button.copyUrl'),
             'copyConfirmation' => $languageService->sL($prefix . 'copyConfirmation'),
             'openInNewTab' => $languageService->sL($prefix . 'openInNewTab'),
+            'placeholder.newPage' => $languageService->sL($prefix . 'placeholder.newPage'),
             'redirectModal.title' => $languageService->sL($prefix . 'redirectModal.title'),
             'redirectModal.message' => $languageService->sL($prefix . 'redirectModal.message'),
             'redirectModal.messageRecursive' => $languageService->sL($prefix . 'redirectModal.messageRecursive'),

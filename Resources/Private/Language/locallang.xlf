@@ -117,6 +117,9 @@
             <trans-unit id="error.hierarchyPermission.message" resname="error.hierarchyPermission.message">
                 <source>You cannot modify path segments above your permission level.</source>
             </trans-unit>
+            <trans-unit id="placeholder.newPage" resname="placeholder.newPage">
+                <source>new-page</source>
+            </trans-unit>
             <trans-unit id="contextMenu.recursiveSlugUpdate" resname="contextMenu.recursiveSlugUpdate">
                 <source>Re-apply URL paths recursively</source>
             </trans-unit>
