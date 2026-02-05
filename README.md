@@ -312,6 +312,16 @@ For non-page tables, add the table name to the `synchronize_tables` extension se
 - [ig-slug](https://github.com/internetgalerie/ig_slug) – Rebuild URL slugs in bulk
 - [masi](https://github.com/b13/masi) – Exclude specific page slugs from subpage URL generation
 
+## Support and Feature Requests
+
+Use the [issues tracker](https://github.com/wazum/sluggi/issues) on GitHub for support questions and new feature requests or ideas concerning the extension.
+
+## Credits and Sponsors
+
+Many thanks to [plan2net GmbH](https://www.plan2.net/) for allowing me to work on the extension during my working hours and for great projects where this extension is already being used in real life.
+
+Special thanks to [TU München](https://www.tum.de/) and other German universities that sponsored my time at _plan2net GmbH_ to work on this extension (_applies to previous versions_).
+
 ## License
 
 GPL-2.0-or-later
