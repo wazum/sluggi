@@ -1,9 +1,0 @@
-#!/bin/sh
-
-cd /var/www/html/Tests/E2e || exit 1
-
-if [ -f yarn.lock ]; then
-  yarn && yarn playwright "$@"
-else
-  npm ci && npx playwright "$@"
-fi

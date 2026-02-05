@@ -5,9 +5,6 @@ node_modules
 composer.lock
 public
 var
-.ddev/.installed
-.ddev/traefik/certs/
-.ddev/traefik/config/
 Tests/.phpunit.cache
 Tests/E2e/.auth
 Tests/E2e/test-results
