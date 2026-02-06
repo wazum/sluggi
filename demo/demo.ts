@@ -83,7 +83,9 @@ customElements.whenDefined('sluggi-element').then(async () => {
     const scopedBadgeUpdate = function (this: any) {
         const card = this.closest('.demo-card');
         if (!card) return;
-        const badges = card.querySelectorAll<HTMLElement>('.sluggi-source-badge');
+
+        // Handle old input-group style badges
+        const badges = card.querySelectorAll<HTMLElement>('.input-group-text.sluggi-source-badge');
         for (const badge of badges) {
             if (this.isSynced) {
                 badge.style.removeProperty('display');
@@ -91,6 +93,12 @@ customElements.whenDefined('sluggi-element').then(async () => {
                 badge.style.display = 'none';
             }
             badge.parentElement?.classList.toggle('input-group', this.isSynced);
+        }
+
+        // Handle new sluggi-source-group style
+        const sourceGroups = card.querySelectorAll<HTMLElement>('.sluggi-source-group');
+        for (const group of sourceGroups) {
+            group.classList.toggle('sluggi-source-group--active', this.isSynced);
         }
     };
 
@@ -103,5 +111,18 @@ customElements.whenDefined('sluggi-element').then(async () => {
     await Promise.all(elements.map((el) => el.updateComplete));
     for (const el of elements) {
         el.updateSourceBadgeVisibility();
+    }
+
+    // Handle confirm button clicks
+    const confirmButtons = document.querySelectorAll<HTMLButtonElement>('.sluggi-source-confirm');
+    for (const button of confirmButtons) {
+        button.addEventListener('click', () => {
+            const card = button.closest('.demo-card');
+            if (!card) return;
+            const sluggiElement = card.querySelector('sluggi-element') as any;
+            if (sluggiElement?.isSynced) {
+                sluggiElement.sendSlugProposal?.('recreate');
+            }
+        });
     }
 });

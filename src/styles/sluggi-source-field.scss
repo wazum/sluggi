@@ -1,0 +1,122 @@
+// =========================================================================
+// Source Badge (left side indicator)
+// =========================================================================
+
+.sluggi-source-badge {
+    color: #737373;
+
+    &__icon {
+        position: relative;
+        display: inline-block;
+
+        svg {
+            display: block;
+        }
+    }
+
+    &__number {
+        position: absolute;
+        bottom: -8px;
+        right: -10px;
+        min-width: 12px;
+        height: 12px;
+        padding: 0 3px;
+        font-size: 8px;
+        font-weight: 600;
+        line-height: 12px;
+        text-align: center;
+        color: #555;
+        background: #fff;
+        border-radius: 6px;
+        box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.2);
+    }
+
+    &--fallback {
+        opacity: 0.5;
+    }
+}
+
+// =========================================================================
+// Source Group Container (custom flexbox layout, not Bootstrap input-group)
+// =========================================================================
+
+.sluggi-source-group {
+    display: flex;
+    align-items: stretch;
+
+    // Make the clearable wrapper grow to fill available space
+    > .form-control-clearable-wrapper {
+        flex: 1 1 auto;
+        min-width: 0;
+    }
+
+    // Badge hidden by default
+    > .sluggi-source-badge {
+        display: none;
+    }
+
+    // Confirm button hidden by default
+    > .sluggi-source-confirm {
+        display: none;
+    }
+}
+
+// When sync is active, show badge and adjust input styling
+.sluggi-source-group--active {
+    > .sluggi-source-badge {
+        display: flex;
+        align-items: center;
+        padding: var(--typo3-input-padding-y, 0.375rem) var(--typo3-input-padding-x, 0.75rem);
+        border: 1px solid var(--bs-border-color, #dee2e6);
+        border-right: 0;
+        border-radius: var(--typo3-input-border-radius, 0.75em) 0 0 var(--typo3-input-border-radius, 0.75em);
+        background: var(--bs-tertiary-bg, #f8f9fa);
+    }
+
+    > .form-control,
+    > .form-control-clearable-wrapper > .form-control {
+        border-top-left-radius: 0 !important;
+        border-bottom-left-radius: 0 !important;
+    }
+}
+
+// =========================================================================
+// Confirm Button (right side) - only visible when input has focus
+// =========================================================================
+
+.sluggi-source-confirm.input-group-text {
+    cursor: pointer;
+    border-left: 0;
+    border-radius: 0 var(--typo3-input-border-radius, 0.75em) var(--typo3-input-border-radius, 0.75em) 0;
+    transition: color 0.15s ease, background-color 0.15s ease;
+
+    &:hover {
+        background-color: var(--typo3-surface-container-lowest, #e9ecef);
+    }
+
+    &:focus-visible {
+        position: relative;
+        z-index: 1;
+        outline: 4px solid rgba(153, 153, 153, 0.75);
+        outline-offset: 0;
+    }
+
+    svg {
+        display: block;
+    }
+}
+
+// Show confirm button and adjust input styling when focused
+.sluggi-source-group:focus-within {
+    > .sluggi-source-confirm.input-group-text {
+        display: flex;
+        align-items: center;
+    }
+
+    // Remove right border-radius from input when button is visible
+    > .form-control,
+    > .form-control-clearable-wrapper > .form-control {
+        border-top-right-radius: 0 !important;
+        border-bottom-right-radius: 0 !important;
+    }
+}

@@ -14,7 +14,7 @@ export default defineConfig({
                 'JavaScript/sluggi-element': resolve(__dirname, 'src/index.ts'),
                 'JavaScript/redirect-notification-handler': resolve(__dirname, 'src/redirect-notification-handler.ts'),
                 'JavaScript/context-menu-actions': resolve(__dirname, 'src/context-menu-actions.ts'),
-                'Css/sluggi-source-badge': resolve(__dirname, 'src/styles/sluggi-source-badge.scss'),
+                'Css/sluggi-source-field': resolve(__dirname, 'src/styles/sluggi-source-field.scss'),
             },
             external: [/^@typo3\/.*/],
             output: {

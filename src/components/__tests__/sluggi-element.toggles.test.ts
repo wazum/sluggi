@@ -129,7 +129,7 @@ describe('SluggiElement - Toggles', () => {
             document.body.appendChild(titleInput);
 
             const wrapper = document.createElement('div');
-            wrapper.className = 'input-group';
+            wrapper.className = 'sluggi-source-group sluggi-source-group--active';
             const badge = document.createElement('span');
             badge.className = 'sluggi-source-badge';
             wrapper.appendChild(badge);
@@ -147,15 +147,13 @@ describe('SluggiElement - Toggles', () => {
                 ></sluggi-element>
             `);
 
-            expect(badge.style.display).to.equal('');
-            expect(wrapper.classList.contains('input-group')).to.be.true;
+            expect(wrapper.classList.contains('sluggi-source-group--active')).to.be.true;
 
             const syncToggle = el.shadowRoot!.querySelector('.sluggi-sync-toggle') as HTMLElement;
             syncToggle.click();
             await el.updateComplete;
 
-            expect(badge.style.display).to.equal('none');
-            expect(wrapper.classList.contains('input-group')).to.be.false;
+            expect(wrapper.classList.contains('sluggi-source-group--active')).to.be.false;
 
             document.body.removeChild(titleInput);
             document.body.removeChild(wrapper);
@@ -169,9 +167,9 @@ describe('SluggiElement - Toggles', () => {
             document.body.appendChild(titleInput);
 
             const wrapper = document.createElement('div');
+            wrapper.className = 'sluggi-source-group';
             const badge = document.createElement('span');
             badge.className = 'sluggi-source-badge';
-            badge.style.display = 'none';
             wrapper.appendChild(badge);
             document.body.appendChild(wrapper);
 
@@ -186,15 +184,13 @@ describe('SluggiElement - Toggles', () => {
                 ></sluggi-element>
             `);
 
-            expect(badge.style.display).to.equal('none');
-            expect(wrapper.classList.contains('input-group')).to.be.false;
+            expect(wrapper.classList.contains('sluggi-source-group--active')).to.be.false;
 
             const syncToggle = el.shadowRoot!.querySelector('.sluggi-sync-toggle') as HTMLElement;
             syncToggle.click();
             await el.updateComplete;
 
-            expect(badge.style.display).to.equal('');
-            expect(wrapper.classList.contains('input-group')).to.be.true;
+            expect(wrapper.classList.contains('sluggi-source-group--active')).to.be.true;
 
             document.body.removeChild(titleInput);
             document.body.removeChild(wrapper);

@@ -174,7 +174,9 @@ export class SluggiElement extends LitElement {
     private sourceFieldElements: Map<string, HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement> = new Map();
     private boundSourceFieldHandler: (event: Event) => void;
     private boundSourceFieldInitHandler: () => void;
+    private boundSourceConfirmHandler: (event: Event) => void;
     private sourceFieldObserver: MutationObserver | null = null;
+    private sourceConfirmButtons: HTMLButtonElement[] = [];
 
     // =========================================================================
     // Constructor & Lifecycle
@@ -184,6 +186,7 @@ export class SluggiElement extends LitElement {
         super();
         this.boundSourceFieldHandler = this.handleSourceFieldChange.bind(this);
         this.boundSourceFieldInitHandler = this.handleSourceFieldInit.bind(this);
+        this.boundSourceConfirmHandler = this.handleSourceConfirmClick.bind(this);
     }
 
     override connectedCallback() {
@@ -192,6 +195,7 @@ export class SluggiElement extends LitElement {
         this.initialSyncValue = (this.parentElement?.querySelector('.sluggi-sync-field') as HTMLInputElement | null)?.value ?? '';
         this.initialLockValue = (this.parentElement?.querySelector('.sluggi-lock-field') as HTMLInputElement | null)?.value ?? '';
         this.setupSourceFieldListeners();
+        this.setupSourceConfirmListeners();
         this.observeSourceFieldInitialization();
         this.setupFormSubmitListener();
     }
@@ -199,6 +203,7 @@ export class SluggiElement extends LitElement {
     override disconnectedCallback() {
         super.disconnectedCallback();
         this.removeSourceFieldListeners();
+        this.removeSourceConfirmListeners();
         this.sourceFieldObserver?.disconnect();
         this.sourceFieldObserver = null;
         this.removeFormSubmitListener();
@@ -725,6 +730,10 @@ export class SluggiElement extends LitElement {
     }
 
     async sendSlugProposal(mode: 'auto' | 'recreate' | 'manual') {
+        if (this.loading) {
+            return;
+        }
+
         this.dispatchEvent(new CustomEvent('sluggi-request-proposal', {
             bubbles: true,
             composed: true,
@@ -1226,14 +1235,9 @@ export class SluggiElement extends LitElement {
     }
 
     private updateSourceBadgeVisibility() {
-        const badges = document.querySelectorAll<HTMLElement>('.sluggi-source-badge');
-        for (const badge of badges) {
-            if (this.isSynced) {
-                badge.style.removeProperty('display');
-            } else {
-                badge.style.display = 'none';
-            }
-            badge.parentElement?.classList.toggle('input-group', this.isSynced);
+        const groups = document.querySelectorAll<HTMLElement>('.sluggi-source-group');
+        for (const group of groups) {
+            group.classList.toggle('sluggi-source-group--active', this.isSynced);
         }
     }
 
@@ -1350,6 +1354,30 @@ export class SluggiElement extends LitElement {
         }
         this.sourceFieldElements.clear();
         this.hasSourceFields = false;
+    }
+
+    private setupSourceConfirmListeners() {
+        const confirmButtons = document.querySelectorAll<HTMLButtonElement>('.sluggi-source-confirm');
+        for (const button of confirmButtons) {
+            button.addEventListener('click', this.boundSourceConfirmHandler);
+            this.sourceConfirmButtons.push(button);
+        }
+    }
+
+    private removeSourceConfirmListeners() {
+        for (const button of this.sourceConfirmButtons) {
+            button.removeEventListener('click', this.boundSourceConfirmHandler);
+        }
+        this.sourceConfirmButtons = [];
+    }
+
+    private handleSourceConfirmClick(event: Event) {
+        const button = event.currentTarget as HTMLButtonElement;
+        button.blur();
+
+        if (this.isSynced && this.hasNonEmptySourceFieldValue()) {
+            this.sendSlugProposal('recreate');
+        }
     }
 
     private sourceFieldInputTimeout: number | null = null;

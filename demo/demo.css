@@ -314,6 +314,70 @@ main > h2 {
     display: block;
 }
 
+/* Source group (flexbox layout for badge + input + confirm button) */
+
+.sluggi-source-group {
+    display: flex;
+    align-items: stretch;
+}
+
+.sluggi-source-group > .demo-field-input {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.sluggi-source-group > .sluggi-source-badge {
+    display: none;
+}
+
+.sluggi-source-group > .sluggi-source-confirm {
+    display: none;
+}
+
+/* When sync is active, show badge and adjust styling */
+.sluggi-source-group--active > .sluggi-source-badge {
+    display: flex;
+    align-items: center;
+    padding: 0 0.5rem;
+    border: 1px solid var(--demo-input-border);
+    border-right: 0;
+    border-radius: var(--typo3-input-border-radius) 0 0 var(--typo3-input-border-radius);
+    background: var(--typo3-surface-container-low);
+}
+
+.sluggi-source-group--active > .demo-field-input {
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+}
+
+/* Confirm button styling */
+.sluggi-source-confirm.input-group-text {
+    cursor: pointer;
+    border-left: 0;
+    border-right: 1px solid var(--demo-input-border);
+    border-radius: 0 var(--typo3-input-border-radius) var(--typo3-input-border-radius) 0;
+    transition: color 0.15s ease, background-color 0.15s ease;
+}
+
+.sluggi-source-confirm.input-group-text:hover {
+    background-color: var(--typo3-surface-container-lowest);
+}
+
+.sluggi-source-confirm.input-group-text svg {
+    display: block;
+}
+
+/* Show confirm button when input is focused */
+.sluggi-source-group:focus-within > .sluggi-source-confirm.input-group-text {
+    display: flex;
+    align-items: center;
+}
+
+.sluggi-source-group:focus-within > .demo-field-input {
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+}
+
 /* Modal dialog styles */
 
 .sluggi-demo-modal {

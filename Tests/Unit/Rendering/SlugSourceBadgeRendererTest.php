@@ -133,18 +133,20 @@ final class SlugSourceBadgeRendererTest extends TestCase
 
         $result = $this->subject->insertBadgeIntoHtml($html, '<span class="badge">1</span>', hidden: false);
 
-        self::assertStringContainsString('<div class="input-group">', $result);
+        self::assertStringContainsString('sluggi-source-group', $result);
+        self::assertStringContainsString('sluggi-source-group--active', $result);
         self::assertStringContainsString('<span class="badge">1</span><input', $result);
     }
 
     #[Test]
-    public function insertBadgeIntoHtmlOmitsInputGroupClassWhenHidden(): void
+    public function insertBadgeIntoHtmlOmitsActiveClassWhenHidden(): void
     {
         $html = '<div class="' . $this->elementClass . '"><input type="text" name="test"></div>';
 
         $result = $this->subject->insertBadgeIntoHtml($html, '<span class="badge">1</span>', hidden: true);
 
-        self::assertStringNotContainsString('class="input-group"', $result);
+        self::assertStringNotContainsString('sluggi-source-group--active', $result);
+        self::assertStringContainsString('class="sluggi-source-group"', $result);
         self::assertStringContainsString('<span class="badge">1</span><input', $result);
     }
 
@@ -214,7 +216,7 @@ final class SlugSourceBadgeRendererTest extends TestCase
 
         self::assertStringContainsString('data-sluggi-source', $result);
         self::assertStringContainsString('sluggi-source-badge', $result);
-        self::assertStringContainsString('input-group', $result);
+        self::assertStringContainsString('sluggi-source-group', $result);
     }
 
     #[Test]
@@ -228,22 +230,90 @@ final class SlugSourceBadgeRendererTest extends TestCase
     }
 
     #[Test]
-    public function renderBadgeWithMetadataIncludesDisplayNoneWhenHidden(): void
+    public function renderConfirmButtonContainsButtonElement(): void
     {
-        $metadata = ['slot' => 1, 'role' => 'single', 'chainSize' => 1];
+        $button = $this->subject->renderConfirmButton();
 
-        $badge = $this->subject->renderBadgeWithMetadata($metadata, totalFields: 1, hidden: true);
-
-        self::assertStringContainsString('style="display:none"', $badge);
+        self::assertStringContainsString('<button', $button);
+        self::assertStringContainsString('</button>', $button);
     }
 
     #[Test]
-    public function renderBadgeWithMetadataDoesNotIncludeDisplayNoneWhenNotHidden(): void
+    public function renderConfirmButtonContainsCssClass(): void
     {
-        $metadata = ['slot' => 1, 'role' => 'single', 'chainSize' => 1];
+        $button = $this->subject->renderConfirmButton();
 
-        $badge = $this->subject->renderBadgeWithMetadata($metadata, totalFields: 1, hidden: false);
+        self::assertStringContainsString('class="input-group-text sluggi-source-confirm"', $button);
+    }
 
-        self::assertStringNotContainsString('style="display:none"', $badge);
+    #[Test]
+    public function renderConfirmButtonContainsCheckmarkSvgIcon(): void
+    {
+        $button = $this->subject->renderConfirmButton();
+
+        self::assertStringContainsString('<svg', $button);
+        self::assertStringContainsString('</svg>', $button);
+    }
+
+    #[Test]
+    public function renderConfirmButtonContainsTitle(): void
+    {
+        $button = $this->subject->renderConfirmButton();
+
+        self::assertStringContainsString('title="Update URL path now"', $button);
+    }
+
+    #[Test]
+    public function renderConfirmButtonDoesNotIncludeDisplayNoneByDefault(): void
+    {
+        $button = $this->subject->renderConfirmButton();
+
+        self::assertStringNotContainsString('style="display:none"', $button);
+    }
+
+    #[Test]
+    public function renderConfirmButtonHasTypeButton(): void
+    {
+        $button = $this->subject->renderConfirmButton();
+
+        self::assertStringContainsString('type="button"', $button);
+    }
+
+    #[Test]
+    public function insertBadgeIntoHtmlPlacesConfirmButtonAfterInput(): void
+    {
+        $html = '<div class="' . $this->elementClass . '"><input type="text" name="test"></div>';
+        $badge = '<span class="sluggi-source-badge">badge</span>';
+        $confirmButton = '<button class="sluggi-source-confirm">OK</button>';
+
+        $result = $this->subject->insertBadgeIntoHtml($html, $badge, $confirmButton);
+
+        self::assertStringContainsString('<input type="text" name="test">', $result);
+        self::assertStringContainsString($confirmButton, $result);
+        self::assertMatchesRegularExpression('/<input[^>]*>.*<button class="sluggi-source-confirm"/s', $result);
+    }
+
+    #[Test]
+    public function insertBadgeIntoHtmlKeepsBadgeBeforeInput(): void
+    {
+        $html = '<div class="' . $this->elementClass . '"><input type="text" name="test"></div>';
+        $badge = '<span class="sluggi-source-badge">badge</span>';
+        $confirmButton = '<button class="sluggi-source-confirm">OK</button>';
+
+        $result = $this->subject->insertBadgeIntoHtml($html, $badge, $confirmButton);
+
+        self::assertMatchesRegularExpression('/<span class="sluggi-source-badge">.*<input/s', $result);
+    }
+
+    #[Test]
+    public function insertBadgeIntoHtmlWorksWithoutConfirmButton(): void
+    {
+        $html = '<div class="' . $this->elementClass . '"><input type="text" name="test"></div>';
+        $badge = '<span class="sluggi-source-badge">badge</span>';
+
+        $result = $this->subject->insertBadgeIntoHtml($html, $badge);
+
+        self::assertStringContainsString('<span class="sluggi-source-badge">badge</span><input', $result);
+        self::assertStringNotContainsString('sluggi-source-confirm', $result);
     }
 }

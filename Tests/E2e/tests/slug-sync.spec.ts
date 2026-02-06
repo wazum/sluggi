@@ -156,4 +156,62 @@ test.describe('Slug Sync Toggle - TYPO3 Integration', () => {
     await modal.locator('button[name="no"]').click();
     await expect(modal).not.toBeVisible();
   });
+
+  test('source field confirm button is hidden when sync is off', async ({ page }) => {
+    await page.goto('/typo3/record/edit?edit[pages][12]=edit');
+    const frame = page.frameLocator('iframe');
+    await expect(frame.locator('h1')).toContainText('Edit Page', { timeout: 15000 });
+
+    const confirmButton = frame.locator('.sluggi-source-confirm');
+    await expect(confirmButton.first()).toBeAttached();
+    await expect(confirmButton.first()).not.toBeVisible();
+  });
+
+  test('source field confirm button is visible when sync is on and input is focused', async ({ page }) => {
+    await page.goto('/typo3/record/edit?edit[pages][13]=edit');
+    const frame = page.frameLocator('iframe');
+    await expect(frame.locator('h1')).toContainText('Edit Page', { timeout: 15000 });
+    const slugElement = frame.locator('sluggi-element');
+    const syncToggle = slugElement.locator('.sluggi-sync-toggle');
+
+    await syncToggle.click();
+    await slugElement.locator('.sluggi-spinner').waitFor({ state: 'hidden', timeout: 10000 }).catch(() => {});
+
+    const confirmButton = frame.locator('.sluggi-source-confirm');
+    await expect(confirmButton.first()).toBeAttached();
+    await expect(confirmButton.first()).not.toBeVisible();
+
+    const titleInput = frame.locator('input[data-formengine-input-name*="[title]"]');
+    await titleInput.focus();
+    await expect(confirmButton.first()).toBeVisible({ timeout: 5000 });
+  });
+
+  test('clicking source field confirm button triggers slug regeneration', async ({ page }) => {
+    await page.goto('/typo3/record/edit?edit[pages][15]=edit');
+    const frame = page.frameLocator('iframe');
+    await expect(frame.locator('h1')).toContainText('Edit Page', { timeout: 15000 });
+    const slugElement = frame.locator('sluggi-element');
+    const syncToggle = slugElement.locator('.sluggi-sync-toggle');
+
+    await syncToggle.click();
+    await slugElement.locator('.sluggi-spinner').waitFor({ state: 'hidden', timeout: 10000 }).catch(() => {});
+    await expect(syncToggle).toHaveClass(/is-synced/);
+
+    const slugDisplay = slugElement.locator('.sluggi-editable');
+    const initialSlug = await slugDisplay.textContent();
+
+    const titleInput = frame.locator('input[data-formengine-input-name*="[title]"]');
+    await titleInput.fill('New Test Title');
+
+    const confirmButton = frame.locator('.sluggi-source-confirm').first();
+    await expect(confirmButton).toBeVisible({ timeout: 5000 });
+    await confirmButton.click();
+
+    await slugElement.locator('.sluggi-spinner').waitFor({ state: 'visible', timeout: 3000 }).catch(() => {});
+    await slugElement.locator('.sluggi-spinner').waitFor({ state: 'hidden', timeout: 10000 });
+
+    const newSlug = await slugDisplay.textContent();
+    expect(newSlug).not.toBe(initialSlug);
+    expect(newSlug).toContain('new-test-title');
+  });
 });

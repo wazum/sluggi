@@ -68,15 +68,16 @@
         <!-- Auto-Sync -->
         <section class="demo-card">
             <h2>Auto-Sync</h2>
-            <p>Rename a page, the URL follows. Change the title below and watch the slug update automatically.</p>
+            <p>Rename a page, the URL follows. Change the title below and watch the slug update automatically. Focus the input to see the confirm button.</p>
 
             <label class="demo-field-label">Page title</label>
-            <div>
-                <span class="input-group-text sluggi-source-badge" style="display:none" title="This field influences the URL slug"><span class="sluggi-source-badge__icon"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg></span></span>
+            <div class="sluggi-source-group">
+                <span class="sluggi-source-badge" title="This field influences the URL slug"><span class="sluggi-source-badge__icon"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg></span></span>
                 <input type="text" class="demo-field-input" value="About Us"
                     data-sluggi-source
                     data-formengine-input-name="data[pages][2][title]"
                     data-formengine-input-initialized="true" />
+                <button type="button" class="sluggi-source-confirm input-group-text" title="Update URL path now"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg></button>
             </div>
 
             <fieldset class="demo-slug-fieldset">

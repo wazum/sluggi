@@ -38,10 +38,10 @@ trait SlugSourceElementTrait
         $hidden = !$shouldShow;
         $badge = $this->badgeRenderer->renderBadgeWithMetadata(
             $fieldMetadata[$fieldName],
-            totalFields: count($fieldMetadata),
-            hidden: $hidden
+            totalFields: count($fieldMetadata)
         );
-        $result['html'] = $this->badgeRenderer->insertBadgeIntoHtml($result['html'], $badge, hidden: $hidden);
+        $confirmButton = $this->badgeRenderer->renderConfirmButton();
+        $result['html'] = $this->badgeRenderer->insertBadgeIntoHtml($result['html'], $badge, $confirmButton, hidden: $hidden);
 
         return $result;
     }

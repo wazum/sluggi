@@ -73,7 +73,7 @@ $GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['t3lib/class.t3lib_pagerenderer.php'][
     static function (array &$params, PageRenderer $pageRenderer): void {
         $request = $GLOBALS['TYPO3_REQUEST'] ?? null;
         if ($request instanceof ServerRequestInterface && ApplicationType::fromRequest($request)->isBackend()) {
-            $pageRenderer->addCssFile('EXT:sluggi/Resources/Public/Css/sluggi-source-badge.css');
+            $pageRenderer->addCssFile('EXT:sluggi/Resources/Public/Css/sluggi-source-field.css');
             $pageRenderer->addInlineLanguageLabelFile('EXT:sluggi/Resources/Private/Language/locallang.xlf', 'contextMenu.');
 
             // Load redirect notification handler when redirect control is enabled
