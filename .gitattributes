@@ -11,8 +11,11 @@
 # Development config
 /.editorconfig export-ignore
 /.gitattributes export-ignore
+/.crowdin.yml export-ignore
+/.php-cs-fixer.php export-ignore
 /phpstan.neon export-ignore
 /vite.config.ts export-ignore
+/vite.config.demo.ts export-ignore
 /tsconfig.json export-ignore
 /web-test-runner.config.mjs export-ignore
 /package.json export-ignore
@@ -24,6 +27,10 @@
 
 # Documentation
 /CLAUDE.md export-ignore
+
+# GitHub Pages demo
+/demo export-ignore
+/demo/** export-ignore
 
 # Site config (demo-specific)
 /config export-ignore
