@@ -40,7 +40,7 @@ final readonly class HandleRecordUndelete
             return;
         }
 
-        $record = BackendUtility::getRecord($table, (int)$id);
+        $record = BackendUtility::getRecordWSOL($table, (int)$id);
         if (empty($record)) {
             return;
         }

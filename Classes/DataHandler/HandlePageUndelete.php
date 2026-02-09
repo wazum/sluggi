@@ -27,7 +27,7 @@ final readonly class HandlePageUndelete
             return;
         }
 
-        $page = BackendUtility::getRecord('pages', (int)$id);
+        $page = BackendUtility::getRecordWSOL('pages', (int)$id);
         if (empty($page)) {
             return;
         }
