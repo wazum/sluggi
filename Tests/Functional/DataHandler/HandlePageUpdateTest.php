@@ -165,4 +165,98 @@ final class HandlePageUpdateTest extends FunctionalTestCase
 
         $this->assertCSVDataSet(__DIR__ . '/Fixtures/pages_after_parent_title_change.csv');
     }
+
+    #[Test]
+    public function translationSlugSyncsWhenDefaultLanguageHasSyncEnabled(): void
+    {
+        Typo3Compatibility::writeSiteConfiguration('test', [
+            'rootPageId' => 1,
+            'base' => '/',
+            'languages' => [
+                [
+                    'languageId' => 0,
+                    'title' => 'English',
+                    'locale' => 'en_US.UTF-8',
+                    'base' => '/',
+                ],
+                [
+                    'languageId' => 1,
+                    'title' => 'German',
+                    'locale' => 'de_DE.UTF-8',
+                    'base' => '/de/',
+                ],
+            ],
+            'settings' => [
+                'redirects' => [
+                    'autoUpdateSlugs' => true,
+                    'autoCreateRedirects' => false,
+                ],
+            ],
+        ]);
+
+        $this->importCSVDataSet(__DIR__ . '/Fixtures/pages_translation_sync_inheritance.csv');
+
+        $dataHandler = GeneralUtility::makeInstance(DataHandler::class);
+        $dataHandler->start(
+            [
+                'pages' => [
+                    11 => [
+                        'title' => 'Neue Standardsprache Seite',
+                    ],
+                ],
+            ],
+            []
+        );
+        $dataHandler->process_datamap();
+
+        $this->assertCSVDataSet(__DIR__ . '/Fixtures/pages_after_translation_sync_inheritance.csv');
+    }
+
+    #[Test]
+    public function translationSlugIsLockedWhenDefaultLanguageIsLocked(): void
+    {
+        $GLOBALS['TYPO3_CONF_VARS']['EXTENSIONS']['sluggi']['lock'] = '1';
+
+        Typo3Compatibility::writeSiteConfiguration('test', [
+            'rootPageId' => 1,
+            'base' => '/',
+            'languages' => [
+                [
+                    'languageId' => 0,
+                    'title' => 'English',
+                    'locale' => 'en_US.UTF-8',
+                    'base' => '/',
+                ],
+                [
+                    'languageId' => 1,
+                    'title' => 'German',
+                    'locale' => 'de_DE.UTF-8',
+                    'base' => '/de/',
+                ],
+            ],
+            'settings' => [
+                'redirects' => [
+                    'autoUpdateSlugs' => true,
+                    'autoCreateRedirects' => false,
+                ],
+            ],
+        ]);
+
+        $this->importCSVDataSet(__DIR__ . '/Fixtures/pages_translation_lock_inheritance.csv');
+
+        $dataHandler = GeneralUtility::makeInstance(DataHandler::class);
+        $dataHandler->start(
+            [
+                'pages' => [
+                    21 => [
+                        'title' => 'Neue Gesperrte Seite',
+                    ],
+                ],
+            ],
+            []
+        );
+        $dataHandler->process_datamap();
+
+        $this->assertCSVDataSet(__DIR__ . '/Fixtures/pages_after_translation_lock_inheritance.csv');
+    }
 }

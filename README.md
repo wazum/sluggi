@@ -63,6 +63,12 @@ When sync is enabled, URL paths regenerate automatically when source fields (e.g
 - Optionally lock all descendant paths when an ancestor is locked
 - Editing the full path auto-locks it to prevent sync from overwriting your work
 
+### Translated Pages
+
+![Translated page](Documentation/sluggi_translated.png)
+
+Translated pages inherit the sync and lock settings from the default language record. The toggles are disabled and display the parent's state – translations cannot override these flags independently. This ensures consistent URL behavior across all language versions.
+
 ### Granular Access Control for Editors
 
 **Last segment only** – Non-admins edit just the final path segment. The parent path is read-only:

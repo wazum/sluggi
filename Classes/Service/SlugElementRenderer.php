@@ -72,6 +72,9 @@ final readonly class SlugElementRenderer
         if ($context['redirectControlEnabled'] ?? false) {
             $attributes['redirect-control'] = '';
         }
+        if ($context['isTranslation'] ?? false) {
+            $attributes['is-translation'] = '';
+        }
 
         return $attributes;
     }

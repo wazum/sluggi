@@ -79,6 +79,9 @@ export class SluggiElement extends LitElement {
     @property({ type: Boolean, attribute: 'redirect-control' })
     redirectControlEnabled = false;
 
+    @property({ type: Boolean, attribute: 'is-translation' })
+    isTranslation = false;
+
     // =========================================================================
     // Properties: Conflict State
     // =========================================================================
@@ -245,11 +248,11 @@ export class SluggiElement extends LitElement {
     }
 
     private get isSyncToggleDisabled(): boolean {
-        return this.isLocked;
+        return this.isLocked || this.isTranslation;
     }
 
     private get isLockToggleDisabled(): boolean {
-        return this.isSynced;
+        return this.isSynced || this.isTranslation;
     }
 
     private get isFullPathEditButtonDisabled(): boolean {

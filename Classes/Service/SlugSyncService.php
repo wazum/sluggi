@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Wazum\Sluggi\Service;
 
+use TYPO3\CMS\Backend\Utility\BackendUtility;
 use Wazum\Sluggi\Configuration\ExtensionConfiguration;
 
 final readonly class SlugSyncService
@@ -24,8 +25,36 @@ final readonly class SlugSyncService
      */
     public function shouldSync(array $record): bool
     {
-        return $this->isSyncFeatureEnabled()
-            && ($record['tx_sluggi_sync'] ?? false);
+        if (!$this->isSyncFeatureEnabled()) {
+            return false;
+        }
+
+        $syncValue = $this->getSyncValue($record);
+
+        return (bool)$syncValue;
+    }
+
+    /**
+     * Get the effective sync value, respecting l10n_mode inheritance for translations.
+     *
+     * @param array<string, mixed> $record
+     */
+    public function getSyncValue(array $record): bool
+    {
+        $languageId = $record['sys_language_uid'] ?? 0;
+        $languageId = (int)(is_array($languageId) ? ($languageId[0] ?? 0) : $languageId);
+
+        $l10nParent = $record['l10n_parent'] ?? 0;
+        $l10nParent = (int)(is_array($l10nParent) ? ($l10nParent[0] ?? 0) : $l10nParent);
+
+        if ($languageId > 0 && $l10nParent > 0) {
+            $parentRecord = BackendUtility::getRecordWSOL('pages', $l10nParent, 'tx_sluggi_sync');
+            if ($parentRecord !== null) {
+                return (bool)($parentRecord['tx_sluggi_sync'] ?? false);
+            }
+        }
+
+        return (bool)($record['tx_sluggi_sync'] ?? false);
     }
 
     public function isTableAutoSyncEnabled(string $table): bool

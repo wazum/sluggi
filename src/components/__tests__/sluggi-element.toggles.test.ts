@@ -469,4 +469,96 @@ describe('SluggiElement - Toggles', () => {
             expect(fullPathEditBtn.disabled).to.be.true;
         });
     });
+
+    describe('Translation Inheritance', () => {
+        it('sync toggle is disabled when is-translation is set', async () => {
+            const titleInput = document.createElement('input');
+            titleInput.setAttribute('data-sluggi-source', '');
+            titleInput.setAttribute('data-formengine-input-name', 'data[pages][456][title]');
+            titleInput.value = 'Demo';
+            document.body.appendChild(titleInput);
+
+            const el = await fixture<SluggiElement>(html`
+                <sluggi-element
+                    value="/demo"
+                    page-id="123"
+                    record-id="456"
+                    table-name="pages"
+                    field-name="slug"
+                    sync-feature-enabled
+                    is-synced
+                    is-translation
+                ></sluggi-element>
+            `);
+
+            const syncToggle = el.shadowRoot!.querySelector('.sluggi-sync-toggle') as HTMLButtonElement;
+            expect(syncToggle).to.exist;
+            expect(syncToggle.disabled).to.be.true;
+
+            document.body.removeChild(titleInput);
+        });
+
+        it('lock toggle is disabled when is-translation is set', async () => {
+            const el = await fixture<SluggiElement>(html`
+                <sluggi-element
+                    value="/demo"
+                    page-id="123"
+                    record-id="456"
+                    table-name="pages"
+                    field-name="slug"
+                    lock-feature-enabled
+                    is-locked
+                    is-translation
+                ></sluggi-element>
+            `);
+
+            const lockToggle = el.shadowRoot!.querySelector('.sluggi-lock-toggle') as HTMLButtonElement;
+            expect(lockToggle).to.exist;
+            expect(lockToggle.disabled).to.be.true;
+        });
+
+        it('sync toggle shows inherited synced state for translation', async () => {
+            const titleInput = document.createElement('input');
+            titleInput.setAttribute('data-sluggi-source', '');
+            titleInput.setAttribute('data-formengine-input-name', 'data[pages][456][title]');
+            titleInput.value = 'Demo';
+            document.body.appendChild(titleInput);
+
+            const el = await fixture<SluggiElement>(html`
+                <sluggi-element
+                    value="/demo"
+                    page-id="123"
+                    record-id="456"
+                    table-name="pages"
+                    field-name="slug"
+                    sync-feature-enabled
+                    is-synced
+                    is-translation
+                ></sluggi-element>
+            `);
+
+            const syncToggle = el.shadowRoot!.querySelector('.sluggi-sync-toggle') as HTMLButtonElement;
+            expect(syncToggle.classList.contains('is-synced')).to.be.true;
+
+            document.body.removeChild(titleInput);
+        });
+
+        it('lock toggle shows inherited locked state for translation', async () => {
+            const el = await fixture<SluggiElement>(html`
+                <sluggi-element
+                    value="/demo"
+                    page-id="123"
+                    record-id="456"
+                    table-name="pages"
+                    field-name="slug"
+                    lock-feature-enabled
+                    is-locked
+                    is-translation
+                ></sluggi-element>
+            `);
+
+            const lockToggle = el.shadowRoot!.querySelector('.sluggi-lock-toggle') as HTMLButtonElement;
+            expect(lockToggle.classList.contains('is-locked')).to.be.true;
+        });
+    });
 });

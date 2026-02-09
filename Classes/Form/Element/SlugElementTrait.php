@@ -129,6 +129,8 @@ trait SlugElementTrait
             }
         }
 
+        $isTranslation = $this->isTranslation($table, $row);
+
         return [
             'table' => $table,
             'fieldName' => $fieldName,
@@ -154,6 +156,7 @@ trait SlugElementTrait
             'lockFeatureEnabled' => $lockFeatureEnabled,
             'isLocked' => $this->slugLockService->isLockFeatureEnabled() && $this->slugLockService->isLocked($row),
             'lockFieldName' => $this->slugElementRenderer->buildLockFieldName($table, $recordId),
+            'isTranslation' => $isTranslation,
             'requiredSourceFields' => $requiredSourceFields,
             'lastSegmentOnly' => $lastSegmentOnly,
             'lockedPrefix' => $lockedPrefix,
@@ -409,5 +412,26 @@ trait SlugElementTrait
         }
 
         return $this->slugSyncService->isTableAutoSyncEnabled($table);
+    }
+
+    /**
+     * @param array<string, mixed> $row
+     */
+    private function isTranslation(string $table, array $row): bool
+    {
+        $languageField = $GLOBALS['TCA'][$table]['ctrl']['languageField'] ?? '';
+        $transOrigPointerField = $GLOBALS['TCA'][$table]['ctrl']['transOrigPointerField'] ?? '';
+
+        if ($languageField === '' || $transOrigPointerField === '') {
+            return false;
+        }
+
+        $languageId = $row[$languageField] ?? 0;
+        $languageId = (int)(is_array($languageId) ? ($languageId[0] ?? 0) : $languageId);
+
+        $l10nParent = $row[$transOrigPointerField] ?? 0;
+        $l10nParent = (int)(is_array($l10nParent) ? ($l10nParent[0] ?? 0) : $l10nParent);
+
+        return $languageId > 0 && $l10nParent > 0;
     }
 }

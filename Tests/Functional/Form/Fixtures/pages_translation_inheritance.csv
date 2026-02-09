@@ -1,0 +1,11 @@
+"be_users"
+,"uid","pid","username","password","admin"
+,1,0,"admin","$2y$12$abc123",1
+
+"pages"
+,"uid","pid","title","slug","tx_sluggi_sync","slug_locked","doktype","sys_language_uid","l10n_parent","perms_userid","perms_groupid","perms_user","perms_group","perms_everybody"
+,1,0,"Root Page","/",0,0,1,0,0,1,0,31,31,31
+,2,1,"Synced Page","/synced-page",1,0,1,0,0,1,0,31,31,31
+,3,1,"Synchronisierte Seite","/synchronisierte-seite",0,0,1,1,2,1,0,31,31,31
+,4,1,"Locked Page","/locked-page",0,1,1,0,0,1,0,31,31,31
+,5,1,"Gesperrte Seite","/gesperrte-seite",0,0,1,1,4,1,0,31,31,31

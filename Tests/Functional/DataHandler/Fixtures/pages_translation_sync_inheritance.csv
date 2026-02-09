@@ -1,0 +1,4 @@
+"pages"
+,"uid","pid","title","slug","tx_sluggi_sync","slug_locked","doktype","sys_language_uid","l10n_parent"
+,10,1,"Default Language Page","/default-language-page",1,0,1,0,0
+,11,1,"Standardsprache Seite","/standardsprache-seite",0,0,1,1,10

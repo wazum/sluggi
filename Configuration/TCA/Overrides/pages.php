@@ -8,6 +8,7 @@ $GLOBALS['TCA']['pages']['columns']['slug']['config']['renderType'] = 'sluggiSlu
 
 $GLOBALS['TCA']['pages']['columns']['tx_sluggi_sync'] = [
     'exclude' => true,
+    'l10n_mode' => 'exclude',
     'label' => 'LLL:EXT:sluggi/Resources/Private/Language/locallang.xlf:pages.tx_sluggi_sync',
     'config' => [
         'type' => 'passthrough',
@@ -16,6 +17,7 @@ $GLOBALS['TCA']['pages']['columns']['tx_sluggi_sync'] = [
 
 $GLOBALS['TCA']['pages']['columns']['slug_locked'] = [
     'exclude' => true,
+    'l10n_mode' => 'exclude',
     'label' => 'LLL:EXT:sluggi/Resources/Private/Language/locallang.xlf:pages.slug_locked',
     'config' => [
         'type' => 'passthrough',

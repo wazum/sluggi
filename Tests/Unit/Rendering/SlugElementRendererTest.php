@@ -295,6 +295,28 @@ final class SlugElementRendererTest extends TestCase
         self::assertArrayNotHasKey('redirect-control', $result);
     }
 
+    #[Test]
+    public function buildAttributesIncludesIsTranslationWhenTrue(): void
+    {
+        $subject = new SlugElementRenderer();
+        $context = $this->createContext(['isTranslation' => true]);
+
+        $result = $subject->buildAttributes($context, []);
+
+        self::assertArrayHasKey('is-translation', $result);
+    }
+
+    #[Test]
+    public function buildAttributesOmitsIsTranslationWhenFalse(): void
+    {
+        $subject = new SlugElementRenderer();
+        $context = $this->createContext(['isTranslation' => false]);
+
+        $result = $subject->buildAttributes($context, []);
+
+        self::assertArrayNotHasKey('is-translation', $result);
+    }
+
     /**
      * @param array<string, mixed> $overrides
      *
@@ -320,6 +342,7 @@ final class SlugElementRendererTest extends TestCase
             'isSynced' => false,
             'lastSegmentOnly' => false,
             'redirectControlEnabled' => false,
+            'isTranslation' => false,
         ], $overrides);
     }
 }
