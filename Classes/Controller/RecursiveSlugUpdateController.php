@@ -54,7 +54,7 @@ final readonly class RecursiveSlugUpdateController
 
         $this->disableCoreSlugHook();
         try {
-            $this->updateChildrenRecursively($pageId, $correlationIdSlugUpdate, $updated, $skipped);
+            $this->processChildren($pageId, $correlationIdSlugUpdate, $updated, $skipped);
         } catch (Throwable $e) {
             return new JsonResponse(['success' => false, 'message' => $e->getMessage()], 500);
         } finally {
@@ -72,40 +72,55 @@ final readonly class RecursiveSlugUpdateController
         ]);
     }
 
-    private function updateChildrenRecursively(
+    private function processChildren(
         int $parentPageId,
         CorrelationId $correlationId,
         int &$updated,
         int &$skipped,
     ): void {
-        $children = $this->getDirectChildren($parentPageId);
-
-        foreach ($children as $child) {
-            if ($this->extensionConfiguration->isPageTypeExcluded((int)$child['doktype'])) {
-                ++$skipped;
-                continue;
-            }
-
-            if ($this->slugLockService->isLocked($child)) {
-                ++$skipped;
-                if (!$this->extensionConfiguration->isLockDescendantsEnabled()) {
-                    $this->updateChildrenRecursively((int)$child['uid'], $correlationId, $updated, $skipped);
-                }
-                continue;
-            }
-
-            $this->regenerateSlug($child, $correlationId, $updated);
-
-            foreach ($this->getTranslations((int)$child['uid']) as $translation) {
-                if ($this->slugLockService->isLocked($translation)) {
-                    ++$skipped;
-                    continue;
-                }
-                $this->regenerateSlug($translation, $correlationId, $updated);
-            }
-
-            $this->updateChildrenRecursively((int)$child['uid'], $correlationId, $updated, $skipped);
+        foreach ($this->getDirectChildren($parentPageId) as $child) {
+            $this->processPage($child, $correlationId, $updated, $skipped);
         }
+    }
+
+    /**
+     * @param array<string, mixed> $page
+     */
+    private function processPage(
+        array $page,
+        CorrelationId $correlationId,
+        int &$updated,
+        int &$skipped,
+    ): void {
+        $pageId = (int)$page['uid'];
+
+        if ($this->extensionConfiguration->isPageTypeExcluded((int)$page['doktype'])) {
+            ++$skipped;
+            $this->processChildren($pageId, $correlationId, $updated, $skipped);
+
+            return;
+        }
+
+        if ($this->slugLockService->isLocked($page)) {
+            ++$skipped;
+            if (!$this->extensionConfiguration->isLockDescendantsEnabled()) {
+                $this->processChildren($pageId, $correlationId, $updated, $skipped);
+            }
+
+            return;
+        }
+
+        $this->regenerateSlug($page, $correlationId, $updated);
+
+        foreach ($this->getTranslations($pageId) as $translation) {
+            if ($this->slugLockService->isLocked($translation)) {
+                ++$skipped;
+                continue;
+            }
+            $this->regenerateSlug($translation, $correlationId, $updated);
+        }
+
+        $this->processChildren($pageId, $correlationId, $updated, $skipped);
     }
 
     /**

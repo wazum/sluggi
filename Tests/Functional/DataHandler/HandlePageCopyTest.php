@@ -144,4 +144,26 @@ final class HandlePageCopyTest extends FunctionalTestCase
 
         $this->assertCSVDataSet(__DIR__ . '/Fixtures/pages_after_copy_with_children.csv');
     }
+
+    #[Test]
+    public function copyingPageIntoExcludedPageTypeSkipsExcludedParentInSlugPath(): void
+    {
+        $this->setUpTest('pages_for_copy_into_excluded.csv');
+
+        $GLOBALS['TYPO3_CONF_VARS']['EXTENSIONS']['sluggi']['exclude_doktypes'] = '254';
+
+        // Copy page 4 into Sysfolder (page 3, doktype=254 excluded)
+        // The slug should use the grandparent's prefix /parent, not /parent/sysfolder
+        $dataHandler = GeneralUtility::makeInstance(DataHandler::class);
+        $dataHandler->start([], [
+            'pages' => [
+                4 => [
+                    'copy' => 3,
+                ],
+            ],
+        ]);
+        $dataHandler->process_cmdmap();
+
+        $this->assertCSVDataSet(__DIR__ . '/Fixtures/pages_after_copy_into_excluded.csv');
+    }
 }

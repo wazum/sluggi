@@ -270,4 +270,21 @@ final class RecursiveSlugUpdateControllerTest extends FunctionalTestCase
 
         $this->assertCSVDataSet(__DIR__ . '/Fixtures/pages_after_recursive_lock_descendants.csv');
     }
+
+    #[Test]
+    public function skipsExcludedPageTypesButProcessesTheirChildren(): void
+    {
+        $GLOBALS['TYPO3_CONF_VARS']['EXTENSIONS']['sluggi']['exclude_doktypes'] = '199,254';
+
+        $this->importCSVDataSet(__DIR__ . '/Fixtures/pages_recursive_excluded_doktypes.csv');
+
+        $controller = $this->get(RecursiveSlugUpdateController::class);
+        $response = $controller->updateAction($this->createRequest(2));
+
+        $body = json_decode((string)$response->getBody(), true);
+        self::assertTrue($body['success']);
+        self::assertSame(2, $body['skipped'], 'Two excluded pages should be skipped');
+
+        $this->assertCSVDataSet(__DIR__ . '/Fixtures/pages_after_recursive_excluded_doktypes.csv');
+    }
 }

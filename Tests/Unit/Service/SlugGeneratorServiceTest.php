@@ -7,6 +7,8 @@ namespace Wazum\Sluggi\Tests\Unit\Service;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
+use TYPO3\CMS\Core\Configuration\ExtensionConfiguration as CoreExtensionConfiguration;
+use Wazum\Sluggi\Configuration\ExtensionConfiguration;
 use Wazum\Sluggi\Service\SlugGeneratorService;
 
 final class SlugGeneratorServiceTest extends TestCase
@@ -16,7 +18,9 @@ final class SlugGeneratorServiceTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->subject = new SlugGeneratorService();
+        $coreExtensionConfiguration = $this->createMock(CoreExtensionConfiguration::class);
+        $extensionConfiguration = new ExtensionConfiguration($coreExtensionConfiguration);
+        $this->subject = new SlugGeneratorService($extensionConfiguration);
     }
 
     /**

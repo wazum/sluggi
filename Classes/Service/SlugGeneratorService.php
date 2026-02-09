@@ -12,10 +12,16 @@ use TYPO3\CMS\Core\DataHandling\Model\RecordStateFactory;
 use TYPO3\CMS\Core\DataHandling\SlugHelper;
 use TYPO3\CMS\Core\Exception\SiteNotFoundException;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
+use Wazum\Sluggi\Configuration\ExtensionConfiguration;
 use Wazum\Sluggi\Utility\SlugUtility;
 
 final readonly class SlugGeneratorService
 {
+    public function __construct(
+        private ExtensionConfiguration $extensionConfiguration,
+    ) {
+    }
+
     /**
      * @param array<string, mixed> $record
      */
@@ -74,7 +80,26 @@ final readonly class SlugGeneratorService
         return $slug;
     }
 
+    /**
+     * Get the parent slug, skipping excluded page types (sysfolders, spacers, etc.).
+     * This ensures children of excluded pages get correct URL prefixes.
+     */
     public function getParentSlug(int $pageId, int $languageId = 0): string
+    {
+        $rootLine = BackendUtility::BEgetRootLine($pageId, '', true, ['doktype']);
+
+        foreach ($rootLine as $page) {
+            if ($this->extensionConfiguration->isPageTypeExcluded((int)($page['doktype'] ?? 1))) {
+                continue;
+            }
+
+            return $this->getSlugForPage((int)$page['uid'], $languageId);
+        }
+
+        return '';
+    }
+
+    private function getSlugForPage(int $pageId, int $languageId): string
     {
         $pageUid = $pageId;
 

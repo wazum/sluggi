@@ -1,0 +1,5 @@
+"pages"
+,"uid","pid","title","slug","tx_sluggi_sync","doktype","sys_language_uid"
+,4,2,"Sysfolder","/wrong/sysfolder",1,254,0
+,5,2,"Spacer","/wrong/spacer",1,199,0
+,6,4,"Child Under Sysfolder","/wrong/child-under-sysfolder",1,1,0

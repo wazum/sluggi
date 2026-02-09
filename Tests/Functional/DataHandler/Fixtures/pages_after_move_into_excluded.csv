@@ -1,0 +1,6 @@
+"pages"
+,"uid","pid","title","slug","tx_sluggi_sync","doktype"
+,1,0,"Root Page","/",0,1
+,2,1,"Parent Page","/parent",0,1
+,3,2,"Sysfolder","/parent/sysfolder",0,254
+,4,3,"Page to Move","/parent/page-to-move",0,1
