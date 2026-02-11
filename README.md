@@ -12,15 +12,19 @@ One `composer require`, sensible defaults – [highly configurable](#configurati
 
 > **[Try the interactive demo](https://wazum.github.io/sluggi/)** – see every feature live in your browser, no installation required.
 
-![sluggi editor](Documentation/sluggi_full_editor_view.png)
-
 ## Installation
 
 ```bash
 composer require wazum/sluggi
 ```
 
+> **Version 14** is a complete rewrite of _sluggi_ – modern, fully tested, and **compatible** with **TYPO3 12.4, 13.4, and 14**.
+> 
+> This is the version you should install regardless of your TYPO3 version. Previous major versions are no longer maintained.
+
 ## What You Get
+
+![sluggi editor](Documentation/sluggi_full_editor_view.png)
 
 **Automatic sync** – Rename a page, the URL updates. All child pages follow. Redirects are created automatically.
 
