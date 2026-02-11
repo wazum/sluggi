@@ -40,12 +40,15 @@ final readonly class ClearExcludedDoktypeSlugsWizard implements UpgradeWizardInt
             return true;
         }
 
-        $connection = $this->connectionPool->getConnectionForTable('pages');
-        $connection->update(
-            'pages',
-            ['slug' => '', 'tx_sluggi_sync' => 0],
-            ['doktype' => $excludedPageTypes],
-        );
+        $queryBuilder = $this->connectionPool->getQueryBuilderForTable('pages');
+        $queryBuilder
+            ->update('pages')
+            ->set('slug', '')
+            ->set('tx_sluggi_sync', 0)
+            ->where(
+                $queryBuilder->expr()->in('doktype', $excludedPageTypes)
+            )
+            ->executeStatement();
 
         return true;
     }

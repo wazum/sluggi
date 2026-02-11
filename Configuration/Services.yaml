@@ -99,6 +99,10 @@ services:
   Wazum\Sluggi\Service\UserSettingsService:
     public: true
 
+  # Upgrade
+  Wazum\Sluggi\Upgrade\ClearExcludedDoktypeSlugsWizard:
+    public: true
+
   # Controller
   Wazum\Sluggi\Controller\RecursiveSlugUpdateController:
     public: true
