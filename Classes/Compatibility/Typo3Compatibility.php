@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Wazum\Sluggi\Compatibility;
 
+use Psr\Http\Message\ServerRequestInterface;
 use TYPO3\CMS\Core\Configuration\SiteConfiguration;
 use TYPO3\CMS\Core\Configuration\SiteWriter;
 use TYPO3\CMS\Core\Crypto\HashService;
@@ -82,6 +83,32 @@ final class Typo3Compatibility
             12 => GeneralUtility::hmac($input, $additionalSecret),
             default => GeneralUtility::makeInstance(HashService::class)->hmac($input, $additionalSecret),
         };
+    }
+
+    /**
+     * Check if the current request is editing multiple records.
+     * On TYPO3 12, columnsOnly is not in the route's allowed redirect parameters,
+     * so fieldListToRender stays empty. This fallback detects multi-edit by checking
+     * for comma-separated UIDs in the edit parameter (which IS preserved).
+     *
+     * @deprecated Remove when dropping TYPO3 12 support — use fieldListToRender instead
+     */
+    public static function isMultiRecordEdit(): bool
+    {
+        $request = $GLOBALS['TYPO3_REQUEST'] ?? null;
+        if (!$request instanceof ServerRequestInterface) {
+            return false;
+        }
+
+        foreach ($request->getQueryParams()['edit'] ?? [] as $uidConfig) {
+            foreach (array_keys((array)$uidConfig) as $uidList) {
+                if (str_contains((string)$uidList, ',')) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 
     /**

@@ -113,7 +113,6 @@ test.describe('Collapsed Controls', () => {
 
   test.describe('multi-edit mode', () => {
     test('controls are always visible without burger menu', async ({ page }) => {
-      // First navigate to detect TYPO3 version, then get proper multi-edit URL
       await page.goto('/typo3');
       const multiEditUrl = await getMultiEditUrl(page, 'pages', [43, 44], ['slug']);
       await page.goto(multiEditUrl);

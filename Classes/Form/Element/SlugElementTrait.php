@@ -165,7 +165,8 @@ trait SlugElementTrait
             'copyUrlFeatureEnabled' => $this->extensionConfiguration->isCopyUrlEnabled(),
             'pageUrl' => $this->data['customData'][$fieldName]['slugPrefix'] ?? '',
             'collapsedControlsEnabled' => $this->userSettingsService->isCollapsedControlsEnabled()
-                && empty($this->data['fieldListToRender']),
+                && empty($this->data['fieldListToRender'])
+                && !Typo3Compatibility::isMultiRecordEdit(),
             'preserveUnderscore' => $this->extensionConfiguration->isPreserveUnderscoreEnabled(),
             'redirectControlEnabled' => $table === 'pages'
                 && $command !== 'new'
