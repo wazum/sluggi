@@ -320,6 +320,17 @@ For non-page tables, add the table name to the `synchronize_tables` extension se
 - [news-redirect-slug-change](https://github.com/georgringer/news-redirect-slug-change) – Redirects when news slugs change
 - [ig-slug](https://github.com/internetgalerie/ig_slug) – Rebuild URL slugs in bulk
 - [masi](https://github.com/b13/masi) – Exclude specific page slugs from subpage URL generation
+- [content_slug](https://github.com/sebkln/content_slug) – Slug field for human-readable content element anchors (`#my-section`)
+
+## Fixes for TYPO3 Core Issues
+
+- [#108375](https://forge.typo3.org/issues/108375) – When multiple pages are updated in a single DataHandler operation (e.g. recursive slug update), TYPO3 core assigns each page its own correlation ID, making it impossible to revert all changes at once via the undo notification. _sluggi_ shares one correlation ID across all pages in the operation so the entire batch can be reverted with a single click.
+- [#106152](https://forge.typo3.org/issues/106152) – Restoring pages from the recycler does not check for slug conflicts in TYPO3 core, which can result in duplicate URLs and 500 errors. _sluggi_ validates and deduplicates slugs on restore.
+- [#86740](https://forge.typo3.org/issues/86740) – TYPO3 core treats slashes in page titles as path separators, turning "Products/Services" into two URL segments instead of one. _sluggi_ normalizes slashes to the fallback character globally.
+- [#103833](https://forge.typo3.org/issues/103833) – Renaming a slug back to a previous value can leave behind a self-referencing redirect ("Redirect /path/ points to itself! Aborting."). _sluggi_ prevents creation of self-referencing redirects automatically.
+- [#108870](https://forge.typo3.org/issues/108870) – The "Revert update" notification after a slug change only rolls back child page slugs and redirect records, but not the parent page's own slug change. _sluggi_ extends the rollback to include the parent page so the entire change is fully reverted.
+- [#97962](https://forge.typo3.org/issues/97962) – TYPO3 core always replaces underscores with the fallback character during slug generation, with no option to preserve them. _sluggi_ adds a `preserve_underscore` setting for RFC 3986 compliant URLs.
+- [#94003](https://forge.typo3.org/issues/94003) – When copying a page subtree, TYPO3 core changes the copied parent's slug immediately (e.g. appending `-1`) but then fails to update the child pages' slug prefixes accordingly, leaving them with stale parent paths. _sluggi_ recalculates all slugs in the copied tree with correct parent prefixes.
 
 ## Support and Feature Requests
 
