@@ -8,8 +8,8 @@
 
 URLs that stay in sync when titles change. Automatic redirects. Duplicate prevention on copy, move, and recycler restore. Locking, access control, conflict detection – everything you need to manage URL paths with confidence.
 
-> [!IMPORTANT]
-> **TYPO3 13.4.25** has a [core regression](https://forge.typo3.org/issues/108948) that corrupts non-admin user permissions during slug updates, causing permission errors and broken child page synchronization for non-admin editors ([#132](https://github.com/wazum/sluggi/issues/132)). The fix is merged and will ship with **13.4.26** – avoid 13.4.25 if possible.
+> [!NOTE]
+> **TYPO3 13.4.25** has a [core regression](https://forge.typo3.org/issues/108948) that corrupts non-admin user permissions during slug updates. Sluggi includes a workaround, but a proper fix will ship with **13.4.26**.
 
 One `composer require`, sensible defaults – [highly configurable](#configuration) when you need it.
 
