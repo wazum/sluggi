@@ -64,12 +64,14 @@ final class HandlePageUpdateTest extends FunctionalTestCase
     #[Test]
     public function slugIsRegeneratedWhenTitleChangesAndSyncEnabled(): void
     {
+        // Browser always submits both title and slug via the sluggi web component
         $dataHandler = GeneralUtility::makeInstance(DataHandler::class);
         $dataHandler->start(
             [
                 'pages' => [
                     2 => [
                         'title' => 'Updated Title',
+                        'slug' => '/updated-title',
                     ],
                 ],
             ],
@@ -89,6 +91,7 @@ final class HandlePageUpdateTest extends FunctionalTestCase
                 'pages' => [
                     2 => [
                         'title' => '   ',
+                        'slug' => '/test-page',
                     ],
                 ],
             ],
@@ -135,6 +138,7 @@ final class HandlePageUpdateTest extends FunctionalTestCase
                 'pages' => [
                     5 => [
                         'title' => 'Neue Kind Seite',
+                        'slug' => '/eltern-seite/neue-kind-seite',
                     ],
                 ],
             ],
@@ -150,12 +154,14 @@ final class HandlePageUpdateTest extends FunctionalTestCase
     {
         $this->importCSVDataSet(__DIR__ . '/Fixtures/pages_child.csv');
 
+        // Browser always submits both title and slug via the sluggi web component
         $dataHandler = GeneralUtility::makeInstance(DataHandler::class);
         $dataHandler->start(
             [
                 'pages' => [
                     2 => [
                         'title' => 'Updated Parent',
+                        'slug' => '/updated-parent',
                     ],
                 ],
             ],
@@ -164,6 +170,29 @@ final class HandlePageUpdateTest extends FunctionalTestCase
         $dataHandler->process_datamap();
 
         $this->assertCSVDataSet(__DIR__ . '/Fixtures/pages_after_parent_title_change.csv');
+    }
+
+    #[Test]
+    public function childSlugIsCorrectWhenParentTitleGetsWordAppendedAndSlugSubmitted(): void
+    {
+        $this->importCSVDataSet(__DIR__ . '/Fixtures/pages_child.csv');
+
+        // Word appended: old slug is a prefix of the new one (/test-page → /test-page-extended)
+        $dataHandler = GeneralUtility::makeInstance(DataHandler::class);
+        $dataHandler->start(
+            [
+                'pages' => [
+                    2 => [
+                        'title' => 'Test Page Extended',
+                        'slug' => '/test-page-extended',
+                    ],
+                ],
+            ],
+            []
+        );
+        $dataHandler->process_datamap();
+
+        $this->assertCSVDataSet(__DIR__ . '/Fixtures/pages_after_parent_word_appended.csv');
     }
 
     #[Test]
@@ -202,6 +231,7 @@ final class HandlePageUpdateTest extends FunctionalTestCase
                 'pages' => [
                     11 => [
                         'title' => 'Neue Standardsprache Seite',
+                        'slug' => '/neue-standardsprache-seite',
                     ],
                 ],
             ],
@@ -250,6 +280,7 @@ final class HandlePageUpdateTest extends FunctionalTestCase
                 'pages' => [
                     21 => [
                         'title' => 'Neue Gesperrte Seite',
+                        'slug' => '/gesperrte-seite',
                     ],
                 ],
             ],

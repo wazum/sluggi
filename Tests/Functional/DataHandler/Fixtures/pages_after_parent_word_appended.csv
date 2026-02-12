@@ -1,0 +1,5 @@
+"pages"
+,"uid","pid","title","slug","tx_sluggi_sync","doktype"
+,1,0,"Root Page","/",0,1
+,2,1,"Test Page Extended","/test-page-extended",1,1
+,3,2,"Child Page","/test-page-extended/child-page",1,1

@@ -89,12 +89,14 @@ final class LockedSlugTest extends FunctionalTestCase
     {
         $this->setUpTest('pages_locked_with_sync.csv');
 
+        // Browser submits existing slug value for locked slugs
         $dataHandler = GeneralUtility::makeInstance(DataHandler::class);
         $dataHandler->start(
             [
                 'pages' => [
                     2 => [
                         'title' => 'Updated Title',
+                        'slug' => '/locked-page',
                     ],
                 ],
             ],
@@ -200,12 +202,14 @@ final class LockedSlugTest extends FunctionalTestCase
     {
         $this->setUpTest('pages_locked_child.csv');
 
+        // Browser always submits both title and slug via the sluggi web component
         $dataHandler = GeneralUtility::makeInstance(DataHandler::class);
         $dataHandler->start(
             [
                 'pages' => [
                     2 => [
                         'title' => 'Updated Parent',
+                        'slug' => '/updated-parent',
                     ],
                 ],
             ],

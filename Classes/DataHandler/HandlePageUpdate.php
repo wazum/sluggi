@@ -76,9 +76,20 @@ final readonly class HandlePageUpdate
         );
         $fieldArray['slug'] = $newSlug;
 
-        if ($newSlug !== $record['slug']) {
+        if ($newSlug !== $record['slug'] && !$this->coreWillCascadeChildSlugs($dataHandler, (int)$id)) {
             $this->rebuildChildSlugs((int)$id, $record, $fieldArray, $dataHandler);
         }
+    }
+
+    /**
+     * When the slug was explicitly submitted (browser sends both title and slug),
+     * the core's DataHandlerSlugUpdateHook will cascade child slug updates in
+     * afterDatabaseOperations. Sluggi must not also cascade, or children get
+     * a duplicated path segment.
+     */
+    private function coreWillCascadeChildSlugs(DataHandler $dataHandler, int $pageId): bool
+    {
+        return isset($dataHandler->datamap['pages'][$pageId]['slug']);
     }
 
     /**
