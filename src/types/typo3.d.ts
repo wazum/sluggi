@@ -61,10 +61,18 @@ declare module '@typo3/core/ajax/ajax-request.js' {
 
     class AjaxRequest {
         constructor(url: string);
-        withQueryArguments(params: Record<string, string>): this;
+        withQueryArguments(params: Record<string, unknown>): this;
         get(): Promise<AjaxResponse>;
         post(data: Record<string, unknown>): Promise<AjaxResponse>;
     }
 
     export default AjaxRequest;
+}
+
+declare module '@typo3/backend/action-button/deferred-action.js' {
+    class DeferredAction {
+        constructor(callback: () => Promise<void>);
+    }
+
+    export default DeferredAction;
 }

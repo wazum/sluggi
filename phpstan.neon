@@ -4,3 +4,4 @@ parameters:
         - Classes
     excludePaths:
         - Classes/Controller/FormSlugAjaxControllerV12.php
+        - Classes/Controller/RecordHistoryRollbackControllerV12.php

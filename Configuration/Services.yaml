@@ -9,6 +9,8 @@ services:
     exclude:
       - '../Classes/Controller/FormSlugAjaxControllerV12.php'
       - '../Classes/Controller/FormSlugAjaxControllerV14.php'
+      - '../Classes/Controller/RecordHistoryRollbackControllerV12.php'
+      - '../Classes/Controller/RecordHistoryRollbackControllerV14.php'
       - '../Classes/Form/Element/SlugElementV12.php'
       - '../Classes/Form/Element/SlugElementV14.php'
       - '../Classes/Form/Element/SlugSourceElementV12.php'
@@ -49,6 +51,9 @@ services:
     public: true
 
   Wazum\Sluggi\DataHandler\LockSlugOnFullPathEdit:
+    public: true
+
+  Wazum\Sluggi\DataHandler\RestorePermissionsForNestedSlugUpdate:
     public: true
 
   # Form/Element
@@ -111,8 +116,13 @@ services:
   Wazum\Sluggi\EventListener\PreventSelfReferencingRedirect:
     tags:
       - name: event.listener
-        identifier: 'sluggi/prevent-self-referencing-redirect'
+        identifier: 'sluggi/prevent-self-referencing-redirect-before'
+        method: beforePersist
         event: TYPO3\CMS\Redirects\Event\ModifyAutoCreateRedirectRecordBeforePersistingEvent
+      - name: event.listener
+        identifier: 'sluggi/prevent-self-referencing-redirect-after'
+        method: afterPersist
+        event: TYPO3\CMS\Redirects\Event\AfterAutoCreateRedirectHasBeenPersistedEvent
 
   Wazum\Sluggi\EventListener\SkipRedirectOnRequest:
     tags:

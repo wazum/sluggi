@@ -10,9 +10,13 @@ use TYPO3\CMS\Core\DataHandling\SlugHelper as CoreSlugHelper;
 use Wazum\Sluggi\DataHandling\SlugHelper;
 use TYPO3\CMS\Core\Page\PageRenderer;
 use Wazum\Sluggi\Compatibility\Typo3Compatibility;
+use TYPO3\CMS\Redirects\Controller\RecordHistoryRollbackController as CoreRecordHistoryRollbackController;
 use Wazum\Sluggi\Controller\FormSlugAjaxControllerV12;
 use Wazum\Sluggi\Controller\FormSlugAjaxControllerV14;
+use Wazum\Sluggi\Controller\RecordHistoryRollbackControllerV12;
+use Wazum\Sluggi\Controller\RecordHistoryRollbackControllerV14;
 use Wazum\Sluggi\DataHandler\ClearSlugForExcludedDoktypes;
+use Wazum\Sluggi\DataHandler\RestorePermissionsForNestedSlugUpdate;
 use Wazum\Sluggi\DataHandler\HandlePageCopy;
 use Wazum\Sluggi\DataHandler\HandlePageMove;
 use Wazum\Sluggi\DataHandler\HandlePageUndelete;
@@ -40,6 +44,12 @@ $GLOBALS['TYPO3_CONF_VARS']['SYS']['Objects'][CoreFormSlugAjaxController::class]
 
 $GLOBALS['TYPO3_CONF_VARS']['SYS']['Objects'][CoreSlugHelper::class] = [
     'className' => SlugHelper::class,
+];
+
+$GLOBALS['TYPO3_CONF_VARS']['SYS']['Objects'][CoreRecordHistoryRollbackController::class] = [
+    'className' => Typo3Compatibility::getMajorVersion() >= 14
+        ? RecordHistoryRollbackControllerV14::class
+        : RecordHistoryRollbackControllerV12::class,
 ];
 
 // Form elements
@@ -91,6 +101,9 @@ $GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['t3lib/class.t3lib_pagerenderer.php'][
     };
 
 // DataHandler
+$GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['t3lib/class.t3lib_tcemain.php']['processDatamapClass']['sluggi_permission_guard'] =
+    RestorePermissionsForNestedSlugUpdate::class;
+
 $GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['t3lib/class.t3lib_tcemain.php']['processDatamapClass']['sluggi_exclude_doktypes'] =
     ClearSlugForExcludedDoktypes::class;
 

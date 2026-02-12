@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Wazum\Sluggi\EventListener;
 
 use TYPO3\CMS\Core\Database\ConnectionPool;
+use TYPO3\CMS\Redirects\Event\AfterAutoCreateRedirectHasBeenPersistedEvent;
 use TYPO3\CMS\Redirects\Event\ModifyAutoCreateRedirectRecordBeforePersistingEvent;
 
 final readonly class PreventSelfReferencingRedirect
@@ -14,24 +15,33 @@ final readonly class PreventSelfReferencingRedirect
     ) {
     }
 
-    public function __invoke(ModifyAutoCreateRedirectRecordBeforePersistingEvent $event): void
+    public function beforePersist(ModifyAutoCreateRedirectRecordBeforePersistingEvent $event): void
     {
-        $redirectRecord = $event->getRedirectRecord();
         $changeItem = $event->getSlugRedirectChangeItem();
         $newSlug = $changeItem->getChanged()['slug'] ?? '';
-        $sourcePath = $redirectRecord['source_path'] ?? '';
-        $sourceHost = $redirectRecord['source_host'] ?? '*';
 
         if ($newSlug === '') {
             return;
         }
 
-        if ($this->isSelfReferencing($sourcePath, $newSlug)) {
-            $redirectRecord['deleted'] = 1;
-            $event->setRedirectRecord($redirectRecord);
+        $this->deleteExistingRedirectsForSlug($newSlug, $changeItem->getPageId());
+    }
+
+    public function afterPersist(AfterAutoCreateRedirectHasBeenPersistedEvent $event): void
+    {
+        $redirectRecord = $event->getRedirectRecord();
+        $changeItem = $event->getSlugRedirectChangeItem();
+        $newSlug = $changeItem->getChanged()['slug'] ?? '';
+        $sourcePath = $redirectRecord['source_path'] ?? '';
+        $uid = $redirectRecord['uid'] ?? null;
+
+        if ($uid === null || !$this->isSelfReferencing($sourcePath, $newSlug)) {
+            return;
         }
 
-        $this->deleteExistingRedirectsForSlug($newSlug, $sourceHost);
+        $this->connectionPool
+            ->getConnectionForTable('sys_redirect')
+            ->update('sys_redirect', ['deleted' => 1], ['uid' => (int)$uid]);
     }
 
     private function isSelfReferencing(string $sourcePath, string $newSlug): bool
@@ -40,25 +50,21 @@ final readonly class PreventSelfReferencingRedirect
             return false;
         }
 
-        $normalizedSource = rtrim($sourcePath, '/');
-        $normalizedSlug = rtrim($newSlug, '/');
-
-        return $normalizedSource === $normalizedSlug;
+        return rtrim($sourcePath, '/') === rtrim($newSlug, '/');
     }
 
-    private function deleteExistingRedirectsForSlug(string $slug, string $sourceHost): void
+    private function deleteExistingRedirectsForSlug(string $slug, int $pageId): void
     {
         $queryBuilder = $this->connectionPool->getQueryBuilderForTable('sys_redirect');
 
-        // QueryBuilder restrictions only apply to SELECT, so we must scope DELETE explicitly:
-        // - deleted = 0: preserve soft-deleted records
-        // - creation_type = 0 (automatically created): preserve manually created redirects (1)
         $queryBuilder
             ->delete('sys_redirect')
             ->where(
                 $queryBuilder->expr()->eq('source_path', $queryBuilder->createNamedParameter($slug)),
-                $queryBuilder->expr()->eq('source_host', $queryBuilder->createNamedParameter($sourceHost)),
-                $queryBuilder->expr()->eq('creation_type', 0),
+                $queryBuilder->expr()->like(
+                    'target',
+                    $queryBuilder->createNamedParameter('t3://page?uid=' . $pageId . '%')
+                ),
                 $queryBuilder->expr()->eq('deleted', 0)
             )
             ->executeStatement();
