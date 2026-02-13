@@ -137,6 +137,11 @@
     background-color: var(--sluggi-secondary-bg);
     border-radius: var(--sluggi-border-radius) 0 0 var(--sluggi-border-radius);
     border-right: 1px solid var(--sluggi-border-color);
+
+    &.is-out-of-sync {
+        background-color: #fff3cd;
+        border-right-color: #e0a800;
+    }
 }
 
 .sluggi-editable {
@@ -173,6 +178,13 @@
     text-overflow: ellipsis;
     flex-shrink: 1;
     min-width: 0;
+
+    &.is-out-of-sync {
+        background-color: #fff3cd;
+        border-radius: 2px;
+        padding: 2px 4px;
+        margin: -2px 0 -2px -4px;
+    }
 }
 
 .sluggi-editable-end {
@@ -467,6 +479,12 @@
     font-size: 11px;
     color: var(--sluggi-secondary-color);
     font-style: italic;
+
+    .sluggi-note-highlight {
+        background-color: #fff3cd;
+        border-radius: 2px;
+        padding: 1px 4px;
+    }
 
     a {
         color: var(--typo3-text-color-base, #000);

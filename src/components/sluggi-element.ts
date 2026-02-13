@@ -2,6 +2,7 @@ import { LitElement, html, unsafeCSS, nothing } from 'lit';
 import { customElement, property, state, query } from 'lit/decorators.js';
 import Modal from '@typo3/backend/modal.js';
 import Severity from '@typo3/backend/severity.js';
+import Notification from '@typo3/backend/notification.js';
 import type { ComponentMode, ToggleConfig } from '@/types';
 import { editIcon, fullPathEditIcon, refreshIcon, checkIcon, closeIcon, syncOnIcon, syncOffIcon, lockOnIcon, lockOffIcon, copyIcon, menuIcon } from './icons.js';
 import styles from '../styles/sluggi-element.scss?inline';
@@ -45,6 +46,9 @@ export class SluggiElement extends LitElement {
 
     @property({ type: String, attribute: 'locked-prefix' })
     lockedPrefix = '';
+
+    @property({ type: String, attribute: 'parent-slug' })
+    parentSlug = '';
 
     @property({ type: Boolean, attribute: 'has-post-modifiers' })
     hasPostModifiers = false;
@@ -157,6 +161,8 @@ export class SluggiElement extends LitElement {
     @state()
     private controlsExpanded = false;
 
+    private static shownMismatchNotifications = new Set<string>();
+
     /** @deprecated Make private when dropping TYPO3 12 support (used by compat/typo3-v12-form-submit.ts) */
     @state()
     originalValue = '';
@@ -201,6 +207,7 @@ export class SluggiElement extends LitElement {
         this.setupSourceConfirmListeners();
         this.observeSourceFieldInitialization();
         this.setupFormSubmitListener();
+        this.notifyPrefixMismatch();
     }
 
     override disconnectedCallback() {
@@ -217,6 +224,13 @@ export class SluggiElement extends LitElement {
         if (this.sourceFieldInputTimeout !== null) {
             clearTimeout(this.sourceFieldInputTimeout);
             this.sourceFieldInputTimeout = null;
+        }
+    }
+
+    override updated(changed: Map<string, unknown>) {
+        if ((changed.has('isLocked') && changed.get('isLocked') === true)
+            || (changed.has('isSynced') && changed.get('isSynced') === true)) {
+            this.notifyPrefixMismatch();
         }
     }
 
@@ -295,6 +309,16 @@ export class SluggiElement extends LitElement {
         return this.prefix;
     }
 
+    private get hierarchyPrefix(): string {
+        return this.lockedPrefix || this.computedPrefix;
+    }
+
+    private get hasPrefixMismatch(): boolean {
+        const expectedPrefix = this.lockedPrefix || this.parentSlug;
+        if (!expectedPrefix || !this.value || this.isLocked || this.isSynced) return false;
+        return !this.value.startsWith(expectedPrefix + '/') && this.value !== expectedPrefix;
+    }
+
     private get editableValue(): string {
         if (this.isCompletelyReadonly) {
             return this.value;
@@ -337,8 +361,11 @@ export class SluggiElement extends LitElement {
         if (this.isFullPathMode) {
             return this.value;
         }
-        if (this.lastSegmentOnly || this.lockedPrefix) {
+        if (this.lastSegmentOnly) {
             return this.computedPrefix + this.editableValue;
+        }
+        if (this.lockedPrefix && this.value.startsWith(this.lockedPrefix)) {
+            return this.lockedPrefix + this.editableValue;
         }
         return this.value;
     }
@@ -357,7 +384,7 @@ export class SluggiElement extends LitElement {
                 @focusin="${this.handleWrapperFocusin}"
                 @focusout="${this.handleWrapperFocusout}"
             >
-                ${this.computedPrefix ? html`<span class="sluggi-prefix" title="${this.computedPrefix}">${this.computedPrefix}</span>` : nothing}
+                ${this.computedPrefix ? html`<span class="sluggi-prefix ${this.hasPrefixMismatch ? 'is-out-of-sync' : ''}" title="${this.hasPrefixMismatch ? this.getLabel('prefixMismatch.tooltip') : this.computedPrefix}">${this.computedPrefix}</span>` : nothing}
 
                 ${this.mode === 'view' ? this.renderViewMode() : this.renderEditMode()}
 
@@ -377,13 +404,19 @@ export class SluggiElement extends LitElement {
             </p>`;
         }
 
-        if (!this.isSynced && !this.isLocked && !this.isFullPathMode) return nothing;
+        if (!this.isSynced && !this.isLocked && !this.isFullPathMode && !this.hasPrefixMismatch) return nothing;
 
         let message: string;
         if (this.isSynced) {
             message = this.labels.syncRestrictionNote || 'The URL path is automatically synchronized with the source fields.';
         } else if (this.isLocked) {
             message = this.labels.lockRestrictionNote || 'The URL path is locked and cannot be edited.';
+        } else if (this.hasPrefixMismatch) {
+            const highlight = this.labels['prefixMismatch.note.highlight'] || 'URL prefix doesn\'t match the page hierarchy.';
+            const advice = this.lockFeatureEnabled
+                ? (this.labels['prefixMismatch.note.lock'] || 'If not intentional, regenerate to fix it — or lock to keep this custom URL.')
+                : (this.labels['prefixMismatch.note'] || 'If not intentional, use regenerate to correct it.');
+            return html`<p class="sluggi-note" role="status" aria-live="polite"><span class="sluggi-note-highlight">${highlight}</span> ${advice}</p>`;
         } else {
             message = this.labels.fullPathNote || 'Full path editing is enabled. You can modify the entire URL structure.';
         }
@@ -415,7 +448,7 @@ export class SluggiElement extends LitElement {
                 aria-label="${isEditable ? `Click to edit slug: ${editable}` : editable}"
                 @click="${this.handleEditableClick}"
                 @keydown="${this.handleEditableKeydown}"
-            >${pathPart ? html`<span class="sluggi-editable-path">${pathPart}</span>` : nothing}<span class="sluggi-editable-end">${endPart}</span>${this.showPlaceholder ? html`<span class="sluggi-placeholder">${this.labels['placeholder.newPage'] || 'new-page'}</span>` : nothing}</span>
+            >${pathPart ? html`<span class="sluggi-editable-path ${this.hasPrefixMismatch && !this.computedPrefix ? 'is-out-of-sync' : ''}">${pathPart}</span>` : nothing}<span class="sluggi-editable-end">${endPart}</span>${this.showPlaceholder ? html`<span class="sluggi-placeholder">${this.labels['placeholder.newPage'] || 'new-page'}</span>` : nothing}</span>
         `;
     }
 
@@ -689,18 +722,22 @@ export class SluggiElement extends LitElement {
             if (this.lockedPrefix && !this.lastSegmentOnly) {
                 // Hierarchy permission: accept proposal as long as it stays within the locked prefix
                 if (!proposal.startsWith(this.lockedPrefix + '/') && proposal !== this.lockedPrefix) {
-                    this.isFullPathMode = true;
-                    this.notifyFullPathFieldOfChange();
+                    if (this.fullPathFeatureEnabled) {
+                        this.isFullPathMode = true;
+                        this.notifyFullPathFieldOfChange();
+                    }
                 }
             } else {
                 // lastSegmentOnly (with or without lockedPrefix): compare actual parent paths
                 const proposalPrefix = this.getParentPath(proposal);
                 const currentValuePrefix = this.getParentPath(this.value);
 
-                if (this.lockedPrefix && !this.value.startsWith(this.lockedPrefix)) {
-                    // Value doesn't follow hierarchy (e.g. shortened URL) — activate full path mode
-                    this.isFullPathMode = true;
-                    this.notifyFullPathFieldOfChange();
+                if (this.lockedPrefix && !this.value.startsWith(this.lockedPrefix)
+                    && !proposal.startsWith(this.lockedPrefix + '/')) {
+                    if (this.fullPathFeatureEnabled) {
+                        this.isFullPathMode = true;
+                        this.notifyFullPathFieldOfChange();
+                    }
                 } else if (proposalPrefix !== currentValuePrefix) {
                     if (this.lockedPrefix && proposal.startsWith(this.lockedPrefix + '/')) {
                         // Parent path changed but proposal is within locked prefix
@@ -710,7 +747,7 @@ export class SluggiElement extends LitElement {
                         if (newLastSegment) {
                             proposal = proposalPrefix + '/' + newLastSegment;
                         }
-                    } else {
+                    } else if (this.fullPathFeatureEnabled) {
                         this.isFullPathMode = true;
                         this.notifyFullPathFieldOfChange();
                     }
@@ -1034,7 +1071,7 @@ export class SluggiElement extends LitElement {
 
     private buildFullSlug(segment: string): string {
         if ((this.lastSegmentOnly || this.lockedPrefix) && !this.isFullPathMode) {
-            return this.computedPrefix + segment;
+            return this.hierarchyPrefix + segment;
         }
         return segment;
     }
@@ -1476,6 +1513,17 @@ export class SluggiElement extends LitElement {
         }
 
         return value;
+    }
+
+    private notifyPrefixMismatch(): void {
+        const key = this.recordId || this.pageId;
+        if (!this.hasPrefixMismatch || SluggiElement.shownMismatchNotifications.has(key)) return;
+        SluggiElement.shownMismatchNotifications.add(key);
+        const title = this.labels['prefixMismatch.notification.title'] || 'URL Path Info';
+        const message = this.lockFeatureEnabled
+            ? (this.labels['prefixMismatch.notification.messageLock'] || 'The URL path prefix doesn\'t match the page hierarchy. Regenerate to correct it, or lock the slug if this is an intentional custom URL.')
+            : (this.labels['prefixMismatch.notification.message'] || 'The URL path prefix doesn\'t match the page hierarchy. Click the regenerate button to correct it, or ask an administrator for advice.');
+        Notification.info(title, message, 15);
     }
 
     private getLabel(key: string, ...replacements: string[]): string {

@@ -55,6 +55,10 @@ final readonly class ValidateLastSegmentOnly
         $newSlug = (string)$fieldArray['slug'];
         $isNewRecord = DataHandlerUtility::isNewRecord($id);
 
+        if (!$isNewRecord && DataHandlerUtility::isSlugUnchanged((int)$id, $newSlug)) {
+            return;
+        }
+
         $expectedParentPath = $isNewRecord
             ? $this->resolveParentSlugForNewRecord($fieldArray)
             : $this->resolveParentSlugForExistingRecord((int)$id);
@@ -63,16 +67,21 @@ final readonly class ValidateLastSegmentOnly
             return;
         }
 
-        if (SlugUtility::getParentPath($newSlug) === $expectedParentPath) {
+        if ($this->hasValidParentPath($newSlug, $expectedParentPath)) {
             return;
         }
 
         if ($isNewRecord) {
-            $fieldArray['slug'] = $expectedParentPath . '/' . SlugUtility::getLastSegment($newSlug);
+            $fieldArray['slug'] = SlugUtility::enforceParentPath($expectedParentPath, $newSlug);
         } else {
             unset($fieldArray['slug']);
             DataHandlerUtility::logSlugValidationError($dataHandler, (int)$id, 'error.lastSegmentOnly');
         }
+    }
+
+    private function hasValidParentPath(string $newSlug, string $expectedParentPath): bool
+    {
+        return SlugUtility::getParentPath($newSlug) === $expectedParentPath;
     }
 
     /**
@@ -90,11 +99,14 @@ final readonly class ValidateLastSegmentOnly
 
     private function resolveParentSlugForExistingRecord(int $id): ?string
     {
-        $record = BackendUtility::getRecordWSOL('pages', $id, 'slug');
+        $record = BackendUtility::getRecordWSOL('pages', $id, 'pid,sys_language_uid');
+        if ($record === null) {
+            return null;
+        }
 
-        return $record !== null
-            ? SlugUtility::getParentPath((string)$record['slug'])
-            : null;
+        $languageId = (int)($record['sys_language_uid'] ?? 0);
+
+        return $this->slugGeneratorService->getParentSlug((int)$record['pid'], $languageId);
     }
 
     private function getBackendUser(): ?BackendUserAuthentication

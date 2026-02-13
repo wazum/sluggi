@@ -56,6 +56,9 @@ final readonly class SlugElementRenderer
         if (!empty($context['lockedPrefix'])) {
             $attributes['locked-prefix'] = $context['lockedPrefix'];
         }
+        if (!empty($context['parentSlug'])) {
+            $attributes['parent-slug'] = $context['parentSlug'];
+        }
         if ($context['fullPathFeatureEnabled'] ?? false) {
             $attributes['full-path-feature-enabled'] = '';
         }

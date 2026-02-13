@@ -92,6 +92,21 @@ Translated pages inherit the sync and lock settings from the default language re
 
 ![Hierarchy permissions](Documentation/sluggi_restricted_permissions.png)
 
+### Out-of-Sync URL Detection
+
+When a page's URL path doesn't match the page hierarchy (e.g. after a page move, a manual admin edit, or a database import), _sluggi_ detects the mismatch and informs the editor with a subtle amber highlight on the prefix, a one-time notification, and an inline note below the field:
+
+![Broken prefix](Documentation/sluggi_broken_prefix.png)
+
+![Broken prefix notification](Documentation/sluggi_broken_prefix_notification.png)
+
+The messages are tailored to the editor's permissions:
+- Editors who can lock URLs are advised to either regenerate or lock the slug to keep a custom URL
+- Editors without lock access are pointed to the regenerate button or advised to ask an administrator
+- Admins see the full URL path with the mismatched portion highlighted
+
+Locked and synced pages suppress the indicator entirely – locked pages have intentional custom URLs, and synced pages will self-correct on the next title change.
+
 ### Redirect Control
 
 Let editors decide whether to create redirects when a URL changes:

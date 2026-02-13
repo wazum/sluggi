@@ -57,6 +57,10 @@ final readonly class ValidateHierarchyPermission
         $newSlug = (string)$fieldArray['slug'];
         $isNewRecord = DataHandlerUtility::isNewRecord($id);
 
+        if (!$isNewRecord && DataHandlerUtility::isSlugUnchanged((int)$id, $newSlug)) {
+            return;
+        }
+
         $lockedPrefix = $isNewRecord
             ? $this->resolveLockedPrefixForNewRecord($fieldArray)
             : $this->resolveLockedPrefixForExistingRecord((int)$id);
@@ -65,16 +69,21 @@ final readonly class ValidateHierarchyPermission
             return;
         }
 
-        if ($this->hierarchyPermissionService->validateSlugChange($lockedPrefix, $newSlug)) {
+        if ($this->isWithinAllowedHierarchy($lockedPrefix, $newSlug)) {
             return;
         }
 
         if ($isNewRecord) {
-            $fieldArray['slug'] = rtrim($lockedPrefix, '/') . '/' . SlugUtility::getLastSegment($newSlug);
+            $fieldArray['slug'] = SlugUtility::enforceParentPath($lockedPrefix, $newSlug);
         } else {
             unset($fieldArray['slug']);
             DataHandlerUtility::logSlugValidationError($dataHandler, (int)$id, 'error.hierarchyPermission');
         }
+    }
+
+    private function isWithinAllowedHierarchy(string $lockedPrefix, string $newSlug): bool
+    {
+        return $this->hierarchyPermissionService->validateSlugChange($lockedPrefix, $newSlug);
     }
 
     /**

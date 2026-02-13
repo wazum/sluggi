@@ -173,6 +173,73 @@ final class LastSegmentValidationTest extends FunctionalTestCase
     }
 
     #[Test]
+    public function nonAdminCanFixOutOfSyncSlug(): void
+    {
+        parent::setUp();
+        $this->importCSVDataSet(__DIR__ . '/Fixtures/pages_last_segment_out_of_sync.csv');
+        $this->setUpSite();
+        $GLOBALS['LANG'] = GeneralUtility::makeInstance(LanguageServiceFactory::class)->create('default');
+        $this->setUpBackendUser(2);
+
+        // Page 3 has slug /wrong-prefix/child but parent (uid=2) has slug /parent
+        // Editor submits corrected slug with correct hierarchy prefix
+        $dataHandler = GeneralUtility::makeInstance(DataHandler::class);
+        $dataHandler->start(
+            [
+                'pages' => [
+                    3 => [
+                        'slug' => '/parent/fixed-child',
+                    ],
+                ],
+            ],
+            []
+        );
+        $dataHandler->process_datamap();
+
+        $row = $this->getConnectionPool()
+            ->getConnectionForTable('pages')
+            ->select(['slug'], 'pages', ['uid' => 3])
+            ->fetchAssociative();
+
+        self::assertSame('/parent/fixed-child', $row['slug'], 'Editor must be able to fix out-of-sync slug');
+        self::assertEmpty($dataHandler->errorLog, 'No error expected: ' . implode(', ', $dataHandler->errorLog));
+    }
+
+    #[Test]
+    public function nonAdminCanSavePageWithUnchangedOutOfSyncSlug(): void
+    {
+        parent::setUp();
+        $this->importCSVDataSet(__DIR__ . '/Fixtures/pages_last_segment_out_of_sync.csv');
+        $this->setUpSite();
+        $GLOBALS['LANG'] = GeneralUtility::makeInstance(LanguageServiceFactory::class)->create('default');
+        $this->setUpBackendUser(2);
+
+        // Page 3 has out-of-sync slug, editor saves title change without touching slug
+        $dataHandler = GeneralUtility::makeInstance(DataHandler::class);
+        $dataHandler->start(
+            [
+                'pages' => [
+                    3 => [
+                        'title' => 'Updated Child',
+                        'slug' => '/wrong-prefix/child',
+                    ],
+                ],
+            ],
+            []
+        );
+        $dataHandler->process_datamap();
+
+        $row = $this->getConnectionPool()
+            ->getConnectionForTable('pages')
+            ->select(['slug', 'title'], 'pages', ['uid' => 3])
+            ->fetchAssociative();
+
+        self::assertSame('Updated Child', $row['title'], 'Title must be updated');
+        self::assertSame('/wrong-prefix/child', $row['slug'], 'Unchanged slug must be preserved');
+        self::assertEmpty($dataHandler->errorLog, 'No error expected: ' . implode(', ', $dataHandler->errorLog));
+    }
+
+    #[Test]
     public function syncTriggeredCascadePassesForNonAdmin(): void
     {
         $GLOBALS['TYPO3_CONF_VARS']['EXTENSIONS']['sluggi']['synchronize'] = '1';

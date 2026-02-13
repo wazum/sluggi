@@ -31,6 +31,11 @@ final class SlugUtility
         return $parts === [] ? '' : '/' . implode('/', $parts);
     }
 
+    public static function enforceParentPath(string $parentPath, string $slug): string
+    {
+        return rtrim($parentPath, '/') . '/' . self::getLastSegment($slug);
+    }
+
     public static function slugMatchesHierarchy(string $slug, string $parentSlug): bool
     {
         $parentSlug = rtrim($parentSlug, '/');

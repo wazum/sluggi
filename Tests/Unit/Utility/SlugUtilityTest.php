@@ -92,6 +92,47 @@ final class SlugUtilityTest extends TestCase
     }
 
     /**
+     * @return array<string, array{parentPath: string, slug: string, expected: string}>
+     */
+    public static function enforceParentPathDataProvider(): array
+    {
+        return [
+            'replaces wrong prefix with correct parent' => [
+                'parentPath' => '/parent',
+                'slug' => '/wrong/child',
+                'expected' => '/parent/child',
+            ],
+            'keeps last segment from deeply nested slug' => [
+                'parentPath' => '/a/b',
+                'slug' => '/x/y/z/page',
+                'expected' => '/a/b/page',
+            ],
+            'handles trailing slash on parent' => [
+                'parentPath' => '/parent/',
+                'slug' => '/other/child',
+                'expected' => '/parent/child',
+            ],
+            'single segment slug' => [
+                'parentPath' => '/parent',
+                'slug' => '/page',
+                'expected' => '/parent/page',
+            ],
+            'empty parent path' => [
+                'parentPath' => '',
+                'slug' => '/child',
+                'expected' => '/child',
+            ],
+        ];
+    }
+
+    #[Test]
+    #[DataProvider('enforceParentPathDataProvider')]
+    public function enforceParentPathReturnsExpectedResult(string $parentPath, string $slug, string $expected): void
+    {
+        self::assertSame($expected, SlugUtility::enforceParentPath($parentPath, $slug));
+    }
+
+    /**
      * @return array<string, array{slug: string, parentSlug: string, expected: bool}>
      */
     public static function slugMatchesHierarchyDataProvider(): array

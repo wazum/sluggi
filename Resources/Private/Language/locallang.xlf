@@ -120,6 +120,27 @@
             <trans-unit id="placeholder.newPage" resname="placeholder.newPage">
                 <source>new-page</source>
             </trans-unit>
+            <trans-unit id="prefixMismatch.tooltip" resname="prefixMismatch.tooltip">
+                <source>This prefix differs from the page hierarchy. Click the regenerate button to update.</source>
+            </trans-unit>
+            <trans-unit id="prefixMismatch.notification.title" resname="prefixMismatch.notification.title">
+                <source>URL Path Info</source>
+            </trans-unit>
+            <trans-unit id="prefixMismatch.notification.message" resname="prefixMismatch.notification.message">
+                <source>The URL path prefix doesn't match the page hierarchy. Click the regenerate button to correct it, or ask an administrator for advice.</source>
+            </trans-unit>
+            <trans-unit id="prefixMismatch.notification.messageLock" resname="prefixMismatch.notification.messageLock">
+                <source>The URL path prefix doesn't match the page hierarchy. Regenerate to correct it, or lock the slug if this is an intentional custom URL.</source>
+            </trans-unit>
+            <trans-unit id="prefixMismatch.note.highlight" resname="prefixMismatch.note.highlight">
+                <source>URL prefix doesn't match the page hierarchy.</source>
+            </trans-unit>
+            <trans-unit id="prefixMismatch.note" resname="prefixMismatch.note">
+                <source>If not intentional, use regenerate to correct it.</source>
+            </trans-unit>
+            <trans-unit id="prefixMismatch.note.lock" resname="prefixMismatch.note.lock">
+                <source>If not intentional, regenerate to fix it — or lock to keep this custom URL.</source>
+            </trans-unit>
             <trans-unit id="contextMenu.recursiveSlugUpdate" resname="contextMenu.recursiveSlugUpdate">
                 <source>Re-apply URL paths recursively</source>
             </trans-unit>

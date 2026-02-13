@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Wazum\Sluggi\Utility;
 
+use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\Authentication\BackendUserAuthentication;
 use TYPO3\CMS\Core\DataHandling\DataHandler;
 use TYPO3\CMS\Core\Localization\LanguageServiceFactory;
@@ -15,6 +16,13 @@ final class DataHandlerUtility
     public static function isNewRecord(string|int $id): bool
     {
         return !is_int($id) && !ctype_digit((string)$id);
+    }
+
+    public static function isSlugUnchanged(int $id, string $newSlug): bool
+    {
+        $currentRecord = BackendUtility::getRecordWSOL('pages', $id, 'slug');
+
+        return $currentRecord !== null && $newSlug === (string)$currentRecord['slug'];
     }
 
     public static function isNestedSlugUpdate(DataHandler $dataHandler): bool

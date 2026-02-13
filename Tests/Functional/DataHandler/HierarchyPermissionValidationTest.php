@@ -170,6 +170,71 @@ final class HierarchyPermissionValidationTest extends FunctionalTestCase
     }
 
     #[Test]
+    public function editorCanFixOutOfSyncSlugWithCorrectHierarchyPrefix(): void
+    {
+        parent::setUp();
+        $this->importCSVDataSet(__DIR__ . '/Fixtures/pages_hierarchy_out_of_sync.csv');
+        $this->setUpSite();
+        $GLOBALS['LANG'] = GeneralUtility::makeInstance(LanguageServiceFactory::class)->create('default');
+        $this->setUpBackendUser(2);
+
+        // Page 5 has slug /wrong-path/about-us but parent (uid=4) has slug /home/department/institute
+        $dataHandler = GeneralUtility::makeInstance(DataHandler::class);
+        $dataHandler->start(
+            [
+                'pages' => [
+                    5 => [
+                        'slug' => '/home/department/institute/fixed-page',
+                    ],
+                ],
+            ],
+            []
+        );
+        $dataHandler->process_datamap();
+
+        $row = $this->getConnectionPool()
+            ->getConnectionForTable('pages')
+            ->select(['slug'], 'pages', ['uid' => 5])
+            ->fetchAssociative();
+
+        self::assertSame('/home/department/institute/fixed-page', $row['slug']);
+        self::assertEmpty($dataHandler->errorLog, 'No error expected: ' . implode(', ', $dataHandler->errorLog));
+    }
+
+    #[Test]
+    public function editorCanSavePageWithUnchangedOutOfSyncSlug(): void
+    {
+        parent::setUp();
+        $this->importCSVDataSet(__DIR__ . '/Fixtures/pages_hierarchy_out_of_sync.csv');
+        $this->setUpSite();
+        $GLOBALS['LANG'] = GeneralUtility::makeInstance(LanguageServiceFactory::class)->create('default');
+        $this->setUpBackendUser(2);
+
+        $dataHandler = GeneralUtility::makeInstance(DataHandler::class);
+        $dataHandler->start(
+            [
+                'pages' => [
+                    5 => [
+                        'title' => 'Updated About Us',
+                        'slug' => '/wrong-path/about-us',
+                    ],
+                ],
+            ],
+            []
+        );
+        $dataHandler->process_datamap();
+
+        $row = $this->getConnectionPool()
+            ->getConnectionForTable('pages')
+            ->select(['slug', 'title'], 'pages', ['uid' => 5])
+            ->fetchAssociative();
+
+        self::assertSame('Updated About Us', $row['title']);
+        self::assertSame('/wrong-path/about-us', $row['slug'], 'Unchanged slug must be preserved');
+        self::assertEmpty($dataHandler->errorLog, 'No error expected: ' . implode(', ', $dataHandler->errorLog));
+    }
+
+    #[Test]
     public function editorCannotRemoveLockedSegments(): void
     {
         $this->setUpBackendUser(2);

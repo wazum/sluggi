@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Wazum\Sluggi\Form\Element;
 
 use TYPO3\CMS\Backend\Controller\FormSlugAjaxController;
+use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\Page\JavaScriptModuleInstruction;
 use TYPO3\CMS\Core\Site\Entity\Site;
 use TYPO3\CMS\Core\Utility\MathUtility;
@@ -104,28 +105,34 @@ trait SlugElementTrait
         );
 
         $lockedPrefix = '';
+        $parentSlug = '';
         $isNewPage = $command === 'new';
         $isAdmin = $this->getBackendUser()->isAdmin();
 
-        if ($table === 'pages' && !$isAdmin) {
+        if ($table === 'pages') {
             if ($isNewPage && $effectivePid > 0) {
                 $parentSlug = $this->slugGeneratorService->getParentSlug($effectivePid, $languageId);
-                if ($lastSegmentOnly) {
-                    $lockedPrefix = $parentSlug;
-                } else {
-                    $lockedPrefix = $this->hierarchyPermissionService->getLockedPrefixForPage(
-                        $effectivePid,
-                        $parentSlug
-                    );
+                if (!$isAdmin) {
+                    $lockedPrefix = $lastSegmentOnly
+                        ? $parentSlug
+                        : $this->hierarchyPermissionService->getLockedPrefixForPage($effectivePid, $parentSlug);
                 }
                 if ($itemValue === '' && $parentSlug !== '') {
                     $itemValue = $parentSlug;
                 }
-            } elseif (!$lastSegmentOnly && is_numeric($recordId) && (int)$recordId > 0) {
-                $lockedPrefix = $this->hierarchyPermissionService->getLockedPrefixForPage(
-                    (int)$recordId,
-                    $itemValue
-                );
+            } elseif (is_numeric($recordId) && (int)$recordId > 0) {
+                $existingRecord = BackendUtility::getRecordWSOL('pages', (int)$recordId, 'pid,sys_language_uid');
+                if ($existingRecord !== null) {
+                    $parentSlug = $this->slugGeneratorService->getParentSlug(
+                        (int)$existingRecord['pid'],
+                        (int)($existingRecord['sys_language_uid'] ?? 0),
+                    );
+                }
+                if (!$isAdmin) {
+                    $lockedPrefix = $lastSegmentOnly
+                        ? $parentSlug
+                        : $this->hierarchyPermissionService->getLockedPrefixForPage((int)$recordId, $itemValue);
+                }
             }
         }
 
@@ -160,6 +167,7 @@ trait SlugElementTrait
             'requiredSourceFields' => $requiredSourceFields,
             'lastSegmentOnly' => $lastSegmentOnly,
             'lockedPrefix' => $lockedPrefix,
+            'parentSlug' => $isAdmin ? $parentSlug : '',
             'fullPathFeatureEnabled' => $this->isFullPathFeatureEnabled($table, $lastSegmentOnly, $lockedPrefix),
             'fullPathFieldName' => $this->slugElementRenderer->buildFullPathFieldName($table, $recordId),
             'copyUrlFeatureEnabled' => $this->extensionConfiguration->isCopyUrlEnabled(),
@@ -316,6 +324,13 @@ trait SlugElementTrait
             'redirectModal.button.create' => $languageService->sL($prefix . 'redirectModal.button.create'),
             'redirectModal.button.skip' => $languageService->sL($prefix . 'redirectModal.button.skip'),
             'redirectModal.button.cancel' => $languageService->sL($prefix . 'redirectModal.button.cancel'),
+            'prefixMismatch.tooltip' => $languageService->sL($prefix . 'prefixMismatch.tooltip'),
+            'prefixMismatch.notification.title' => $languageService->sL($prefix . 'prefixMismatch.notification.title'),
+            'prefixMismatch.notification.message' => $languageService->sL($prefix . 'prefixMismatch.notification.message'),
+            'prefixMismatch.notification.messageLock' => $languageService->sL($prefix . 'prefixMismatch.notification.messageLock'),
+            'prefixMismatch.note.highlight' => $languageService->sL($prefix . 'prefixMismatch.note.highlight'),
+            'prefixMismatch.note' => $languageService->sL($prefix . 'prefixMismatch.note'),
+            'prefixMismatch.note.lock' => $languageService->sL($prefix . 'prefixMismatch.note.lock'),
         ];
     }
 

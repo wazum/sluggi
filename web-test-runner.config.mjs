@@ -17,6 +17,9 @@ function typo3MockPlugin() {
             if (source.startsWith('@typo3/backend/severity')) {
                 return '/src/__mocks__/typo3-backend.ts?severity';
             }
+            if (source.startsWith('@typo3/backend/notification')) {
+                return '/src/__mocks__/typo3-notification.ts';
+            }
         },
         serve(context) {
             if (context.path.includes('typo3-backend.ts?severity')) {
