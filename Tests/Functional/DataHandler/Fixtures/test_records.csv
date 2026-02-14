@@ -1,6 +1,11 @@
+"be_groups"
+,"uid","pid","title","tables_modify","non_exclude_fields"
+,1,0,"Editor","tx_sluggitest_article","tx_sluggitest_article:title,tx_sluggitest_article:subtitle,tx_sluggitest_article:slug"
+
 "be_users"
-,"uid","pid","username","password","admin"
-,1,0,"admin","$2y$12$abc123",1
+,"uid","pid","username","password","admin","usergroup"
+,1,0,"admin","$2y$12$abc123",1,""
+,2,0,"editor","$2y$12$abc123",0,"1"
 
 "tx_sluggitest_article"
 ,"uid","pid","title","subtitle","slug"

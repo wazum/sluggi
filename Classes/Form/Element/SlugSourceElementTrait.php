@@ -33,7 +33,7 @@ trait SlugSourceElementTrait
 
         $command = (string)($this->data['command'] ?? 'edit');
         $record = $this->data['databaseRow'] ?? [];
-        $shouldShow = $this->slugSyncService->shouldShowSourceBadge($command, $record);
+        $shouldShow = $this->slugSyncService->shouldShowSourceBadge($tableName, $command, $record);
 
         $hidden = !$shouldShow;
         $badge = $this->badgeRenderer->renderBadgeWithMetadata(

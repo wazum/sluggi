@@ -53,6 +53,10 @@ final readonly class HandleRecordUpdate
             return;
         }
 
+        if (!$this->syncService->getEffectiveRecordSyncState($table, $record)) {
+            return;
+        }
+
         $merged = array_merge($record, $fieldArray);
 
         if (!$this->syncService->hasNonEmptySourceFieldValue($table, $merged)) {

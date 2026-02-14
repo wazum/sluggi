@@ -120,6 +120,9 @@
             <trans-unit id="placeholder.newPage" resname="placeholder.newPage">
                 <source>new-page</source>
             </trans-unit>
+            <trans-unit id="placeholder.newRecord" resname="placeholder.newRecord">
+                <source>new-record</source>
+            </trans-unit>
             <trans-unit id="prefixMismatch.tooltip" resname="prefixMismatch.tooltip">
                 <source>This prefix differs from the page hierarchy. Click the regenerate button to update.</source>
             </trans-unit>

@@ -21,11 +21,17 @@ final readonly class InitializeSyncField implements FormDataProviderInterface
      */
     public function addData(array $result): array
     {
-        if ($result['command'] !== 'new' || $result['tableName'] !== 'pages') {
+        if ($result['command'] !== 'new') {
             return $result;
         }
 
-        if ($this->extensionConfiguration->isSyncEnabled() && $this->extensionConfiguration->isSyncDefaultEnabled()) {
+        $table = $result['tableName'];
+
+        if ($table === 'pages') {
+            if ($this->extensionConfiguration->isSyncEnabled() && $this->extensionConfiguration->isSyncDefaultEnabled()) {
+                $result['databaseRow']['tx_sluggi_sync'] = 1;
+            }
+        } elseif ($this->extensionConfiguration->isTableSynchronizeEnabled($table)) {
             $result['databaseRow']['tx_sluggi_sync'] = 1;
         }
 
