@@ -93,8 +93,9 @@ trait SlugElementTrait
         $includeUid = $this->hasUidInGeneratorFields($generatorFields);
         $hasPostModifiers = !empty($config['generatorOptions']['postModifiers']);
 
-        $syncFeatureEnabled = $table === 'pages'
-            && $this->slugSyncService->isSyncFeatureEnabled()
+        $syncFeatureEnabled = ($table === 'pages'
+            ? $this->slugSyncService->isSyncFeatureEnabled()
+            : $this->extensionConfiguration->isTableSynchronizeEnabled($table))
             && $this->canUserAccessSyncField($table);
         $lockFeatureEnabled = $table === 'pages'
             && $this->slugLockService->isLockFeatureEnabled()
@@ -318,6 +319,7 @@ trait SlugElementTrait
             'copyConfirmation' => $languageService->sL($prefix . 'copyConfirmation'),
             'openInNewTab' => $languageService->sL($prefix . 'openInNewTab'),
             'placeholder.newPage' => $languageService->sL($prefix . 'placeholder.newPage'),
+            'placeholder.newRecord' => $languageService->sL($prefix . 'placeholder.newRecord'),
             'redirectModal.title' => $languageService->sL($prefix . 'redirectModal.title'),
             'redirectModal.message' => $languageService->sL($prefix . 'redirectModal.message'),
             'redirectModal.messageRecursive' => $languageService->sL($prefix . 'redirectModal.messageRecursive'),
@@ -386,6 +388,10 @@ trait SlugElementTrait
 
     private function canUserAccessSyncField(string $table): bool
     {
+        if (!($GLOBALS['TCA'][$table]['columns']['tx_sluggi_sync']['exclude'] ?? false)) {
+            return true;
+        }
+
         return $this->getBackendUser()->check('non_exclude_fields', $table . ':tx_sluggi_sync');
     }
 
@@ -428,7 +434,15 @@ trait SlugElementTrait
                 && $this->slugSyncService->shouldSync($row);
         }
 
-        return $this->slugSyncService->isTableAutoSyncEnabled($table);
+        if (!$this->extensionConfiguration->isTableSynchronizeEnabled($table)) {
+            return false;
+        }
+
+        $uid = (int)($row['uid'] ?? 0);
+
+        return $uid > 0
+            ? $this->slugSyncService->getEffectiveRecordSyncState($table, $row)
+            : true;
     }
 
     /**

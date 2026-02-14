@@ -238,6 +238,10 @@ export class SluggiElement extends LitElement {
     // Computed Properties
     // =========================================================================
 
+    private get isPageTable(): boolean {
+        return !this.tableName || this.tableName === 'pages';
+    }
+
     private get showSyncToggle(): boolean {
         return this.syncFeatureEnabled && this.hasSourceFields;
     }
@@ -447,7 +451,7 @@ export class SluggiElement extends LitElement {
 
     private renderViewMode() {
         const isEditable = !this.isLocked && !this.isSynced;
-        const editable = this.editableValue || '/';
+        const editable = this.editableValue || (this.isPageTable ? '/' : '');
         const classes = [
             'sluggi-editable',
             this.isLocked ? 'locked' : '',
@@ -469,13 +473,13 @@ export class SluggiElement extends LitElement {
                 aria-label="${isEditable ? `Click to edit slug: ${editable}` : editable}"
                 @click="${this.handleEditableClick}"
                 @keydown="${this.handleEditableKeydown}"
-            >${pathPart ? html`<span class="sluggi-editable-path ${this.hasPrefixMismatch && !this.computedPrefix ? 'is-out-of-sync' : ''}">${pathPart}</span>` : nothing}<span class="sluggi-editable-end">${endPart}</span>${this.showPlaceholder ? html`<span class="sluggi-placeholder">${this.labels['placeholder.newPage'] || 'new-page'}</span>` : nothing}</span>
+            >${pathPart ? html`<span class="sluggi-editable-path ${this.hasPrefixMismatch && !this.computedPrefix ? 'is-out-of-sync' : ''}">${pathPart}</span>` : nothing}<span class="sluggi-editable-end">${endPart}</span>${this.showPlaceholder ? html`<span class="sluggi-placeholder">${this.isPageTable ? (this.labels['placeholder.newPage'] || 'new-page') : (this.labels['placeholder.newRecord'] || 'new-record')}</span>` : nothing}</span>
         `;
     }
 
     private renderEditMode() {
         return html`
-            <span class="sluggi-input-prefix">/</span>
+            ${this.isPageTable ? html`<span class="sluggi-input-prefix">/</span>` : nothing}
             <input
                 type="text"
                 class="sluggi-input"
@@ -719,7 +723,8 @@ export class SluggiElement extends LitElement {
         }
 
         const oldValue = this.value;
-        const fullNewValue = this.buildFullSlug('/' + sanitizedValue);
+        const segment = this.isPageTable ? '/' + sanitizedValue : sanitizedValue;
+        const fullNewValue = this.buildFullSlug(segment);
 
         this.conflictingSlug = fullNewValue;
         this.value = fullNewValue;
@@ -1111,6 +1116,7 @@ export class SluggiElement extends LitElement {
 
     private useSuggestion() {
         this.value = this.conflictProposal;
+        this.slugGenerated = true;
         this.clearConflictState();
         this.dispatchEvent(new CustomEvent('sluggi-change', {
             bubbles: true,

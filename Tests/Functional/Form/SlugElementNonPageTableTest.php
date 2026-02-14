@@ -100,12 +100,12 @@ final class SlugElementNonPageTableTest extends FunctionalTestCase
     }
 
     #[Test]
-    public function nonPageTableWithAutoSyncDoesNotShowSyncToggle(): void
+    public function nonPageTableWithSyncTableConfiguredShowsSyncToggle(): void
     {
         $this->setUpBackendUser(1);
         $html = $this->renderSlugElement(1);
 
-        self::assertStringNotContainsString('sync-feature-enabled', $html);
+        self::assertStringContainsString('sync-feature-enabled', $html);
     }
 
     #[Test]
@@ -124,5 +124,18 @@ final class SlugElementNonPageTableTest extends FunctionalTestCase
         $html = $this->renderSlugElement(1);
 
         self::assertStringContainsString('is-synced', $html);
+    }
+
+    #[Test]
+    public function nonAdminEditorSeesSyncToggleOnNonPageTable(): void
+    {
+        $this->setUpBackendUser(2);
+        $html = $this->renderSlugElement(1);
+
+        self::assertStringContainsString(
+            'sync-feature-enabled',
+            $html,
+            'Non-admin editor must see sync toggle on non-page tables (field is non-exclude)'
+        );
     }
 }

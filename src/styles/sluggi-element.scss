@@ -224,6 +224,10 @@
     margin: 0;
     height: auto;
     color: var(--sluggi-color);
+
+    &:first-child {
+        padding-left: 12px;
+    }
 }
 
 .sluggi-hidden-input {

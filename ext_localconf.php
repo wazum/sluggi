@@ -24,6 +24,7 @@ use Wazum\Sluggi\DataHandler\HandlePageUpdate;
 use Wazum\Sluggi\DataHandler\HandleRecordUndelete;
 use Wazum\Sluggi\DataHandler\InitializeSyncForNewPage;
 use Wazum\Sluggi\DataHandler\HandleRecordUpdate;
+use Wazum\Sluggi\DataHandler\PersistRecordSyncState;
 use Wazum\Sluggi\DataHandler\LockSlugOnFullPathEdit;
 use Wazum\Sluggi\DataHandler\PreventLockedSlugEdit;
 use Wazum\Sluggi\DataHandler\ValidateHierarchyPermission;
@@ -115,6 +116,10 @@ $GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['t3lib/class.t3lib_tcemain.php']['proc
 
 $GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['t3lib/class.t3lib_tcemain.php']['processDatamapClass']['sluggi_update'] =
     HandlePageUpdate::class;
+
+// Must run before HandleRecordUpdate to intercept and persist tx_sluggi_sync
+$GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['t3lib/class.t3lib_tcemain.php']['processDatamapClass']['sluggi_record_sync_persist'] =
+    PersistRecordSyncState::class;
 
 $GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['t3lib/class.t3lib_tcemain.php']['processDatamapClass']['sluggi_record_update'] =
     HandleRecordUpdate::class;

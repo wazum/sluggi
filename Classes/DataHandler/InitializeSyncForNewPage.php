@@ -24,10 +24,6 @@ final readonly class InitializeSyncForNewPage
         string|int $id,
         DataHandler $dataHandler,
     ): void {
-        if ($table !== 'pages') {
-            return;
-        }
-
         if (!DataHandlerUtility::isNewRecord($id)) {
             return;
         }
@@ -36,14 +32,12 @@ final readonly class InitializeSyncForNewPage
             return;
         }
 
-        if (!$this->extensionConfiguration->isSyncEnabled()) {
+        if ($table !== 'pages') {
             return;
         }
 
-        if (!$this->extensionConfiguration->isSyncDefaultEnabled()) {
-            return;
+        if ($this->extensionConfiguration->isSyncEnabled() && $this->extensionConfiguration->isSyncDefaultEnabled()) {
+            $fieldArray['tx_sluggi_sync'] = 1;
         }
-
-        $fieldArray['tx_sluggi_sync'] = 1;
     }
 }

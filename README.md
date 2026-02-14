@@ -57,7 +57,7 @@ When sync is enabled, URL paths regenerate automatically when source fields (e.g
 
 ![Sync badge](Documentation/sluggi_sync.png)
 
-- Per-page sync toggle – disable it for pages with manually crafted URLs
+- Per-record sync toggle – disable it for pages or records with manually crafted URLs
 - Child pages update recursively when a parent path changes
 - Redirects from old to new URL are created automatically via EXT:redirects
 - Works for any table with a slug field (news, events, custom records)
@@ -75,6 +75,18 @@ When sync is enabled, URL paths regenerate automatically when source fields (e.g
 ![Translated page](Documentation/sluggi_translated.png)
 
 Translated pages inherit the sync and lock settings from the default language record. The toggles are disabled and display the parent's state – translations cannot override these flags independently. This ensures consistent URL behavior across all language versions.
+
+### Non-Page Tables (News, Events, Custom Records)
+
+![Non-page table sync](Documentation/sluggi_non_page_sync.png)
+
+Tables configured in `synchronize_tables` (e.g. `tx_news_domain_model_news`) get the same per-record sync toggle as pages. Editors can disable auto-sync for individual records where they've manually crafted a slug for SEO:
+
+- Sync defaults to **on** for new records – slugs auto-generate from source fields
+- Toggle sync **off** to keep a hand-crafted slug that won't change when the title is edited
+- Source field badges appear when sync is active, showing which fields drive the slug
+- Translated records inherit the sync state from their default language parent
+- Sync state is stored in a separate reference table – no changes to your extension's database schema
 
 ### Granular Access Control for Editors
 
@@ -165,7 +177,7 @@ All features work out of the box with sensible defaults. Fine-tune via **System 
 |---------|-------------|---------|
 | `synchronize` | Keep URLs in sync with page titles automatically. When an editor renames a page, the URL path updates instantly – no manual work, no stale URLs. Redirects from old to new are created via EXT:redirects. | On |
 | `synchronize_default` | Turn on sync for every newly created page. Editors can still disable it per page for manually crafted URLs. | On |
-| `synchronize_tables` | Extend auto-sync beyond pages to any table with a slug field. Comma-separated list, e.g. `tx_news_domain_model_news`. Supports multi-field generation with `fieldSeparator`. | – |
+| `synchronize_tables` | Extend auto-sync beyond pages to any table with a slug field. Comma-separated list, e.g. `tx_news_domain_model_news`. Each configured table gets a per-record sync toggle so editors can opt out individually. Supports multi-field generation with `fieldSeparator`. | – |
 
 **Lock**
 
@@ -329,7 +341,7 @@ _sluggi_ reads the source fields for slug generation from the standard TCA [`gen
 
 For more configuration options (e.g. multiple fields, fallback chains, field separators), see the [TYPO3 TCA slug documentation](https://docs.typo3.org/m/typo3/reference-tca/main/en-us/ColumnsConfig/Type/Slug/Index.html).
 
-For non-page tables, add the table name to the `synchronize_tables` extension setting. The slug is then auto-regenerated whenever a source field changes on save.
+For non-page tables, add the table name to the `synchronize_tables` extension setting. The slug auto-regenerates whenever a source field changes on save, unless the editor has disabled sync for that specific record via the per-record toggle.
 
 ## Requirements
 

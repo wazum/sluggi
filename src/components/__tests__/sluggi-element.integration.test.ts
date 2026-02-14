@@ -53,6 +53,34 @@ describe('SluggiElement - Integration', () => {
             expect(el.hasConflict).to.be.true;
         });
 
+        it('hides placeholder after accepting conflict suggestion on new record', async () => {
+            const el = await fixture<SluggiElement>(html`
+                <sluggi-element
+                    value="/parent/child"
+                    locked-prefix="/parent"
+                    command="new"
+                ></sluggi-element>
+            `);
+
+            (el as any).hasSourceFields = true;
+            await el.updateComplete;
+
+            expect(el.shadowRoot!.querySelector('.sluggi-placeholder'), 'placeholder should show initially').to.exist;
+
+            // Set conflict via setProposal (Modal.confirm is no-op mock)
+            el.setProposal('/parent/child/my-new-page', true, '/parent/child/existing');
+            await el.updateComplete;
+
+            expect(el.hasConflict).to.be.true;
+
+            (el as any).useSuggestion();
+            await el.updateComplete;
+
+            expect(el.value).to.equal('/parent/child/my-new-page');
+            const placeholderStillVisible = el.shadowRoot!.querySelector('.sluggi-placeholder') !== null;
+            expect(placeholderStillVisible, 'placeholder must hide after accepting conflict suggestion').to.be.false;
+        });
+
         it('setProposal updates value or sets conflict state', async () => {
             const el = await fixture<SluggiElement>(html`
                 <sluggi-element value="/test"></sluggi-element>

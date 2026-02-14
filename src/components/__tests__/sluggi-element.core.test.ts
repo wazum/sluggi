@@ -121,6 +121,27 @@ describe('SluggiElement - Core', () => {
             document.body.removeChild(el);
             document.body.removeChild(sourceInput);
         });
+
+        it('shows "new-record" placeholder for new non-page table records', async () => {
+            const el = await fixture<SluggiElement>(html`
+                <sluggi-element
+                    value=""
+                    table-name="tx_news_domain_model_news"
+                    command="new"
+                ></sluggi-element>
+            `);
+
+            (el as any).hasSourceFields = true;
+            await el.updateComplete;
+
+            const placeholder = el.shadowRoot!.querySelector('.sluggi-placeholder');
+            expect(placeholder, 'non-page tables should show placeholder').to.exist;
+            expect(placeholder!.textContent).to.equal('new-record');
+
+            const editable = el.shadowRoot!.querySelector('.sluggi-editable-end');
+            expect(editable?.textContent?.trim() || '', 'should not show / before placeholder for non-page tables').to.equal('');
+        });
+
     });
 
     describe('Properties', () => {
@@ -194,6 +215,19 @@ describe('SluggiElement - Core', () => {
 
             expect(el.value).to.equal('/original');
             expect(el.shadowRoot!.querySelector('input.sluggi-input')).to.not.exist;
+        });
+
+        it('does not show slash prefix in edit mode for non-page tables', async () => {
+            const el = await fixture<SluggiElement>(html`
+                <sluggi-element
+                    value="my-news-slug"
+                    table-name="tx_news_domain_model_news"
+                ></sluggi-element>
+            `);
+
+            await enterEditMode(el);
+            const hasSlashPrefix = el.shadowRoot!.querySelector('.sluggi-input-prefix') !== null;
+            expect(hasSlashPrefix, 'non-page tables should not show / prefix in edit mode').to.be.false;
         });
 
         it('prefix remains unchanged when editing value', async () => {
