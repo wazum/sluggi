@@ -686,21 +686,40 @@ export class SluggiElement extends LitElement {
 
     setProposal(proposal: string, hasConflict = false, conflictingSlug = '') {
         if ((this.lastSegmentOnly || this.lockedPrefix) && !this.isFullPathMode) {
-            const proposalPrefix = this.getParentPath(proposal);
-            const currentValuePrefix = this.getParentPath(this.value);
-            // Use lockedPrefix only if value already follows hierarchy, otherwise use derived prefix
-            const expectedPrefix = (this.lockedPrefix && this.value.startsWith(this.lockedPrefix))
-                ? this.lockedPrefix
-                : currentValuePrefix;
-
-            if (proposalPrefix !== expectedPrefix) {
-                this.isFullPathMode = true;
-                this.notifyFullPathFieldOfChange();
+            if (this.lockedPrefix && !this.lastSegmentOnly) {
+                // Hierarchy permission: accept proposal as long as it stays within the locked prefix
+                if (!proposal.startsWith(this.lockedPrefix + '/') && proposal !== this.lockedPrefix) {
+                    this.isFullPathMode = true;
+                    this.notifyFullPathFieldOfChange();
+                }
             } else {
-                const proposalParts = proposal.split('/').filter(Boolean);
-                const newLastSegment = proposalParts.pop() || '';
-                if (newLastSegment) {
-                    proposal = expectedPrefix + '/' + newLastSegment;
+                // lastSegmentOnly (with or without lockedPrefix): compare actual parent paths
+                const proposalPrefix = this.getParentPath(proposal);
+                const currentValuePrefix = this.getParentPath(this.value);
+
+                if (this.lockedPrefix && !this.value.startsWith(this.lockedPrefix)) {
+                    // Value doesn't follow hierarchy (e.g. shortened URL) — activate full path mode
+                    this.isFullPathMode = true;
+                    this.notifyFullPathFieldOfChange();
+                } else if (proposalPrefix !== currentValuePrefix) {
+                    if (this.lockedPrefix && proposal.startsWith(this.lockedPrefix + '/')) {
+                        // Parent path changed but proposal is within locked prefix
+                        // (e.g. new page where value = lockedPrefix gets first slug)
+                        const proposalParts = proposal.split('/').filter(Boolean);
+                        const newLastSegment = proposalParts.pop() || '';
+                        if (newLastSegment) {
+                            proposal = proposalPrefix + '/' + newLastSegment;
+                        }
+                    } else {
+                        this.isFullPathMode = true;
+                        this.notifyFullPathFieldOfChange();
+                    }
+                } else {
+                    const proposalParts = proposal.split('/').filter(Boolean);
+                    const newLastSegment = proposalParts.pop() || '';
+                    if (newLastSegment) {
+                        proposal = currentValuePrefix + '/' + newLastSegment;
+                    }
                 }
             }
         }

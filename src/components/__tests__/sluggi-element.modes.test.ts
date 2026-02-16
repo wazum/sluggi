@@ -116,6 +116,72 @@ describe('SluggiElement - Modes', () => {
         });
     });
 
+    describe('Locked Prefix (Hierarchy Permission)', () => {
+        it('setProposal does not activate fullPathMode when proposal stays within locked prefix', async () => {
+            const el = await fixture<SluggiElement>(html`
+                <sluggi-element
+                    value="/organization/department/institute/about-us"
+                    locked-prefix="/organization/department"
+                ></sluggi-element>
+            `);
+
+            el.setProposal('/organization/department/institute/about-us-updated');
+            await el.updateComplete;
+
+            expect((el as any).isFullPathMode).to.be.false;
+            expect(el.value).to.equal('/organization/department/institute/about-us-updated');
+            expect(el.shadowRoot!.querySelector('.sluggi-prefix')?.textContent).to.contain('/organization/department');
+        });
+
+        it('setProposal activates fullPathMode when proposal leaves locked prefix', async () => {
+            const el = await fixture<SluggiElement>(html`
+                <sluggi-element
+                    value="/organization/department/institute/about-us"
+                    locked-prefix="/organization/department"
+                    full-path-feature-enabled
+                ></sluggi-element>
+            `);
+
+            el.setProposal('/different-root/institute/about-us-updated');
+            await el.updateComplete;
+
+            expect((el as any).isFullPathMode).to.be.true;
+        });
+
+        it('setProposal preserves multi-segment editable part with locked prefix', async () => {
+            const el = await fixture<SluggiElement>(html`
+                <sluggi-element
+                    value="/root/sub/deep/page"
+                    locked-prefix="/root"
+                ></sluggi-element>
+            `);
+
+            el.setProposal('/root/sub/deep/page-renamed');
+            await el.updateComplete;
+
+            expect((el as any).isFullPathMode).to.be.false;
+            expect(el.value).to.equal('/root/sub/deep/page-renamed');
+        });
+    });
+
+    describe('Last Segment Only + Locked Prefix combined', () => {
+        it('setProposal does not activate fullPathMode when proposal stays within locked prefix', async () => {
+            const el = await fixture<SluggiElement>(html`
+                <sluggi-element
+                    value="/organization/department/institute/about-us"
+                    locked-prefix="/organization/department"
+                    last-segment-only
+                ></sluggi-element>
+            `);
+
+            el.setProposal('/organization/department/institute/about-us-updated');
+            await el.updateComplete;
+
+            expect((el as any).isFullPathMode).to.be.false;
+            expect(el.value).to.equal('/organization/department/institute/about-us-updated');
+        });
+    });
+
     describe('Locked State', () => {
         it('prevents editing when locked without toggle access', async () => {
             const el = await fixture<SluggiElement>(html`
