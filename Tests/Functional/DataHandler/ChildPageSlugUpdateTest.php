@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Wazum\Sluggi\Tests\Functional\DataHandler;
 
 use PHPUnit\Framework\Attributes\Test;
+use TYPO3\CMS\Backend\Utility\BackendUtility;
+use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\DataHandling\DataHandler;
 use TYPO3\CMS\Core\Localization\LanguageServiceFactory;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
@@ -90,6 +92,138 @@ final class ChildPageSlugUpdateTest extends FunctionalTestCase
             $dataHandler->errorLog,
             'Updating child page with full path permission should also update grandchild without errors. Errors: '
             . implode(', ', $dataHandler->errorLog)
+        );
+    }
+
+    #[Test]
+    public function editorCanRenamePageWithChildrenWhenAutoCreateRedirectsEnabled(): void
+    {
+        Typo3Compatibility::writeSiteConfiguration('test', [
+            'rootPageId' => 1,
+            'base' => '/',
+            'languages' => [
+                [
+                    'languageId' => 0,
+                    'title' => 'English',
+                    'locale' => 'en_US.UTF-8',
+                    'base' => '/',
+                ],
+            ],
+            'settings' => [
+                'redirects' => [
+                    'autoUpdateSlugs' => true,
+                    'autoCreateRedirects' => true,
+                ],
+            ],
+        ]);
+        $this->setUpBackendUser(2);
+
+        $dataHandler = GeneralUtility::makeInstance(DataHandler::class);
+        $dataHandler->start(
+            ['pages' => [3 => ['slug' => '/custom-parent/child-new']]],
+            [],
+        );
+        $dataHandler->process_datamap();
+
+        self::assertEmpty(
+            $dataHandler->errorLog,
+            'Editor renaming page with autoCreateRedirects should not produce permission errors. Errors: '
+            . implode(', ', $dataHandler->errorLog),
+        );
+
+        $child = BackendUtility::getRecord('pages', 3, 'slug');
+        self::assertSame('/custom-parent/child-new', $child['slug']);
+
+        $grandchild = BackendUtility::getRecord('pages', 4, 'slug');
+        self::assertSame('/custom-parent/child-new/grandchild', $grandchild['slug']);
+    }
+
+    #[Test]
+    public function editorRenamingPageCreatesRedirectsWhenAutoCreateRedirectsEnabled(): void
+    {
+        Typo3Compatibility::writeSiteConfiguration('test', [
+            'rootPageId' => 1,
+            'base' => '/',
+            'languages' => [
+                [
+                    'languageId' => 0,
+                    'title' => 'English',
+                    'locale' => 'en_US.UTF-8',
+                    'base' => '/',
+                ],
+            ],
+            'settings' => [
+                'redirects' => [
+                    'autoUpdateSlugs' => true,
+                    'autoCreateRedirects' => true,
+                ],
+            ],
+        ]);
+        $this->setUpBackendUser(2);
+
+        $dataHandler = GeneralUtility::makeInstance(DataHandler::class);
+        $dataHandler->start(
+            ['pages' => [3 => ['slug' => '/custom-parent/child-new']]],
+            [],
+        );
+        $dataHandler->process_datamap();
+
+        $child = BackendUtility::getRecord('pages', 3, 'slug');
+        self::assertSame('/custom-parent/child-new', $child['slug']);
+
+        $redirectCount = GeneralUtility::makeInstance(ConnectionPool::class)
+            ->getConnectionForTable('sys_redirect')
+            ->count('*', 'sys_redirect', ['source_path' => '/custom-parent/child']);
+        self::assertGreaterThan(
+            0,
+            $redirectCount,
+            'A redirect should have been created for the old slug /custom-parent/child',
+        );
+    }
+
+    #[Test]
+    public function editorWithSubTreeMountCreatesRedirectsWhenAutoCreateRedirectsEnabled(): void
+    {
+        Typo3Compatibility::writeSiteConfiguration('test', [
+            'rootPageId' => 1,
+            'base' => '/',
+            'languages' => [
+                [
+                    'languageId' => 0,
+                    'title' => 'English',
+                    'locale' => 'en_US.UTF-8',
+                    'base' => '/',
+                ],
+            ],
+            'settings' => [
+                'redirects' => [
+                    'autoUpdateSlugs' => true,
+                    'autoCreateRedirects' => true,
+                ],
+            ],
+        ]);
+        $this->setUpBackendUser(2);
+        // Editor mounted on sub-tree only, not root page.
+        // Redirects are stored at pid = site root page (1), which editor cannot normally access.
+        $GLOBALS['BE_USER']->groupData['webmounts'] = '2';
+
+        $dataHandler = GeneralUtility::makeInstance(DataHandler::class);
+        $dataHandler->start(
+            ['pages' => [3 => ['slug' => '/custom-parent/child-new']]],
+            [],
+        );
+        $dataHandler->process_datamap();
+
+        $child = BackendUtility::getRecord('pages', 3, 'slug');
+        self::assertSame('/custom-parent/child-new', $child['slug']);
+
+        $redirectCount = GeneralUtility::makeInstance(ConnectionPool::class)
+            ->getConnectionForTable('sys_redirect')
+            ->count('*', 'sys_redirect', ['source_path' => '/custom-parent/child']);
+        self::assertGreaterThan(
+            0,
+            $redirectCount,
+            'A redirect should have been created even when editor has no root page in webmounts',
         );
     }
 }

@@ -24,7 +24,10 @@ final class DataHandlerUtility
             return false;
         }
 
-        return in_array(SlugService::CORRELATION_ID_IDENTIFIER, $correlationId->getAspects(), true);
+        $aspects = $correlationId->getAspects();
+
+        return in_array(SlugService::CORRELATION_ID_IDENTIFIER, $aspects, true)
+            && !in_array('redirect', $aspects, true);
     }
 
     public static function logSlugValidationError(
