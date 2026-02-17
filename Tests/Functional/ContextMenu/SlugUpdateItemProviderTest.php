@@ -110,10 +110,15 @@ final class SlugUpdateItemProviderTest extends FunctionalTestCase
     }
 
     #[Test]
-    public function priorityIsLowerThanPageProvider(): void
+    public function priorityDoesNotCollideWithCoreProviders(): void
     {
         $provider = $this->get(SlugUpdateItemProvider::class);
 
-        self::assertLessThan(100, $provider->getPriority());
+        $coreProviderPriorities = [100, 60, 50];
+        self::assertNotContains(
+            $provider->getPriority(),
+            $coreProviderPriorities,
+            'Priority must not collide with core providers (PageProvider=100, RecordProvider=60, ImportExport=50) because ContextMenu uses priority as array key'
+        );
     }
 }

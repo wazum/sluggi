@@ -29,7 +29,7 @@ final class SlugUpdateItemProvider extends AbstractProvider
 
     public function getPriority(): int
     {
-        return 50;
+        return 45;
     }
 
     /**
