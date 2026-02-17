@@ -1,0 +1,51 @@
+name: Publish to TER
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  publish:
+    name: Publish to TER
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Get release info
+        env:
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
+          RELEASE_BODY: ${{ github.event.release.body }}
+        run: |
+          version="$RELEASE_TAG"
+          if ! [[ "$version" =~ ^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$ ]]; then
+            echo "Tag does not match semver format: $version"
+            exit 1
+          fi
+          echo "TER_VERSION=$version" >> "$GITHUB_ENV"
+
+          body="$RELEASE_BODY"
+          if [[ -z "${body//[[:space:]]/}" ]]; then
+            echo "TER_COMMENT=Release $version" >> "$GITHUB_ENV"
+          else
+            delimiter="TER_COMMENT_$(date +%s)_$RANDOM"
+            {
+              echo "TER_COMMENT<<$delimiter"
+              echo "$body"
+              echo "$delimiter"
+            } >> "$GITHUB_ENV"
+          fi
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          tools: composer
+
+      - name: Install Tailor
+        run: composer global require typo3/tailor --no-interaction
+
+      - name: Publish to TER
+        run: php ~/.composer/vendor/bin/tailor ter:publish --comment "$TER_COMMENT" "$TER_VERSION" sluggi
+        env:
+          TYPO3_API_TOKEN: ${{ secrets.TYPO3_API_TOKEN }}
