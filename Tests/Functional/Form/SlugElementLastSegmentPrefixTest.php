@@ -95,4 +95,14 @@ final class SlugElementLastSegmentPrefixTest extends FunctionalTestCase
         self::assertStringContainsString('locked-prefix="/parent"', $html);
         self::assertStringContainsString('last-segment-only', $html);
     }
+
+    #[Test]
+    public function editorGetsParentSlugAttribute(): void
+    {
+        $this->setUpBackendUser(2);
+
+        $html = $this->renderSlugElement(3);
+
+        self::assertStringContainsString('parent-slug="/parent"', $html);
+    }
 }

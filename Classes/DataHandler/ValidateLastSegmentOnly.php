@@ -71,6 +71,10 @@ final readonly class ValidateLastSegmentOnly
             return;
         }
 
+        if (!$isNewRecord && $this->isLastSegmentOnlyChange((int)$id, $newSlug)) {
+            return;
+        }
+
         if ($isNewRecord) {
             $fieldArray['slug'] = SlugUtility::enforceParentPath($expectedParentPath, $newSlug);
         } else {
@@ -82,6 +86,16 @@ final readonly class ValidateLastSegmentOnly
     private function hasValidParentPath(string $newSlug, string $expectedParentPath): bool
     {
         return SlugUtility::getParentPath($newSlug) === $expectedParentPath;
+    }
+
+    private function isLastSegmentOnlyChange(int $id, string $newSlug): bool
+    {
+        $currentRecord = BackendUtility::getRecordWSOL('pages', $id, 'slug');
+        if ($currentRecord === null) {
+            return false;
+        }
+
+        return SlugUtility::getParentPath($newSlug) === SlugUtility::getParentPath((string)$currentRecord['slug']);
     }
 
     /**

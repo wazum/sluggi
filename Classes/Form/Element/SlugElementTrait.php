@@ -167,7 +167,7 @@ trait SlugElementTrait
             'requiredSourceFields' => $requiredSourceFields,
             'lastSegmentOnly' => $lastSegmentOnly,
             'lockedPrefix' => $lockedPrefix,
-            'parentSlug' => $isAdmin ? $parentSlug : '',
+            'parentSlug' => $parentSlug,
             'fullPathFeatureEnabled' => $this->isFullPathFeatureEnabled($table, $lastSegmentOnly, $lockedPrefix),
             'fullPathFieldName' => $this->slugElementRenderer->buildFullPathFieldName($table, $recordId),
             'copyUrlFeatureEnabled' => $this->extensionConfiguration->isCopyUrlEnabled(),
@@ -331,6 +331,7 @@ trait SlugElementTrait
             'prefixMismatch.note.highlight' => $languageService->sL($prefix . 'prefixMismatch.note.highlight'),
             'prefixMismatch.note' => $languageService->sL($prefix . 'prefixMismatch.note'),
             'prefixMismatch.note.lock' => $languageService->sL($prefix . 'prefixMismatch.note.lock'),
+            'prefixMismatch.note.expected' => $languageService->sL($prefix . 'prefixMismatch.note.expected'),
         ];
     }
 

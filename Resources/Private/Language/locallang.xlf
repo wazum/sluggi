@@ -141,6 +141,9 @@
             <trans-unit id="prefixMismatch.note.lock" resname="prefixMismatch.note.lock">
                 <source>If not intentional, regenerate to fix it — or lock to keep this custom URL.</source>
             </trans-unit>
+            <trans-unit id="prefixMismatch.note.expected" resname="prefixMismatch.note.expected">
+                <source>Hierarchy path: %s</source>
+            </trans-unit>
             <trans-unit id="contextMenu.recursiveSlugUpdate" resname="contextMenu.recursiveSlugUpdate">
                 <source>Re-apply URL paths recursively</source>
             </trans-unit>

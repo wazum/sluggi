@@ -171,7 +171,7 @@ describe('SluggiElement - Modes', () => {
             expect(prefix?.classList.contains('is-out-of-sync')).to.not.be.true;
         });
 
-        it('editing out-of-sync slug uses hierarchy prefix not value prefix', async () => {
+        it('editing out-of-sync slug preserves actual parent path', async () => {
             const el = await fixture<SluggiElement>(html`
                 <sluggi-element
                     value="/wrong-prefix/child"
@@ -186,7 +186,7 @@ describe('SluggiElement - Modes', () => {
             input.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
             await el.updateComplete;
 
-            expect(el.value).to.equal('/parent/fixed-child');
+            expect(el.value).to.equal('/wrong-prefix/fixed-child');
         });
 
         it('hiddenInputValue preserves mismatched prefix instead of silently rewriting', async () => {
@@ -591,6 +591,163 @@ describe('SluggiElement - Modes', () => {
 
             expect((el as any).hiddenInputValue).to.equal('/broken-prefix/child');
             expect((el as any).hiddenInputValue).to.not.equal('/parent/broken-prefix/child');
+        });
+
+        it('detects mismatch using parentSlug when value matches lockedPrefix but not parent hierarchy', async () => {
+            const el = await fixture<SluggiElement>(html`
+                <sluggi-element
+                    value="/organization/department/different"
+                    locked-prefix="/organization/department"
+                    parent-slug="/organization/department/institute"
+                ></sluggi-element>
+            `);
+
+            const prefix = el.shadowRoot!.querySelector('.sluggi-prefix');
+            expect(prefix?.classList.contains('is-out-of-sync')).to.be.true;
+        });
+
+        it('no mismatch when value matches parentSlug hierarchy even with shallower lockedPrefix', async () => {
+            const el = await fixture<SluggiElement>(html`
+                <sluggi-element
+                    value="/organization/department/institute/about-us"
+                    locked-prefix="/organization/department"
+                    parent-slug="/organization/department/institute"
+                ></sluggi-element>
+            `);
+
+            const prefix = el.shadowRoot!.querySelector('.sluggi-prefix');
+            expect(prefix?.classList.contains('is-out-of-sync')).to.not.be.true;
+        });
+    });
+
+    describe('Outside Locked Hierarchy (hierarchy-permission only, no lastSegmentOnly)', () => {
+        beforeEach(() => {
+            Notification._reset();
+            const ctor = customElements.get('sluggi-element') as any;
+            ctor?.shownMismatchNotifications?.clear();
+        });
+
+        it('computedPrefix returns actual parent from value when outside hierarchy', async () => {
+            const el = await fixture<SluggiElement>(html`
+                <sluggi-element
+                    value="/competely-different/path"
+                    locked-prefix="/organization/department"
+                ></sluggi-element>
+            `);
+
+            expect((el as any).computedPrefix).to.equal('/competely-different');
+        });
+
+        it('editableValue returns last segment when outside hierarchy', async () => {
+            const el = await fixture<SluggiElement>(html`
+                <sluggi-element
+                    value="/competely-different/path"
+                    locked-prefix="/organization/department"
+                ></sluggi-element>
+            `);
+
+            expect((el as any).editableValue).to.equal('/path');
+        });
+
+        it('editing preserves actual parent path when outside hierarchy', async () => {
+            const el = await fixture<SluggiElement>(html`
+                <sluggi-element
+                    value="/competely-different/path"
+                    locked-prefix="/organization/department"
+                ></sluggi-element>
+            `);
+
+            const input = await enterEditMode(el);
+            input.value = 'about-us';
+            input.dispatchEvent(new Event('input', { bubbles: true }));
+            input.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+            await el.updateComplete;
+
+            expect(el.value).to.equal('/competely-different/about-us');
+        });
+
+        it('hiddenInputValue returns value unchanged when outside hierarchy', async () => {
+            const el = await fixture<SluggiElement>(html`
+                <sluggi-element
+                    value="/competely-different/path"
+                    locked-prefix="/organization/department"
+                ></sluggi-element>
+            `);
+
+            expect((el as any).hiddenInputValue).to.equal('/competely-different/path');
+        });
+
+        it('strips slashes from input when outside hierarchy', async () => {
+            const el = await fixture<SluggiElement>(html`
+                <sluggi-element
+                    value="/competely-different/path"
+                    locked-prefix="/organization/department"
+                ></sluggi-element>
+            `);
+
+            const input = await enterEditMode(el);
+            input.value = 'some/nested';
+            input.dispatchEvent(new InputEvent('input', { bubbles: true }));
+            await el.updateComplete;
+
+            expect(input.value).to.not.include('/');
+        });
+
+        it('cancels edit when segment is empty outside hierarchy', async () => {
+            const el = await fixture<SluggiElement>(html`
+                <sluggi-element
+                    value="/competely-different/path"
+                    locked-prefix="/organization/department"
+                ></sluggi-element>
+            `);
+
+            const input = await enterEditMode(el);
+            input.value = '';
+            input.dispatchEvent(new Event('input', { bubbles: true }));
+            input.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+            await el.updateComplete;
+
+            expect(el.value).to.equal('/competely-different/path');
+        });
+
+        it('single-segment slug outside hierarchy has no prefix', async () => {
+            const el = await fixture<SluggiElement>(html`
+                <sluggi-element
+                    value="/landing-page"
+                    locked-prefix="/organization/department"
+                ></sluggi-element>
+            `);
+
+            expect((el as any).computedPrefix).to.equal('');
+            expect((el as any).editableValue).to.equal('/landing-page');
+        });
+
+        it('inside hierarchy but wrong parent keeps lockedPrefix as computedPrefix', async () => {
+            const el = await fixture<SluggiElement>(html`
+                <sluggi-element
+                    value="/organization/department/different"
+                    locked-prefix="/organization/department"
+                    parent-slug="/organization/department/institute"
+                ></sluggi-element>
+            `);
+
+            expect((el as any).computedPrefix).to.equal('/organization/department');
+        });
+
+        it('mismatch note includes expected hierarchy path', async () => {
+            const el = await fixture<SluggiElement>(html`
+                <sluggi-element
+                    value="/competely-different/path"
+                    locked-prefix="/organization/department"
+                    parent-slug="/organization/department/institute"
+                    labels='{"prefixMismatch.note.expected": "Hierarchy path: %s"}'
+                ></sluggi-element>
+            `);
+
+            const note = el.shadowRoot!.querySelector('.sluggi-note');
+            expect(note).to.exist;
+            expect(note?.textContent).to.include('Hierarchy path:');
+            expect(note?.textContent).to.include('/organization/department/institute/');
         });
     });
 

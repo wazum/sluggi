@@ -240,6 +240,38 @@ final class LastSegmentValidationTest extends FunctionalTestCase
     }
 
     #[Test]
+    public function nonAdminCanEditLastSegmentOfOutOfSyncSlugPreservingCustomParent(): void
+    {
+        parent::setUp();
+        $this->importCSVDataSet(__DIR__ . '/Fixtures/pages_last_segment_out_of_sync.csv');
+        $this->setUpSite();
+        $GLOBALS['LANG'] = GeneralUtility::makeInstance(LanguageServiceFactory::class)->create('default');
+        $this->setUpBackendUser(2);
+
+        // Page 3 has slug /wrong-prefix/child — editor changes only the last segment
+        $dataHandler = GeneralUtility::makeInstance(DataHandler::class);
+        $dataHandler->start(
+            [
+                'pages' => [
+                    3 => [
+                        'slug' => '/wrong-prefix/new-child',
+                    ],
+                ],
+            ],
+            []
+        );
+        $dataHandler->process_datamap();
+
+        $row = $this->getConnectionPool()
+            ->getConnectionForTable('pages')
+            ->select(['slug'], 'pages', ['uid' => 3])
+            ->fetchAssociative();
+
+        self::assertSame('/wrong-prefix/new-child', $row['slug'], 'Last-segment-only change must preserve custom parent path');
+        self::assertEmpty($dataHandler->errorLog, 'No error expected: ' . implode(', ', $dataHandler->errorLog));
+    }
+
+    #[Test]
     public function syncTriggeredCascadePassesForNonAdmin(): void
     {
         $GLOBALS['TYPO3_CONF_VARS']['EXTENSIONS']['sluggi']['synchronize'] = '1';

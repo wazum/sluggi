@@ -235,6 +235,38 @@ final class HierarchyPermissionValidationTest extends FunctionalTestCase
     }
 
     #[Test]
+    public function editorCanEditLastSegmentOfOutOfHierarchySlugPreservingParentPath(): void
+    {
+        parent::setUp();
+        $this->importCSVDataSet(__DIR__ . '/Fixtures/pages_hierarchy_out_of_sync.csv');
+        $this->setUpSite();
+        $GLOBALS['LANG'] = GeneralUtility::makeInstance(LanguageServiceFactory::class)->create('default');
+        $this->setUpBackendUser(2);
+
+        // Page 5 has slug /wrong-path/about-us — editor changes only last segment
+        $dataHandler = GeneralUtility::makeInstance(DataHandler::class);
+        $dataHandler->start(
+            [
+                'pages' => [
+                    5 => [
+                        'slug' => '/wrong-path/new-page',
+                    ],
+                ],
+            ],
+            []
+        );
+        $dataHandler->process_datamap();
+
+        $row = $this->getConnectionPool()
+            ->getConnectionForTable('pages')
+            ->select(['slug'], 'pages', ['uid' => 5])
+            ->fetchAssociative();
+
+        self::assertSame('/wrong-path/new-page', $row['slug'], 'Last-segment-only change should be allowed');
+        self::assertEmpty($dataHandler->errorLog, 'No error expected: ' . implode(', ', $dataHandler->errorLog));
+    }
+
+    #[Test]
     public function editorCannotRemoveLockedSegments(): void
     {
         $this->setUpBackendUser(2);

@@ -73,6 +73,10 @@ final readonly class ValidateHierarchyPermission
             return;
         }
 
+        if (!$isNewRecord && $this->isLastSegmentOnlyChange((int)$id, $newSlug)) {
+            return;
+        }
+
         if ($isNewRecord) {
             $fieldArray['slug'] = SlugUtility::enforceParentPath($lockedPrefix, $newSlug);
         } else {
@@ -111,6 +115,16 @@ final readonly class ValidateHierarchyPermission
         }
 
         return $this->hierarchyPermissionService->getLockedPrefixForPage($id, (string)$record['slug']);
+    }
+
+    private function isLastSegmentOnlyChange(int $id, string $newSlug): bool
+    {
+        $currentRecord = BackendUtility::getRecordWSOL('pages', $id, 'slug');
+        if ($currentRecord === null) {
+            return false;
+        }
+
+        return SlugUtility::getParentPath($newSlug) === SlugUtility::getParentPath((string)$currentRecord['slug']);
     }
 
     private function getBackendUser(): ?BackendUserAuthentication

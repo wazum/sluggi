@@ -303,6 +303,14 @@ export class SluggiElement extends LitElement {
                 return '/' + parts.join('/');
             }
         }
+        if (this.isOutsideLockedHierarchy && this.value) {
+            const parts = this.value.split('/').filter(Boolean);
+            if (parts.length > 1) {
+                parts.pop();
+                return '/' + parts.join('/');
+            }
+            return '';
+        }
         if (this.lockedPrefix) {
             return this.lockedPrefix;
         }
@@ -314,9 +322,14 @@ export class SluggiElement extends LitElement {
     }
 
     private get hasPrefixMismatch(): boolean {
-        const expectedPrefix = this.lockedPrefix || this.parentSlug;
+        const expectedPrefix = this.parentSlug || this.lockedPrefix;
         if (!expectedPrefix || !this.value || this.isLocked || this.isSynced) return false;
         return !this.value.startsWith(expectedPrefix + '/') && this.value !== expectedPrefix;
+    }
+
+    private get isOutsideLockedHierarchy(): boolean {
+        if (!this.lockedPrefix || !this.value) return false;
+        return !this.value.startsWith(this.lockedPrefix + '/') && this.value !== this.lockedPrefix;
     }
 
     private get editableValue(): string {
@@ -333,6 +346,12 @@ export class SluggiElement extends LitElement {
             if (this.lockedPrefix && this.value === this.lockedPrefix) {
                 return '/';
             }
+            const parts = this.value.split('/').filter(Boolean);
+            if (parts.length > 0) {
+                return '/' + parts[parts.length - 1];
+            }
+        }
+        if (this.isOutsideLockedHierarchy && this.value) {
             const parts = this.value.split('/').filter(Boolean);
             if (parts.length > 0) {
                 return '/' + parts[parts.length - 1];
@@ -413,10 +432,12 @@ export class SluggiElement extends LitElement {
             message = this.labels.lockRestrictionNote || 'The URL path is locked and cannot be edited.';
         } else if (this.hasPrefixMismatch) {
             const highlight = this.labels['prefixMismatch.note.highlight'] || 'URL prefix doesn\'t match the page hierarchy.';
+            const expectedPrefix = this.parentSlug || this.lockedPrefix;
+            const expectedLine = expectedPrefix ? this.getLabel('prefixMismatch.note.expected', expectedPrefix + '/') : '';
             const advice = this.lockFeatureEnabled
                 ? (this.labels['prefixMismatch.note.lock'] || 'If not intentional, regenerate to fix it — or lock to keep this custom URL.')
                 : (this.labels['prefixMismatch.note'] || 'If not intentional, use regenerate to correct it.');
-            return html`<p class="sluggi-note" role="status" aria-live="polite"><span class="sluggi-note-highlight">${highlight}</span> ${advice}</p>`;
+            return html`<p class="sluggi-note" role="status" aria-live="polite"><span class="sluggi-note-highlight">${highlight}</span> ${advice}${expectedLine ? html`<br/>${expectedLine}` : nothing}</p>`;
         } else {
             message = this.labels.fullPathNote || 'Full path editing is enabled. You can modify the entire URL structure.';
         }
@@ -692,8 +713,7 @@ export class SluggiElement extends LitElement {
 
         const sanitizedValue = this.sanitizeSlug(this.editValue, true);
 
-        // In lastSegmentOnly mode, revert to original if segment is empty
-        if (this.lastSegmentOnly && !sanitizedValue) {
+        if ((this.lastSegmentOnly || this.isOutsideLockedHierarchy) && !sanitizedValue) {
             this.cancelEdit();
             return;
         }
@@ -878,7 +898,7 @@ export class SluggiElement extends LitElement {
         const input = e.target as HTMLInputElement;
         let value = this.sanitizeSlug(input.value, false);
 
-        if (this.lastSegmentOnly && !this.isFullPathMode) {
+        if ((this.lastSegmentOnly || this.isOutsideLockedHierarchy) && !this.isFullPathMode) {
             value = value.replace(/^\/+/, '');
             value = value.replace(/\//g, this.fallbackCharacter);
             value = this.sanitizeSlug(value, false);
@@ -1071,6 +1091,9 @@ export class SluggiElement extends LitElement {
 
     private buildFullSlug(segment: string): string {
         if ((this.lastSegmentOnly || this.lockedPrefix) && !this.isFullPathMode) {
+            if (this.isOutsideLockedHierarchy) {
+                return this.computedPrefix + segment;
+            }
             return this.hierarchyPrefix + segment;
         }
         return segment;
