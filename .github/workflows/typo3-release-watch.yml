@@ -1,0 +1,81 @@
+name: TYPO3 Release Watch
+
+on:
+  schedule:
+    - cron: '17 */6 * * *'
+  workflow_dispatch:
+
+permissions:
+  actions: write
+
+# Prevent duplicate dispatches when two runs overlap
+concurrency:
+  group: typo3-release-watch
+  cancel-in-progress: false
+
+jobs:
+  check-releases:
+    name: Check for new TYPO3 releases
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Fetch latest TYPO3 versions
+        id: fetch
+        run: |
+          RESPONSE=$(curl -sf https://repo.packagist.org/p2/typo3/cms-core.json)
+
+          ALL_VERSIONS=$(echo "$RESPONSE" | jq -r '[.packages["typo3/cms-core"][].version | select(test("^[0-9]+\\.[0-9]+\\.[0-9]+$"))] | unique | .[]')
+
+          LATEST_12=$(echo "$ALL_VERSIONS" | { grep '^12\.4\.' || true; } | sort -V | tail -1)
+          LATEST_13=$(echo "$ALL_VERSIONS" | { grep '^13\.4\.' || true; } | sort -V | tail -1)
+          LATEST_14=$(echo "$ALL_VERSIONS" | { grep '^14\.' || true; } | sort -V | tail -1)
+
+          echo "latest_12=$LATEST_12" >> $GITHUB_OUTPUT
+          echo "latest_13=$LATEST_13" >> $GITHUB_OUTPUT
+          echo "latest_14=$LATEST_14" >> $GITHUB_OUTPUT
+          echo "versions=${LATEST_12},${LATEST_13},${LATEST_14}" >> $GITHUB_OUTPUT
+
+          echo "### Latest TYPO3 versions" >> $GITHUB_STEP_SUMMARY
+          echo "- 12.4 LTS: **${LATEST_12:-none}**" >> $GITHUB_STEP_SUMMARY
+          echo "- 13.4 LTS: **${LATEST_13:-none}**" >> $GITHUB_STEP_SUMMARY
+          echo "- 14.x: **${LATEST_14:-none}**" >> $GITHUB_STEP_SUMMARY
+
+      # Cache key encodes the current version triple. Exact hit = versions unchanged.
+      # If the cache is evicted (7-day TTL or repo limit), a miss triggers a harmless
+      # re-run of the test suite against the same TYPO3 versions.
+      - name: Restore version cache
+        uses: actions/cache@v4
+        id: cache
+        with:
+          path: .typo3-versions
+          key: typo3-release-watch-${{ steps.fetch.outputs.versions }}
+
+      - name: Check for changes
+        id: check
+        run: |
+          if [ "${{ steps.cache.outputs.cache-hit }}" = "true" ]; then
+            echo "changed=false" >> $GITHUB_OUTPUT
+            echo "No new releases detected" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "changed=true" >> $GITHUB_OUTPUT
+            echo "${{ steps.fetch.outputs.versions }}" > .typo3-versions
+            echo "**New releases detected — triggering test suite**" >> $GITHUB_STEP_SUMMARY
+          fi
+
+      - name: Trigger tests
+        if: steps.check.outputs.changed == 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const ref = context.ref.replace(/^refs\/heads\//, '');
+            await github.rest.actions.createWorkflowDispatch({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              workflow_id: 'tests.yml',
+              ref,
+              inputs: {
+                typo3_release: '${{ steps.fetch.outputs.versions }}'
+              }
+            });
+            core.summary.addRaw(`\n\nTriggered test workflow on \`${ref}\` for: \`${{ steps.fetch.outputs.versions }}\``);
+            await core.summary.write();
