@@ -14,6 +14,8 @@ export default defineConfig({
             '@typo3/backend/modal': resolve(__dirname, 'demo/mocks/typo3-modal.ts'),
             '@typo3/backend/severity.js': resolve(__dirname, 'demo/mocks/typo3-severity.ts'),
             '@typo3/backend/severity': resolve(__dirname, 'demo/mocks/typo3-severity.ts'),
+            '@typo3/backend/notification.js': resolve(__dirname, 'demo/mocks/typo3-notification.ts'),
+            '@typo3/backend/notification': resolve(__dirname, 'demo/mocks/typo3-notification.ts'),
             '@': resolve(__dirname, 'src'),
         },
     },
