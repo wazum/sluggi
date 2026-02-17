@@ -7,6 +7,12 @@ on:
       - 'fix/*'
       - 'feature/*'
   pull_request:
+  workflow_dispatch:
+    inputs:
+      typo3_release:
+        description: 'TYPO3 release version(s) that triggered this run'
+        required: false
+        type: string
 
 jobs:
   code-quality:
