@@ -53,7 +53,7 @@ services:
   Wazum\Sluggi\DataHandler\LockSlugOnFullPathEdit:
     public: true
 
-  Wazum\Sluggi\DataHandler\RestorePermissionsForNestedSlugUpdate:
+  Wazum\Sluggi\DataHandler\BypassAccessCheckForRedirectCreation:
     public: true
 
   # Form/Element

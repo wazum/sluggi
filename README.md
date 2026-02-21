@@ -2,14 +2,14 @@
 
 [![Tests](https://github.com/wazum/sluggi/workflows/Tests/badge.svg)](https://github.com/wazum/sluggi/actions)
 [![PHP](https://img.shields.io/badge/PHP-8.2%20|%208.3%20|%208.4-blue.svg)](https://www.php.net/)
-[![TYPO3](https://img.shields.io/badge/TYPO3-12.4%20|%2013.4%20|%2014-orange.svg)](https://typo3.org/)
+[![TYPO3](https://img.shields.io/badge/TYPO3-12.4%20|%2013.4.26%2B%20|%2014-orange.svg)](https://typo3.org/)
 [![Total Downloads](https://img.shields.io/packagist/dt/wazum/sluggi.svg)](https://packagist.org/packages/wazum/sluggi)
 [![License](https://img.shields.io/badge/License-GPL%20v2-blue.svg)](LICENSE)
 
 URLs that stay in sync when titles change. Automatic redirects. Duplicate prevention on copy, move, and recycler restore. Locking, access control, conflict detection – everything you need to manage URL paths with confidence.
 
 > [!NOTE]
-> **TYPO3 13.4.25** has [core regressions](https://forge.typo3.org/issues/108948) that break non-admin slug updates when `autoCreateRedirects` is enabled: permission corruption and missing webmount access for redirect storage. Sluggi includes workarounds; a fix is expected in **13.4.26**.
+> **TYPO3 13.4** has a core bug where `TemporaryPermissionMutationService` does not grant page-level access for redirect storage. Non-admin editors without the site root page in their webmounts cannot create redirects on slug changes. Sluggi includes a workaround; this does not affect TYPO3 12 or 14.
 
 One `composer require`, sensible defaults – [highly configurable](#configuration) when you need it.
 
@@ -21,7 +21,7 @@ One `composer require`, sensible defaults – [highly configurable](#configurati
 composer require wazum/sluggi
 ```
 
-> **Version 14** is a complete rewrite of _sluggi_ – modern, fully tested, and **compatible** with **TYPO3 12.4, 13.4, and 14**.
+> **Version 14** is a complete rewrite of _sluggi_ – modern, fully tested, and **compatible** with **TYPO3 12.4, 13.4.26+, and 14**.
 > 
 > This is the version you should install regardless of your TYPO3 version. Previous major versions are no longer maintained.
 
@@ -333,7 +333,7 @@ For non-page tables, add the table name to the `synchronize_tables` extension se
 
 ## Requirements
 
-- TYPO3 12.4 – 14.x
+- TYPO3 12.4, 13.4.26+, or 14.x
 - PHP 8.2+
 - EXT:redirects
 
@@ -355,12 +355,7 @@ _sluggi_ works around these known TYPO3 core issues:
 - [#103833](https://forge.typo3.org/issues/103833) – Renaming a slug back to a previous value can leave behind a self-referencing redirect. _sluggi_ prevents creation of self-referencing redirects automatically.
 - [#97962](https://forge.typo3.org/issues/97962) – TYPO3 core always replaces underscores with the fallback character during slug generation. _sluggi_ adds a `preserve_underscore` setting for RFC 3986 compliant URLs.
 - [#94003](https://forge.typo3.org/issues/94003) – When copying a page subtree, TYPO3 core changes the copied parent's slug immediately (e.g. appending `-1`) but fails to update child pages' slug prefixes accordingly. _sluggi_ recalculates all slugs in the copied tree with correct parent prefixes.
-- [#108948](https://forge.typo3.org/issues/108948) – In TYPO3 13.4.25, `TemporaryPermissionMutationService` corrupts `$BE_USER->groupData['tables_modify']` after redirect creation, preventing non-admin users from updating child page slugs. _sluggi_ saves and restores the permission around the nested DataHandler call.
-- In TYPO3 13.4.25, redirect records are stored at the site root page, but `TemporaryPermissionMutationService` only grants `tables_modify` for `sys_redirect` without adding the storage page to the editor's webmounts. Editors without root page access silently fail to create redirects. _sluggi_ temporarily extends webmounts to include the redirect storage page.
-
-## TYPO3 Version Notes
-
-**TYPO3 13.4.25+** is required because it switches auto redirect creation to use DataHandler instead of direct database operations, which is necessary for _sluggi_'s DataHandler hooks (redirect control, correlation ID sharing) to work correctly.
+- In TYPO3 13.4, `TemporaryPermissionMutationService` grants `tables_modify` for `sys_redirect` but does not grant page-level access. Editors without the site root page in their webmounts cannot create redirect records. _sluggi_ bypasses page-level access checks for redirect creation DataHandler operations.
 
 ## Support and Feature Requests
 

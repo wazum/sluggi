@@ -15,8 +15,8 @@ use Wazum\Sluggi\Controller\FormSlugAjaxControllerV12;
 use Wazum\Sluggi\Controller\FormSlugAjaxControllerV14;
 use Wazum\Sluggi\Controller\RecordHistoryRollbackControllerV12;
 use Wazum\Sluggi\Controller\RecordHistoryRollbackControllerV14;
+use Wazum\Sluggi\DataHandler\BypassAccessCheckForRedirectCreation;
 use Wazum\Sluggi\DataHandler\ClearSlugForExcludedDoktypes;
-use Wazum\Sluggi\DataHandler\RestorePermissionsForNestedSlugUpdate;
 use Wazum\Sluggi\DataHandler\HandlePageCopy;
 use Wazum\Sluggi\DataHandler\HandlePageMove;
 use Wazum\Sluggi\DataHandler\HandlePageUndelete;
@@ -101,8 +101,8 @@ $GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['t3lib/class.t3lib_pagerenderer.php'][
     };
 
 // DataHandler
-$GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['t3lib/class.t3lib_tcemain.php']['processDatamapClass']['sluggi_permission_guard'] =
-    RestorePermissionsForNestedSlugUpdate::class;
+$GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['t3lib/class.t3lib_tcemain.php']['processDatamapClass']['sluggi_redirect_access'] =
+    BypassAccessCheckForRedirectCreation::class;
 
 $GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['t3lib/class.t3lib_tcemain.php']['processDatamapClass']['sluggi_exclude_doktypes'] =
     ClearSlugForExcludedDoktypes::class;
