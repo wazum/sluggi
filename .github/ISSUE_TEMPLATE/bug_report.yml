@@ -1,0 +1,54 @@
+name: Bug Report
+description: Report a bug in sluggi
+labels: ["bug"]
+body:
+  - type: checkboxes
+    id: version-check
+    attributes:
+      label: Version check
+      options:
+        - label: I am using **sluggi 14.x** (older versions are not supported)
+          required: true
+    validations:
+      required: true
+
+  - type: input
+    id: sluggi-version
+    attributes:
+      label: Sluggi version
+      description: "Exact version (run: composer show wazum/sluggi)"
+      placeholder: "14.1.1"
+    validations:
+      required: true
+
+  - type: input
+    id: typo3-version
+    attributes:
+      label: TYPO3 version
+      placeholder: "13.4.26"
+    validations:
+      required: true
+
+  - type: input
+    id: php-version
+    attributes:
+      label: PHP version
+      placeholder: "8.3"
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: What happened? What did you expect?
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: Minimal steps to reproduce the issue
+    validations:
+      required: true
