@@ -140,7 +140,7 @@ final class HandlePageMoveTest extends FunctionalTestCase
     {
         $this->setUpTest('pages_for_move_into_excluded.csv');
 
-        $GLOBALS['TYPO3_CONF_VARS']['EXTENSIONS']['sluggi']['exclude_doktypes'] = '254';
+        $GLOBALS['TYPO3_CONF_VARS']['EXTENSIONS']['sluggi']['exclude_doktypes'] = '199,254';
 
         // Move page 4 into Sysfolder (page 3, doktype=254 excluded)
         // The slug should use the grandparent's prefix /parent, not /parent/sysfolder

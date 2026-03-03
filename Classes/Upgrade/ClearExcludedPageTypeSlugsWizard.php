@@ -9,8 +9,8 @@ use TYPO3\CMS\Install\Attribute\UpgradeWizard;
 use TYPO3\CMS\Install\Updates\UpgradeWizardInterface;
 use Wazum\Sluggi\Configuration\ExtensionConfiguration;
 
-#[UpgradeWizard('sluggi_clearExcludedDoktypeSlugs')]
-final readonly class ClearExcludedDoktypeSlugsWizard implements UpgradeWizardInterface
+#[UpgradeWizard('sluggi_clearExcludedPageTypeSlugs')]
+final readonly class ClearExcludedPageTypeSlugsWizard implements UpgradeWizardInterface
 {
     public function __construct(
         private ExtensionConfiguration $extensionConfiguration,

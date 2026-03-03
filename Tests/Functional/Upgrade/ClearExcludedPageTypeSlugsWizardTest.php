@@ -6,9 +6,9 @@ namespace Wazum\Sluggi\Tests\Functional\Upgrade;
 
 use PHPUnit\Framework\Attributes\Test;
 use TYPO3\TestingFramework\Core\Functional\FunctionalTestCase;
-use Wazum\Sluggi\Upgrade\ClearExcludedDoktypeSlugsWizard;
+use Wazum\Sluggi\Upgrade\ClearExcludedPageTypeSlugsWizard;
 
-final class ClearExcludedDoktypeSlugsWizardTest extends FunctionalTestCase
+final class ClearExcludedPageTypeSlugsWizardTest extends FunctionalTestCase
 {
     protected array $testExtensionsToLoad = [
         'wazum/sluggi',
@@ -35,7 +35,7 @@ final class ClearExcludedDoktypeSlugsWizardTest extends FunctionalTestCase
     #[Test]
     public function updateNecessaryReturnsTrueWhenExcludedPagesHaveSlugs(): void
     {
-        $subject = $this->get(ClearExcludedDoktypeSlugsWizard::class);
+        $subject = $this->get(ClearExcludedPageTypeSlugsWizard::class);
 
         self::assertTrue($subject->updateNecessary());
     }
@@ -50,7 +50,7 @@ final class ClearExcludedDoktypeSlugsWizardTest extends FunctionalTestCase
             ->getConnectionForTable('pages')
             ->update('pages', ['slug' => ''], ['uid' => 4]);
 
-        $subject = $this->get(ClearExcludedDoktypeSlugsWizard::class);
+        $subject = $this->get(ClearExcludedPageTypeSlugsWizard::class);
 
         self::assertFalse($subject->updateNecessary());
     }
@@ -58,7 +58,7 @@ final class ClearExcludedDoktypeSlugsWizardTest extends FunctionalTestCase
     #[Test]
     public function executeUpdateClearsSlugsForAllExcludedPageTypes(): void
     {
-        $subject = $this->get(ClearExcludedDoktypeSlugsWizard::class);
+        $subject = $this->get(ClearExcludedPageTypeSlugsWizard::class);
 
         $result = $subject->executeUpdate();
 
@@ -71,7 +71,7 @@ final class ClearExcludedDoktypeSlugsWizardTest extends FunctionalTestCase
     {
         $GLOBALS['TYPO3_CONF_VARS']['EXTENSIONS']['sluggi']['exclude_doktypes'] = '';
 
-        $subject = $this->get(ClearExcludedDoktypeSlugsWizard::class);
+        $subject = $this->get(ClearExcludedPageTypeSlugsWizard::class);
 
         $result = $subject->executeUpdate();
 
@@ -87,7 +87,7 @@ final class ClearExcludedDoktypeSlugsWizardTest extends FunctionalTestCase
     #[Test]
     public function executeUpdateDoesNotAffectStandardPages(): void
     {
-        $subject = $this->get(ClearExcludedDoktypeSlugsWizard::class);
+        $subject = $this->get(ClearExcludedPageTypeSlugsWizard::class);
 
         $subject->executeUpdate();
 

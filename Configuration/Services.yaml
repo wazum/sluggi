@@ -105,7 +105,10 @@ services:
     public: true
 
   # Upgrade
-  Wazum\Sluggi\Upgrade\ClearExcludedDoktypeSlugsWizard:
+  Wazum\Sluggi\Upgrade\ClearExcludedPageTypeSlugsWizard:
+    public: true
+
+  Wazum\Sluggi\Upgrade\SetDefaultExcludedPageTypesWizard:
     public: true
 
   # Controller

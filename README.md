@@ -153,7 +153,7 @@ All features work out of the box with sensible defaults. Fine-tune via **System 
 
 | Setting | Description | Default |
 |---------|-------------|---------|
-| `exclude_doktypes` | Remove URL paths from page types that will never be visited directly. Comma-separated doktypes, e.g. `199,254,255` for Spacer, Sysfolder, and Recycler. Keeps your slug table clean. | – |
+| `exclude_doktypes` | Comma-separated doktypes excluded from slug path generation. The default `199,254` matches TYPO3 core's built-in exclusion of Spacer and Sysfolder (see `SlugHelper::resolveParentPageRecord()`). Add `255` to also exclude Recycler pages. If you use [b13/masi](https://github.com/b13/masi) to include sysfolders in URL paths, remove `254` from this list. | `199,254` |
 | `preserve_underscore` | Keep underscores in URL paths instead of converting them to dashes. Useful when your URL convention or external systems require underscores (RFC 3986 compliant). | Off |
 | `copy_url` | Show a button to copy the full page URL to the clipboard. Saves editors from navigating to the frontend just to grab a link for emails, documents, or tickets. | On |
 | `last_segment_only` | Non-admin editors can only change the last segment of a URL path. The parent path stays read-only, preventing editors from accidentally breaking the site's URL hierarchy. | Off |
@@ -356,6 +356,20 @@ _sluggi_ works around these known TYPO3 core issues:
 - [#97962](https://forge.typo3.org/issues/97962) – TYPO3 core always replaces underscores with the fallback character during slug generation. _sluggi_ adds a `preserve_underscore` setting for RFC 3986 compliant URLs.
 - [#94003](https://forge.typo3.org/issues/94003) – When copying a page subtree, TYPO3 core changes the copied parent's slug immediately (e.g. appending `-1`) but fails to update child pages' slug prefixes accordingly. _sluggi_ recalculates all slugs in the copied tree with correct parent prefixes.
 - In TYPO3 13.4, `TemporaryPermissionMutationService` grants `tables_modify` for `sys_redirect` but does not grant page-level access. Editors without the site root page in their webmounts cannot create redirect records. _sluggi_ bypasses page-level access checks for redirect creation DataHandler operations.
+
+## Upgrading
+
+### 14.2.0
+
+**`exclude_doktypes` default changed from empty to `199,254`** ([#135](https://github.com/wazum/sluggi/issues/135))
+
+Previous versions shipped with an empty `exclude_doktypes` default, which caused sluggi's copy/move handlers to include Spacer and Sysfolder names in generated slug paths — contrary to TYPO3 core's built-in behavior in `SlugHelper::resolveParentPageRecord()`. The default is now `199,254` (Spacer, Sysfolder) to match core.
+
+Sluggi now also overrides core's `resolveParentPageRecord()` so that _all_ slug generation paths (AJAX suggestions, new pages, copy, move, sync) consistently respect the `exclude_doktypes` setting. Without this override, TYPO3 core hardcodes the exclusion of Spacer and Sysfolder regardless of configuration.
+
+**Upgrade wizard:** Run **Admin Tools > Upgrade > Upgrade Wizard** after updating. The wizard _"Set default excluded page types for sluggi"_ sets `exclude_doktypes` to `199,254` for existing installations where it was empty.
+
+**[b13/masi](https://github.com/b13/masi) users:** If you use masi to include sysfolders in URL paths, remove `254` from `exclude_doktypes` after the upgrade. Masi uses a TCA `postModifier` (not an XCLASS), so both extensions work together without conflicts — masi overrides the generated slug after sluggi's `SlugHelper`, and both will consistently include the sysfolder when `254` is not in the exclusion list.
 
 ## Support and Feature Requests
 

@@ -150,7 +150,7 @@ final class HandlePageCopyTest extends FunctionalTestCase
     {
         $this->setUpTest('pages_for_copy_into_excluded.csv');
 
-        $GLOBALS['TYPO3_CONF_VARS']['EXTENSIONS']['sluggi']['exclude_doktypes'] = '254';
+        $GLOBALS['TYPO3_CONF_VARS']['EXTENSIONS']['sluggi']['exclude_doktypes'] = '199,254';
 
         // Copy page 4 into Sysfolder (page 3, doktype=254 excluded)
         // The slug should use the grandparent's prefix /parent, not /parent/sysfolder
@@ -165,5 +165,27 @@ final class HandlePageCopyTest extends FunctionalTestCase
         $dataHandler->process_cmdmap();
 
         $this->assertCSVDataSet(__DIR__ . '/Fixtures/pages_after_copy_into_excluded.csv');
+    }
+
+    #[Test]
+    public function copyingPageWithinSysfolderDirectlyUnderRootProducesCorrectSlug(): void
+    {
+        $this->setUpTest('pages_for_copy_within_sysfolder.csv');
+
+        $GLOBALS['TYPO3_CONF_VARS']['EXTENSIONS']['sluggi']['exclude_doktypes'] = '199,254';
+
+        // Copy page 3 within the same sysfolder (page 2, doktype=254)
+        // The slug must NOT include the sysfolder name
+        $dataHandler = GeneralUtility::makeInstance(DataHandler::class);
+        $dataHandler->start([], [
+            'pages' => [
+                3 => [
+                    'copy' => 2,
+                ],
+            ],
+        ]);
+        $dataHandler->process_cmdmap();
+
+        $this->assertCSVDataSet(__DIR__ . '/Fixtures/pages_after_copy_within_sysfolder.csv');
     }
 }

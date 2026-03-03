@@ -1,0 +1,6 @@
+"pages"
+,"uid","pid","title","slug","tx_sluggi_sync","doktype"
+,1,0,"Root Page","/",0,1
+,2,1,"Sysfolder","/sysfolder",0,254
+,3,2,"Page to Copy","/page-to-copy",0,1
+,4,2,"Page to Copy (copy 1)","/page-to-copy-1",0,1
