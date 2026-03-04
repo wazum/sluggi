@@ -86,6 +86,19 @@ final class Typo3Compatibility
     }
 
     /**
+     * Redirects module route identifier
+     * TYPO3 12/13: 'site_redirects'
+     * TYPO3 14+: 'redirects'.
+     */
+    public static function getRedirectsModuleRoute(): string
+    {
+        return match (self::getMajorVersion()) {
+            12, 13 => 'site_redirects',
+            default => 'redirects',
+        };
+    }
+
+    /**
      * Check if the current request is editing multiple records.
      * On TYPO3 12, columnsOnly is not in the route's allowed redirect parameters,
      * so fieldListToRender stays empty. This fallback detects multi-edit by checking

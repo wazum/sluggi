@@ -382,6 +382,45 @@ final class ExtensionConfigurationTest extends TestCase
     }
 
     #[Test]
+    public function isShowRedirectsEnabledReturnsTrueWhenSettingIs1(): void
+    {
+        $coreConfig = $this->createMock(CoreExtensionConfiguration::class);
+        $coreConfig->method('get')
+            ->with('sluggi', 'show_redirects')
+            ->willReturn('1');
+
+        $subject = new ExtensionConfiguration($coreConfig);
+
+        self::assertTrue($subject->isShowRedirectsEnabled());
+    }
+
+    #[Test]
+    public function isShowRedirectsEnabledReturnsFalseWhenSettingIs0(): void
+    {
+        $coreConfig = $this->createMock(CoreExtensionConfiguration::class);
+        $coreConfig->method('get')
+            ->with('sluggi', 'show_redirects')
+            ->willReturn('0');
+
+        $subject = new ExtensionConfiguration($coreConfig);
+
+        self::assertFalse($subject->isShowRedirectsEnabled());
+    }
+
+    #[Test]
+    public function isShowRedirectsEnabledReturnsFalseWhenSettingIsMissing(): void
+    {
+        $coreConfig = $this->createMock(CoreExtensionConfiguration::class);
+        $coreConfig->method('get')
+            ->with('sluggi', 'show_redirects')
+            ->willThrowException(new Exception('Configuration not found'));
+
+        $subject = new ExtensionConfiguration($coreConfig);
+
+        self::assertFalse($subject->isShowRedirectsEnabled());
+    }
+
+    #[Test]
     public function isRedirectControlEnabledReturnsTrueWhenSettingIs1(): void
     {
         $coreConfig = $this->createMock(CoreExtensionConfiguration::class);

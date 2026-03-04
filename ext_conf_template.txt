@@ -20,3 +20,5 @@ lock=0
 lock_descendants=0
 # cat=redirect; type=boolean; label=Show redirect control: When enabled, a modal dialog is shown when changing a slug to let users decide if redirects should be created
 redirect_control=0
+# cat=redirect; type=boolean; label=Show redirect info: Display the number of active redirects below the slug field with a link to the redirects module
+show_redirects=0

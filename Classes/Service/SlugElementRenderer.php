@@ -78,6 +78,10 @@ final readonly class SlugElementRenderer
         if ($context['isTranslation'] ?? false) {
             $attributes['is-translation'] = '';
         }
+        if (($context['redirectCount'] ?? 0) > 0) {
+            $attributes['redirect-count'] = (string)$context['redirectCount'];
+            $attributes['redirects-module-url'] = $context['redirectsModuleUrl'];
+        }
 
         return $attributes;
     }

@@ -86,6 +86,12 @@ export class SluggiElement extends LitElement {
     @property({ type: Boolean, attribute: 'is-translation' })
     isTranslation = false;
 
+    @property({ type: Number, attribute: 'redirect-count' })
+    redirectCount = 0;
+
+    @property({ type: String, attribute: 'redirects-module-url' })
+    redirectsModuleUrl = '';
+
     // =========================================================================
     // Properties: Conflict State
     // =========================================================================
@@ -412,6 +418,7 @@ export class SluggiElement extends LitElement {
                 </div>
             </div>
             ${this.renderRestrictionNote()}
+            ${this.renderRedirectInfo()}
         `;
     }
 
@@ -443,6 +450,24 @@ export class SluggiElement extends LitElement {
         }
 
         return html`<p class="sluggi-note" role="status" aria-live="polite">${message}</p>`;
+    }
+
+    private renderRedirectInfo() {
+        if (this.redirectCount <= 0 || !this.redirectsModuleUrl) return nothing;
+
+        const labelKey = this.redirectCount === 1 ? 'redirectInfo.singular' : 'redirectInfo.plural';
+        const fallback = this.redirectCount === 1
+            ? 'There is %d redirect for this page.'
+            : 'There are %d redirects for this page.';
+        const message = (this.labels[labelKey] || fallback)
+            .replace('%d', String(this.redirectCount));
+
+        return html`<p class="sluggi-note sluggi-redirect-info">
+            ${message}
+            <a href="${this.redirectsModuleUrl}" target="_top">
+                ${this.labels['redirectInfoLink'] || 'Manage redirects'}
+            </a>
+        </p>`;
     }
 
     private renderViewMode() {
