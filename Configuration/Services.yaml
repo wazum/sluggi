@@ -98,6 +98,9 @@ services:
   Wazum\Sluggi\Service\SlugLockService:
     public: true
 
+  Wazum\Sluggi\Service\RedirectInfoService:
+    public: true
+
   Wazum\Sluggi\Service\SlugSyncService:
     public: true
 

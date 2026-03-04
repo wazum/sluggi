@@ -1,0 +1,23 @@
+"be_groups"
+,"uid","pid","title","tables_select","tables_modify","pagetypes_select","non_exclude_fields","db_mountpoints"
+,1,0,"Editors","","pages","1","pages:slug,pages:title","1"
+
+"be_users"
+,"uid","pid","username","password","admin","usergroup"
+,1,0,"admin","$2y$12$abc123",1,""
+,2,0,"editor","$2y$12$abc123",0,"1"
+
+"pages"
+,"uid","pid","title","slug","doktype","is_siteroot","perms_userid","perms_groupid","perms_user","perms_group","perms_everybody"
+,1,0,"Root","/",1,1,1,0,31,31,31
+,2,1,"Test Page","/test-page",1,0,1,0,31,31,31
+,3,1,"No Redirects","/no-redirects",1,0,1,0,31,31,31
+
+"sys_redirect"
+,"uid","pid","source_host","source_path","target","disabled","deleted"
+,1,0,"*","/old-page","t3://page?uid=2",0,0
+,2,0,"*","/another-old","/test-page&L=1",0,0
+,3,0,"*","/very-old","t3://page?uid=2&L=1",0,0
+,4,0,"*","/deleted-redirect","t3://page?uid=2",0,1
+,5,0,"*","/disabled-redirect","t3://page?uid=2",1,0
+,6,0,"*","/other-page-redirect","t3://page?uid=20",0,0

@@ -10,6 +10,7 @@ use Wazum\Sluggi\Configuration\ExtensionConfiguration;
 use Wazum\Sluggi\Service\FullPathEditingService;
 use Wazum\Sluggi\Service\HierarchyPermissionService;
 use Wazum\Sluggi\Service\LastSegmentValidationService;
+use Wazum\Sluggi\Service\RedirectInfoService;
 use Wazum\Sluggi\Service\SlugConfigurationService;
 use Wazum\Sluggi\Service\SlugElementRenderer;
 use Wazum\Sluggi\Service\SlugGeneratorService;
@@ -65,6 +66,7 @@ final class SlugElementV14 extends AbstractFormElement
         FullPathEditingService $fullPathEditingService,
         ExtensionConfiguration $extensionConfiguration,
         UserSettingsService $userSettingsService,
+        RedirectInfoService $redirectInfoService,
     ) {
         $this->slugElementRenderer = $slugElementRenderer;
         $this->slugSyncService = $slugSyncService;
@@ -76,5 +78,6 @@ final class SlugElementV14 extends AbstractFormElement
         $this->fullPathEditingService = $fullPathEditingService;
         $this->extensionConfiguration = $extensionConfiguration;
         $this->userSettingsService = $userSettingsService;
+        $this->redirectInfoService = $redirectInfoService;
     }
 }

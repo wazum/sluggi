@@ -41,6 +41,8 @@ composer require wazum/sluggi
 
 **Redirect control** – Editors choose whether to create redirects when changing a URL.
 
+**Redirect info** – See how many redirects point to a page, with a direct link to manage them.
+
 **Any table** – Works with pages, news, events, or any record with a TCA slug field.
 
 ## Features
@@ -106,6 +108,14 @@ The messages are tailored to the editor's permissions:
 - Admins see the full URL path with the mismatched portion highlighted
 
 Locked and synced pages suppress the indicator entirely – locked pages have intentional custom URLs, and synced pages will self-correct on the next title change.
+
+### Redirect Info
+
+See at a glance how many redirects target a page, with a direct link to the redirects module:
+
+![Redirect info](Documentation/sluggi_redirect_display.png)
+
+Only shown to editors with access to the redirects module and `sys_redirect` table.
 
 ### Redirect Control
 
@@ -179,6 +189,7 @@ All features work out of the box with sensible defaults. Fine-tune via **System 
 | Setting | Description | Default |
 |---------|-------------|---------|
 | `redirect_control` | Show a modal when a URL changes, letting the editor decide whether to create a redirect. Gives editors control instead of silently creating redirects they may not want. The choice applies recursively to all affected child pages. | Off |
+| `show_redirects` | Display the number of active redirects targeting a page below the slug field, with a link to the redirects module pre-filtered by target page. Only shown to users with access to the redirects module. Requires EXT:redirects. | Off |
 
 For deployment or version-controlled configuration, set values in `config/system/additional.php`:
 
@@ -195,6 +206,7 @@ $GLOBALS['TYPO3_CONF_VARS']['EXTENSIONS']['sluggi'] = [
     'copy_url' => '1',
     'preserve_underscore' => '0',
     'redirect_control' => '1',
+    'show_redirects' => '1',
 ];
 ```
 

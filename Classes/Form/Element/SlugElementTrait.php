@@ -8,12 +8,14 @@ use TYPO3\CMS\Backend\Controller\FormSlugAjaxController;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\Page\JavaScriptModuleInstruction;
 use TYPO3\CMS\Core\Site\Entity\Site;
+use TYPO3\CMS\Core\Utility\ExtensionManagementUtility;
 use TYPO3\CMS\Core\Utility\MathUtility;
 use Wazum\Sluggi\Compatibility\Typo3Compatibility;
 use Wazum\Sluggi\Configuration\ExtensionConfiguration;
 use Wazum\Sluggi\Service\FullPathEditingService;
 use Wazum\Sluggi\Service\HierarchyPermissionService;
 use Wazum\Sluggi\Service\LastSegmentValidationService;
+use Wazum\Sluggi\Service\RedirectInfoService;
 use Wazum\Sluggi\Service\SlugConfigurationService;
 use Wazum\Sluggi\Service\SlugElementRenderer;
 use Wazum\Sluggi\Service\SlugGeneratorService;
@@ -33,6 +35,7 @@ trait SlugElementTrait
     protected FullPathEditingService $fullPathEditingService;
     protected ExtensionConfiguration $extensionConfiguration;
     protected UserSettingsService $userSettingsService;
+    protected RedirectInfoService $redirectInfoService;
 
     /**
      * @return array<string, mixed>
@@ -138,7 +141,7 @@ trait SlugElementTrait
 
         $isTranslation = $this->isTranslation($table, $row);
 
-        return [
+        $context = [
             'table' => $table,
             'fieldName' => $fieldName,
             'languageId' => $languageId,
@@ -181,7 +184,23 @@ trait SlugElementTrait
                 && $this->extensionConfiguration->isRedirectControlEnabled()
                 && $this->isSiteAutoCreateRedirectsEnabled(),
             'redirectFieldName' => $this->slugElementRenderer->buildRedirectFieldName($table, $recordId),
+            'redirectCount' => 0,
+            'redirectsModuleUrl' => '',
         ];
+
+        if ($table === 'pages' && $command !== 'new' && is_numeric($recordId)
+            && $this->extensionConfiguration->isShowRedirectsEnabled()
+            && ExtensionManagementUtility::isLoaded('redirects')
+            && $this->redirectInfoService->canUserAccessRedirectsModule()
+        ) {
+            $count = $this->redirectInfoService->countRedirectsForPage((int)$recordId);
+            if ($count > 0) {
+                $context['redirectCount'] = $count;
+                $context['redirectsModuleUrl'] = $this->redirectInfoService->buildRedirectsModuleUrl((int)$recordId);
+            }
+        }
+
+        return $context;
     }
 
     /**
@@ -332,6 +351,9 @@ trait SlugElementTrait
             'prefixMismatch.note' => $languageService->sL($prefix . 'prefixMismatch.note'),
             'prefixMismatch.note.lock' => $languageService->sL($prefix . 'prefixMismatch.note.lock'),
             'prefixMismatch.note.expected' => $languageService->sL($prefix . 'prefixMismatch.note.expected'),
+            'redirectInfo.singular' => $languageService->sL($prefix . 'redirectInfo.singular'),
+            'redirectInfo.plural' => $languageService->sL($prefix . 'redirectInfo.plural'),
+            'redirectInfoLink' => $languageService->sL($prefix . 'redirectInfoLink'),
         ];
     }
 

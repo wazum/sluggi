@@ -159,6 +159,15 @@
             <trans-unit id="contextMenu.recursiveSlugUpdate.success" resname="contextMenu.recursiveSlugUpdate.success">
                 <source>URL paths updated successfully.</source>
             </trans-unit>
+            <trans-unit id="redirectInfo.singular" resname="redirectInfo.singular">
+                <source>There is %d redirect for this page.</source>
+            </trans-unit>
+            <trans-unit id="redirectInfo.plural" resname="redirectInfo.plural">
+                <source>There are %d redirects for this page.</source>
+            </trans-unit>
+            <trans-unit id="redirectInfoLink" resname="redirectInfoLink">
+                <source>Manage redirects</source>
+            </trans-unit>
         </body>
     </file>
 </xliff>

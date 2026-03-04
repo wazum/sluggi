@@ -95,6 +95,11 @@ final readonly class ExtensionConfiguration
         return $this->getBool('redirect_control', true);
     }
 
+    public function isShowRedirectsEnabled(): bool
+    {
+        return $this->getBool('show_redirects');
+    }
+
     private function getBool(string $path, bool $default = false): bool
     {
         try {

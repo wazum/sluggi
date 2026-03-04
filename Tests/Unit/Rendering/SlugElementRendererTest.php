@@ -317,6 +317,33 @@ final class SlugElementRendererTest extends TestCase
         self::assertArrayNotHasKey('is-translation', $result);
     }
 
+    #[Test]
+    public function buildAttributesIncludesRedirectCountWhenGreaterThanZero(): void
+    {
+        $subject = new SlugElementRenderer();
+        $context = $this->createContext([
+            'redirectCount' => 3,
+            'redirectsModuleUrl' => '/typo3/module/link-management/redirects?demand%5Btarget%5D=t3%3A%2F%2Fpage%3Fuid%3D5',
+        ]);
+
+        $result = $subject->buildAttributes($context, []);
+
+        self::assertSame('3', $result['redirect-count']);
+        self::assertSame('/typo3/module/link-management/redirects?demand%5Btarget%5D=t3%3A%2F%2Fpage%3Fuid%3D5', $result['redirects-module-url']);
+    }
+
+    #[Test]
+    public function buildAttributesOmitsRedirectCountWhenZero(): void
+    {
+        $subject = new SlugElementRenderer();
+        $context = $this->createContext(['redirectCount' => 0]);
+
+        $result = $subject->buildAttributes($context, []);
+
+        self::assertArrayNotHasKey('redirect-count', $result);
+        self::assertArrayNotHasKey('redirects-module-url', $result);
+    }
+
     /**
      * @param array<string, mixed> $overrides
      *
