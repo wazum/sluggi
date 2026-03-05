@@ -28,10 +28,23 @@ jobs:
           if [[ -z "${body//[[:space:]]/}" ]]; then
             echo "TER_COMMENT=Release $version" >> "$GITHUB_ENV"
           else
+            # Convert GitHub markdown to plain text for TER display:
+            # - Strip ## headings but keep them as section titles with blank line before
+            # - Remove bold markers, inline code backticks, and markdown links
+            # - Replace list dashes with bullets, drop "Full Changelog" line
+            plain=$(echo "$body" \
+              | sed '/^## /{s/^## //;s/^/\n/;}' \
+              | sed '/^### /{s/^### //;s/^/\n/;}' \
+              | sed 's/\*\*\([^*]*\)\*\*/\1/g' \
+              | sed 's/\[\([^]]*\)\]([^)]*)/\1/g' \
+              | sed 's/^- /• /g' \
+              | sed 's/`\([^`]*\)`/\1/g' \
+              | sed '/^Full Changelog:/d' \
+              | cat -s)
             delimiter="TER_COMMENT_$(date +%s)_$RANDOM"
             {
               echo "TER_COMMENT<<$delimiter"
-              echo "$body"
+              echo "$plain"
               echo "$delimiter"
             } >> "$GITHUB_ENV"
           fi
