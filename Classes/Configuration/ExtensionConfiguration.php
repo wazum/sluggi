@@ -85,6 +85,11 @@ final readonly class ExtensionConfiguration
         return $this->getBool('copy_url');
     }
 
+    public function isAllowTranslationEditEnabled(): bool
+    {
+        return $this->getBool('allow_translation_edit');
+    }
+
     public function isPreserveUnderscoreEnabled(): bool
     {
         return $this->getBool('preserve_underscore');

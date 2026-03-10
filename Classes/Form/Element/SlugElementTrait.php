@@ -137,6 +137,9 @@ trait SlugElementTrait
         }
 
         $isTranslation = $this->isTranslation($table, $row);
+        if ($this->extensionConfiguration->isAllowTranslationEditEnabled()) {
+            $isTranslation = false;
+        }
 
         return [
             'table' => $table,
