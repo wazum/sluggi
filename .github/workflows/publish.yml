@@ -43,6 +43,7 @@ jobs:
               | sed 's/`\([^`]*\)`/\1/g' \
               | sed '/^Full Changelog:/d' \
               | cat -s)
+            plain=$(printf '%s\n\nFull release notes: https://github.com/${{ github.repository }}/releases/tag/%s' "$plain" "$version")
             delimiter="TER_COMMENT_$(date +%s)_$RANDOM"
             {
               echo "TER_COMMENT<<$delimiter"
