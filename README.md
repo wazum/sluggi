@@ -1,4 +1,9 @@
-# _sluggi_ – The URL Path Manager TYPO3 deserves
+<p align="center">
+  <img src="Resources/Public/Icons/Extension.svg" alt="sluggi" width="80" height="80">
+</p>
+<h1 align="center">sluggi</h1>
+<p align="center"><em>The URL Path Manager TYPO3 CMS deserves.</em></p>
+<br>
 
 [![Tests](https://github.com/wazum/sluggi/workflows/Tests/badge.svg)](https://github.com/wazum/sluggi/actions)
 [![PHP](https://img.shields.io/badge/PHP-8.2%20|%208.3%20|%208.4-blue.svg)](https://www.php.net/)
@@ -389,6 +394,8 @@ Use the [issues tracker](https://github.com/wazum/sluggi/issues) on GitHub for s
 
 ## Credits and Sponsors
 
+Made with love for the TYPO3 community by [Wolfgang Klinger](https://wolfgang-klinger.dev/).
+
 Many thanks to [plan2net GmbH](https://www.plan2.net/) for allowing me to work on the extension during my working hours and for great projects where this extension is already being used in real life.
 
 Special thanks to [TU München](https://www.tum.de/) and other German universities that sponsored my time at _plan2net GmbH_ to work on this extension (_applies to previous versions_).
@@ -396,3 +403,8 @@ Special thanks to [TU München](https://www.tum.de/) and other German universiti
 ## License
 
 GPL-2.0-or-later
+
+<br>
+<p align="center">
+  <img src="Resources/Public/Icons/Extension.svg" alt="sluggi" width="80" height="80">
+</p>

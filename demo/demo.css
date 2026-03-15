@@ -71,6 +71,7 @@ header {
     max-width: 800px;
     margin: 0 auto;
     padding: 3rem 1.5rem 1rem;
+    text-align: center;
 }
 
 header h1 {
@@ -78,24 +79,51 @@ header h1 {
     font-size: 1.75rem;
     font-weight: 600;
     letter-spacing: -0.02em;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.demo-logo {
+    width: 5rem;
+    height: 5rem;
+    mix-blend-mode: multiply;
+}
+
+@media (prefers-color-scheme: dark) {
+    .demo-logo {
+        mix-blend-mode: screen;
+    }
 }
 
 header .demo-tagline {
-    font-size: .875rem;
-    color: var(--demo-text-secondary);
-    margin-top: 0.25rem;
+    font-family: 'Georgia', 'Times New Roman', serif;
+    font-style: italic;
+    font-size: 1.05rem;
+    color: #ff8700;
+    font-weight: 500;
+    margin-top: 0.75rem;
+    margin-bottom: 4rem;
+    letter-spacing: 0.01em;
+    background: #fff;
+    display: inline-block;
+    padding: 0.4rem 1.5rem;
+    border-radius: 6px;
 }
 
 header .demo-pitch {
     font-size: .9375rem;
     margin-top: 0.75rem;
     line-height: 1.6;
+    text-align: left;
 }
 
 header .demo-links {
     font-size: .8125rem;
     color: var(--demo-text-secondary);
     margin-top: 0.5rem;
+    text-align: left;
 }
 
 header .demo-links a {
