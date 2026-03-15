@@ -24,5 +24,8 @@
     },
     "dependencies": {
         "lit": "^3.2.1"
+    },
+    "overrides": {
+        "yauzl": "^3.2.1"
     }
 }
