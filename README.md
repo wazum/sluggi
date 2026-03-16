@@ -9,6 +9,7 @@
 [![PHP](https://img.shields.io/badge/PHP-8.2%20|%208.3%20|%208.4-blue.svg)](https://www.php.net/)
 [![TYPO3](https://img.shields.io/badge/TYPO3-12.4%20|%2013.4.26%2B%20|%2014-orange.svg)](https://typo3.org/)
 [![Total Downloads](https://img.shields.io/packagist/dt/wazum/sluggi.svg)](https://packagist.org/packages/wazum/sluggi)
+[![GitHub Stars](https://img.shields.io/github/stars/wazum/sluggi?style=flat)](https://github.com/wazum/sluggi/stargazers)
 [![License](https://img.shields.io/badge/License-GPL%20v2-blue.svg)](LICENSE)
 
 URLs that stay in sync when titles change. Automatic redirects. Duplicate prevention on copy, move, and recycler restore. Locking, access control, conflict detection – everything you need to manage URL paths with confidence.
@@ -18,7 +19,10 @@ URLs that stay in sync when titles change. Automatic redirects. Duplicate preven
 
 One `composer require`, sensible defaults – [highly configurable](#configuration) when you need it.
 
-> **[Try the interactive demo](https://wazum.github.io/sluggi/)** – see every feature live in your browser, no installation required.
+<p align="center">
+  <a href="https://wazum.github.io/sluggi/"><strong>Try the interactive demo</strong></a><br>
+  See every feature live in your browser – no installation required.
+</p>
 
 ## Installation
 

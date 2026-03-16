@@ -44,14 +44,23 @@
         hsl(from color-mix(in srgb, hsl(from #000 h s 50%), hsl(from #5033c7 h s 50%) 20%) h s 85%)
     );
 
-    /* Demo page variables */
-    --demo-bg: light-dark(#f4f4f6, #111);
+    /* Demo design system */
+    --demo-bg: light-dark(#f8f7f4, #111);
+    --demo-bg-end: light-dark(#f0eeeb, #0a0a0a);
     --demo-surface: light-dark(#fff, #1a1a1a);
-    --demo-text: var(--typo3-text-color-base);
-    --demo-text-secondary: var(--typo3-text-color-secondary);
+    --demo-surface-inner: light-dark(#f7f6f3, #222);
+    --demo-text: light-dark(#1a1a1a, #e8e8e8);
+    --demo-text-body: light-dark(#555, #aaa);
+    --demo-text-secondary: light-dark(#666, #999);
+    --demo-text-link: light-dark(#444, #bbb);
     --demo-border: var(--typo3-input-border-color);
     --demo-input-bg: var(--typo3-input-bg);
     --demo-input-border: var(--typo3-input-border-color);
+    --demo-shadow: light-dark(
+        0 1px 3px rgba(0, 0, 0, 0.03), 0 6px 16px rgba(0, 0, 0, 0.025),
+        0 1px 3px rgba(0, 0, 0, 0.2), 0 6px 16px rgba(0, 0, 0, 0.15)
+    );
+    --demo-divider: light-dark(#d8d4cf, #333);
     --demo-accent: light-dark(
         hsl(from #5033c7 h s 40%),
         hsl(from #5033c7 h s 50%)
@@ -59,210 +68,290 @@
 }
 
 body {
-    font-family: Verdana, Arial, Helvetica, sans-serif;
-    font-size: .75rem;
-    background: var(--demo-bg);
+    font-family: system-ui, -apple-system, sans-serif;
+    font-size: 1rem;
+    background: linear-gradient(180deg, var(--demo-bg) 0%, var(--demo-bg-end) 100%);
     color: var(--demo-text);
-    line-height: 1.5;
+    line-height: 1.6;
     -webkit-font-smoothing: antialiased;
 }
 
-header {
-    max-width: 800px;
-    margin: 0 auto;
-    padding: 3rem 1.5rem 1rem;
-    text-align: center;
-}
-
-header h1 {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    font-size: 1.75rem;
-    font-weight: 600;
-    letter-spacing: -0.02em;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 0.25rem;
-}
-
-.demo-logo {
-    width: 5rem;
-    height: 5rem;
-    mix-blend-mode: multiply;
-}
-
-@media (prefers-color-scheme: dark) {
-    .demo-logo {
-        mix-blend-mode: screen;
-    }
-}
-
-header .demo-tagline {
-    font-family: 'Georgia', 'Times New Roman', serif;
-    font-style: italic;
-    font-size: 1.05rem;
-    color: #ff8700;
-    font-weight: 500;
-    margin-top: 0.75rem;
-    margin-bottom: 4rem;
-    letter-spacing: 0.01em;
-    background: #fff;
-    display: inline-block;
-    padding: 0.4rem 1.5rem;
-    border-radius: 6px;
-}
-
-header .demo-pitch {
-    font-size: .9375rem;
-    margin-top: 0.75rem;
-    line-height: 1.6;
-    text-align: left;
-}
-
-header .demo-links {
-    font-size: .8125rem;
-    color: var(--demo-text-secondary);
-    margin-top: 0.5rem;
-    text-align: left;
-}
-
-header .demo-links a {
-    color: var(--demo-accent);
-    text-decoration: none;
-    font-weight: 600;
-}
-
-header .demo-links a:hover {
+a {
+    color: var(--demo-text-link);
     text-decoration: underline;
+    text-underline-offset: 2px;
+}
+
+a:hover {
+    color: var(--demo-text);
 }
 
 code {
-    font-size: 0.6875rem;
-    background: var(--typo3-surface-container-low);
+    font-size: 0.8125rem;
+    background: var(--demo-surface-inner);
     padding: 0.15em 0.4em;
     border-radius: 4px;
 }
 
-main {
-    max-width: 800px;
+/* ================================================================
+   Hero
+   ================================================================ */
+
+.demo-hero {
+    padding: 60px 24px 60px;
+    text-align: center;
+    max-width: 780px;
     margin: 0 auto;
-    padding: 1rem 1.5rem 4rem;
-    display: flex;
-    flex-direction: column;
-    gap: 1.5rem;
 }
 
-/* Headings in main */
+.demo-logo {
+    width: 120px;
+    height: 120px;
+}
 
-main > h2 {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    font-size: 1.125rem;
+.demo-hero h1 {
+    font-size: 2rem;
     font-weight: 600;
+    letter-spacing: 0.02em;
     margin: 0;
 }
 
-/* Code block with copy button */
-
-.demo-code-block {
-    display: flex;
-    align-items: center;
-    background: var(--typo3-surface-container-low);
-    border: 1px solid var(--demo-border);
-    border-radius: 6px;
-    padding: 0.625rem 0.75rem;
+.demo-hero .demo-tagline {
+    font-size: 1rem;
+    color: var(--demo-text-secondary);
+    margin: 8px 0 28px 0;
 }
 
-.demo-code-block code {
-    flex: 1;
+.demo-hero .demo-pitch {
+    font-size: 1rem;
+    color: var(--demo-text-body);
+    margin-top: 16px;
+    line-height: 1.7;
+    text-align: left;
+}
+
+.demo-hero .demo-links {
+    font-size: 0.875rem;
+    margin-top: 14px;
+    text-align: left;
+}
+
+/* Copyable install block */
+
+.demo-install-block {
+    margin: 28px 0;
+    display: inline-flex;
+    font: inherit;
+    color: inherit;
+    align-items: center;
+    gap: 12px;
+    background: light-dark(#1a1a1a, #2a2a2a);
+    border: 1px solid light-dark(transparent, #333);
+    padding: 10px 16px 10px 24px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.15s;
+}
+
+.demo-install-block:hover {
+    background: light-dark(#2a2a2a, #333);
+}
+
+.demo-install-block code {
+    color: #e0e0e0;
+    font-size: 0.875rem;
+    font-family: ui-monospace, 'SF Mono', SFMono-Regular, Menlo, Consolas, monospace;
+    letter-spacing: -0.01em;
+    user-select: all;
     background: none;
     padding: 0;
-    border-radius: 0;
-    font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace;
-    font-size: 0.8125rem;
-    user-select: all;
 }
 
-.demo-copy-button {
+.demo-install-block .demo-copy-icon {
+    color: #888;
     flex-shrink: 0;
-    background: none;
-    border: none;
-    padding: 0.25rem;
-    cursor: pointer;
-    color: var(--demo-text-secondary);
+    transition: color 0.15s;
     line-height: 0;
 }
 
-.demo-copy-button:hover {
-    color: var(--demo-text);
+.demo-install-block:hover .demo-copy-icon {
+    color: #ccc;
 }
 
-.demo-copy-button .demo-check-icon {
+.demo-install-block .demo-check-icon {
+    display: none;
+    line-height: 0;
+}
+
+.demo-install-block.copied .demo-copy-icon {
     display: none;
 }
 
-.demo-copy-button.copied .demo-copy-icon {
-    display: none;
-}
-
-.demo-copy-button.copied .demo-check-icon {
+.demo-install-block.copied .demo-check-icon {
     display: block;
-    color: #22c55e;
+    color: #ff8700;
 }
 
-/* Card */
+/* ================================================================
+   Divider
+   ================================================================ */
+
+.demo-divider {
+    max-width: 780px;
+    margin: 0 auto;
+    padding: 0 24px;
+}
+
+.demo-divider-line {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--demo-divider), transparent);
+}
+
+/* ================================================================
+   Content
+   ================================================================ */
+
+main {
+    max-width: 780px;
+    margin: 0 auto;
+    padding: 0 24px;
+}
+
+/* ================================================================
+   Demo intro
+   ================================================================ */
+
+.demo-intro {
+    padding-top: 48px;
+}
+
+.demo-intro h2 {
+    font-size: 1.375rem;
+    font-weight: 600;
+    margin-bottom: 6px;
+}
+
+.demo-intro p {
+    font-size: 1rem;
+    color: var(--demo-text-body);
+    line-height: 1.6;
+}
+
+/* ================================================================
+   Feature list
+   ================================================================ */
+
+.demo-features {
+    padding-top: 48px;
+}
+
+.demo-features h2 {
+    font-size: 1.375rem;
+    font-weight: 600;
+    margin-bottom: 16px;
+}
+
+.demo-features ul {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.demo-features li {
+    font-size: 1rem;
+    color: var(--demo-text-body);
+    line-height: 1.5;
+    padding-left: 20px;
+    position: relative;
+}
+
+.demo-features li::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 9px;
+    width: 8px;
+    height: 8px;
+    background: #ff8700;
+    border-radius: 50%;
+}
+
+.demo-features li strong {
+    color: var(--demo-text);
+    font-weight: 600;
+}
+
+.demo-features > p {
+    font-size: 1rem;
+    color: var(--demo-text-secondary);
+    margin-top: 20px;
+}
+
+/* ================================================================
+   Cards
+   ================================================================ */
 
 .demo-card {
     background: var(--demo-surface);
-    border: 1px solid var(--demo-border);
-    border-radius: 6px;
-    padding: 1.5rem;
+    border-radius: 16px;
+    padding: 32px;
+    margin-top: 48px;
+    box-shadow: var(--demo-shadow);
 }
 
 .demo-card h2 {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    font-size: 1rem;
+    font-size: 1.25rem;
     font-weight: 600;
-    margin-bottom: 0.25rem;
+    margin-bottom: 4px;
 }
 
 .demo-card > p {
-    font-size: 0.75rem;
+    font-size: 1rem;
     color: var(--demo-text-secondary);
-    margin-bottom: 1.25rem;
+    margin-bottom: 24px;
+    line-height: 1.6;
+}
+
+.demo-card--highlight {
+    background: light-dark(#dcd9d4, #252525);
+    --demo-surface-inner: light-dark(#cfccc7, #2e2e2e);
 }
 
 .demo-domain {
     font-weight: 400;
     color: var(--demo-text-secondary);
-    font-size: 0.75rem;
+    font-size: 0.875rem;
 }
 
 .demo-subheading {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    font-size: 0.8125rem;
-    font-weight: 600;
-    margin-top: 1.25rem;
-    margin-bottom: 0.125rem;
+    font-size: 1rem;
+    font-weight: 500;
+    color: var(--demo-text-secondary);
+    margin-top: 24px;
+    margin-bottom: 6px;
 }
 
 .demo-subdescription {
-    font-size: 0.75rem;
+    font-size: 1rem;
     color: var(--demo-text-secondary);
-    margin-bottom: 0.75rem;
+    margin-bottom: 12px;
 }
 
-/* TYPO3-style field label (bold, normal case) */
+/* Field label */
 
 .demo-field-label {
     display: block;
-    font-weight: 700;
-    margin-bottom: 0.25rem;
+    font-weight: 600;
+    font-size: 1rem;
+    color: var(--demo-text-body);
+    margin-bottom: 6px;
 }
 
 .demo-field-input {
     width: 100%;
-    padding: 0.5rem 0.75rem;
-    font-size: .75rem;
+    padding: 10px 16px;
+    font-size: 0.9375rem;
     font-family: inherit;
     background: var(--demo-input-bg);
     color: var(--demo-text);
@@ -276,20 +365,22 @@ main > h2 {
     border-color: var(--typo3-input-focus-border-color);
 }
 
-/* TYPO3-style fieldset legend for "URL Segment" */
+/* Slug fieldset */
 
 .demo-slug-fieldset {
     border: none;
     padding: 0;
-    margin: 0.75rem 0 0;
+    margin: 20px 0 0;
 }
 
 .demo-slug-legend {
     display: flex;
     align-items: center;
-    gap: 0.25rem;
+    gap: 5px;
     font-weight: 400;
-    margin-bottom: 0.25rem;
+    font-size: 0.8125rem;
+    color: var(--demo-text-secondary);
+    margin-bottom: 6px;
 }
 
 .demo-slug-legend .demo-chain-icon {
@@ -303,9 +394,12 @@ main > h2 {
 
 .demo-element-wrapper {
     position: relative;
+    font-size: 14px;
 }
 
-/* Source field badge (chain-link icon on title input when sync is active) */
+/* ================================================================
+   Source field badge
+   ================================================================ */
 
 .input-group {
     display: flex;
@@ -342,7 +436,7 @@ main > h2 {
     display: block;
 }
 
-/* Source group (flexbox layout for badge + input + confirm button) */
+/* Source group */
 
 .sluggi-source-group {
     display: flex;
@@ -362,7 +456,6 @@ main > h2 {
     display: none;
 }
 
-/* When sync is active, show badge and adjust styling */
 .sluggi-source-group--active > .sluggi-source-badge {
     display: flex;
     align-items: center;
@@ -378,7 +471,6 @@ main > h2 {
     border-bottom-left-radius: 0;
 }
 
-/* Confirm button styling */
 .sluggi-source-confirm.input-group-text {
     cursor: pointer;
     border-left: 0;
@@ -395,7 +487,6 @@ main > h2 {
     display: block;
 }
 
-/* Show confirm button when input is focused */
 .sluggi-source-group:focus-within > .sluggi-source-confirm.input-group-text {
     display: flex;
     align-items: center;
@@ -406,7 +497,67 @@ main > h2 {
     border-bottom-right-radius: 0;
 }
 
-/* Modal dialog styles */
+/* ================================================================
+   Scroll animations (progressive enhancement)
+   ================================================================ */
+
+.demo-card--animate {
+    opacity: 0;
+    transform: translateY(20px);
+}
+
+.demo-card--visible {
+    opacity: 1;
+    transform: translateY(0);
+    transition: opacity 0.5s ease-out, transform 0.5s ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .demo-card--animate {
+        opacity: 1;
+        transform: none;
+    }
+}
+
+/* ================================================================
+   Footer
+   ================================================================ */
+
+.demo-footer {
+    max-width: 780px;
+    margin: 0 auto;
+    padding: 80px 24px 64px;
+    text-align: center;
+}
+
+.demo-footer .demo-logo {
+    width: 80px;
+    height: 80px;
+    margin-bottom: 16px;
+}
+
+.demo-footer-links {
+    font-size: 1rem;
+    color: var(--demo-text-secondary);
+}
+
+.demo-footer-links a {
+    color: var(--demo-text-secondary);
+}
+
+.demo-footer-links a:hover {
+    color: var(--demo-text-body);
+}
+
+.demo-footer-credit {
+    font-size: 1rem;
+    color: var(--demo-text-secondary);
+    margin-top: 12px;
+}
+
+/* ================================================================
+   Modal dialog styles
+   ================================================================ */
 
 .sluggi-demo-modal {
     border: 1px solid var(--demo-border);
@@ -428,14 +579,13 @@ main > h2 {
 }
 
 .sluggi-demo-modal h3 {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     font-size: 1rem;
     font-weight: 600;
     margin-bottom: 0.75rem;
 }
 
 .sluggi-demo-modal p {
-    font-size: 0.75rem;
+    font-size: 0.875rem;
     color: var(--demo-text-secondary);
     margin-bottom: 1.25rem;
     line-height: 1.6;
@@ -449,7 +599,7 @@ main > h2 {
 
 .sluggi-demo-modal-actions button {
     padding: 0.4rem 0.875rem;
-    font-size: .75rem;
+    font-size: 0.875rem;
     font-family: inherit;
     border: 1px solid var(--demo-input-border);
     border-radius: var(--typo3-input-border-radius);
@@ -481,4 +631,55 @@ main > h2 {
 
 .sluggi-demo-modal-actions button.primary:hover {
     opacity: 0.9;
+}
+
+/* ================================================================
+   Responsive: desktop
+   ================================================================ */
+
+@media (min-width: 768px) {
+    .demo-hero {
+        padding: 80px 40px 80px;
+    }
+
+    .demo-hero h1 {
+        font-size: 2.5rem;
+    }
+
+    .demo-hero .demo-tagline {
+        font-size: 1.125rem;
+    }
+
+    .demo-install-block {
+        padding: 12px 20px 12px 28px;
+    }
+
+    .demo-install-block code {
+        font-size: 0.9375rem;
+    }
+
+    .demo-divider {
+        padding: 0 40px;
+    }
+
+    main {
+        padding: 0 40px;
+    }
+
+    .demo-card {
+        padding: 36px 40px;
+        margin-top: 56px;
+    }
+
+    .demo-card h2 {
+        font-size: 1.375rem;
+    }
+
+    .demo-field-input {
+        padding: 12px 18px;
+    }
+
+    .demo-footer {
+        padding: 100px 40px 80px;
+    }
 }

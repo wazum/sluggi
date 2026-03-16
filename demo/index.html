@@ -8,27 +8,32 @@
     <link rel="stylesheet" href="demo.css">
 </head>
 <body>
-    <header>
-        <h1><img src="sluggi-logo.svg" alt="sluggi" class="demo-logo">sluggi</h1>
+    <header class="demo-hero">
+        <img src="sluggi-logo.svg" alt="sluggi" class="demo-logo">
+        <h1>sluggi</h1>
         <p class="demo-tagline">The URL Path Manager TYPO3 CMS deserves.</p>
         <p class="demo-pitch">URLs that stay in sync when titles change. Automatic redirects. Duplicate prevention on copy, move, and recycler restore. Locking, access control, conflict detection – everything you need to manage URL paths with confidence.</p>
+        <p class="demo-pitch">Works with <a href="https://typo3.org/">TYPO3 CMS</a> 12, 13, and 14. One <em>sluggi</em> version for all of them. Fully tested across PHP 8.2–8.4, backed by hundreds of unit, functional, and end-to-end tests. Install once, configure to taste.</p>
+        <p class="demo-pitch">Trusted by <span id="demo-install-count">thousands of</span> installations.</p>
+        <button type="button" class="demo-install-block" aria-label="Copy to clipboard" onclick="navigator.clipboard.writeText('composer require wazum/sluggi').then(() => { this.classList.add('copied'); setTimeout(() => this.classList.remove('copied'), 1500); })">
+            <code>composer require wazum/sluggi</code>
+            <svg class="demo-copy-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+            <svg class="demo-check-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        </button>
         <p class="demo-links"><a href="https://github.com/wazum/sluggi">GitHub &amp; Documentation</a></p>
     </header>
 
+    <div class="demo-divider"><div class="demo-divider-line"></div></div>
+
     <main>
-        <h2>Installation</h2>
-        <div class="demo-code-block">
-            <code>composer require wazum/sluggi</code>
-            <button class="demo-copy-button" aria-label="Copy to clipboard" onclick="navigator.clipboard.writeText('composer require wazum/sluggi').then(() => { this.classList.add('copied'); setTimeout(() => this.classList.remove('copied'), 1500); })">
-                <svg class="demo-copy-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
-                <svg class="demo-check-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-            </button>
+        <div class="demo-intro">
+            <h2>Interactive Demo</h2>
+            <p>Every component below is a live <em>sluggi</em> web component – the same one that runs inside the TYPO3 backend. Click, type, toggle, and explore. Nothing is simulated.</p>
         </div>
 
-        <h2>Demo</h2>
         <!-- Default -->
         <section class="demo-card">
-            <h2>Default <span class="demo-domain">(https://example.com)</span></h2>
+            <h2>Default</h2>
             <p>What you get after <code>composer require wazum/sluggi</code>. Click the slug to edit inline, or regenerate it from the title.</p>
 
             <label class="demo-field-label">Page title</label>
@@ -65,6 +70,19 @@
                 </div>
             </fieldset>
         </section>
+
+        <div class="demo-features">
+            <h2>What else can <em>sluggi</em> do for you?</h2>
+            <ul>
+                <li><strong>Auto-sync</strong> – URLs update automatically when page titles change</li>
+                <li><strong>Locking</strong> – pin critical URLs so nobody accidentally breaks them</li>
+                <li><strong>Access control</strong> – restrict editing to the last segment, or enforce hierarchy permissions</li>
+                <li><strong>Redirect control</strong> – choose per change whether to create a redirect</li>
+                <li><strong>Recursive updates</strong> – re-apply URL paths to an entire subtree via context menu</li>
+                <li><strong>Any slug table</strong> – works with news, events, or any record type that has a slug field</li>
+            </ul>
+            <p>… and more – see the <a href="https://github.com/wazum/sluggi#readme">full documentation</a> for all options. Every feature below is interactive – try them out.</p>
+        </div>
 
         <!-- Auto-Sync -->
         <section class="demo-card">
@@ -279,50 +297,8 @@
             </fieldset>
         </section>
 
-        <!-- New Page -->
-        <section class="demo-card">
-            <h2>New Page</h2>
-            <p>Type a title and the slug is generated on the fly. Conflicts are detected before you save.</p>
-
-            <label class="demo-field-label">Page title</label>
-            <div>
-                <span class="input-group-text sluggi-source-badge" style="display:none" title="This field influences the URL slug"><span class="sluggi-source-badge__icon"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg></span></span>
-                <input type="text" class="demo-field-input" value=""
-                    data-sluggi-source
-                    data-formengine-input-name="data[pages][NEW1][title]"
-                    data-formengine-input-initialized="true"
-                    placeholder="Enter a page title…" />
-            </div>
-
-            <fieldset class="demo-slug-fieldset">
-                <legend class="demo-slug-legend">
-                    <svg class="demo-chain-icon" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
-                    URL Segment <span class="demo-domain">(https://example.com)</span>
-                </legend>
-                <div class="demo-element-wrapper">
-                    <sluggi-element
-                        value=""
-                        sync-feature-enabled
-                        page-id="0"
-                        record-id="NEW1"
-                        table-name="pages"
-                        field-name="slug"
-                        language="0"
-                        signature="demo"
-                        command="new"
-                        parent-page-id="1"
-                    ></sluggi-element>
-                    <input type="hidden" class="sluggi-hidden-field" name="data[pages][NEW1][slug]" value="" />
-                    <input type="hidden" class="sluggi-sync-field" name="data[pages][NEW1][tx_sluggi_sync]" value="1" />
-                    <input type="hidden" class="sluggi-lock-field" name="data[pages][NEW1][slug_locked]" value="0" />
-                    <input type="hidden" class="sluggi-full-path-field" value="0" />
-                    <input type="hidden" class="sluggi-redirect-field" value="0" />
-                </div>
-            </fieldset>
-        </section>
-
         <!-- Everything Combined -->
-        <section class="demo-card">
+        <section class="demo-card demo-card--highlight">
             <h2>Everything Combined</h2>
             <p>Sync, locking, access control, clipboard copy, redirect info, and regeneration – all on a deeply nested university page.</p>
 
@@ -369,6 +345,17 @@
             </fieldset>
         </section>
     </main>
+
+    <footer class="demo-footer">
+        <div class="demo-divider" style="padding:0;max-width:100%;margin-bottom:48px;"><div class="demo-divider-line"></div></div>
+        <img src="sluggi-logo.svg" alt="sluggi" class="demo-logo">
+        <p class="demo-footer-links">
+            <a href="https://github.com/wazum/sluggi">GitHub</a> &middot;
+            <a href="https://github.com/wazum/sluggi#readme">Documentation</a> &middot;
+            <a href="https://packagist.org/packages/wazum/sluggi">Packagist</a>
+        </p>
+        <p class="demo-footer-credit">Made with love for the TYPO3 CMS community by <a href="https://www.wolfgang-klinger.dev">Wolfgang Klinger</a></p>
+    </footer>
 
     <script type="module" src="demo.ts"></script>
 </body>

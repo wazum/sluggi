@@ -67,6 +67,18 @@ window.fetch = async (input: RequestInfo | URL, init?: RequestInit): Promise<Res
 
 import '../src/index.js';
 
+originalFetch('https://packagist.org/packages/wazum/sluggi.json')
+    .then((response) => response.json())
+    .then((data) => {
+        const total = data?.package?.downloads?.total;
+        if (total && total > 0) {
+            const formatted = total >= 1000 ? Math.floor(total / 1000) + 'k+' : String(total);
+            const el = document.getElementById('demo-install-count');
+            if (el) el.textContent = formatted;
+        }
+    })
+    .catch(() => {});
+
 const labels: Record<string, string> = {
     'conflict.title': 'URL path conflict',
     'conflict.message': 'The URL path "%s" is already in use by another page.',
@@ -124,5 +136,29 @@ customElements.whenDefined('sluggi-element').then(async () => {
                 sluggiElement.sendSlugProposal?.('recreate');
             }
         });
+    }
+
+    // Scroll animations (progressive enhancement)
+    if ('IntersectionObserver' in window && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        const cards = document.querySelectorAll<HTMLElement>('.demo-card');
+        for (const card of cards) {
+            card.classList.add('demo-card--animate');
+        }
+
+        const observer = new IntersectionObserver(
+            (entries) => {
+                for (const entry of entries) {
+                    if (entry.isIntersecting) {
+                        (entry.target as HTMLElement).classList.add('demo-card--visible');
+                        observer.unobserve(entry.target);
+                    }
+                }
+            },
+            { threshold: 0.1 },
+        );
+
+        for (const card of cards) {
+            observer.observe(card);
+        }
     }
 });
