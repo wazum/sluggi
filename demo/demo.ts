@@ -41,10 +41,12 @@ window.fetch = async (input: RequestInfo | URL, init?: RequestInit): Promise<Res
                 proposal = proposal + '-1';
             }
         } else {
+            const tableName = (formData.get('tableName') as string) ?? 'pages';
             const title = (formData.get('values[title]') as string) ?? '';
             const navTitle = (formData.get('values[nav_title]') as string) ?? '';
             const source = navTitle || title;
-            proposal = source ? '/' + slugify(source) : '/';
+            const isPageTable = tableName === 'pages';
+            proposal = source ? (isPageTable ? '/' : '') + slugify(source) : (isPageTable ? '/' : '');
         }
 
         await delay(300 + Math.random() * 400);

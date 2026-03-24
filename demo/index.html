@@ -297,6 +297,50 @@
             </fieldset>
         </section>
 
+        <!-- Non-Page Tables -->
+        <section class="demo-card">
+            <h2>Non-Page Tables</h2>
+            <p>Works beyond pages – news articles, events, or any record with a TCA slug field. Add the table to <code>synchronize_tables</code> and each record gets its own sync toggle. Slug values have no leading <code>/</code> and are typically flat (no hierarchy). Try toggling sync off and editing the title – the slug stays put.</p>
+            <p class="demo-config-hint">Enable via <code>synchronize_tables: tx_news_domain_model_news</code> in extension settings.</p>
+
+            <label class="demo-field-label">News title</label>
+            <div class="sluggi-source-group">
+                <span class="sluggi-source-badge" title="This field influences the URL slug"><span class="sluggi-source-badge__icon"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg></span></span>
+                <input type="text" class="demo-field-input" value="TYPO3 v14 Released with New Features"
+                    data-sluggi-source
+                    data-formengine-input-name="data[tx_news_domain_model_news][1][title]"
+                    data-formengine-input-initialized="true" />
+                <button type="button" class="sluggi-source-confirm input-group-text" title="Update URL path now"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg></button>
+            </div>
+
+            <fieldset class="demo-slug-fieldset">
+                <legend class="demo-slug-legend">
+                    <svg class="demo-chain-icon" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+                    URL Segment
+                </legend>
+                <div class="demo-element-wrapper">
+                    <sluggi-element
+                        value="typo3-v14-released-with-new-features"
+                        sync-feature-enabled
+                        is-synced
+                        page-id="0"
+                        record-id="1"
+                        table-name="tx_news_domain_model_news"
+                        field-name="path_segment"
+                        language="0"
+                        signature="demo"
+                        command="edit"
+                        parent-page-id="0"
+                    ></sluggi-element>
+                    <input type="hidden" class="sluggi-hidden-field" name="data[tx_news_domain_model_news][1][path_segment]" value="typo3-v14-released-with-new-features" />
+                    <input type="hidden" class="sluggi-sync-field" name="data[tx_news_domain_model_news][1][tx_sluggi_sync]" value="1" />
+                    <input type="hidden" class="sluggi-lock-field" name="data[tx_news_domain_model_news][1][slug_locked]" value="0" />
+                    <input type="hidden" class="sluggi-full-path-field" value="0" />
+                    <input type="hidden" class="sluggi-redirect-field" value="0" />
+                </div>
+            </fieldset>
+        </section>
+
         <!-- Everything Combined -->
         <section class="demo-card demo-card--highlight">
             <h2>Everything Combined</h2>

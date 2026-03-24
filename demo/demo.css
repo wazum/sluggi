@@ -338,6 +338,12 @@ main {
     margin-bottom: 12px;
 }
 
+.demo-config-hint {
+    font-size: 0.9rem;
+    color: var(--demo-text-secondary);
+    margin-bottom: 16px;
+}
+
 /* Field label */
 
 .demo-field-label {
