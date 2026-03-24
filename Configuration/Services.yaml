@@ -40,6 +40,7 @@ services:
 
   Wazum\Sluggi\DataHandler\PersistRecordSyncState:
     public: true
+    shared: false
 
   Wazum\Sluggi\DataHandler\PreventLockedSlugEdit:
     public: true
@@ -106,6 +107,7 @@ services:
 
   Wazum\Sluggi\Service\SlugSyncService:
     public: true
+    shared: false
 
   Wazum\Sluggi\Service\UserSettingsService:
     public: true
