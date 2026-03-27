@@ -392,6 +392,29 @@ _sluggi_ works around these known TYPO3 core issues:
 
 ## Upgrading
 
+### 14.0.0
+
+**Configuration keys renamed**
+
+The following extension configuration keys were renamed. Your existing values are **not** migrated automatically — update them manually in `config/system/additional.php` or via **Admin Tools > Settings > Extension Configuration**:
+
+| Old key (v12/v13) | New key (v14) |
+|---|---|
+| `exclude_page_types` | `exclude_doktypes` |
+| `allow_lock` | `lock` |
+
+**Configuration keys removed**
+
+| Removed key | Replacement |
+|---|---|
+| `pages_fields` | Configure source fields via TCA `generatorOptions.fields` |
+| `whitelist` | Use standard TYPO3 backend user/group permissions for `pages:slug` |
+| `slash_replacement` | Now always active, no longer configurable |
+
+**Redirect settings moved to site configuration**
+
+Extension-level redirect keys (`redirect_lifetime`, `redirect_code`, `redirect_force_https`, `redirect_respect_query_parameters`, `redirect_keep_query_parameters`) were removed. Use TYPO3's native per-site redirect settings instead. Ready-made presets are shipped in `Configuration/SiteSettings/`.
+
 ### 14.2.0
 
 **`exclude_doktypes` default changed from empty to `199,254`** ([#135](https://github.com/wazum/sluggi/issues/135))
