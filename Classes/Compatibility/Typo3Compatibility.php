@@ -125,6 +125,30 @@ final class Typo3Compatibility
     }
 
     /**
+     * VersionState DELETE_PLACEHOLDER value.
+     * TYPO3 12: class constant (Enumeration subclass)
+     * TYPO3 13+: backed enum case.
+     *
+     * @deprecated Remove when dropping TYPO3 12 support — use VersionState::DELETE_PLACEHOLDER->value directly
+     */
+    public static function versionStateDeletePlaceholder(): int
+    {
+        return 2;
+    }
+
+    /**
+     * VersionState MOVE_POINTER value.
+     * TYPO3 12: class constant (Enumeration subclass)
+     * TYPO3 13+: backed enum case.
+     *
+     * @deprecated Remove when dropping TYPO3 12 support — use VersionState::MOVE_POINTER->value directly
+     */
+    public static function versionStateMovePointer(): int
+    {
+        return 4;
+    }
+
+    /**
      * Write site configuration compatible across TYPO3 versions
      * TYPO3 12: SiteConfiguration->write()
      * TYPO3 13+: SiteWriter->write().

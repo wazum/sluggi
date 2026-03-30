@@ -6,6 +6,7 @@ namespace Wazum\Sluggi\Controller;
 
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
+use TYPO3\CMS\Core\Authentication\BackendUserAuthentication;
 use TYPO3\CMS\Core\DataHandling\SlugHelper;
 use TYPO3\CMS\Core\Http\JsonResponse;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
@@ -68,7 +69,9 @@ trait FormSlugAjaxControllerTrait
         $fieldName = (string)($params['fieldName'] ?? '');
         $fieldConfig = $GLOBALS['TCA'][$tableName]['columns'][$fieldName]['config'] ?? [];
 
-        $slug = GeneralUtility::makeInstance(SlugHelper::class, $tableName, $fieldName, $fieldConfig);
+        // @phpstan-ignore nullsafe.neverNull
+        $workspaceId = $this->getBackendUser()?->workspace ?? 0;
+        $slug = GeneralUtility::makeInstance(SlugHelper::class, $tableName, $fieldName, $fieldConfig, (int)$workspaceId);
         $mode = (string)($params['mode'] ?? '');
         /** @var array<string, mixed> $values */
         $values = $params['values'] ?? [];
@@ -79,5 +82,10 @@ trait FormSlugAjaxControllerTrait
             'manual' => $slug->sanitize((string)($values['manual'] ?? '')),
             default => $slug->generate($values, (int)($params['parentPageId'] ?? 0)),
         };
+    }
+
+    private function getBackendUser(): ?BackendUserAuthentication
+    {
+        return $GLOBALS['BE_USER'] ?? null;
     }
 }

@@ -39,7 +39,7 @@ final class BypassAccessCheckForRedirectCreation
             return false;
         }
 
-        $tables = array_keys($dataHandler->datamap ?? []);
+        $tables = array_keys($dataHandler->datamap);
 
         return $tables === ['sys_redirect'];
     }

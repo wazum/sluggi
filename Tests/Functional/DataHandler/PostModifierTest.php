@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Wazum\Sluggi\Tests\Functional\DataHandler;
 
 use PHPUnit\Framework\Attributes\Test;
+use TYPO3\CMS\Core\Context\Context;
+use TYPO3\CMS\Core\Context\WorkspaceAspect;
 use TYPO3\CMS\Core\DataHandling\DataHandler;
 use TYPO3\CMS\Core\Localization\LanguageServiceFactory;
 use TYPO3\CMS\Core\Schema\TcaSchemaFactory;
@@ -30,6 +32,7 @@ final class PostModifierTest extends FunctionalTestCase
 
     protected array $coreExtensionsToLoad = [
         'redirects',
+        'workspaces',
     ];
 
     private function setUpSite(): void
@@ -160,8 +163,8 @@ final class PostModifierTest extends FunctionalTestCase
     {
         $this->setUpTestWithWorkspacePostModifier('pages_for_workspace_postmodifier.csv');
 
-        // Set backend user to workspace 1
         $GLOBALS['BE_USER']->workspace = 1;
+        $this->get(Context::class)->setAspect('workspace', new WorkspaceAspect(1));
 
         // Use SlugGeneratorService directly to test workspace ID is passed to postModifiers
         $generatorService = GeneralUtility::makeInstance(\Wazum\Sluggi\Service\SlugGeneratorService::class);

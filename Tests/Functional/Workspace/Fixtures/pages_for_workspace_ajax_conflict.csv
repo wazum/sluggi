@@ -1,0 +1,14 @@
+"be_users"
+,"uid","pid","username","password","admin"
+,1,0,"admin","$2y$12$abc123",1
+
+"sys_workspace"
+,"uid","pid","title"
+,1,0,"Test Workspace"
+
+"pages"
+,"uid","pid","title","slug","tx_sluggi_sync","doktype","sys_language_uid","t3ver_wsid","t3ver_state","t3ver_oid"
+,1,0,"Root Page","/",0,1,0,0,0,0
+,2,1,"Existing Page","/existing-page",1,1,0,0,0,0
+,3,1,"Another Page","/another-page",1,1,0,0,0,0
+,4,1,"Blocker","/existing-page-ws1",1,1,0,0,0,0

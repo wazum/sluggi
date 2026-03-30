@@ -6,6 +6,8 @@ composer.lock
 public
 var
 Tests/.phpunit.cache
+Tests/phpunit.local.xml
+Tests/phpunit.functional.local.xml
 Tests/E2e/.auth
 Tests/E2e/test-results
 demo-dist

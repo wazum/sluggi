@@ -7,6 +7,8 @@ namespace Wazum\Sluggi\Tests\Functional\Controller;
 use PHPUnit\Framework\Attributes\Test;
 use Psr\Http\Message\ServerRequestInterface;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
+use TYPO3\CMS\Core\Context\Context;
+use TYPO3\CMS\Core\Context\WorkspaceAspect;
 use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Http\ServerRequest;
 use TYPO3\CMS\Core\Http\Uri;
@@ -24,6 +26,7 @@ final class RecursiveSlugUpdateControllerTest extends FunctionalTestCase
 
     protected array $coreExtensionsToLoad = [
         'redirects',
+        'workspaces',
     ];
 
     protected array $configurationToUseInTestInstance = [
@@ -286,5 +289,94 @@ final class RecursiveSlugUpdateControllerTest extends FunctionalTestCase
         self::assertSame(2, $body['skipped'], 'Two excluded pages should be skipped');
 
         $this->assertCSVDataSet(__DIR__ . '/Fixtures/pages_after_recursive_excluded_doktypes.csv');
+    }
+
+    #[Test]
+    public function usesWorkspaceOverlaidTitleForSlugGeneration(): void
+    {
+        $this->importCSVDataSet(__DIR__ . '/Fixtures/pages_recursive_workspace_modified.csv');
+
+        $backendUser = $GLOBALS['BE_USER'];
+        $backendUser->workspace = 1;
+        $this->get(Context::class)->setAspect('workspace', new WorkspaceAspect(1));
+
+        $controller = $this->get(RecursiveSlugUpdateController::class);
+        $response = $controller->updateAction($this->createRequest(2));
+
+        $body = json_decode((string)$response->getBody(), true);
+        self::assertTrue($body['success']);
+
+        $record = BackendUtility::getRecordWSOL('pages', 3, 'slug');
+        self::assertSame('/parent/child-modified', $record['slug']);
+
+        // The controller should process exactly 1 child (the live record with overlay),
+        // not 2 (live + workspace version separately)
+        self::assertSame(1, $body['updated'], 'Should process the live record once with workspace overlay, not both live and workspace rows');
+    }
+
+    #[Test]
+    public function processesPageMovedIntoSubtreeInWorkspace(): void
+    {
+        $this->importCSVDataSet(__DIR__ . '/Fixtures/pages_recursive_workspace_moved_in.csv');
+
+        $backendUser = $GLOBALS['BE_USER'];
+        $backendUser->workspace = 1;
+        $this->get(Context::class)->setAspect('workspace', new WorkspaceAspect(1));
+
+        $controller = $this->get(RecursiveSlugUpdateController::class);
+        $response = $controller->updateAction($this->createRequest(2));
+
+        $body = json_decode((string)$response->getBody(), true);
+        self::assertTrue($body['success']);
+
+        // Base fixture has page 3 under parent 2 (updated).
+        // Page 4 was moved INTO parent 2 in workspace — should also be processed.
+        // So 2 updates total (page 3 + page 4).
+        self::assertSame(2, $body['updated'], 'Page moved into subtree in workspace should be processed');
+    }
+
+    #[Test]
+    public function skipsPageMovedOutOfSubtreeInWorkspace(): void
+    {
+        $this->importCSVDataSet(__DIR__ . '/Fixtures/pages_recursive_workspace_moved_out.csv');
+
+        $backendUser = $GLOBALS['BE_USER'];
+        $backendUser->workspace = 1;
+        $this->get(Context::class)->setAspect('workspace', new WorkspaceAspect(1));
+
+        $controller = $this->get(RecursiveSlugUpdateController::class);
+        $response = $controller->updateAction($this->createRequest(2));
+
+        $body = json_decode((string)$response->getBody(), true);
+        self::assertTrue($body['success']);
+
+        // Base fixture has page 3 under parent 2 (expected to be updated).
+        // Page 4 was moved out of parent 2 in workspace — should NOT be processed.
+        // So only 1 update (page 3), not 2.
+        self::assertSame(1, $body['updated'], 'Moved-away page should not be processed under old parent');
+    }
+
+    #[Test]
+    public function skipsWorkspaceDeletedPages(): void
+    {
+        $this->importCSVDataSet(__DIR__ . '/Fixtures/pages_recursive_workspace_deleted.csv');
+
+        $backendUser = $GLOBALS['BE_USER'];
+        $backendUser->workspace = 1;
+        $this->get(Context::class)->setAspect('workspace', new WorkspaceAspect(1));
+
+        $controller = $this->get(RecursiveSlugUpdateController::class);
+        $response = $controller->updateAction($this->createRequest(2));
+
+        $body = json_decode((string)$response->getBody(), true);
+        self::assertTrue($body['success']);
+
+        // Page uid=3 is deleted in workspace — should be skipped, live slug unchanged
+        $deletedRecord = BackendUtility::getRecord('pages', 3, 'slug');
+        self::assertSame('/old/child', $deletedRecord['slug']);
+
+        // Page uid=4 is not deleted — should be updated
+        $keptRecord = BackendUtility::getRecordWSOL('pages', 4, 'slug');
+        self::assertSame('/parent/kept-in-ws', $keptRecord['slug']);
     }
 }

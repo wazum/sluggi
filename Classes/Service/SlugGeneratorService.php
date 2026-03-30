@@ -6,7 +6,6 @@ namespace Wazum\Sluggi\Service;
 
 use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\Authentication\BackendUserAuthentication;
-use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\DataHandling\Model\RecordState;
 use TYPO3\CMS\Core\DataHandling\Model\RecordStateFactory;
 use TYPO3\CMS\Core\DataHandling\SlugHelper;
@@ -104,16 +103,13 @@ final readonly class SlugGeneratorService
         $pageUid = $pageId;
 
         if ($languageId > 0) {
-            $queryBuilder = GeneralUtility::makeInstance(ConnectionPool::class)
-                ->getQueryBuilderForTable('pages');
-            $translatedUid = $queryBuilder->select('uid')
-                ->from('pages')
-                ->where(
-                    $queryBuilder->expr()->eq('l10n_parent', $pageId),
-                    $queryBuilder->expr()->eq('sys_language_uid', $languageId)
-                )->executeQuery()->fetchOne();
-            if ($translatedUid) {
-                $pageUid = (int)$translatedUid;
+            $localizedRecords = BackendUtility::getRecordLocalization('pages', $pageId, $languageId);
+            if (!empty($localizedRecords)) {
+                $localizedRecord = reset($localizedRecords);
+                BackendUtility::workspaceOL('pages', $localizedRecord);
+                if (is_array($localizedRecord)) {
+                    $pageUid = (int)$localizedRecord['uid'];
+                }
             }
         }
 
