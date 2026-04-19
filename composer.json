@@ -37,7 +37,7 @@
     "require-dev": {
         "friendsofphp/php-cs-fixer": "^3.65",
         "phpstan/phpstan": "^2.0",
-        "phpunit/phpunit": "^10.5 || ^11.5",
+        "phpunit/phpunit": "^10.5 || ^11.5 || ^12.5.22",
         "typo3/cms-fluid-styled-content": "^12.4 || ^13.4.26 || ^14.2",
         "typo3/cms-frontend": "^12.4 || ^13.4.26 || ^14.2",
         "typo3/cms-install": "^12.4 || ^13.4.26 || ^14.2",
