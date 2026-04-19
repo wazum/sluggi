@@ -26,9 +26,12 @@ test.describe('Page Copy - Slug Update', () => {
     const pasteMenuItem = page.getByRole('menuitem', { name: 'Paste into' });
     await expect(pasteMenuItem).toBeVisible({ timeout: 5000 });
 
-    // Intercept the paste response to get the new page ID
+    // Paste navigates the iframe to /record/commit (the tce_db route path shared
+    // by TYPO3 12/13/14), which responds with a 303 redirect to the layout
+    // module. Match the /record/commit response regardless of status so we wait
+    // for the real paste, not an unrelated dialog/tree-refresh call.
     const pasteResponsePromise = page.waitForResponse(
-      response => response.url().includes('ajax') && response.status() === 200,
+      response => response.url().includes('/record/commit'),
       { timeout: 15000 }
     );
     await pasteMenuItem.click();
@@ -38,7 +41,6 @@ test.describe('Page Copy - Slug Update', () => {
     await dialog.getByRole('button', { name: 'OK', exact: true }).click();
     await expect(dialog).not.toBeVisible({ timeout: 10000 });
 
-    // Wait for paste operation to complete
     await pasteResponsePromise;
 
     // Navigate to List/Records module for Copy Target (page 24) to find the copied page
