@@ -1,10 +1,11 @@
 import { test, expect } from '@playwright/test';
+import { waitForEditForm, waitForNewPageForm } from '../fixtures/typo3-compat';
 
 test.describe('Page Create - Sync Default', () => {
   test('new page form has sync enabled by default when global sync is on', async ({ page }) => {
     await page.goto('/typo3/record/edit?edit[pages][1]=new');
     const frame = page.frameLocator('iframe');
-    await expect(frame.locator('h1')).toContainText('Create new Page', { timeout: 15000 });
+    await waitForNewPageForm(frame, page);
 
     const slugElement = frame.locator('sluggi-element');
     await expect(slugElement).toBeVisible();
@@ -14,7 +15,7 @@ test.describe('Page Create - Sync Default', () => {
   test('sync persists after saving new page', async ({ page }) => {
     await page.goto('/typo3/record/edit?edit[pages][1]=new');
     let frame = page.frameLocator('iframe');
-    await expect(frame.locator('h1')).toContainText('Create new Page', { timeout: 15000 });
+    await waitForNewPageForm(frame, page);
 
     const titleInput = frame.locator('input[data-formengine-input-name*="[title]"]');
     await titleInput.fill('Sync Persist Test');
@@ -23,7 +24,7 @@ test.describe('Page Create - Sync Default', () => {
     await page.waitForURL(/edit/, { timeout: 10000 });
 
     frame = page.frameLocator('iframe');
-    await expect(frame.locator('h1')).toContainText('Edit Page', { timeout: 15000 });
+    await waitForEditForm(frame, page);
 
     const slugElement = frame.locator('sluggi-element');
     await expect(slugElement).toBeVisible();

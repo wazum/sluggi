@@ -1,5 +1,5 @@
 import {expect, test} from '@playwright/test';
-import { expandPageTreeNode, getPageTreeNode, getPageTreeNodeLabel, getPageTreeEditInput, waitForPageTree } from '../fixtures/typo3-compat';
+import { expandPageTreeNode, getPageTreeNode, getPageTreeNodeLabel, getPageTreeEditInput, waitForEditForm, waitForPageTree } from '../fixtures/typo3-compat';
 
 test.describe('Page Tree Inline Editing with Sync', () => {
   test('slug updates when title is changed via page tree inline editing', async ({ page }) => {
@@ -30,7 +30,7 @@ test.describe('Page Tree Inline Editing with Sync', () => {
 
     await page.goto('/typo3/record/edit?edit[pages][2]=edit');
     const frame = page.frameLocator('iframe');
-    await expect(frame.locator('h1')).toContainText('Edit Page', { timeout: 15000 });
+    await waitForEditForm(frame, page);
 
     const hiddenField = frame.locator('.sluggi-hidden-field');
     const expectedSlugPart = `edited-${timestamp}`;

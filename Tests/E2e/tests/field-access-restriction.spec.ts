@@ -1,10 +1,11 @@
 import { test, expect } from '@playwright/test';
+import { waitForEditForm } from '../fixtures/typo3-compat';
 
 test.describe('Field Access Restriction - Restricted Editor', () => {
   test('synced page without toggle hides all controls and auto-syncs on title change', async ({ page }) => {
     await page.goto('/typo3/record/edit?edit[pages][37]=edit');
     const frame = page.frameLocator('iframe');
-    await expect(frame.locator('h1')).toContainText('Edit Page', { timeout: 15000 });
+    await waitForEditForm(frame, page);
     const slugElement = frame.locator('sluggi-element');
 
     await expect(slugElement.locator('.sluggi-sync-toggle')).not.toBeVisible();
@@ -27,7 +28,7 @@ test.describe('Field Access Restriction - Restricted Editor', () => {
   test('locked page without toggle hides all controls and prevents editing', async ({ page }) => {
     await page.goto('/typo3/record/edit?edit[pages][38]=edit');
     const frame = page.frameLocator('iframe');
-    await expect(frame.locator('h1')).toContainText('Edit Page', { timeout: 15000 });
+    await waitForEditForm(frame, page);
     const slugElement = frame.locator('sluggi-element');
 
     await expect(slugElement.locator('.sluggi-lock-toggle')).not.toBeVisible();

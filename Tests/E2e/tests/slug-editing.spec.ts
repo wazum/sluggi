@@ -1,5 +1,5 @@
 import {expect, FrameLocator, Locator, test} from '@playwright/test';
-import { waitForSourceFieldsInitialized } from '../fixtures/typo3-compat';
+import { waitForEditForm, waitForSourceFieldsInitialized } from '../fixtures/typo3-compat';
 
 test.describe('Slug Editing - TYPO3 Integration', () => {
   let frame: FrameLocator;
@@ -8,7 +8,7 @@ test.describe('Slug Editing - TYPO3 Integration', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/typo3/record/edit?edit[pages][2]=edit');
     frame = page.frameLocator('iframe');
-    await expect(frame.locator('h1')).toContainText('Edit Page', { timeout: 15000 });
+    await waitForEditForm(frame, page);
     slugElement = frame.locator('sluggi-element');
   });
 
@@ -22,7 +22,7 @@ test.describe('Slug Editing - TYPO3 Integration', () => {
   test('regenerate button triggers AJAX proposal from TYPO3', async ({ page }) => {
     await page.goto('/typo3/record/edit?edit[pages][8]=edit');
     const regenFrame = page.frameLocator('iframe');
-    await expect(regenFrame.locator('h1')).toContainText('Edit Page', { timeout: 15000 });
+    await waitForEditForm(regenFrame, page);
     const regenSlugElement = regenFrame.locator('sluggi-element');
 
     const regenerateButton = regenSlugElement.locator('.sluggi-regenerate-btn');
@@ -40,7 +40,7 @@ test.describe('Slug Editing - TYPO3 Integration', () => {
   test('form save persists slug to database', async ({ page }) => {
     await page.goto('/typo3/record/edit?edit[pages][6]=edit');
     let editFrame = page.frameLocator('iframe');
-    await expect(editFrame.locator('h1')).toContainText('Edit Page', { timeout: 15000 });
+    await waitForEditForm(editFrame, page);
     const editSlugElement = editFrame.locator('sluggi-element');
 
     const editableArea = editSlugElement.locator('.sluggi-editable');
@@ -56,7 +56,7 @@ test.describe('Slug Editing - TYPO3 Integration', () => {
     await page.waitForURL(/edit/, { timeout: 10000 });
 
     editFrame = page.frameLocator('iframe');
-    await expect(editFrame.locator('h1')).toContainText('Edit Page', { timeout: 15000 });
+    await waitForEditForm(editFrame, page);
 
     const hiddenField = editFrame.locator('.sluggi-hidden-field');
     await expect(hiddenField).toHaveValue('/save-test-edited');
@@ -65,7 +65,7 @@ test.describe('Slug Editing - TYPO3 Integration', () => {
   test('slash in title is replaced with hyphen on regenerate', async ({ page }) => {
     await page.goto('/typo3/record/edit?edit[pages][8]=edit');
     const editFrame = page.frameLocator('iframe');
-    await expect(editFrame.locator('h1')).toContainText('Edit Page', { timeout: 15000 });
+    await waitForEditForm(editFrame, page);
 
     const slugElement = editFrame.locator('sluggi-element');
     await expect(slugElement.locator('.sluggi-editable')).toBeVisible({ timeout: 10000 });

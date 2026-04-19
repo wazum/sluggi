@@ -1,4 +1,5 @@
 import {expect, FrameLocator, test} from '@playwright/test';
+import { waitForEditForm } from '../fixtures/typo3-compat';
 
 test.describe('Redirect Control - TYPO3 Integration', () => {
   test.use({
@@ -12,7 +13,7 @@ test.describe('Redirect Control - TYPO3 Integration', () => {
   test('redirect modal appears when saving page with changed slug', async ({ page }) => {
     await page.goto('/typo3/record/edit?edit[pages][6]=edit');
     frame = page.frameLocator('iframe');
-    await expect(frame.locator('h1')).toContainText('Edit Page', { timeout: 15000 });
+    await waitForEditForm(frame, page);
 
     const slugElement = frame.locator('sluggi-element');
     await expect(slugElement).toHaveAttribute('redirect-control', '');
@@ -39,7 +40,7 @@ test.describe('Redirect Control - TYPO3 Integration', () => {
   test('redirect modal does NOT appear when slug unchanged', async ({ page }) => {
     await page.goto('/typo3/record/edit?edit[pages][7]=edit');
     frame = page.frameLocator('iframe');
-    await expect(frame.locator('h1')).toContainText('Edit Page', { timeout: 15000 });
+    await waitForEditForm(frame, page);
 
     const slugElement = frame.locator('sluggi-element');
     await expect(slugElement).toHaveAttribute('redirect-control', '');
@@ -58,7 +59,7 @@ test.describe('Redirect Control - TYPO3 Integration', () => {
   test('choosing "Create Redirects" stores choice in localStorage', async ({ page }) => {
     await page.goto('/typo3/record/edit?edit[pages][6]=edit');
     frame = page.frameLocator('iframe');
-    await expect(frame.locator('h1')).toContainText('Edit Page', { timeout: 15000 });
+    await waitForEditForm(frame, page);
 
     const slugElement = frame.locator('sluggi-element');
 
@@ -96,7 +97,7 @@ test.describe('Redirect Control - TYPO3 Integration', () => {
   test('choosing "Don\'t Create Redirects" stores choice in localStorage', async ({ page }) => {
     await page.goto('/typo3/record/edit?edit[pages][6]=edit');
     frame = page.frameLocator('iframe');
-    await expect(frame.locator('h1')).toContainText('Edit Page', { timeout: 15000 });
+    await waitForEditForm(frame, page);
 
     const slugElement = frame.locator('sluggi-element');
 
@@ -132,7 +133,7 @@ test.describe('Redirect Control - TYPO3 Integration', () => {
   test('"Revert update" reverts parent page slug, not just child slugs', async ({ page }) => {
     await page.goto('/typo3/record/edit?edit[pages][60]=edit');
     frame = page.frameLocator('iframe');
-    await expect(frame.locator('h1')).toContainText('Edit Page', { timeout: 15000 });
+    await waitForEditForm(frame, page);
 
     // Dismiss stale slugChanged notifications created from update signals left in
     // be_users.uc by previous tests (see BackendUtility::setUpdateSignal).
@@ -179,7 +180,7 @@ test.describe('Redirect Control - TYPO3 Integration', () => {
 
     await page.goto('/typo3/record/edit?edit[pages][60]=edit');
     const reloadedFrame = page.frameLocator('iframe');
-    await expect(reloadedFrame.locator('h1').first()).toContainText('Edit Page', { timeout: 15000 });
+    await waitForEditForm(reloadedFrame, page);
 
     const revertedSlug = reloadedFrame.locator('.sluggi-hidden-field');
     await expect(revertedSlug).toHaveValue(originalSlug, { timeout: 10000 });
@@ -188,7 +189,7 @@ test.describe('Redirect Control - TYPO3 Integration', () => {
   test('notification shows "slug only" when user chose not to create redirects', async ({ page }) => {
     await page.goto('/typo3/record/edit?edit[pages][6]=edit');
     frame = page.frameLocator('iframe');
-    await expect(frame.locator('h1')).toContainText('Edit Page', { timeout: 15000 });
+    await waitForEditForm(frame, page);
 
     // Dismiss stale notifications from previous tests
     await page.locator('.alert-info').first().waitFor({ state: 'visible', timeout: 3000 }).catch(() => {});

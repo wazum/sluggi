@@ -1,4 +1,5 @@
 import {expect, FrameLocator, test} from '@playwright/test';
+import { waitForEditForm } from '../fixtures/typo3-compat';
 
 test.describe('Slug Conflicts - TYPO3 Integration', () => {
   let frame: FrameLocator;
@@ -6,7 +7,7 @@ test.describe('Slug Conflicts - TYPO3 Integration', () => {
   test('server detects duplicate slug and shows conflict modal', async ({ page }) => {
     await page.goto('/typo3/record/edit?edit[pages][3]=edit');
     frame = page.frameLocator('iframe');
-    await expect(frame.locator('h1')).toContainText('Edit Page', { timeout: 15000 });
+    await waitForEditForm(frame, page);
 
     const slugElement = frame.locator('sluggi-element');
     const editableArea = slugElement.locator('.sluggi-editable');
@@ -40,7 +41,7 @@ test.describe('Slug Conflicts - TYPO3 Integration', () => {
   test('applying conflict suggestion updates slug via TYPO3', async ({ page }) => {
     await page.goto('/typo3/record/edit?edit[pages][3]=edit');
     frame = page.frameLocator('iframe');
-    await expect(frame.locator('h1')).toContainText('Edit Page', { timeout: 15000 });
+    await waitForEditForm(frame, page);
 
     const slugElement = frame.locator('sluggi-element');
     const editableArea = slugElement.locator('.sluggi-editable');
@@ -70,7 +71,7 @@ test.describe('Slug Conflicts - TYPO3 Integration', () => {
   test('enabling sync does not show conflict modal when slug is already correct', async ({ page }) => {
     await page.goto('/typo3/record/edit?edit[pages][5]=edit');
     frame = page.frameLocator('iframe');
-    await expect(frame.locator('h1')).toContainText('Edit Page', { timeout: 15000 });
+    await waitForEditForm(frame, page);
 
     const slugElement = frame.locator('sluggi-element');
     await expect(slugElement).toBeVisible();

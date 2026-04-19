@@ -1312,11 +1312,21 @@ export class SluggiElement extends LitElement {
     }
 
     private static submitForm(form: HTMLFormElement): void {
+        // TYPO3 12/13: hidden `doSave` field triggers save.
         const doSaveField = form.querySelector('input[name="doSave"]') as HTMLInputElement | null;
         if (doSaveField) {
             doSaveField.value = '1';
+            form.requestSubmit();
+            return;
         }
-        form.requestSubmit();
+
+        // TYPO3 14+: no `doSave` field — submit with the `_savedok` button
+        // as submitter so FormEngine sees the intended action.
+        const saveButton = form.ownerDocument.querySelector(
+            `button[name="_savedok"][form="${form.id}"]`
+        ) as HTMLButtonElement | null
+            ?? form.querySelector('button[name="_savedok"]') as HTMLButtonElement | null;
+        form.requestSubmit(saveButton ?? undefined);
     }
 
     // =========================================================================

@@ -1,11 +1,11 @@
 import { test, expect } from '@playwright/test';
-import { waitForPageTree, clickModuleMenuItem } from '../fixtures/typo3-compat';
+import { waitForEditForm, waitForPageTree, clickModuleMenuItem } from '../fixtures/typo3-compat';
 
 test.describe('Slug Sync Toggle - TYPO3 Integration', () => {
   test('sync toggle button is visible with label', async ({ page }) => {
     await page.goto('/typo3/record/edit?edit[pages][15]=edit');
     const frame = page.frameLocator('iframe');
-    await expect(frame.locator('h1')).toContainText('Edit Page', { timeout: 15000 });
+    await waitForEditForm(frame, page);
 
     const slugElement = frame.locator('sluggi-element');
     const syncWrapper = slugElement.locator('.sluggi-sync-wrapper');
@@ -21,7 +21,7 @@ test.describe('Slug Sync Toggle - TYPO3 Integration', () => {
   test('clicking sync toggle changes visual state', async ({ page }) => {
     await page.goto('/typo3/record/edit?edit[pages][7]=edit');
     const frame = page.frameLocator('iframe');
-    await expect(frame.locator('h1')).toContainText('Edit Page', { timeout: 15000 });
+    await waitForEditForm(frame, page);
     const slugElement = frame.locator('sluggi-element');
 
     const syncToggle = slugElement.locator('.sluggi-sync-toggle');
@@ -36,7 +36,7 @@ test.describe('Slug Sync Toggle - TYPO3 Integration', () => {
   test('enabling sync triggers slug regeneration', async ({ page }) => {
     await page.goto('/typo3/record/edit?edit[pages][9]=edit');
     const frame = page.frameLocator('iframe');
-    await expect(frame.locator('h1')).toContainText('Edit Page', { timeout: 15000 });
+    await waitForEditForm(frame, page);
     const slugElement = frame.locator('sluggi-element');
 
     const syncToggle = slugElement.locator('.sluggi-sync-toggle');
@@ -53,7 +53,7 @@ test.describe('Slug Sync Toggle - TYPO3 Integration', () => {
   test('sync toggle remains visible when sync is off (regression)', async ({ page }) => {
     await page.goto('/typo3/record/edit?edit[pages][11]=edit');
     const frame = page.frameLocator('iframe');
-    await expect(frame.locator('h1')).toContainText('Edit Page', { timeout: 15000 });
+    await waitForEditForm(frame, page);
     const slugElement = frame.locator('sluggi-element');
     const syncToggle = slugElement.locator('.sluggi-sync-toggle');
 
@@ -64,7 +64,7 @@ test.describe('Slug Sync Toggle - TYPO3 Integration', () => {
   test('source badge is hidden when sync is off', async ({ page }) => {
     await page.goto('/typo3/record/edit?edit[pages][12]=edit');
     const frame = page.frameLocator('iframe');
-    await expect(frame.locator('h1')).toContainText('Edit Page', { timeout: 15000 });
+    await waitForEditForm(frame, page);
 
     const sourceBadge = frame.locator('.sluggi-source-badge');
     await expect(sourceBadge.first()).toBeAttached();
@@ -74,7 +74,7 @@ test.describe('Slug Sync Toggle - TYPO3 Integration', () => {
   test('source badge is visible when sync is on', async ({ page }) => {
     await page.goto('/typo3/record/edit?edit[pages][13]=edit');
     const frame = page.frameLocator('iframe');
-    await expect(frame.locator('h1')).toContainText('Edit Page', { timeout: 15000 });
+    await waitForEditForm(frame, page);
     const slugElement = frame.locator('sluggi-element');
     const syncToggle = slugElement.locator('.sluggi-sync-toggle');
 
@@ -88,7 +88,7 @@ test.describe('Slug Sync Toggle - TYPO3 Integration', () => {
   test('source badge appears immediately when toggling sync on (no reload)', async ({ page }) => {
     await page.goto('/typo3/record/edit?edit[pages][10]=edit');
     const frame = page.frameLocator('iframe');
-    await expect(frame.locator('h1')).toContainText('Edit Page', { timeout: 15000 });
+    await waitForEditForm(frame, page);
     const slugElement = frame.locator('sluggi-element');
 
     const syncToggle = slugElement.locator('.sluggi-sync-toggle');
@@ -108,7 +108,7 @@ test.describe('Slug Sync Toggle - TYPO3 Integration', () => {
   test('sync state persists after form save and full page reload', async ({ page }) => {
     await page.goto('/typo3/record/edit?edit[pages][14]=edit');
     let frame = page.frameLocator('iframe');
-    await expect(frame.locator('h1')).toContainText('Edit Page', { timeout: 15000 });
+    await waitForEditForm(frame, page);
     let slugElement = frame.locator('sluggi-element');
     let syncToggle = slugElement.locator('.sluggi-sync-toggle');
 
@@ -127,7 +127,7 @@ test.describe('Slug Sync Toggle - TYPO3 Integration', () => {
 
     await page.goto('/typo3/record/edit?edit[pages][14]=edit');
     frame = page.frameLocator('iframe');
-    await expect(frame.locator('h1')).toContainText('Edit Page', { timeout: 15000 });
+    await waitForEditForm(frame, page);
     slugElement = frame.locator('sluggi-element');
     syncToggle = slugElement.locator('.sluggi-sync-toggle');
 
@@ -137,7 +137,7 @@ test.describe('Slug Sync Toggle - TYPO3 Integration', () => {
   test('toggling sync marks form as dirty and shows unsaved changes modal', async ({ page }) => {
     await page.goto('/typo3/record/edit?edit[pages][16]=edit');
     const frame = page.frameLocator('iframe');
-    await expect(frame.locator('h1')).toContainText('Edit Page', { timeout: 15000 });
+    await waitForEditForm(frame, page);
     const slugElement = frame.locator('sluggi-element');
     const syncToggle = slugElement.locator('.sluggi-sync-toggle');
 
@@ -160,7 +160,7 @@ test.describe('Slug Sync Toggle - TYPO3 Integration', () => {
   test('source field confirm button is hidden when sync is off', async ({ page }) => {
     await page.goto('/typo3/record/edit?edit[pages][12]=edit');
     const frame = page.frameLocator('iframe');
-    await expect(frame.locator('h1')).toContainText('Edit Page', { timeout: 15000 });
+    await waitForEditForm(frame, page);
 
     const confirmButton = frame.locator('.sluggi-source-confirm');
     await expect(confirmButton.first()).toBeAttached();
@@ -170,7 +170,7 @@ test.describe('Slug Sync Toggle - TYPO3 Integration', () => {
   test('source field confirm button is visible when sync is on and input is focused', async ({ page }) => {
     await page.goto('/typo3/record/edit?edit[pages][13]=edit');
     const frame = page.frameLocator('iframe');
-    await expect(frame.locator('h1')).toContainText('Edit Page', { timeout: 15000 });
+    await waitForEditForm(frame, page);
     const slugElement = frame.locator('sluggi-element');
     const syncToggle = slugElement.locator('.sluggi-sync-toggle');
 
@@ -189,7 +189,7 @@ test.describe('Slug Sync Toggle - TYPO3 Integration', () => {
   test('clicking source field confirm button triggers slug regeneration', async ({ page }) => {
     await page.goto('/typo3/record/edit?edit[pages][15]=edit');
     const frame = page.frameLocator('iframe');
-    await expect(frame.locator('h1')).toContainText('Edit Page', { timeout: 15000 });
+    await waitForEditForm(frame, page);
     const slugElement = frame.locator('sluggi-element');
     const syncToggle = slugElement.locator('.sluggi-sync-toggle');
 

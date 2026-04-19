@@ -6,6 +6,7 @@ namespace Wazum\Sluggi\Form\Element;
 
 use TYPO3\CMS\Backend\Form\Element\AbstractFormElement;
 use TYPO3\CMS\Core\Information\Typo3Version;
+use Wazum\Sluggi\Compatibility\Typo3Compatibility;
 use Wazum\Sluggi\Configuration\ExtensionConfiguration;
 use Wazum\Sluggi\Service\FullPathEditingService;
 use Wazum\Sluggi\Service\HierarchyPermissionService;
@@ -28,15 +29,6 @@ if ((new Typo3Version())->getMajorVersion() < 13) {
 final class SlugElementV14 extends AbstractFormElement
 {
     use SlugElementTrait;
-
-    /**
-     * @var array<string, array<string, string>>
-     */
-    protected $defaultFieldInformation = [
-        'tcaDescription' => [
-            'renderType' => 'tcaDescription',
-        ],
-    ];
 
     /**
      * @var array<string, array<string, mixed>>
@@ -79,5 +71,7 @@ final class SlugElementV14 extends AbstractFormElement
         $this->extensionConfiguration = $extensionConfiguration;
         $this->userSettingsService = $userSettingsService;
         $this->redirectInfoService = $redirectInfoService;
+
+        $this->defaultFieldInformation = Typo3Compatibility::getFormElementFieldInformation();
     }
 }

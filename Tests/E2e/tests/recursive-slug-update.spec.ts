@@ -1,5 +1,5 @@
 import {expect, test} from '@playwright/test';
-import { expandPageTreeNode, getPageTreeItemByName, scrollPageTreeToBottom, waitForPageTree } from '../fixtures/typo3-compat';
+import { expandPageTreeNode, getPageTreeItemByName, scrollPageTreeToBottom, waitForEditForm, waitForPageTree } from '../fixtures/typo3-compat';
 
 test.describe('Recursive Slug Update - Context Menu', () => {
   test('updates child slug via context menu and shows statistics notification', async ({ page }) => {
@@ -31,7 +31,7 @@ test.describe('Recursive Slug Update - Context Menu', () => {
 
     await page.goto('/typo3/record/edit?edit[pages][50]=edit');
     const frame = page.frameLocator('iframe');
-    await expect(frame.locator('h1')).toContainText('Edit Page', { timeout: 15000 });
+    await waitForEditForm(frame, page);
 
     const hiddenField = frame.locator('.sluggi-hidden-field');
     await expect(hiddenField).toHaveValue('/recursive-parent/recursive-child');

@@ -1,5 +1,5 @@
 import { expect, FrameLocator, test } from '@playwright/test';
-import { getMultiEditUrl } from '../fixtures/typo3-compat';
+import { getMultiEditUrl, waitForEditForm } from '../fixtures/typo3-compat';
 
 test.describe('Redirect Control - Multi-Edit', () => {
   test.use({
@@ -14,7 +14,7 @@ test.describe('Redirect Control - Multi-Edit', () => {
     const multiEditUrl = await getMultiEditUrl(page, 'pages', [46, 47, 48], ['slug']);
     await page.goto(multiEditUrl);
     frame = page.frameLocator('iframe');
-    await expect(frame.locator('h1').first()).toContainText('Edit Page', { timeout: 15000 });
+    await waitForEditForm(frame, page);
 
     const slugElements = frame.locator('sluggi-element');
     await expect(slugElements).toHaveCount(3, { timeout: 10000 });
@@ -52,7 +52,7 @@ test.describe('Redirect Control - Multi-Edit', () => {
     const multiEditUrl = await getMultiEditUrl(page, 'pages', [46, 47, 48], ['slug']);
     await page.goto(multiEditUrl);
     frame = page.frameLocator('iframe');
-    await expect(frame.locator('h1').first()).toContainText('Edit Page', { timeout: 15000 });
+    await waitForEditForm(frame, page);
 
     const slugElements = frame.locator('sluggi-element');
     await expect(slugElements).toHaveCount(3, { timeout: 10000 });
@@ -89,7 +89,7 @@ test.describe('Redirect Control - Multi-Edit', () => {
     const multiEditUrl = await getMultiEditUrl(page, 'pages', [46, 47, 48], ['slug']);
     await page.goto(multiEditUrl);
     frame = page.frameLocator('iframe');
-    await expect(frame.locator('h1').first()).toContainText('Edit Page', { timeout: 15000 });
+    await waitForEditForm(frame, page);
 
     const slugElements = frame.locator('sluggi-element');
     await expect(slugElements).toHaveCount(3, { timeout: 10000 });

@@ -1,5 +1,5 @@
 import {expect, FrameLocator, Locator, test} from '@playwright/test';
-import { waitForFormFrame, clickModuleMenuItem } from '../fixtures/typo3-compat';
+import { waitForEditForm, waitForFormFrame, clickModuleMenuItem } from '../fixtures/typo3-compat';
 
 test.describe('Full Path Editing - Editor Button', () => {
   let frame: FrameLocator;
@@ -14,7 +14,7 @@ test.describe('Full Path Editing - Editor Button', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/typo3/record/edit?edit[pages][39]=edit');
     frame = page.frameLocator('iframe');
-    await expect(frame.locator('h1')).toContainText('Edit Page', { timeout: 15000 });
+    await waitForEditForm(frame, page);
     slugElement = frame.locator('sluggi-element');
   });
 
@@ -70,7 +70,7 @@ test.describe('Full Path Editing - Editor Button', () => {
   test('full path change persists after save', async ({ page }) => {
     await page.goto('/typo3/record/edit?edit[pages][40]=edit');
     const editFrame = page.frameLocator('iframe');
-    await expect(editFrame.locator('h1')).toContainText('Edit Page', { timeout: 15000 });
+    await waitForEditForm(editFrame, page);
 
     const slugEl = editFrame.locator('sluggi-element');
     const fullPathEditBtn = slugEl.locator('.sluggi-full-path-edit-btn');
@@ -86,7 +86,7 @@ test.describe('Full Path Editing - Editor Button', () => {
     await page.waitForURL(/edit/, { timeout: 10000 });
 
     const savedFrame = page.frameLocator('iframe');
-    await expect(savedFrame.locator('h1')).toContainText('Edit Page', { timeout: 15000 });
+    await waitForEditForm(savedFrame, page);
 
     const savedHiddenField = savedFrame.locator('.sluggi-hidden-field');
     await expect(savedHiddenField).toHaveValue('/custom-path/nested-page');
@@ -95,7 +95,7 @@ test.describe('Full Path Editing - Editor Button', () => {
   test('full path edit button is disabled when slug is synced', async ({ page }) => {
     await page.goto('/typo3/record/edit?edit[pages][22]=edit');
     const editFrame = page.frameLocator('iframe');
-    await expect(editFrame.locator('h1')).toContainText('Edit Page', { timeout: 15000 });
+    await waitForEditForm(editFrame, page);
 
     const slugEl = editFrame.locator('sluggi-element');
     const syncToggle = slugEl.locator('.sluggi-sync-toggle');
@@ -136,7 +136,7 @@ test.describe('Full Path Editing - Regenerate Behavior', () => {
     await page.waitForURL(/edit/, { timeout: 10000 });
 
     const editFrame = page.frameLocator('iframe');
-    await expect(editFrame.locator('h1')).toContainText('Edit Page', { timeout: 15000 });
+    await waitForEditForm(editFrame, page);
 
     const errorAlert = editFrame.locator('.alert-danger');
     await expect(errorAlert).not.toBeVisible();
@@ -157,7 +157,7 @@ test.describe('Full Path Editing - Regenerate Behavior', () => {
     await page.waitForURL(/edit/, { timeout: 10000 });
 
     const editFrame = page.frameLocator('iframe');
-    await expect(editFrame.locator('h1')).toContainText('Edit Page', { timeout: 15000 });
+    await waitForEditForm(editFrame, page);
 
     const errorAlert = editFrame.locator('.alert-danger');
     await expect(errorAlert).not.toBeVisible();

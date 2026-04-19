@@ -97,6 +97,11 @@ $GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['t3lib/class.t3lib_pagerenderer.php'][
             }
             if ($redirectControlEnabled) {
                 $pageRenderer->loadJavaScriptModule('@wazum/sluggi/redirect-notification-handler.js');
+                if (Typo3Compatibility::getMajorVersion() >= 14) {
+                    $pageRenderer->addInlineLanguageLabelFile(
+                        'EXT:redirects/Resources/Private/Language/locallang_slug_service.xlf'
+                    );
+                }
             }
         }
     };

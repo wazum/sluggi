@@ -209,10 +209,19 @@ export async function reloadPageTree(page: Page): Promise<void> {
 
 /**
  * Wait for the form iframe to be fully loaded with sluggi-element initialized.
+ *
+ * TYPO3 14+: h1 is the page title (varies per record) — assert visibility only.
+ * TYPO3 < 14: h1 contains "Edit Page".
  */
 export async function waitForFormFrame(page: Page): Promise<ReturnType<Page['frameLocator']>> {
   const frame = page.frameLocator('iframe');
-  await expect(frame.locator('h1')).toContainText('Edit Page', { timeout: 15000 });
+  const version = await getTypo3Version(page);
+
+  if (version < 14) {
+    await expect(frame.locator('h1')).toContainText('Edit Page', { timeout: 15000 });
+  } else {
+    await expect(frame.locator('h1').first()).toBeVisible({ timeout: 15000 });
+  }
 
   const slugElement = frame.locator('sluggi-element');
   await expect(slugElement.locator('.sluggi-editable')).toBeVisible({ timeout: 10000 });
@@ -266,4 +275,98 @@ export async function getMultiEditUrl(
     .map((col, idx) => `columnsOnly[${table}][${idx}]=${col}`)
     .join('&');
   return `${baseUrl}&${columnsParams}`;
+}
+
+/**
+ * Wait for an edit form to be loaded inside the iframe.
+ *
+ * TYPO3 14+: h1 visible (the page title, not a literal "Edit Page").
+ * TYPO3 < 14: h1 contains "Edit Page".
+ *
+ * For records without sluggi-element (SysFolder etc.), use waitForEditFormWithoutSlug.
+ */
+export async function waitForEditForm(
+  frame: ReturnType<Page['frameLocator']>,
+  page: Page,
+): Promise<void> {
+  const version = await getTypo3Version(page);
+
+  if (version < 14) {
+    await expect(frame.locator('h1').first()).toContainText('Edit Page', { timeout: 15000 });
+  } else {
+    await expect(frame.locator('h1').first()).toBeVisible({ timeout: 15000 });
+  }
+}
+
+/**
+ * Wait for an edit form for a record type that has no sluggi-element
+ * (e.g. SysFolder / excluded doktypes).
+ *
+ * TYPO3 14+: h1 visible + form visible.
+ * TYPO3 < 14: h1 contains expectedH1Text (if given) + form visible.
+ */
+export async function waitForEditFormWithoutSlug(
+  frame: ReturnType<Page['frameLocator']>,
+  page: Page,
+  expectedH1Text?: string,
+): Promise<void> {
+  const version = await getTypo3Version(page);
+
+  if (version < 14 && expectedH1Text !== undefined) {
+    await expect(frame.locator('h1')).toContainText(expectedH1Text, { timeout: 15000 });
+  } else {
+    await expect(frame.locator('h1').first()).toBeVisible({ timeout: 15000 });
+  }
+
+  await expect(frame.locator('form').first()).toBeVisible({ timeout: 10000 });
+}
+
+/**
+ * Wait for a "Create new page" form inside the iframe.
+ *
+ * TYPO3 14+: h1 visible + title input visible.
+ * TYPO3 < 14: h1 contains "Create new Page" + title input visible.
+ */
+export async function waitForNewPageForm(
+  frame: ReturnType<Page['frameLocator']>,
+  page: Page,
+): Promise<void> {
+  const version = await getTypo3Version(page);
+
+  if (version < 14) {
+    await expect(frame.locator('h1')).toContainText('Create new Page', { timeout: 15000 });
+  } else {
+    await expect(frame.locator('h1').first()).toBeVisible({ timeout: 15000 });
+  }
+
+  await expect(
+    frame.locator('input[data-formengine-input-name*="[title]"]').first(),
+  ).toBeVisible({ timeout: 10000 });
+}
+
+/**
+ * Open a "New subpage" form for a given parent page.
+ *
+ * Navigates directly to the classic edit URL (`edit[pages][-{parentId}]=new`),
+ * which on both TYPO3 12/13 and 14.2 renders the full-page edit form inside
+ * the iframe. This deliberately bypasses TYPO3 14.2's PageCreationWizard
+ * modal — we only need the new-page form for sluggi-element assertions.
+ */
+export async function openNewSubpageForm(
+  page: Page,
+  parentPageId: number | string,
+): Promise<ReturnType<Page['frameLocator']>> {
+  await page.goto(`/typo3/record/edit?edit[pages][${parentPageId}]=new`);
+  const frame = page.frameLocator('iframe');
+  await waitForNewPageForm(frame, page);
+  return frame;
+}
+
+/**
+ * Wait for a form save to fully complete (page reload).
+ *
+ * Thin wrapper over waitForLoadState for call-site readability.
+ */
+export async function waitForSaveComplete(page: Page): Promise<void> {
+  await page.waitForLoadState('load');
 }

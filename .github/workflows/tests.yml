@@ -30,7 +30,7 @@ jobs:
           tools: composer
 
       - name: Install dependencies
-        run: composer install --no-interaction
+        run: composer install --no-interaction --no-security-blocking
 
       - name: Run PHPStan
         run: composer phpstan
@@ -83,11 +83,11 @@ jobs:
             typo3: '13.4'
           # TYPO3 14.x
           - php: '8.2'
-            typo3: '14.1'
+            typo3: '14.2'
           - php: '8.3'
-            typo3: '14.1'
+            typo3: '14.2'
           - php: '8.4'
-            typo3: '14.1'
+            typo3: '14.2'
 
     steps:
       - uses: actions/checkout@v4
@@ -102,7 +102,7 @@ jobs:
       - name: Install dependencies
         run: |
           composer require "typo3/cms-core:^${{ matrix.typo3 }}" "typo3/cms-backend:^${{ matrix.typo3 }}" "typo3/cms-redirects:^${{ matrix.typo3 }}" --no-update --no-interaction
-          composer install --no-interaction
+          composer install --no-interaction --no-security-blocking
 
       - name: Run unit tests
         run: vendor/bin/phpunit -c Tests/phpunit.xml --testsuite unit
@@ -128,11 +128,11 @@ jobs:
             typo3: '13.4'
           # TYPO3 14.x
           - php: '8.2'
-            typo3: '14.1'
+            typo3: '14.2'
           - php: '8.3'
-            typo3: '14.1'
+            typo3: '14.2'
           - php: '8.4'
-            typo3: '14.1'
+            typo3: '14.2'
 
     steps:
       - uses: actions/checkout@v4
@@ -147,7 +147,7 @@ jobs:
       - name: Install dependencies
         run: |
           composer require "typo3/cms-core:^${{ matrix.typo3 }}" "typo3/cms-backend:^${{ matrix.typo3 }}" "typo3/cms-redirects:^${{ matrix.typo3 }}" --no-update --no-interaction
-          composer install --no-interaction
+          composer install --no-interaction --no-security-blocking
 
       - name: Run functional tests
         run: typo3DatabaseDriver=pdo_sqlite vendor/bin/phpunit --bootstrap vendor/typo3/testing-framework/Resources/Core/Build/FunctionalTestsBootstrap.php Tests/Functional
@@ -177,15 +177,15 @@ jobs:
           - php: '8.4'
             typo3: '13.4'
             dist: '13.4'
-          # TYPO3 14.x (dist 14.0 as 14.1 not yet released)
+          # TYPO3 14.x (dist 14.0 — no newer cms-base-distribution published)
           - php: '8.2'
-            typo3: '14.1'
+            typo3: '14.2'
             dist: '14.0'
           - php: '8.3'
-            typo3: '14.1'
+            typo3: '14.2'
             dist: '14.0'
           - php: '8.4'
-            typo3: '14.1'
+            typo3: '14.2'
             dist: '14.0'
 
     services:
@@ -221,7 +221,7 @@ jobs:
           cd typo3-test
           composer config --unset platform.php
           composer config repositories.sluggi path ../
-          composer require "typo3/cms-core:^${{ matrix.typo3 }}" wazum/sluggi:@dev --no-interaction --with-all-dependencies
+          composer require "typo3/cms-core:^${{ matrix.typo3 }}" wazum/sluggi:@dev --no-interaction --with-all-dependencies --no-security-blocking
 
       - name: Setup TYPO3
         run: |
@@ -231,6 +231,12 @@ jobs:
             --admin-username=admin --admin-user-password=Password123! \
             --admin-email=admin@example.com --project-name=test \
             --server-type=other --no-interaction
+
+      - name: Run database migrations (TYPO3 14+ only)
+        if: startsWith(matrix.typo3, '14.')
+        run: |
+          cd typo3-test
+          ./vendor/bin/typo3 extension:setup
 
       - name: Create site configuration
         run: |
@@ -258,6 +264,10 @@ jobs:
           <?php
           declare(strict_types=1);
           $GLOBALS['TYPO3_CONF_VARS']['BE']['passwordPolicy'] = '';
+          $GLOBALS['TYPO3_CONF_VARS']['SYS']['trustedHostsPattern'] = '.*';
+          if ((new \TYPO3\CMS\Core\Information\Typo3Version())->getMajorVersion() >= 14) {
+              $GLOBALS['TYPO3_CONF_VARS']['BE']['defaultUserTSconfig'] = ($GLOBALS['TYPO3_CONF_VARS']['BE']['defaultUserTSconfig'] ?? '') . "\nsetup.override.contextualRecordEdit = 0\n";
+          }
           $testId = $_SERVER['HTTP_X_PLAYWRIGHT_TEST_ID'] ?? 'default';
           $sluggiSettings = match ($testId) {
               'last-segment-only' => [
@@ -296,11 +306,105 @@ jobs:
           $GLOBALS['TYPO3_CONF_VARS']['EXTENSIONS']['sluggi'] = $sluggiSettings;
           EOF
 
-      - name: Start PHP server
+      - name: Start nginx + PHP-FPM
         run: |
-          cd typo3-test/public
-          php -S 127.0.0.1:8080 &
-          sleep 5
+          set -euo pipefail
+          sudo apt-get install -y nginx
+
+          # Locate PHP-FPM binary (shivammathur installs a versioned name too)
+          FPM_BIN="$(command -v "php-fpm${{ matrix.php }}" || command -v php-fpm || true)"
+          if [ -z "$FPM_BIN" ]; then
+            echo "php-fpm binary not found in PATH" >&2
+            ls /usr/sbin/php-fpm* /usr/bin/php-fpm* 2>&1 || true
+            exit 1
+          fi
+          echo "Using PHP-FPM: $FPM_BIN"
+
+          # PHP-FPM on TCP 9000, runs as the GitHub runner user.
+          cat > /tmp/php-fpm.conf <<CONF
+          [global]
+          error_log = /tmp/php-fpm.log
+          daemonize = yes
+          [www]
+          listen = 127.0.0.1:9000
+          user = $(id -un)
+          group = $(id -gn)
+          pm = dynamic
+          pm.max_children = 10
+          pm.start_servers = 2
+          pm.min_spare_servers = 1
+          pm.max_spare_servers = 4
+          clear_env = no
+          CONF
+          sudo "$FPM_BIN" --fpm-config /tmp/php-fpm.conf
+          sleep 1
+          ss -tlnp | grep ':9000' || (cat /tmp/php-fpm.log; exit 1)
+
+          # nginx server block — mirrors DDEV's TYPO3 site config. The map picks
+          # the right backend entry point: TYPO3 14+ = /index.php, TYPO3 12/13 = /typo3/index.php.
+          sudo tee /etc/nginx/sites-available/default >/dev/null <<NGINX
+          map \$typo3_index_exists \$typo3_index {
+              default  /index.php;
+              1        /typo3/index.php;
+          }
+
+          server {
+              listen 8080 default_server;
+              root ${GITHUB_WORKSPACE}/typo3-test/public;
+              index index.php;
+
+              set \$typo3_index_exists 0;
+              if (-f \$document_root/typo3/index.php) {
+                  set \$typo3_index_exists 1;
+              }
+
+              location / {
+                  absolute_redirect off;
+                  try_files \$uri \$uri/ /index.php\$is_args\$args;
+              }
+
+              location = /typo3 {
+                  rewrite ^ /typo3/;
+              }
+
+              location /typo3/ {
+                  absolute_redirect off;
+                  try_files \$uri \$typo3_index\$is_args\$args;
+              }
+
+              location ~ \.php\$ {
+                  try_files \$uri =404;
+                  fastcgi_split_path_info ^(.+\.php)(/.+)\$;
+                  fastcgi_pass 127.0.0.1:9000;
+                  fastcgi_index index.php;
+                  fastcgi_param SCRIPT_FILENAME \$document_root\$fastcgi_script_name;
+                  fastcgi_param SCRIPT_NAME \$fastcgi_script_name;
+                  include fastcgi_params;
+                  fastcgi_read_timeout 300;
+              }
+          }
+          NGINX
+
+          # nginx defaults to www-data; the repo is under /home/runner which
+          # is not traversable for other users. Run nginx as the runner too.
+          sudo sed -i "s|^user .*|user $(id -un) $(id -gn);|" /etc/nginx/nginx.conf
+          sudo nginx -t
+          sudo service nginx restart
+          sleep 1
+          # Follow redirects so /typo3 → login page counts as 2xx, but still fail on 5xx.
+          HTTP_CODE=$(curl -sSL -o /tmp/curl-body -w '%{http_code}' http://127.0.0.1:8080/typo3)
+          echo "GET /typo3 => $HTTP_CODE"
+          if [ "$HTTP_CODE" -ge 500 ] 2>/dev/null || [ -z "$HTTP_CODE" ]; then
+            echo "--- nginx error log ---"
+            sudo tail -50 /var/log/nginx/error.log || true
+            echo "--- php-fpm log ---"
+            sudo tail -50 /tmp/php-fpm.log || true
+            echo "--- TYPO3 log ---"
+            find typo3-test/var/log -name '*.log' -exec tail -30 {} + 2>&1 | tail -60 || true
+            echo "--- response body (exception title + message) ---"
+            sed -n 's/.*<title>\(.*\)<\/title>.*/TITLE: \1/p; /exception\|Exception\|error/I p' /tmp/curl-body | head -30
+            exit 1
+          fi
 
       - name: Install Playwright
         run: |

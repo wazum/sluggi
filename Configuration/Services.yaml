@@ -63,15 +63,19 @@ services:
   # Form/Element
   Wazum\Sluggi\Form\Element\SlugElementV12:
     public: true
+    shared: false
 
   Wazum\Sluggi\Form\Element\SlugElementV14:
     public: true
+    shared: false
 
   Wazum\Sluggi\Form\Element\SlugSourceElementV12:
     public: true
+    shared: false
 
   Wazum\Sluggi\Form\Element\SlugSourceElementV14:
     public: true
+    shared: false
 
   # Form/FormDataProvider
   Wazum\Sluggi\Form\FormDataProvider\HideSlugForExcludedPageTypes:

@@ -1,5 +1,5 @@
 import {expect, test} from '@playwright/test';
-import { expandPageTreeNode, getPageTreeItemByName, waitForPageTree } from '../fixtures/typo3-compat';
+import { expandPageTreeNode, getPageTreeItemByName, waitForEditForm, waitForPageTree } from '../fixtures/typo3-compat';
 
 test.describe('Page Move - Slug Update', () => {
   test('moving a page into another updates slug with parent prefix', async ({ page }) => {
@@ -28,7 +28,7 @@ test.describe('Page Move - Slug Update', () => {
 
     await page.goto('/typo3/record/edit?edit[pages][17]=edit');
     const frame = page.frameLocator('iframe');
-    await expect(frame.locator('h1')).toContainText('Edit Page', { timeout: 15000 });
+    await waitForEditForm(frame, page);
 
     const hiddenField = frame.locator('.sluggi-hidden-field');
     const slug = await hiddenField.inputValue();

@@ -1,10 +1,11 @@
 import { test, expect } from '@playwright/test';
+import { waitForEditForm } from '../fixtures/typo3-compat';
 
 test.describe('Translation Inheritance - Sync/Lock from Default Language', () => {
   test('sync toggle on translation is disabled and shows inherited state from default language', async ({ page }) => {
     await page.goto('/typo3/record/edit?edit[pages][52]=edit');
     const frame = page.frameLocator('iframe');
-    await expect(frame.locator('h1')).toContainText('Edit Page', { timeout: 15000 });
+    await waitForEditForm(frame, page);
 
     const slugElement = frame.locator('sluggi-element');
     const syncToggle = slugElement.locator('.sluggi-sync-toggle');
@@ -17,7 +18,7 @@ test.describe('Translation Inheritance - Sync/Lock from Default Language', () =>
   test('lock toggle on translation is disabled and shows inherited state from default language', async ({ page }) => {
     await page.goto('/typo3/record/edit?edit[pages][54]=edit');
     const frame = page.frameLocator('iframe');
-    await expect(frame.locator('h1')).toContainText('Edit Page', { timeout: 15000 });
+    await waitForEditForm(frame, page);
 
     const slugElement = frame.locator('sluggi-element');
     const lockToggle = slugElement.locator('.sluggi-lock-toggle');
@@ -30,7 +31,7 @@ test.describe('Translation Inheritance - Sync/Lock from Default Language', () =>
   test('default language page has editable sync toggle', async ({ page }) => {
     await page.goto('/typo3/record/edit?edit[pages][51]=edit');
     const frame = page.frameLocator('iframe');
-    await expect(frame.locator('h1')).toContainText('Edit Page', { timeout: 15000 });
+    await waitForEditForm(frame, page);
 
     const slugElement = frame.locator('sluggi-element');
     const syncToggle = slugElement.locator('.sluggi-sync-toggle');
@@ -43,7 +44,7 @@ test.describe('Translation Inheritance - Sync/Lock from Default Language', () =>
   test('default language page has editable lock toggle', async ({ page }) => {
     await page.goto('/typo3/record/edit?edit[pages][53]=edit');
     const frame = page.frameLocator('iframe');
-    await expect(frame.locator('h1')).toContainText('Edit Page', { timeout: 15000 });
+    await waitForEditForm(frame, page);
 
     const slugElement = frame.locator('sluggi-element');
     const lockToggle = slugElement.locator('.sluggi-lock-toggle');

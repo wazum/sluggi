@@ -1,5 +1,5 @@
 import { test, expect, FrameLocator, Locator } from '@playwright/test';
-import { expandPageTreeNode, getPageTreeNode, waitForPageTree } from '../fixtures/typo3-compat';
+import { expandPageTreeNode, getPageTreeNode, openNewSubpageForm, waitForEditForm, waitForNewPageForm, waitForPageTree } from '../fixtures/typo3-compat';
 
 test.describe('Hierarchy Permission - Editor Slug Restrictions', () => {
   let frame: FrameLocator;
@@ -14,7 +14,7 @@ test.describe('Hierarchy Permission - Editor Slug Restrictions', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/typo3/record/edit?edit[pages][28]=edit');
     frame = page.frameLocator('iframe');
-    await expect(frame.locator('h1')).toContainText('Edit Page', { timeout: 15000 });
+    await waitForEditForm(frame, page);
     slugElement = frame.locator('sluggi-element');
   });
 
@@ -48,27 +48,14 @@ test.describe('Hierarchy Permission - Editor Slug Restrictions', () => {
     await page.waitForURL(/edit/, { timeout: 10000 });
 
     const editFrame = page.frameLocator('iframe');
-    await expect(editFrame.locator('h1')).toContainText('Edit Page', { timeout: 15000 });
+    await waitForEditForm(editFrame, page);
 
     const savedHiddenField = editFrame.locator('.sluggi-hidden-field');
     await expect(savedHiddenField).toHaveValue('/organization/department/institute/about-page');
   });
 
   test('new page has correct locked-prefix based on hierarchy permissions', async ({ page }) => {
-    await page.goto('/typo3/module/web/layout');
-    await waitForPageTree(page, 10000);
-
-    // Editor has mount point at page 27, so it's directly visible
-    const instituteNode = await getPageTreeNode(page, 27);
-    await expect(instituteNode).toBeVisible({ timeout: 10000 });
-    await instituteNode.click({ button: 'right' });
-
-    const newSubpageMenuItem = page.getByRole('menuitem', { name: 'New subpage' });
-    await expect(newSubpageMenuItem).toBeVisible({ timeout: 5000 });
-    await newSubpageMenuItem.click();
-
-    const editFrame = page.frameLocator('iframe');
-    await expect(editFrame.locator('h1')).toContainText('Create new Page', { timeout: 15000 });
+    const editFrame = await openNewSubpageForm(page, 27);
 
     const slugElement = editFrame.locator('sluggi-element');
     await expect(slugElement).toBeVisible();
@@ -94,7 +81,7 @@ test.describe('Hierarchy Permission - Editor Slug Restrictions', () => {
     await page.waitForURL(/edit/, { timeout: 10000 });
 
     const editFrame = page.frameLocator('iframe');
-    await expect(editFrame.locator('h1')).toContainText('Edit Page', { timeout: 15000 });
+    await waitForEditForm(editFrame, page);
 
     const flashMessage = editFrame.locator('.alert-danger').first();
     await expect(flashMessage).toBeVisible({ timeout: 5000 });

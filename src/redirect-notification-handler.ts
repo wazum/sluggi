@@ -28,8 +28,26 @@ interface RevertResponse {
 }
 
 class RedirectNotificationHandler {
+    private readonly recentCorrelationIds = new Set<string>();
+
     constructor() {
-        document.addEventListener('typo3:redirects:slugChanged', (event) => this.onSlugChanged(event as CustomEvent<SlugChangedEventDetail>), true);
+        const listener = (event: Event) => {
+            const customEvent = event as CustomEvent<SlugChangedEventDetail>;
+            const correlationId = customEvent.detail?.correlations?.correlationIdSlugUpdate;
+            if (correlationId) {
+                if (this.recentCorrelationIds.has(correlationId)) return;
+                this.recentCorrelationIds.add(correlationId);
+                setTimeout(() => this.recentCorrelationIds.delete(correlationId), 2000);
+            }
+            this.onSlugChanged(customEvent);
+        };
+        document.addEventListener('typo3:redirects:slugChanged', listener, true);
+        // TYPO3 14+ dispatches on top.document (FLAG_USE_TOP_WINDOW). When this
+        // handler is loaded inside an iframe, also listen on the top document.
+        // Dedup by correlation ID protects against double invocation.
+        if (window.top && window.top.document !== document) {
+            window.top.document.addEventListener('typo3:redirects:slugChanged', listener, true);
+        }
     }
 
     static storeChoice(pageId: string, createRedirects: boolean): void {

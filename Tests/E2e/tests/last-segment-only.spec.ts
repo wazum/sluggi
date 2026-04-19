@@ -1,5 +1,5 @@
 import { test, expect, FrameLocator, Locator } from '@playwright/test';
-import { expandPageTreeNode, getPageTreeNode, getPageTreeNodeLabel, getPageTreeEditInput, waitForPageTree } from '../fixtures/typo3-compat';
+import { expandPageTreeNode, getPageTreeNode, getPageTreeNodeLabel, getPageTreeEditInput, openNewSubpageForm, waitForEditForm, waitForNewPageForm, waitForPageTree } from '../fixtures/typo3-compat';
 
 test.describe('Last Segment Only - Editor Restrictions', () => {
   let frame: FrameLocator;
@@ -14,7 +14,7 @@ test.describe('Last Segment Only - Editor Restrictions', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/typo3/record/edit?edit[pages][19]=edit');
     frame = page.frameLocator('iframe');
-    await expect(frame.locator('h1')).toContainText('Edit Page', { timeout: 15000 });
+    await waitForEditForm(frame, page);
     slugElement = frame.locator('sluggi-element');
   });
 
@@ -35,7 +35,7 @@ test.describe('Last Segment Only - Editor Restrictions', () => {
   test('editor can change only the last segment', async ({ page }) => {
     await page.goto('/typo3/record/edit?edit[pages][20]=edit');
     frame = page.frameLocator('iframe');
-    await expect(frame.locator('h1')).toContainText('Edit Page', { timeout: 15000 });
+    await waitForEditForm(frame, page);
     slugElement = frame.locator('sluggi-element');
 
     const editableArea = slugElement.locator('.sluggi-editable');
@@ -54,7 +54,7 @@ test.describe('Last Segment Only - Editor Restrictions', () => {
     await page.waitForURL(/edit/, { timeout: 10000 });
 
     const editFrame = page.frameLocator('iframe');
-    await expect(editFrame.locator('h1')).toContainText('Edit Page', { timeout: 15000 });
+    await waitForEditForm(editFrame, page);
 
     const savedHiddenField = editFrame.locator('.sluggi-hidden-field');
     await expect(savedHiddenField).toHaveValue('/parent-section/new-segment');
@@ -91,7 +91,7 @@ test.describe('Last Segment Only - Editor Restrictions', () => {
   test('backend blocks attempt to change parent segment', async ({ page }) => {
     await page.goto('/typo3/record/edit?edit[pages][21]=edit');
     frame = page.frameLocator('iframe');
-    await expect(frame.locator('h1')).toContainText('Edit Page', { timeout: 15000 });
+    await waitForEditForm(frame, page);
 
     const hiddenField = frame.locator('.sluggi-hidden-field');
     await hiddenField.evaluate((el: HTMLInputElement) => {
@@ -102,27 +102,14 @@ test.describe('Last Segment Only - Editor Restrictions', () => {
     await page.waitForURL(/edit/, { timeout: 10000 });
 
     const editFrame = page.frameLocator('iframe');
-    await expect(editFrame.locator('h1')).toContainText('Edit Page', { timeout: 15000 });
+    await waitForEditForm(editFrame, page);
 
     const flashMessage = editFrame.locator('.alert-danger').first();
     await expect(flashMessage).toBeVisible({ timeout: 5000 });
   });
 
   test('new page via context menu shows parent prefix as locked (issue #128)', async ({ page }) => {
-    await page.goto('/typo3/module/web/layout');
-    await waitForPageTree(page, 10000);
-
-    // Editor has mount point at page 18, so it's directly visible
-    const parentNode = await getPageTreeNode(page, 18);
-    await expect(parentNode).toBeVisible({ timeout: 10000 });
-    await parentNode.click({ button: 'right' });
-
-    const newSubpageMenuItem = page.getByRole('menuitem', { name: 'New subpage' });
-    await expect(newSubpageMenuItem).toBeVisible({ timeout: 5000 });
-    await newSubpageMenuItem.click();
-
-    const editFrame = page.frameLocator('iframe');
-    await expect(editFrame.locator('h1')).toContainText('Create new Page', { timeout: 15000 });
+    const editFrame = await openNewSubpageForm(page, 18);
 
     const slugElement = editFrame.locator('sluggi-element');
     await expect(slugElement).toBeVisible();
@@ -166,7 +153,7 @@ test.describe('Last Segment Only - Editor Restrictions', () => {
 
     await page.goto('/typo3/record/edit?edit[pages][22]=edit');
     const editFrame = page.frameLocator('iframe');
-    await expect(editFrame.locator('h1')).toContainText('Edit Page', { timeout: 15000 });
+    await waitForEditForm(editFrame, page);
 
     const hiddenField = editFrame.locator('.sluggi-hidden-field');
     const slugValue = await hiddenField.inputValue();

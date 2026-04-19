@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { getMultiEditUrl } from '../fixtures/typo3-compat';
+import { getMultiEditUrl, waitForEditForm } from '../fixtures/typo3-compat';
 
 test.describe('Collapsed Controls', () => {
   test.use({
@@ -12,7 +12,7 @@ test.describe('Collapsed Controls', () => {
     test('burger menu trigger is visible and controls are hidden', async ({ page }) => {
       await page.goto('/typo3/record/edit?edit[pages][43]=edit');
       const frame = page.frameLocator('iframe');
-      await expect(frame.locator('h1')).toContainText('Edit Page', { timeout: 15000 });
+      await waitForEditForm(frame, page);
 
       const slugElement = frame.locator('sluggi-element');
       const menuTrigger = slugElement.locator('.sluggi-menu-trigger');
@@ -25,7 +25,7 @@ test.describe('Collapsed Controls', () => {
     test('hovering expands controls', async ({ page }) => {
       await page.goto('/typo3/record/edit?edit[pages][43]=edit');
       const frame = page.frameLocator('iframe');
-      await expect(frame.locator('h1')).toContainText('Edit Page', { timeout: 15000 });
+      await waitForEditForm(frame, page);
 
       const slugElement = frame.locator('sluggi-element');
       const wrapper = slugElement.locator('.sluggi-wrapper');
@@ -41,7 +41,7 @@ test.describe('Collapsed Controls', () => {
     test('controls retract after mouse leaves', async ({ page }) => {
       await page.goto('/typo3/record/edit?edit[pages][43]=edit');
       const frame = page.frameLocator('iframe');
-      await expect(frame.locator('h1')).toContainText('Edit Page', { timeout: 15000 });
+      await waitForEditForm(frame, page);
 
       const slugElement = frame.locator('sluggi-element');
       const wrapper = slugElement.locator('.sluggi-wrapper');
@@ -61,7 +61,7 @@ test.describe('Collapsed Controls', () => {
     test('burger menu is keyboard accessible', async ({ page }) => {
       await page.goto('/typo3/record/edit?edit[pages][43]=edit');
       const frame = page.frameLocator('iframe');
-      await expect(frame.locator('h1')).toContainText('Edit Page', { timeout: 15000 });
+      await waitForEditForm(frame, page);
 
       const slugElement = frame.locator('sluggi-element');
       const menuTrigger = slugElement.locator('.sluggi-menu-trigger');
@@ -82,7 +82,7 @@ test.describe('Collapsed Controls', () => {
     test('Escape closes menu and returns focus to trigger', async ({ page }) => {
       await page.goto('/typo3/record/edit?edit[pages][43]=edit');
       const frame = page.frameLocator('iframe');
-      await expect(frame.locator('h1')).toContainText('Edit Page', { timeout: 15000 });
+      await waitForEditForm(frame, page);
 
       const slugElement = frame.locator('sluggi-element');
       const menuTrigger = slugElement.locator('.sluggi-menu-trigger');
@@ -102,7 +102,7 @@ test.describe('Collapsed Controls', () => {
     test('hidden buttons are not focusable when menu is collapsed', async ({ page }) => {
       await page.goto('/typo3/record/edit?edit[pages][43]=edit');
       const frame = page.frameLocator('iframe');
-      await expect(frame.locator('h1')).toContainText('Edit Page', { timeout: 15000 });
+      await waitForEditForm(frame, page);
 
       const slugElement = frame.locator('sluggi-element');
       const menuContent = slugElement.locator('.sluggi-menu-content');
@@ -119,7 +119,7 @@ test.describe('Collapsed Controls', () => {
 
       const frame = page.frameLocator('iframe');
       // Multi-edit shows multiple h1 headings (one per record)
-      await expect(frame.locator('h1').first()).toContainText('Edit Page', { timeout: 15000 });
+      await waitForEditForm(frame, page);
 
       const slugElement = frame.locator('sluggi-element').first();
       const menuTrigger = slugElement.locator('.sluggi-menu-trigger');

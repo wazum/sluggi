@@ -166,4 +166,23 @@ final class Typo3Compatibility
             GeneralUtility::makeInstance(SiteWriter::class)->write($siteIdentifier, $configuration);
         }
     }
+
+    /**
+     * Default $defaultFieldInformation value for FormEngine elements.
+     *
+     * TYPO3 12/13: include 'tcaDescription' so field descriptions render.
+     * TYPO3 14+: empty — descriptions auto-render at label level via
+     * AbstractFormElement::renderDescription(); the 'tcaDescription' render
+     * type was deprecated in 14.2 (issue #109280).
+     *
+     * @return array<string, array<string, string>>
+     *
+     * @deprecated Remove (and inline the empty default) when dropping TYPO3 13 support
+     */
+    public static function getFormElementFieldInformation(): array
+    {
+        return self::getMajorVersion() < 14
+            ? ['tcaDescription' => ['renderType' => 'tcaDescription']]
+            : [];
+    }
 }
