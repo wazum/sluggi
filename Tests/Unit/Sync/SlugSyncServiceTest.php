@@ -9,6 +9,7 @@ use PHPUnit\Framework\TestCase;
 use TYPO3\CMS\Core\Configuration\ExtensionConfiguration as CoreExtensionConfiguration;
 use TYPO3\CMS\Core\Database\ConnectionPool;
 use Wazum\Sluggi\Configuration\ExtensionConfiguration;
+use Wazum\Sluggi\Service\PendingSyncStateRegistry;
 use Wazum\Sluggi\Service\SlugConfigurationService;
 use Wazum\Sluggi\Service\SlugSyncService;
 
@@ -20,7 +21,7 @@ final class SlugSyncServiceTest extends TestCase
         $coreConfig = $this->createMock(CoreExtensionConfiguration::class);
         $coreConfig->method('get')->with('sluggi', 'synchronize')->willReturn('1');
 
-        $subject = new SlugSyncService(new ExtensionConfiguration($coreConfig), new SlugConfigurationService(), $this->createMock(ConnectionPool::class));
+        $subject = new SlugSyncService(new ExtensionConfiguration($coreConfig), new SlugConfigurationService(), $this->createMock(ConnectionPool::class), new PendingSyncStateRegistry());
 
         self::assertTrue($subject->isSyncFeatureEnabled());
     }
@@ -31,7 +32,7 @@ final class SlugSyncServiceTest extends TestCase
         $coreConfig = $this->createMock(CoreExtensionConfiguration::class);
         $coreConfig->method('get')->with('sluggi', 'synchronize')->willReturn('0');
 
-        $subject = new SlugSyncService(new ExtensionConfiguration($coreConfig), new SlugConfigurationService(), $this->createMock(ConnectionPool::class));
+        $subject = new SlugSyncService(new ExtensionConfiguration($coreConfig), new SlugConfigurationService(), $this->createMock(ConnectionPool::class), new PendingSyncStateRegistry());
 
         self::assertFalse($subject->isSyncFeatureEnabled());
     }
@@ -42,7 +43,7 @@ final class SlugSyncServiceTest extends TestCase
         $coreConfig = $this->createMock(CoreExtensionConfiguration::class);
         $coreConfig->method('get')->with('sluggi', 'synchronize')->willReturn('1');
 
-        $subject = new SlugSyncService(new ExtensionConfiguration($coreConfig), new SlugConfigurationService(), $this->createMock(ConnectionPool::class));
+        $subject = new SlugSyncService(new ExtensionConfiguration($coreConfig), new SlugConfigurationService(), $this->createMock(ConnectionPool::class), new PendingSyncStateRegistry());
 
         $result = $subject->shouldSync(['tx_sluggi_sync' => 1]);
 
@@ -55,7 +56,7 @@ final class SlugSyncServiceTest extends TestCase
         $coreConfig = $this->createMock(CoreExtensionConfiguration::class);
         $coreConfig->method('get')->with('sluggi', 'synchronize')->willReturn('0');
 
-        $subject = new SlugSyncService(new ExtensionConfiguration($coreConfig), new SlugConfigurationService(), $this->createMock(ConnectionPool::class));
+        $subject = new SlugSyncService(new ExtensionConfiguration($coreConfig), new SlugConfigurationService(), $this->createMock(ConnectionPool::class), new PendingSyncStateRegistry());
 
         $result = $subject->shouldSync(['tx_sluggi_sync' => 1]);
 
@@ -68,7 +69,7 @@ final class SlugSyncServiceTest extends TestCase
         $coreConfig = $this->createMock(CoreExtensionConfiguration::class);
         $coreConfig->method('get')->with('sluggi', 'synchronize')->willReturn('1');
 
-        $subject = new SlugSyncService(new ExtensionConfiguration($coreConfig), new SlugConfigurationService(), $this->createMock(ConnectionPool::class));
+        $subject = new SlugSyncService(new ExtensionConfiguration($coreConfig), new SlugConfigurationService(), $this->createMock(ConnectionPool::class), new PendingSyncStateRegistry());
 
         $result = $subject->shouldSync(['tx_sluggi_sync' => 0]);
 
@@ -86,7 +87,7 @@ final class SlugSyncServiceTest extends TestCase
         ];
 
         $coreConfig = $this->createMock(CoreExtensionConfiguration::class);
-        $subject = new SlugSyncService(new ExtensionConfiguration($coreConfig), new SlugConfigurationService(), $this->createMock(ConnectionPool::class));
+        $subject = new SlugSyncService(new ExtensionConfiguration($coreConfig), new SlugConfigurationService(), $this->createMock(ConnectionPool::class), new PendingSyncStateRegistry());
 
         $result = $subject->hasSourceFieldChanged('pages', ['title' => 'New Title']);
 
@@ -104,7 +105,7 @@ final class SlugSyncServiceTest extends TestCase
         ];
 
         $coreConfig = $this->createMock(CoreExtensionConfiguration::class);
-        $subject = new SlugSyncService(new ExtensionConfiguration($coreConfig), new SlugConfigurationService(), $this->createMock(ConnectionPool::class));
+        $subject = new SlugSyncService(new ExtensionConfiguration($coreConfig), new SlugConfigurationService(), $this->createMock(ConnectionPool::class), new PendingSyncStateRegistry());
 
         $result = $subject->hasSourceFieldChanged('pages', ['hidden' => 1]);
 
@@ -117,7 +118,7 @@ final class SlugSyncServiceTest extends TestCase
         $coreConfig = $this->createMock(CoreExtensionConfiguration::class);
         $coreConfig->method('get')->with('sluggi', 'synchronize')->willReturn('0');
 
-        $subject = new SlugSyncService(new ExtensionConfiguration($coreConfig), new SlugConfigurationService(), $this->createMock(ConnectionPool::class));
+        $subject = new SlugSyncService(new ExtensionConfiguration($coreConfig), new SlugConfigurationService(), $this->createMock(ConnectionPool::class), new PendingSyncStateRegistry());
 
         $result = $subject->shouldShowSourceBadge('pages', 'new', ['tx_sluggi_sync' => 0]);
 
@@ -130,7 +131,7 @@ final class SlugSyncServiceTest extends TestCase
         $coreConfig = $this->createMock(CoreExtensionConfiguration::class);
         $coreConfig->method('get')->with('sluggi', 'synchronize')->willReturn('1');
 
-        $subject = new SlugSyncService(new ExtensionConfiguration($coreConfig), new SlugConfigurationService(), $this->createMock(ConnectionPool::class));
+        $subject = new SlugSyncService(new ExtensionConfiguration($coreConfig), new SlugConfigurationService(), $this->createMock(ConnectionPool::class), new PendingSyncStateRegistry());
 
         $result = $subject->shouldShowSourceBadge('pages', 'edit', ['tx_sluggi_sync' => 1]);
 
@@ -143,7 +144,7 @@ final class SlugSyncServiceTest extends TestCase
         $coreConfig = $this->createMock(CoreExtensionConfiguration::class);
         $coreConfig->method('get')->with('sluggi', 'synchronize')->willReturn('1');
 
-        $subject = new SlugSyncService(new ExtensionConfiguration($coreConfig), new SlugConfigurationService(), $this->createMock(ConnectionPool::class));
+        $subject = new SlugSyncService(new ExtensionConfiguration($coreConfig), new SlugConfigurationService(), $this->createMock(ConnectionPool::class), new PendingSyncStateRegistry());
 
         $result = $subject->shouldShowSourceBadge('pages', 'edit', ['tx_sluggi_sync' => 0]);
 
@@ -156,7 +157,7 @@ final class SlugSyncServiceTest extends TestCase
         $coreConfig = $this->createMock(CoreExtensionConfiguration::class);
         $coreConfig->method('get')->with('sluggi', 'synchronize')->willReturn('0');
 
-        $subject = new SlugSyncService(new ExtensionConfiguration($coreConfig), new SlugConfigurationService(), $this->createMock(ConnectionPool::class));
+        $subject = new SlugSyncService(new ExtensionConfiguration($coreConfig), new SlugConfigurationService(), $this->createMock(ConnectionPool::class), new PendingSyncStateRegistry());
 
         $result = $subject->shouldShowSourceBadge('pages', 'edit', ['tx_sluggi_sync' => 1]);
 
@@ -180,7 +181,7 @@ final class SlugSyncServiceTest extends TestCase
         $result->method('fetchAssociative')->willReturn(['is_synced' => 0]);
 
         $coreConfig = $this->createMock(CoreExtensionConfiguration::class);
-        $subject = new SlugSyncService(new ExtensionConfiguration($coreConfig), new SlugConfigurationService(), $connectionPool);
+        $subject = new SlugSyncService(new ExtensionConfiguration($coreConfig), new SlugConfigurationService(), $connectionPool, new PendingSyncStateRegistry());
 
         $record = [
             'uid' => 2,
@@ -205,9 +206,10 @@ final class SlugSyncServiceTest extends TestCase
         $result->method('fetchAssociative')->willReturn(['is_synced' => 1]);
 
         $coreConfig = $this->createMock(CoreExtensionConfiguration::class);
-        $subject = new SlugSyncService(new ExtensionConfiguration($coreConfig), new SlugConfigurationService(), $connectionPool);
+        $subject = new SlugSyncService(new ExtensionConfiguration($coreConfig), new SlugConfigurationService(), $connectionPool, new PendingSyncStateRegistry());
 
-        $subject->setPendingSyncState('tx_test', 1, false);
+        $dataHandler = $this->createMock(\TYPO3\CMS\Core\DataHandling\DataHandler::class);
+        $subject->setPendingSyncState($dataHandler, 'tx_test', 1, false);
 
         self::assertFalse(
             $subject->getRecordSyncState('tx_test', 1),

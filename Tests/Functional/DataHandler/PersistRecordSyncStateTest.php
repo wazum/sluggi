@@ -63,6 +63,50 @@ final class PersistRecordSyncStateTest extends FunctionalTestCase
     }
 
     #[Test]
+    public function slugIsNotRegeneratedWhenSyncIsToggledOffInSameSave(): void
+    {
+        // Handshake between PersistRecordSyncState (preProcess) and HandleRecordUpdate
+        // (postProcess): changing the title and toggling sync off in one save must not
+        // regenerate the slug — the pending override has to cross the phase boundary.
+        $dataHandler = GeneralUtility::makeInstance(DataHandler::class);
+        $dataHandler->start(
+            [
+                'tx_sluggitest_article' => [
+                    1 => [
+                        'title' => 'Updated Title',
+                        'tx_sluggi_sync' => 0,
+                    ],
+                ],
+            ],
+            []
+        );
+        $dataHandler->process_datamap();
+
+        $articleConnection = GeneralUtility::makeInstance(ConnectionPool::class)
+            ->getConnectionForTable('tx_sluggitest_article');
+        $row = $articleConnection->select(['title', 'slug'], 'tx_sluggitest_article', ['uid' => 1])
+            ->fetchAssociative();
+
+        self::assertIsArray($row);
+        self::assertSame('Updated Title', (string)$row['title'], 'title change should still be saved');
+        self::assertSame(
+            'original-title/original-subtitle',
+            (string)$row['slug'],
+            'slug must stay at the previous value when sync is toggled off in the same save',
+        );
+
+        $syncConnection = GeneralUtility::makeInstance(ConnectionPool::class)
+            ->getConnectionForTable('tx_sluggi_record_sync');
+        $syncRow = $syncConnection->select(
+            ['is_synced'],
+            'tx_sluggi_record_sync',
+            ['tablename' => 'tx_sluggitest_article', 'record_uid' => 1]
+        )->fetchAssociative();
+        self::assertIsArray($syncRow, 'sync state row must be persisted');
+        self::assertSame(0, (int)$syncRow['is_synced'], 'sync must be off after the save');
+    }
+
+    #[Test]
     public function setRecordSyncStateCanUpdateExistingRow(): void
     {
         $connectionPool = GeneralUtility::makeInstance(ConnectionPool::class);

@@ -6,19 +6,16 @@ namespace Wazum\Sluggi\Service;
 
 use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\Database\ConnectionPool;
+use TYPO3\CMS\Core\DataHandling\DataHandler;
 use Wazum\Sluggi\Configuration\ExtensionConfiguration;
 
 final class SlugSyncService
 {
-    /**
-     * @var array<string, bool>
-     */
-    private array $pendingOverrides = [];
-
     public function __construct(
         private readonly ExtensionConfiguration $extensionConfiguration,
         private readonly SlugConfigurationService $slugConfigurationService,
         private readonly ConnectionPool $connectionPool,
+        private readonly PendingSyncStateRegistry $pendingSyncStateRegistry,
     ) {
     }
 
@@ -110,25 +107,24 @@ final class SlugSyncService
         return $this->getRecordSyncState($table, $uid);
     }
 
-    public function setPendingSyncState(string $table, int $uid, bool $synced): void
+    public function setPendingSyncState(DataHandler $dataHandler, string $table, int $uid, bool $synced): void
     {
-        $this->pendingOverrides[$table . ':' . $uid] = $synced;
+        $this->pendingSyncStateRegistry->set($dataHandler, $table, $uid, $synced);
     }
 
-    public function flushPendingSyncState(string $table, int $uid): void
+    public function flushPendingSyncState(DataHandler $dataHandler, string $table, int $uid): void
     {
-        $key = $table . ':' . $uid;
-        if (!isset($this->pendingOverrides[$key])) {
+        $pending = $this->pendingSyncStateRegistry->consume($dataHandler, $table, $uid);
+        if ($pending === null) {
             return;
         }
 
-        $this->setRecordSyncState($table, $uid, $this->pendingOverrides[$key]);
-        unset($this->pendingOverrides[$key]);
+        $this->setRecordSyncState($table, $uid, $pending);
     }
 
-    public function clearPendingOverrides(): void
+    public function clearPendingOverrides(DataHandler $dataHandler): void
     {
-        $this->pendingOverrides = [];
+        $this->pendingSyncStateRegistry->clearScope($dataHandler);
     }
 
     public function getRecordSyncState(string $table, int $uid): bool
@@ -137,9 +133,9 @@ final class SlugSyncService
             return true;
         }
 
-        $key = $table . ':' . $uid;
-        if (isset($this->pendingOverrides[$key])) {
-            return $this->pendingOverrides[$key];
+        $pending = $this->pendingSyncStateRegistry->get($table, $uid);
+        if ($pending !== null) {
+            return $pending;
         }
 
         $row = $this->connectionPool

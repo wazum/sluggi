@@ -111,7 +111,6 @@ services:
 
   Wazum\Sluggi\Service\SlugSyncService:
     public: true
-    shared: false
 
   Wazum\Sluggi\Service\UserSettingsService:
     public: true

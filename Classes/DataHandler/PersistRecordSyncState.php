@@ -63,7 +63,7 @@ final class PersistRecordSyncState
         // Stage as pending so HandleRecordUpdate can see the new state,
         // but don't persist to DB yet — that happens in afterDatabaseOperations
         // only if the record update actually succeeds.
-        $this->syncService->setPendingSyncState($table, (int)$id, $synced);
+        $this->syncService->setPendingSyncState($dataHandler, $table, (int)$id, $synced);
     }
 
     /**
@@ -80,7 +80,7 @@ final class PersistRecordSyncState
         DataHandler $dataHandler,
     ): void {
         match ($status) {
-            'update' => $this->syncService->flushPendingSyncState($table, (int)$id),
+            'update' => $this->syncService->flushPendingSyncState($dataHandler, $table, (int)$id),
             'new' => $this->flushNewRecord($table, $id, $dataHandler),
             default => null,
         };
@@ -88,7 +88,7 @@ final class PersistRecordSyncState
 
     public function processDatamap_afterAllOperations(DataHandler $dataHandler): void
     {
-        $this->syncService->clearPendingOverrides();
+        $this->syncService->clearPendingOverrides($dataHandler);
         $this->pendingNewRecords = [];
     }
 
