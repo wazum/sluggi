@@ -39,6 +39,52 @@ describe('SluggiElement - Core', () => {
             document.body.removeChild(container);
         });
 
+        it('shows "/" between parent slug and placeholder for new page (no locked-prefix)', async () => {
+            const container = document.createElement('div');
+            const input = document.createElement('input');
+            input.dataset.sluggiSource = '';
+            input.setAttribute('data-formengine-input-name', 'data[pages][123][title]');
+            input.value = '';
+            const sluggi = document.createElement('sluggi-element') as SluggiElement;
+            sluggi.setAttribute('value', '/test-page');
+            sluggi.setAttribute('command', 'new');
+            sluggi.setAttribute('record-id', '123');
+            container.append(input, sluggi);
+            document.body.appendChild(container);
+            await sluggi.updateComplete;
+
+            const editable = sluggi.shadowRoot!.querySelector('.sluggi-editable');
+            // Expect `/test-page/new-page` — the "/" between the parent path and
+            // the placeholder belongs to the URL structure, not the placeholder label.
+            expect(editable?.textContent).to.equal('/test-page/new-page');
+            expect(sluggi.shadowRoot!.querySelector('.sluggi-placeholder')).to.exist;
+            document.body.removeChild(container);
+        });
+
+        it('omits "/" before placeholder for non-page records', async () => {
+            const container = document.createElement('div');
+            const input = document.createElement('input');
+            input.dataset.sluggiSource = '';
+            input.setAttribute('data-formengine-input-name', 'data[tx_news_domain_model_news][456][title]');
+            input.value = '';
+            const sluggi = document.createElement('sluggi-element') as SluggiElement;
+            sluggi.setAttribute('value', '');
+            sluggi.setAttribute('command', 'new');
+            sluggi.setAttribute('record-id', '456');
+            sluggi.setAttribute('table-name', 'tx_news_domain_model_news');
+            sluggi.setAttribute('field-name', 'path_segment');
+            container.append(input, sluggi);
+            document.body.appendChild(container);
+            await sluggi.updateComplete;
+
+            const editable = sluggi.shadowRoot!.querySelector('.sluggi-editable');
+            // Non-page records don't follow the parent-hierarchy URL pattern, so
+            // the placeholder should not get a leading "/".
+            expect(editable?.textContent).to.equal('new-record');
+            expect(sluggi.shadowRoot!.querySelector('.sluggi-placeholder')).to.exist;
+            document.body.removeChild(container);
+        });
+
         it('does not show placeholder on existing page even when source field is empty', async () => {
             const container = document.createElement('div');
             container.innerHTML = `

@@ -488,6 +488,9 @@ export class SluggiElement extends LitElement {
         const hasMultipleSegments = lastSlashIndex > 0;
         const pathPart = hasMultipleSegments ? editable.substring(0, lastSlashIndex) : '';
         const endPart = hasMultipleSegments ? editable.substring(lastSlashIndex) : editable;
+        // Pages follow a parent/child URL structure — insert "/" between the
+        // parent path and the placeholder text. Non-page records don't.
+        const placeholderSeparator = this.showPlaceholder && this.isPageTable && !endPart.endsWith('/') ? '/' : '';
 
         return html`
             <span
@@ -498,7 +501,7 @@ export class SluggiElement extends LitElement {
                 aria-label="${isEditable ? `Click to edit slug: ${editable}` : editable}"
                 @click="${this.handleEditableClick}"
                 @keydown="${this.handleEditableKeydown}"
-            >${pathPart ? html`<span class="sluggi-editable-path ${this.hasPrefixMismatch && !this.computedPrefix ? 'is-out-of-sync' : ''}">${pathPart}</span>` : nothing}<span class="sluggi-editable-end">${endPart}</span>${this.showPlaceholder ? html`<span class="sluggi-placeholder">${this.isPageTable ? (this.labels['placeholder.newPage'] || 'new-page') : (this.labels['placeholder.newRecord'] || 'new-record')}</span>` : nothing}</span>
+            >${pathPart ? html`<span class="sluggi-editable-path ${this.hasPrefixMismatch && !this.computedPrefix ? 'is-out-of-sync' : ''}">${pathPart}</span>` : nothing}<span class="sluggi-editable-end">${endPart}${placeholderSeparator}</span>${this.showPlaceholder ? html`<span class="sluggi-placeholder">${this.isPageTable ? (this.labels['placeholder.newPage'] || 'new-page') : (this.labels['placeholder.newRecord'] || 'new-record')}</span>` : nothing}</span>
         `;
     }
 
