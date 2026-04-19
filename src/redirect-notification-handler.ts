@@ -64,7 +64,8 @@ class RedirectNotificationHandler {
             const data = JSON.parse(stored) as RedirectChoice;
             if (Date.now() - data.timestamp > 30000) return null;
             return data;
-        } catch {
+        } catch (error) {
+            console.warn('sluggi: malformed redirect choice in localStorage', error);
             return null;
         }
     }

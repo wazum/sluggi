@@ -356,6 +356,8 @@ trait SlugElementTrait
             'redirectInfo.singular' => $languageService->sL($prefix . 'redirectInfo.singular'),
             'redirectInfo.plural' => $languageService->sL($prefix . 'redirectInfo.plural'),
             'redirectInfoLink' => $languageService->sL($prefix . 'redirectInfoLink'),
+            'error.proposalFailed.title' => $languageService->sL($prefix . 'error.proposalFailed.title'),
+            'error.proposalFailed.message' => $languageService->sL($prefix . 'error.proposalFailed.message'),
         ];
     }
 

@@ -905,6 +905,10 @@ export class SluggiElement extends LitElement {
             this.setProposal(data.proposal, data.hasConflicts, data.slug);
         } catch (error) {
             console.error('Slug proposal request failed:', error);
+            Notification.warning(
+                this.labels['error.proposalFailed.title'] || 'URL preview unavailable',
+                this.labels['error.proposalFailed.message'] || 'Could not update the URL preview. Please check your connection and try again.',
+            );
         } finally {
             this.loading = false;
         }

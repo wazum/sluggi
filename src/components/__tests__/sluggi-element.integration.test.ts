@@ -1,6 +1,7 @@
 import '../sluggi-element.js';
 import { fixture, html, expect, oneEvent, enterEditMode } from './helpers.js';
 import type { SluggiElement } from './helpers.js';
+import Notification from '@typo3/backend/notification.js';
 
 describe('SluggiElement - Integration', () => {
     describe('Conflict Handling', () => {
@@ -426,6 +427,46 @@ describe('SluggiElement - Integration', () => {
             expect(hiddenField.classList.contains('has-change'), 'Slug field should not have has-change').to.be.false;
 
             document.body.removeChild(container);
+        });
+    });
+
+    describe('Proposal error handling', () => {
+        let originalFetch: typeof window.fetch;
+        let originalTypo3: any;
+
+        beforeEach(() => {
+            originalFetch = window.fetch;
+            originalTypo3 = (window as any).TYPO3;
+            (window as any).TYPO3 = { settings: { ajaxUrls: { record_slug_suggest: '/fake-endpoint' } } };
+            (Notification as any)._reset();
+        });
+
+        afterEach(() => {
+            window.fetch = originalFetch;
+            (window as any).TYPO3 = originalTypo3;
+        });
+
+        it('shows a warning notification when the slug proposal request fails', async () => {
+            window.fetch = async () => new Response('', { status: 500 });
+
+            const el = await fixture<SluggiElement>(html`
+                <sluggi-element
+                    value="/test"
+                    record-id="123"
+                    page-id="1"
+                    table-name="pages"
+                    field-name="slug"
+                    labels='{"error.proposalFailed.title":"URL preview unavailable","error.proposalFailed.message":"Could not update the URL preview. Please check your connection and try again."}'
+                ></sluggi-element>
+            `);
+
+            await el.sendSlugProposal('manual');
+
+            const calls = (Notification as any)._calls as Array<{ type: string; title: string; message: string }>;
+            expect(calls).to.have.lengthOf(1);
+            expect(calls[0].type).to.equal('warning');
+            expect(calls[0].title).to.equal('URL preview unavailable');
+            expect(calls[0].message).to.contain('Could not update');
         });
     });
 });

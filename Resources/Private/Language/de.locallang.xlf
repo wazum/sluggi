@@ -159,6 +159,14 @@
                 <source>You cannot modify path segments above your permission level.</source>
                 <target>Sie können keine Pfadsegmente oberhalb Ihrer Berechtigungsstufe ändern.</target>
             </trans-unit>
+            <trans-unit id="error.proposalFailed.title" resname="error.proposalFailed.title">
+                <source>URL preview unavailable</source>
+                <target>URL-Vorschau nicht verfügbar</target>
+            </trans-unit>
+            <trans-unit id="error.proposalFailed.message" resname="error.proposalFailed.message">
+                <source>Could not update the URL preview. Please check your connection and try again.</source>
+                <target>Die URL-Vorschau konnte nicht aktualisiert werden. Bitte Verbindung prüfen und erneut versuchen.</target>
+            </trans-unit>
             <trans-unit id="prefixMismatch.tooltip" resname="prefixMismatch.tooltip">
                 <source>This prefix differs from the page hierarchy. Click the regenerate button to update.</source>
                 <target>Dieses Präfix weicht von der Seitenhierarchie ab. Klicken Sie auf „Neu generieren", um es zu korrigieren.</target>
