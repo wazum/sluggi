@@ -106,7 +106,18 @@ $GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['t3lib/class.t3lib_pagerenderer.php'][
         }
     };
 
-// DataHandler
+// DataHandler hooks — order matters. Registration order determines execution order.
+// processDatamap phases:
+//   1. Access    — BypassAccessCheckForRedirectCreation: grant redirect storage write for nested DataHandler calls
+//   2. Sanitize  — ClearSlugForExcludedDoktypes: strip slug for excluded doktypes before validation
+//   3. Validate  — ValidateHierarchyPermission: must run before any slug mutation
+//   4. Gate      — PreventLockedSlugEdit: blocks edits on locked slugs before HandlePageUpdate regenerates them
+//   5. Regenerate (pages)   — HandlePageUpdate: auto-regenerates slug when source fields change
+//   6. Persist sync state   — PersistRecordSyncState: must run before HandleRecordUpdate to capture tx_sluggi_sync from the form
+//   7. Regenerate (records) — HandleRecordUpdate: non-page tables configured in synchronize_tables
+//   8. Last-segment guard   — ValidateLastSegmentOnly: must run AFTER regeneration to validate the final slug
+// processCmdmap hooks (copy/undelete) and moveRecord (move) run independently per operation.
+// Sync/lock field initialisers are registered last because they only seed defaults on new records.
 $GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['t3lib/class.t3lib_tcemain.php']['processDatamapClass']['sluggi_redirect_access'] =
     BypassAccessCheckForRedirectCreation::class;
 
