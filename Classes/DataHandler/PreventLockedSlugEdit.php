@@ -64,13 +64,16 @@ final readonly class PreventLockedSlugEdit
     private function canUserModifyLockField(): bool
     {
         $backendUser = $this->getBackendUser();
+        if ($backendUser === null) {
+            return false;
+        }
 
         return $backendUser->isAdmin()
             || $backendUser->check('non_exclude_fields', 'pages:slug_locked');
     }
 
-    private function getBackendUser(): BackendUserAuthentication
+    private function getBackendUser(): ?BackendUserAuthentication
     {
-        return $GLOBALS['BE_USER'];
+        return $GLOBALS['BE_USER'] ?? null;
     }
 }
