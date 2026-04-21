@@ -92,6 +92,9 @@ export class SluggiElement extends LitElement {
     @property({ type: String, attribute: 'redirects-module-url' })
     redirectsModuleUrl = '';
 
+    @property({ type: String, attribute: 'reserved-paths' })
+    reservedPaths = '';
+
     // =========================================================================
     // Properties: Conflict State
     // =========================================================================
@@ -422,8 +425,31 @@ export class SluggiElement extends LitElement {
                 </div>
             </div>
             ${this.renderRestrictionNote()}
+            ${this.renderReservedPathWarning()}
             ${this.renderRedirectInfo()}
         `;
+    }
+
+    private get reservedPathPatterns(): string[] {
+        if (!this.reservedPaths) return [];
+        try {
+            const parsed = JSON.parse(this.reservedPaths);
+            return Array.isArray(parsed) ? parsed.filter((p): p is string => typeof p === 'string') : [];
+        } catch {
+            return [];
+        }
+    }
+
+    private get isSlugReserved(): boolean {
+        const slug = this.value;
+        if (!slug) return false;
+        return this.reservedPathPatterns.some(p => slug === p || slug.startsWith(p + '/'));
+    }
+
+    private renderReservedPathWarning() {
+        if (!this.isSlugReserved) return nothing;
+        const message = this.labels['warning.reservedPath'] || 'This URL path matches a reserved path and will be rejected on save.';
+        return html`<p class="sluggi-reserved-warning" role="status" aria-live="polite">${message}</p>`;
     }
 
     private renderRestrictionNote() {

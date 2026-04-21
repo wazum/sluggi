@@ -8,6 +8,7 @@ use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\DataHandling\DataHandler;
 use TYPO3\CMS\Redirects\RedirectUpdate\SlugRedirectChangeItemFactory;
 use TYPO3\CMS\Redirects\Service\SlugService;
+use Wazum\Sluggi\Service\ReservedPathService;
 use Wazum\Sluggi\Service\SlugGeneratorService;
 use Wazum\Sluggi\Service\SlugLockService;
 use Wazum\Sluggi\Service\SlugSyncService;
@@ -21,6 +22,7 @@ final readonly class HandlePageUpdate
         private SlugGeneratorService $generatorService,
         private SlugRedirectChangeItemFactory $changeItemFactory,
         private SlugService $slugService,
+        private ReservedPathService $reservedPathService,
     ) {
     }
 
@@ -74,6 +76,13 @@ final readonly class HandlePageUpdate
             $merged,
             (int)$record['pid'],
         );
+
+        if ($this->isReservedForSite((int)$id, $newSlug)) {
+            DataHandlerUtility::logSlugValidationError($dataHandler, (int)$id, 'error.reservedPath');
+
+            return;
+        }
+
         $fieldArray['slug'] = $newSlug;
 
         if ($newSlug !== $record['slug'] && !$this->coreWillCascadeChildSlugs($dataHandler, (int)$id)) {
@@ -90,6 +99,21 @@ final readonly class HandlePageUpdate
     private function coreWillCascadeChildSlugs(DataHandler $dataHandler, int $pageId): bool
     {
         return isset($dataHandler->datamap['pages'][$pageId]['slug']);
+    }
+
+    private function isReservedForSite(int $pageId, string $slug): bool
+    {
+        $site = $this->reservedPathService->findSiteForPage($pageId);
+        if ($site === null) {
+            return false;
+        }
+
+        $patterns = $this->reservedPathService->getReservedPathsForSite($site);
+        if ($patterns === []) {
+            return false;
+        }
+
+        return $this->reservedPathService->isReserved($slug, $patterns);
     }
 
     /**

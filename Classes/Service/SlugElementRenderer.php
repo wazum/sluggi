@@ -82,6 +82,9 @@ final readonly class SlugElementRenderer
             $attributes['redirect-count'] = (string)$context['redirectCount'];
             $attributes['redirects-module-url'] = $context['redirectsModuleUrl'];
         }
+        if (!empty($context['reservedPaths'])) {
+            $attributes['reserved-paths'] = (string)json_encode($context['reservedPaths']);
+        }
 
         return $attributes;
     }

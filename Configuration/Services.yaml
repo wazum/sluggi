@@ -51,6 +51,9 @@ services:
   Wazum\Sluggi\DataHandler\ValidateLastSegmentOnly:
     public: true
 
+  Wazum\Sluggi\DataHandler\ValidateReservedSlugPath:
+    public: true
+
   Wazum\Sluggi\DataHandler\InitializeSyncForNewPage:
     public: true
 
@@ -109,6 +112,9 @@ services:
   Wazum\Sluggi\Service\RedirectInfoService:
     public: true
 
+  Wazum\Sluggi\Service\ReservedPathService:
+    public: true
+
   Wazum\Sluggi\Service\SlugSyncService:
     public: true
 
@@ -142,5 +148,12 @@ services:
     tags:
       - name: event.listener
         identifier: 'sluggi/skip-redirect-on-request'
+        event: TYPO3\CMS\Redirects\Event\SlugRedirectChangeItemCreatedEvent
+        after: 'redirects-add-plain-slug-replacement-source,redirects-add-page-type-zero-source'
+
+  Wazum\Sluggi\EventListener\SuppressRedirectForReservedPath:
+    tags:
+      - name: event.listener
+        identifier: 'sluggi/suppress-redirect-for-reserved-path'
         event: TYPO3\CMS\Redirects\Event\SlugRedirectChangeItemCreatedEvent
         after: 'redirects-add-plain-slug-replacement-source,redirects-add-page-type-zero-source'

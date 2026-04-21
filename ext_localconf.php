@@ -29,6 +29,7 @@ use Wazum\Sluggi\DataHandler\LockSlugOnFullPathEdit;
 use Wazum\Sluggi\DataHandler\PreventLockedSlugEdit;
 use Wazum\Sluggi\DataHandler\ValidateHierarchyPermission;
 use Wazum\Sluggi\DataHandler\ValidateLastSegmentOnly;
+use Wazum\Sluggi\DataHandler\ValidateReservedSlugPath;
 use Wazum\Sluggi\Form\Element\SlugElementV12;
 use Wazum\Sluggi\Form\Element\SlugElementV14;
 use Wazum\Sluggi\Form\Element\SlugSourceElementV12;
@@ -116,6 +117,7 @@ $GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['t3lib/class.t3lib_pagerenderer.php'][
 //   6. Persist sync state   — PersistRecordSyncState: must run before HandleRecordUpdate to capture tx_sluggi_sync from the form
 //   7. Regenerate (records) — HandleRecordUpdate: non-page tables configured in synchronize_tables
 //   8. Last-segment guard   — ValidateLastSegmentOnly: must run AFTER regeneration to validate the final slug
+//   9. Reserved-path guard  — ValidateReservedSlugPath: rejects reserved slugs on update; rewrites reserved slugs on create
 // processCmdmap hooks (copy/undelete) and moveRecord (move) run independently per operation.
 // Sync/lock field initialisers are registered last because they only seed defaults on new records.
 $GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['t3lib/class.t3lib_tcemain.php']['processDatamapClass']['sluggi_redirect_access'] =
@@ -142,6 +144,9 @@ $GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['t3lib/class.t3lib_tcemain.php']['proc
 
 $GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['t3lib/class.t3lib_tcemain.php']['processDatamapClass']['sluggi_validate'] =
     ValidateLastSegmentOnly::class;
+
+$GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['t3lib/class.t3lib_tcemain.php']['processDatamapClass']['sluggi_reserved_path'] =
+    ValidateReservedSlugPath::class;
 
 $GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['t3lib/class.t3lib_tcemain.php']['processCmdmapClass']['sluggi_copy'] =
     HandlePageCopy::class;

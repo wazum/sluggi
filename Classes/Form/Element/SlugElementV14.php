@@ -12,6 +12,7 @@ use Wazum\Sluggi\Service\FullPathEditingService;
 use Wazum\Sluggi\Service\HierarchyPermissionService;
 use Wazum\Sluggi\Service\LastSegmentValidationService;
 use Wazum\Sluggi\Service\RedirectInfoService;
+use Wazum\Sluggi\Service\ReservedPathService;
 use Wazum\Sluggi\Service\SlugConfigurationService;
 use Wazum\Sluggi\Service\SlugElementRenderer;
 use Wazum\Sluggi\Service\SlugGeneratorService;
@@ -59,6 +60,7 @@ final class SlugElementV14 extends AbstractFormElement
         ExtensionConfiguration $extensionConfiguration,
         UserSettingsService $userSettingsService,
         RedirectInfoService $redirectInfoService,
+        ReservedPathService $reservedPathService,
     ) {
         $this->slugElementRenderer = $slugElementRenderer;
         $this->slugSyncService = $slugSyncService;
@@ -71,6 +73,7 @@ final class SlugElementV14 extends AbstractFormElement
         $this->extensionConfiguration = $extensionConfiguration;
         $this->userSettingsService = $userSettingsService;
         $this->redirectInfoService = $redirectInfoService;
+        $this->reservedPathService = $reservedPathService;
 
         $this->defaultFieldInformation = Typo3Compatibility::getFormElementFieldInformation();
     }

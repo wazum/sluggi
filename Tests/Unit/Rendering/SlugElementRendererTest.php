@@ -344,6 +344,40 @@ final class SlugElementRendererTest extends TestCase
         self::assertArrayNotHasKey('redirects-module-url', $result);
     }
 
+    #[Test]
+    public function buildAttributesEmitsReservedPathsWhenNonEmpty(): void
+    {
+        $subject = new SlugElementRenderer();
+        $context = $this->createContext(['reservedPaths' => ['/api', '/typo3']]);
+
+        $result = $subject->buildAttributes($context, []);
+
+        self::assertArrayHasKey('reserved-paths', $result);
+        self::assertSame('["\/api","\/typo3"]', $result['reserved-paths']);
+    }
+
+    #[Test]
+    public function buildAttributesOmitsReservedPathsWhenEmpty(): void
+    {
+        $subject = new SlugElementRenderer();
+        $context = $this->createContext(['reservedPaths' => []]);
+
+        $result = $subject->buildAttributes($context, []);
+
+        self::assertArrayNotHasKey('reserved-paths', $result);
+    }
+
+    #[Test]
+    public function buildAttributesOmitsReservedPathsWhenMissingFromContext(): void
+    {
+        $subject = new SlugElementRenderer();
+        $context = $this->createContext();
+
+        $result = $subject->buildAttributes($context, []);
+
+        self::assertArrayNotHasKey('reserved-paths', $result);
+    }
+
     /**
      * @param array<string, mixed> $overrides
      *

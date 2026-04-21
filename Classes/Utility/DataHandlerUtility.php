@@ -46,8 +46,10 @@ final class DataHandlerUtility
         $title = self::translate($errorKeyPrefix . '.title');
         $message = self::translate($errorKeyPrefix . '.message');
 
+        // TYPO3 core auto-renders DataHandler::$errorLog entries as flash
+        // messages at the end of the request, so logging here is enough —
+        // adding a separate FlashMessage would produce a duplicate.
         $dataHandler->log('pages', $id, 2, null, 1, $title . ': ' . $message);
-        FlashMessageUtility::addError($message, $title);
     }
 
     private static function translate(string $key): string

@@ -14,6 +14,7 @@ use Wazum\Sluggi\Service\FullPathEditingService;
 use Wazum\Sluggi\Service\HierarchyPermissionService;
 use Wazum\Sluggi\Service\LastSegmentValidationService;
 use Wazum\Sluggi\Service\RedirectInfoService;
+use Wazum\Sluggi\Service\ReservedPathService;
 use Wazum\Sluggi\Service\SlugConfigurationService;
 use Wazum\Sluggi\Service\SlugElementRenderer;
 use Wazum\Sluggi\Service\SlugGeneratorService;
@@ -82,5 +83,6 @@ final class SlugElementV12 extends AbstractFormElement
         );
         $this->userSettingsService = GeneralUtility::makeInstance(UserSettingsService::class);
         $this->redirectInfoService = GeneralUtility::makeInstance(RedirectInfoService::class);
+        $this->reservedPathService = GeneralUtility::makeInstance(ReservedPathService::class);
     }
 }

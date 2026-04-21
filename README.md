@@ -52,6 +52,8 @@ composer require wazum/sluggi
 
 **Redirect info** – See how many redirects point to a page, with a direct link to manage them.
 
+**Reserved URL paths** – Declare path prefixes pages must never occupy (e.g. `/api`, `/typo3`). Saving a reserved slug is rejected with an inline warning and a flash error.
+
 **Any table** – Works with pages, news, events, or any record with a TCA slug field.
 
 ## Features
@@ -145,6 +147,48 @@ Let editors decide whether to create redirects when a URL changes:
 ![Redirect modal](Documentation/sluggi_create_redirects.png)
 
 The choice applies recursively to all affected child pages. Self-referencing redirects are prevented automatically, and stale redirect cleanup only affects auto-created redirects – manually created redirects are never touched.
+
+### Reserved URL Paths
+
+Prevent pages from using URL paths that conflict with external services (e.g. reverse-proxied `/api` endpoints, `/typo3` backend, `/fileadmin`).
+
+Declare the reserved list per site in `config/sites/<identifier>/settings.yaml`:
+
+```yaml
+sluggi:
+  reservedPaths:
+    - '/api'
+    - '/typo3'
+    - '/fileadmin'
+```
+
+To make the list editable through the Sites backend module instead of YAML, add the `wazum/sluggi` site set to your site's `config.yaml`:
+
+```yaml
+dependencies:
+  - wazum/sluggi
+```
+
+The "Reserved URL paths" field then appears under the site's Settings tab — one row per prefix, `+` to add, trash icon to remove:
+
+![Reserved URL paths in Site Settings](Documentation/sluggi_reserved_paths_settings.png)
+
+Applying the set gives you `/typo3` and `/fileadmin` as sensible defaults so editors can't accidentally shadow the backend or file mount. Remove them if you've moved `typo3MainDir` or renamed `fileadminDir`.
+
+Matching is segment-aware: `/api` blocks `/api` and `/api/v1` but not `/api-docs` or `/apis`.
+
+| Slug | Reserved? |
+|---|---|
+| `/api` | ✅ |
+| `/api/v1` | ✅ |
+| `/api-docs` | ❌ |
+| `/apis` | ❌ |
+
+Editing a slug to a reserved value is rejected with a flash error; the slug stays at its previous value. Creating a new page with a reserved slug clears the slug field — TYPO3 saves the record with a title-derived fallback slug so the editor keeps all the other form data they entered, and a flash error prompts them to set a non-reserved slug before publishing.
+
+Redirects from reserved slugs are suppressed — a path that's handled by something else than TYPO3 would never route to the new slug anyway.
+
+The feature is a no-op for sites that don't declare `sluggi.reservedPaths`.
 
 ### Re-apply URL Paths Recursively
 

@@ -16,6 +16,7 @@ use Wazum\Sluggi\Service\FullPathEditingService;
 use Wazum\Sluggi\Service\HierarchyPermissionService;
 use Wazum\Sluggi\Service\LastSegmentValidationService;
 use Wazum\Sluggi\Service\RedirectInfoService;
+use Wazum\Sluggi\Service\ReservedPathService;
 use Wazum\Sluggi\Service\SlugConfigurationService;
 use Wazum\Sluggi\Service\SlugElementRenderer;
 use Wazum\Sluggi\Service\SlugGeneratorService;
@@ -36,6 +37,7 @@ trait SlugElementTrait
     protected ExtensionConfiguration $extensionConfiguration;
     protected UserSettingsService $userSettingsService;
     protected RedirectInfoService $redirectInfoService;
+    protected ReservedPathService $reservedPathService;
 
     /**
      * @return array<string, mixed>
@@ -201,7 +203,34 @@ trait SlugElementTrait
             }
         }
 
+        $context['reservedPaths'] = $this->resolveReservedPathsForRecord(
+            is_numeric($recordId) ? (int)$recordId : 0,
+            $effectivePid,
+        );
+
         return $context;
+    }
+
+    /**
+     * Resolves reserved paths for the record being edited. Prefers the real
+     * page uid (works for site-root pages whose effectivePid is 0), falls back
+     * to effectivePid for new pages where no uid exists yet.
+     *
+     * @return list<string>
+     */
+    private function resolveReservedPathsForRecord(int $recordUid, int $effectivePid): array
+    {
+        $pageId = $recordUid > 0 ? $recordUid : $effectivePid;
+        if ($pageId <= 0) {
+            return [];
+        }
+
+        $site = $this->reservedPathService->findSiteForPage($pageId);
+        if ($site === null) {
+            return [];
+        }
+
+        return $this->reservedPathService->getReservedPathsForSite($site);
     }
 
     /**
@@ -358,6 +387,7 @@ trait SlugElementTrait
             'redirectInfoLink' => $languageService->sL($prefix . 'redirectInfoLink'),
             'error.proposalFailed.title' => $languageService->sL($prefix . 'error.proposalFailed.title'),
             'error.proposalFailed.message' => $languageService->sL($prefix . 'error.proposalFailed.message'),
+            'warning.reservedPath' => $languageService->sL($prefix . 'warning.reservedPath'),
         ];
     }
 

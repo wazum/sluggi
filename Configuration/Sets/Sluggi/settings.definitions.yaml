@@ -1,0 +1,11 @@
+categories:
+  sluggi:
+    label: 'Sluggi'
+
+settings:
+  sluggi.reservedPaths:
+    type: stringlist
+    default: ['/typo3', '/fileadmin']
+    category: sluggi
+    label: 'Reserved URL paths'
+    description: 'Path prefixes pages on this site must never occupy. Defaults to /typo3 and /fileadmin so editors can''t accidentally shadow the backend or file mount. Add entries like /api if you reverse-proxy something outside TYPO3. Matching is segment-aware: /api blocks /api and /api/v1 but not /api-docs.'

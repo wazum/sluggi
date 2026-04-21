@@ -1,0 +1,11 @@
+"be_users"
+,"uid","pid","username","password","admin"
+,1,0,"admin","$2y$12$abc123",1
+
+"pages"
+,"uid","pid","title","slug","tx_sluggi_sync","doktype"
+,1,0,"Root","/",0,1
+,2,1,"About","/about",1,1
+,3,1,"Legacy API","/api",0,1
+,4,1,"Parent","/foo",1,1
+,5,4,"Child","/foo/child",1,1
