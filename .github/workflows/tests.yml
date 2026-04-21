@@ -14,6 +14,12 @@ on:
         required: false
         type: string
 
+# Cancel superseded runs on the same ref (force-push on a feature branch, or
+# a newer commit landing on main while the previous run is still going).
+concurrency:
+  group: tests-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   code-quality:
     name: Code Quality
