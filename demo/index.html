@@ -161,38 +161,6 @@
             </fieldset>
         </section>
 
-        <!-- Reserved Paths -->
-        <section class="demo-card">
-            <h2>Reserved Paths</h2>
-            <p>Per-site list of URL prefixes pages must never occupy (e.g. <code>/api</code>, <code>/typo3</code>, <code>/fileadmin</code>). Matching is segment-aware, so <code>/api</code> blocks <code>/api</code> and <code>/api/v1</code> but not <code>/api-docs</code>. The inline warning shows up the moment the slug matches a reserved path; the server rejects it on save.</p>
-
-            <fieldset class="demo-slug-fieldset" style="margin-top: 0;">
-                <legend class="demo-slug-legend">
-                    <svg class="demo-chain-icon" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
-                    URL Path <span class="demo-domain">(https://example.com)</span>
-                </legend>
-                <div class="demo-element-wrapper">
-                    <sluggi-element
-                        value="/api"
-                        reserved-paths='["/api","/typo3","/fileadmin"]'
-                        page-id="7"
-                        record-id="7"
-                        table-name="pages"
-                        field-name="slug"
-                        language="0"
-                        signature="demo"
-                        command="edit"
-                        parent-page-id="0"
-                    ></sluggi-element>
-                    <input type="hidden" class="sluggi-hidden-field" name="data[pages][7][slug]" value="/api" />
-                    <input type="hidden" class="sluggi-sync-field" name="data[pages][7][tx_sluggi_sync]" value="0" />
-                    <input type="hidden" class="sluggi-lock-field" name="data[pages][7][slug_locked]" value="0" />
-                    <input type="hidden" class="sluggi-full-path-field" value="0" />
-                    <input type="hidden" class="sluggi-redirect-field" value="0" />
-                </div>
-            </fieldset>
-        </section>
-
         <!-- Access Control -->
         <section class="demo-card">
             <h2>Access Control</h2>
@@ -281,6 +249,38 @@
                     <input type="hidden" class="sluggi-hidden-field" name="data[pages][6][slug]" value="/faculty/research/publications/annual-report" />
                     <input type="hidden" class="sluggi-sync-field" name="data[pages][6][tx_sluggi_sync]" value="0" />
                     <input type="hidden" class="sluggi-lock-field" name="data[pages][6][slug_locked]" value="0" />
+                    <input type="hidden" class="sluggi-full-path-field" value="0" />
+                    <input type="hidden" class="sluggi-redirect-field" value="0" />
+                </div>
+            </fieldset>
+        </section>
+
+        <!-- Reserved Paths -->
+        <section class="demo-card">
+            <h2>Reserved Paths</h2>
+            <p>Per-site list of URL prefixes pages must never occupy (e.g. <code>/api</code>, <code>/typo3</code>, <code>/fileadmin</code>). Matching is segment-aware, so <code>/api</code> blocks <code>/api</code> and <code>/api/v1</code> but not <code>/api-docs</code>. The inline warning shows up the moment the slug matches a reserved path; the server rejects it on save.</p>
+
+            <fieldset class="demo-slug-fieldset" style="margin-top: 0;">
+                <legend class="demo-slug-legend">
+                    <svg class="demo-chain-icon" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+                    URL Path <span class="demo-domain">(https://example.com)</span>
+                </legend>
+                <div class="demo-element-wrapper">
+                    <sluggi-element
+                        value="/api"
+                        reserved-paths='["/api","/typo3","/fileadmin"]'
+                        page-id="7"
+                        record-id="7"
+                        table-name="pages"
+                        field-name="slug"
+                        language="0"
+                        signature="demo"
+                        command="edit"
+                        parent-page-id="0"
+                    ></sluggi-element>
+                    <input type="hidden" class="sluggi-hidden-field" name="data[pages][7][slug]" value="/api" />
+                    <input type="hidden" class="sluggi-sync-field" name="data[pages][7][tx_sluggi_sync]" value="0" />
+                    <input type="hidden" class="sluggi-lock-field" name="data[pages][7][slug_locked]" value="0" />
                     <input type="hidden" class="sluggi-full-path-field" value="0" />
                     <input type="hidden" class="sluggi-redirect-field" value="0" />
                 </div>
