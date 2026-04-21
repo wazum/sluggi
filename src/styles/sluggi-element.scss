@@ -500,10 +500,19 @@
     margin: 0.5em 0 0;
     padding: 6px 8px;
     font-size: 11px;
-    color: #a00;
-    background: #fee;
-    border-left: 3px solid #a00;
+    color: var(--bs-danger-text-emphasis, #a00);
+    background: var(--bs-danger-bg-subtle, #fee);
+    border-left: 3px solid var(--bs-danger, #a00);
     border-radius: 2px;
+}
+
+// Matches the TYPO3 backend pattern for an invalid required field: red border
+// + light-red background on the editable surface when the slug is reserved.
+// Uses TYPO3's own danger tokens so the look tracks the active backend theme.
+:host(.has-error) .sluggi-editable,
+:host(.has-error) input[type="text"].sluggi-input {
+    border-color: var(--bs-danger, #c83c3c);
+    background-color: var(--bs-danger-bg-subtle, #fbe7e7);
 }
 
 // =========================================================================

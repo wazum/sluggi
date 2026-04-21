@@ -89,12 +89,13 @@ final class ValidateReservedSlugPathTest extends TestCase
     }
 
     #[Test]
-    public function unsetsSlugWhenReservedOnCreate(): void
+    public function rewritesSlugToTemporaryPlaceholderOnCreate(): void
     {
-        // The slug is cleared so TYPO3 core falls back to a title-derived
-        // default. The record still gets created (the editor keeps their other
-        // form data), but the slug is never the reserved value and a flash
-        // error prompts the editor to set a non-reserved one before publishing.
+        // On create the slug is rewritten to a non-reserved placeholder with a
+        // random suffix on the first path segment. Unlike clearing the field
+        // (which TYPO3 turns into the empty string and the form shows as '/',
+        // colliding with the site root), this keeps the record at a valid
+        // non-reserved slug that the editor has to fix before publishing.
         $subject = $this->createSubjectWithReservedPaths(['/api']);
 
         $fieldArray = ['slug' => '/api', 'pid' => 1, 'title' => 'API'];
@@ -106,7 +107,28 @@ final class ValidateReservedSlugPathTest extends TestCase
             $this->createMock(DataHandler::class),
         );
 
-        self::assertArrayNotHasKey('slug', $fieldArray);
+        self::assertArrayHasKey('slug', $fieldArray);
+        self::assertIsString($fieldArray['slug']);
+        self::assertMatchesRegularExpression('#^/api-[0-9a-f]{10}$#', (string)$fieldArray['slug']);
+    }
+
+    #[Test]
+    public function placeholderForNestedReservedSlugEscapesTheReservedPrefix(): void
+    {
+        $subject = $this->createSubjectWithReservedPaths(['/api']);
+
+        $fieldArray = ['slug' => '/api/foo', 'pid' => 1];
+        $subject->processDatamap_postProcessFieldArray(
+            'new',
+            'pages',
+            'NEW123',
+            $fieldArray,
+            $this->createMock(DataHandler::class),
+        );
+
+        $stored = (string)($fieldArray['slug'] ?? '');
+        self::assertMatchesRegularExpression('#^/api-[0-9a-f]{10}/foo$#', $stored);
+        self::assertStringStartsNotWith('/api/', $stored);
     }
 
     #[Test]

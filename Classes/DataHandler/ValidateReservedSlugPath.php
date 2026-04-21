@@ -49,15 +49,30 @@ final readonly class ValidateReservedSlugPath
             return;
         }
 
-        // Clear the slug field — TYPO3 core fills in a fallback from the title.
-        // Update: previous slug stays in the DB. Create: the record is saved
-        // with core's fallback slug and the editor sees the flash error so
-        // they can fix the slug without losing the other form data.
-        unset($fieldArray['slug']);
+        if (DataHandlerUtility::isNewRecord($id)) {
+            // On create we can't just clear the slug — TYPO3 then falls back to
+            // the empty default which ends up as '/' and collides with the site
+            // root. Rewrite the first path segment with a random suffix so the
+            // record gets a valid, non-reserved, obviously temporary slug that
+            // the editor has to fix. Client-side submit blocking prevents this
+            // path under normal editor workflows; this runs as a safety net.
+            $fieldArray['slug'] = $this->placeholderSlugFor($slug);
+        } else {
+            unset($fieldArray['slug']);
+        }
         DataHandlerUtility::logSlugValidationError(
             $dataHandler,
             is_int($id) ? $id : 0,
             'error.reservedPath',
         );
+    }
+
+    private function placeholderSlugFor(string $reservedSlug): string
+    {
+        $suffix = bin2hex(random_bytes(5));
+        $segments = explode('/', ltrim($reservedSlug, '/'));
+        $segments[0] = ($segments[0] === '' ? 'page' : $segments[0]) . '-' . $suffix;
+
+        return '/' . implode('/', $segments);
     }
 }

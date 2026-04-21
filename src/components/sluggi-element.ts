@@ -241,6 +241,12 @@ export class SluggiElement extends LitElement {
             || (changed.has('isSynced') && changed.get('isSynced') === true)) {
             this.notifyPrefixMismatch();
         }
+
+        // Keep the hidden slug input and FormEngine's validation state in sync
+        // with the reserved-path check so the standard invalid-field UX kicks
+        // in (red border via Bootstrap .has-error, docheader review button via
+        // the form-engine-review listener, "Save with errors?" confirmation).
+        this.syncReservedSlugValidity();
     }
 
     // =========================================================================
@@ -1239,6 +1245,39 @@ export class SluggiElement extends LitElement {
     private removeFormSubmitListener(): void {
         if (!this.redirectControlEnabled) return;
         this.ownerDocument.removeEventListener('click', SluggiElement.handleSaveButtonClick, true);
+    }
+
+    private syncReservedSlugValidity(): void {
+        const hidden = this.parentElement?.querySelector('.sluggi-hidden-field') as HTMLInputElement | null;
+        if (!hidden) return;
+
+        const reserved = this.isSlugReserved;
+        // Apply the class to the host too so shadow-DOM CSS can style the
+        // editable slug area with a red border, matching the look of a
+        // required-but-empty input in the TYPO3 backend.
+        this.classList.toggle('has-error', reserved);
+        hidden.classList.toggle('has-error', reserved);
+        if (reserved) {
+            hidden.setAttribute('aria-invalid', 'true');
+        } else {
+            hidden.removeAttribute('aria-invalid');
+        }
+
+        // Mirror FormEngine's standard invalid-field styling: the label inside
+        // the closest .t3js-formengine-validation-marker gets .has-error so the
+        // red exclamation pseudo-element on .form-label lights up.
+        const label = hidden.closest('.t3js-formengine-validation-marker')?.querySelector('.t3js-formengine-label');
+        label?.classList.toggle('has-error', reserved);
+
+        // Let FormEngine's review panel and save-with-errors confirmation pick
+        // this up via the same mechanism core uses for required/range rules.
+        const form = hidden.closest('form');
+        if (form) {
+            form.dispatchEvent(new CustomEvent('t3-formengine-postfieldvalidation', {
+                detail: { field: hidden, isValid: !reserved },
+                bubbles: true,
+            }));
+        }
     }
 
     private static handleSaveButtonClick(event: MouseEvent): void {

@@ -434,8 +434,8 @@ trait SlugElementTrait
             $legend .= ' <span style="font-weight: normal;">(' . htmlspecialchars($baseUrl) . ')</span>';
         }
 
-        return '<fieldset>'
-            . '<legend class="' . Typo3Compatibility::getLegendClass() . '">' . $chainIcon . $legend . '</legend>'
+        return '<fieldset class="t3js-formengine-validation-marker">'
+            . '<legend class="' . Typo3Compatibility::getLegendClass() . ' t3js-formengine-label form-label">' . $chainIcon . $legend . '</legend>'
             . $innerHTML
             . '</fieldset>';
     }
