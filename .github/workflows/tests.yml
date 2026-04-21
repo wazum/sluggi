@@ -89,11 +89,11 @@ jobs:
             typo3: '13.4'
           # TYPO3 14.x
           - php: '8.2'
-            typo3: '14.2'
+            typo3: '14.3'
           - php: '8.3'
-            typo3: '14.2'
+            typo3: '14.3'
           - php: '8.4'
-            typo3: '14.2'
+            typo3: '14.3'
 
     steps:
       - uses: actions/checkout@v4
@@ -134,11 +134,11 @@ jobs:
             typo3: '13.4'
           # TYPO3 14.x
           - php: '8.2'
-            typo3: '14.2'
+            typo3: '14.3'
           - php: '8.3'
-            typo3: '14.2'
+            typo3: '14.3'
           - php: '8.4'
-            typo3: '14.2'
+            typo3: '14.3'
 
     steps:
       - uses: actions/checkout@v4
@@ -185,13 +185,13 @@ jobs:
             dist: '13.4'
           # TYPO3 14.x (dist 14.0 — no newer cms-base-distribution published)
           - php: '8.2'
-            typo3: '14.2'
+            typo3: '14.3'
             dist: '14.0'
           - php: '8.3'
-            typo3: '14.2'
+            typo3: '14.3'
             dist: '14.0'
           - php: '8.4'
-            typo3: '14.2'
+            typo3: '14.3'
             dist: '14.0'
 
     services:
