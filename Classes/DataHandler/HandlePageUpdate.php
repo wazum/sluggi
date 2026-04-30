@@ -49,19 +49,22 @@ final readonly class HandlePageUpdate
             return;
         }
 
-        if ($this->lockService->isLocked($record)) {
+        $merged = array_merge($record, $fieldArray);
+
+        // Evaluate lock/sync against the final state of this save so a same-save
+        // toggle (e.g. lock activated together with a title change) wins over the
+        // pre-save DB value.
+        if ($this->lockService->isLocked($merged)) {
             return;
         }
 
-        if (!$this->syncService->shouldSync($record)) {
+        if (!$this->syncService->shouldSync($merged)) {
             return;
         }
 
         if (!$this->syncService->hasSourceFieldChanged($table, $fieldArray)) {
             return;
         }
-
-        $merged = array_merge($record, $fieldArray);
 
         if (!$this->syncService->hasNonEmptySourceFieldValue($table, $merged)) {
             return;

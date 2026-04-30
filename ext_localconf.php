@@ -107,17 +107,18 @@ $GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['t3lib/class.t3lib_pagerenderer.php'][
         }
     };
 
-// DataHandler hooks — order matters. Registration order determines execution order.
-// processDatamap phases:
-//   1. Access    — BypassAccessCheckForRedirectCreation: grant redirect storage write for nested DataHandler calls
-//   2. Sanitize  — ClearSlugForExcludedDoktypes: strip slug for excluded doktypes before validation
-//   3. Validate  — ValidateHierarchyPermission: must run before any slug mutation
-//   4. Gate      — PreventLockedSlugEdit: blocks edits on locked slugs before HandlePageUpdate regenerates them
-//   5. Regenerate (pages)   — HandlePageUpdate: auto-regenerates slug when source fields change
-//   6. Persist sync state   — PersistRecordSyncState: must run before HandleRecordUpdate to capture tx_sluggi_sync from the form
-//   7. Regenerate (records) — HandleRecordUpdate: non-page tables configured in synchronize_tables
-//   8. Last-segment guard   — ValidateLastSegmentOnly: must run AFTER regeneration to validate the final slug
-//   9. Reserved-path guard  — ValidateReservedSlugPath: rejects reserved slugs on update; rewrites reserved slugs on create
+// DataHandler hooks — order matters. Registration order determines execution order within each hook phase.
+// processDatamap_beforeStart:
+//   - BypassAccessCheckForRedirectCreation: grant redirect storage write for nested DataHandler calls.
+// processDatamap_preProcessFieldArray:
+//   - ValidateHierarchyPermission and PreventLockedSlugEdit guard submitted slugs before field processing.
+//   - PersistRecordSyncState captures tx_sluggi_sync from non-page table forms before HandleRecordUpdate reads it later.
+//   - ValidateLastSegmentOnly validates submitted slugs before field processing; nested slug cascades are skipped by correlation id.
+// processDatamap_postProcessFieldArray:
+//   - ClearSlugForExcludedDoktypes strips slug/sync for excluded page types before page regeneration.
+//   - HandlePageUpdate auto-regenerates page slugs when source fields changed.
+//   - HandleRecordUpdate auto-regenerates non-page table slugs configured in synchronize_tables.
+//   - ValidateReservedSlugPath rejects reserved final page slugs on update and rewrites reserved slugs on create.
 // processCmdmap hooks (copy/undelete) and moveRecord (move) run independently per operation.
 // Sync/lock field initialisers are registered last because they only seed defaults on new records.
 $GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['t3lib/class.t3lib_tcemain.php']['processDatamapClass']['sluggi_redirect_access'] =

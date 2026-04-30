@@ -108,6 +108,30 @@ final class LockedSlugTest extends FunctionalTestCase
     }
 
     #[Test]
+    public function slugNotRegeneratedWhenLockActivatedInSameSaveAsTitleChange(): void
+    {
+        $this->setUpTest('pages_unlocked_with_sync.csv');
+
+        $dataHandler = GeneralUtility::makeInstance(DataHandler::class);
+        $dataHandler->start(
+            [
+                'pages' => [
+                    2 => [
+                        'title' => 'Updated Title',
+                        'slug' => '/original-page',
+                        'slug_locked' => 1,
+                        'tx_sluggi_sync' => 0,
+                    ],
+                ],
+            ],
+            []
+        );
+        $dataHandler->process_datamap();
+
+        $this->assertCSVDataSet(__DIR__ . '/Fixtures/pages_locked_in_same_save_after_title_change.csv');
+    }
+
+    #[Test]
     public function lockedSlugNotUpdatedOnMove(): void
     {
         $this->setUpTest('pages_locked_for_move.csv');
