@@ -31,10 +31,12 @@
         "typo3/cms-redirects": "^12.4 || ^13.4.26 || ^14.2"
     },
     "suggest": {
+        "b13/masi": "Extend TYPO3 URL handling with per-page slug exclusion for subpages",
         "georgringer/news-redirect-slug-change": "Generate redirects when news slugs change",
         "internetgalerie/ig-slug": "Rebuild URL slugs in bulk"
     },
     "require-dev": {
+        "b13/masi": "^3.0",
         "friendsofphp/php-cs-fixer": "^3.65",
         "phpstan/phpstan": "^2.0",
         "phpunit/phpunit": "^10.5 || ^11.5 || ^12.5.22",
