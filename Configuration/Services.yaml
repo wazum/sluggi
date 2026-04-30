@@ -42,6 +42,10 @@ services:
     public: true
     shared: false
 
+  Wazum\Sluggi\DataHandler\HandleMasiExclusionChange:
+    public: true
+    shared: false
+
   Wazum\Sluggi\DataHandler\PreventLockedSlugEdit:
     public: true
 
@@ -119,9 +123,6 @@ services:
     public: true
 
   Wazum\Sluggi\Service\MasiCompatibilityService:
-    public: true
-
-  Wazum\Sluggi\Service\SlugCascadeService:
     public: true
 
   Wazum\Sluggi\Service\UserSettingsService:
