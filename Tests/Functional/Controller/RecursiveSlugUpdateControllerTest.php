@@ -6,10 +6,6 @@ namespace Wazum\Sluggi\Tests\Functional\Controller;
 
 use PHPUnit\Framework\Attributes\Test;
 use Psr\Http\Message\ServerRequestInterface;
-use TYPO3\CMS\Backend\Utility\BackendUtility;
-use TYPO3\CMS\Core\Context\Context;
-use TYPO3\CMS\Core\Context\WorkspaceAspect;
-use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Http\ServerRequest;
 use TYPO3\CMS\Core\Http\Uri;
 use TYPO3\CMS\Core\Localization\LanguageServiceFactory;
@@ -20,51 +16,27 @@ use Wazum\Sluggi\Controller\RecursiveSlugUpdateController;
 
 final class RecursiveSlugUpdateControllerTest extends FunctionalTestCase
 {
-    protected array $testExtensionsToLoad = [
-        'wazum/sluggi',
-    ];
-
-    protected array $coreExtensionsToLoad = [
-        'redirects',
-        'workspaces',
-    ];
-
+    protected array $testExtensionsToLoad = ['wazum/sluggi'];
+    protected array $coreExtensionsToLoad = ['redirects', 'workspaces'];
     protected array $configurationToUseInTestInstance = [
-        'EXTENSIONS' => [
-            'sluggi' => [
-                'synchronize' => '1',
-                'lock' => '1',
-            ],
-        ],
+        'EXTENSIONS' => ['sluggi' => ['synchronize' => '1', 'lock' => '1']],
     ];
-
-    private function setUpSite(): void
-    {
-        Typo3Compatibility::writeSiteConfiguration('test', [
-            'rootPageId' => 1,
-            'base' => '/',
-            'languages' => [
-                [
-                    'languageId' => 0,
-                    'title' => 'English',
-                    'locale' => 'en_US.UTF-8',
-                    'base' => '/',
-                ],
-            ],
-            'settings' => [
-                'redirects' => [
-                    'autoUpdateSlugs' => true,
-                    'autoCreateRedirects' => true,
-                ],
-            ],
-        ]);
-    }
 
     protected function setUp(): void
     {
         parent::setUp();
-        $this->importCSVDataSet(__DIR__ . '/Fixtures/pages_recursive_update.csv');
-        $this->setUpSite();
+        $this->importCSVDataSet(__DIR__ . '/../Service/Fixtures/pages_recursive_update.csv');
+        Typo3Compatibility::writeSiteConfiguration('test', [
+            'rootPageId' => 1,
+            'base' => '/',
+            'languages' => [[
+                'languageId' => 0,
+                'title' => 'English',
+                'locale' => 'en_US.UTF-8',
+                'base' => '/',
+            ]],
+            'settings' => ['redirects' => ['autoUpdateSlugs' => true, 'autoCreateRedirects' => true]],
+        ]);
         $this->setUpBackendUser(1);
         $GLOBALS['LANG'] = GeneralUtility::makeInstance(LanguageServiceFactory::class)->create('default');
     }
@@ -80,303 +52,22 @@ final class RecursiveSlugUpdateControllerTest extends FunctionalTestCase
     {
         $this->setUpBackendUser(2);
         $GLOBALS['LANG'] = GeneralUtility::makeInstance(LanguageServiceFactory::class)->create('default');
-
-        $controller = $this->get(RecursiveSlugUpdateController::class);
-        $response = $controller->updateAction($this->createRequest(2));
-
+        $response = $this->get(RecursiveSlugUpdateController::class)->updateAction($this->createRequest(2));
         self::assertSame(403, $response->getStatusCode());
-
-        $body = json_decode((string)$response->getBody(), true);
-        self::assertFalse($body['success']);
+        self::assertFalse(json_decode((string)$response->getBody(), true)['success']);
     }
 
     #[Test]
-    public function regeneratesChildSlugBasedOnParentPath(): void
+    public function returnsCorrelationIdsAndCountsInResponse(): void
     {
-        $controller = $this->get(RecursiveSlugUpdateController::class);
-        $response = $controller->updateAction($this->createRequest(2));
-
+        $this->importCSVDataSet(__DIR__ . '/../Service/Fixtures/pages_recursive_update_deep.csv');
+        $response = $this->get(RecursiveSlugUpdateController::class)->updateAction($this->createRequest(2));
+        $body = json_decode((string)$response->getBody(), true);
         self::assertSame(200, $response->getStatusCode());
-
-        $body = json_decode((string)$response->getBody(), true);
         self::assertTrue($body['success']);
-        self::assertGreaterThan(0, $body['updated']);
-
-        $this->assertCSVDataSet(__DIR__ . '/Fixtures/pages_after_recursive_update.csv');
-    }
-
-    #[Test]
-    public function updatesGrandchildrenRecursively(): void
-    {
-        $this->importCSVDataSet(__DIR__ . '/Fixtures/pages_recursive_update_deep.csv');
-
-        $controller = $this->get(RecursiveSlugUpdateController::class);
-        $response = $controller->updateAction($this->createRequest(2));
-
-        self::assertSame(200, $response->getStatusCode());
-
-        $body = json_decode((string)$response->getBody(), true);
-        self::assertTrue($body['success']);
-
-        $this->assertCSVDataSet(__DIR__ . '/Fixtures/pages_after_recursive_update_deep.csv');
-    }
-
-    #[Test]
-    public function skipsLockedPages(): void
-    {
-        $this->importCSVDataSet(__DIR__ . '/Fixtures/pages_recursive_locked.csv');
-
-        $controller = $this->get(RecursiveSlugUpdateController::class);
-        $response = $controller->updateAction($this->createRequest(2));
-
-        $body = json_decode((string)$response->getBody(), true);
-        self::assertTrue($body['success']);
-        self::assertGreaterThan(0, $body['skipped']);
-
-        $this->assertCSVDataSet(__DIR__ . '/Fixtures/pages_after_recursive_locked.csv');
-    }
-
-    #[Test]
-    public function doesNotTriggerCoreSlugChangedNotification(): void
-    {
-        $this->importCSVDataSet(__DIR__ . '/Fixtures/pages_recursive_update_deep.csv');
-
-        $controller = $this->get(RecursiveSlugUpdateController::class);
-        $controller->updateAction($this->createRequest(2));
-
-        $updateSignals = BackendUtility::getUpdateSignalDetails();
-        $hasSlugChangedSignal = false;
-        foreach ($updateSignals as $signal) {
-            if (($signal['eventName'] ?? '') === 'slugChanged') {
-                $hasSlugChangedSignal = true;
-                break;
-            }
-        }
-
-        self::assertFalse($hasSlugChangedSignal, 'Core slugChanged notification should not be triggered');
-    }
-
-    #[Test]
-    public function returnsSharedCorrelationIdsForUndo(): void
-    {
-        $this->importCSVDataSet(__DIR__ . '/Fixtures/pages_recursive_update_deep.csv');
-
-        $controller = $this->get(RecursiveSlugUpdateController::class);
-        $response = $controller->updateAction($this->createRequest(2));
-
-        $body = json_decode((string)$response->getBody(), true);
-        self::assertArrayHasKey('correlations', $body);
+        self::assertArrayHasKey('updated', $body);
+        self::assertArrayHasKey('skipped', $body);
         self::assertNotEmpty($body['correlations']['correlationIdSlugUpdate']);
         self::assertNotEmpty($body['correlations']['correlationIdRedirectCreation']);
-
-        $correlationIdSlugUpdate = $body['correlations']['correlationIdSlugUpdate'];
-
-        $connectionPool = $this->get(ConnectionPool::class);
-        $queryBuilder = $connectionPool->getQueryBuilderForTable('sys_history');
-        $historyEntries = $queryBuilder
-            ->count('*')
-            ->from('sys_history')
-            ->where(
-                $queryBuilder->expr()->eq(
-                    'correlation_id',
-                    $queryBuilder->createNamedParameter($correlationIdSlugUpdate),
-                ),
-            )
-            ->executeQuery()
-            ->fetchOne();
-
-        self::assertGreaterThan(0, (int)$historyEntries, 'All slug changes should share the same correlation ID');
-    }
-
-    #[Test]
-    public function updatesChildWithSyncDisabled(): void
-    {
-        $this->importCSVDataSet(__DIR__ . '/Fixtures/pages_recursive_nosync.csv');
-
-        $controller = $this->get(RecursiveSlugUpdateController::class);
-        $response = $controller->updateAction($this->createRequest(2));
-
-        $body = json_decode((string)$response->getBody(), true);
-        self::assertTrue($body['success']);
-        self::assertGreaterThan(0, $body['updated'], 'Child with sync disabled should still be updated');
-
-        $this->assertCSVDataSet(__DIR__ . '/Fixtures/pages_after_recursive_nosync.csv');
-    }
-
-    #[Test]
-    public function updatesHiddenChildPages(): void
-    {
-        $this->importCSVDataSet(__DIR__ . '/Fixtures/pages_recursive_hidden.csv');
-
-        $controller = $this->get(RecursiveSlugUpdateController::class);
-        $response = $controller->updateAction($this->createRequest(2));
-
-        $body = json_decode((string)$response->getBody(), true);
-        self::assertTrue($body['success']);
-        self::assertGreaterThan(0, $body['updated'], 'Hidden child pages should still be updated');
-
-        $this->assertCSVDataSet(__DIR__ . '/Fixtures/pages_after_recursive_hidden.csv');
-    }
-
-    #[Test]
-    public function updatesTranslatedChildPages(): void
-    {
-        Typo3Compatibility::writeSiteConfiguration('test', [
-            'rootPageId' => 1,
-            'base' => '/',
-            'languages' => [
-                [
-                    'languageId' => 0,
-                    'title' => 'English',
-                    'locale' => 'en_US.UTF-8',
-                    'base' => '/',
-                ],
-                [
-                    'languageId' => 1,
-                    'title' => 'German',
-                    'locale' => 'de_DE.UTF-8',
-                    'base' => '/de/',
-                ],
-            ],
-            'settings' => [
-                'redirects' => [
-                    'autoUpdateSlugs' => true,
-                    'autoCreateRedirects' => true,
-                ],
-            ],
-        ]);
-
-        $this->importCSVDataSet(__DIR__ . '/Fixtures/pages_recursive_translated.csv');
-
-        $controller = $this->get(RecursiveSlugUpdateController::class);
-        $response = $controller->updateAction($this->createRequest(2));
-
-        $body = json_decode((string)$response->getBody(), true);
-        self::assertTrue($body['success']);
-        self::assertGreaterThan(0, $body['updated'], 'Translated child pages should be updated');
-
-        $this->assertCSVDataSet(__DIR__ . '/Fixtures/pages_after_recursive_translated.csv');
-    }
-
-    #[Test]
-    public function skipsDescendantsOfLockedPageWhenLockDescendantsEnabled(): void
-    {
-        $GLOBALS['TYPO3_CONF_VARS']['EXTENSIONS']['sluggi']['lock_descendants'] = '1';
-
-        $this->importCSVDataSet(__DIR__ . '/Fixtures/pages_recursive_lock_descendants.csv');
-
-        $controller = $this->get(RecursiveSlugUpdateController::class);
-        $response = $controller->updateAction($this->createRequest(2));
-
-        $body = json_decode((string)$response->getBody(), true);
-        self::assertTrue($body['success']);
-
-        $this->assertCSVDataSet(__DIR__ . '/Fixtures/pages_after_recursive_lock_descendants.csv');
-    }
-
-    #[Test]
-    public function skipsExcludedPageTypesButProcessesTheirChildren(): void
-    {
-        $GLOBALS['TYPO3_CONF_VARS']['EXTENSIONS']['sluggi']['exclude_doktypes'] = '199,254';
-
-        $this->importCSVDataSet(__DIR__ . '/Fixtures/pages_recursive_excluded_doktypes.csv');
-
-        $controller = $this->get(RecursiveSlugUpdateController::class);
-        $response = $controller->updateAction($this->createRequest(2));
-
-        $body = json_decode((string)$response->getBody(), true);
-        self::assertTrue($body['success']);
-        self::assertSame(2, $body['skipped'], 'Two excluded pages should be skipped');
-
-        $this->assertCSVDataSet(__DIR__ . '/Fixtures/pages_after_recursive_excluded_doktypes.csv');
-    }
-
-    #[Test]
-    public function usesWorkspaceOverlaidTitleForSlugGeneration(): void
-    {
-        $this->importCSVDataSet(__DIR__ . '/Fixtures/pages_recursive_workspace_modified.csv');
-
-        $backendUser = $GLOBALS['BE_USER'];
-        $backendUser->workspace = 1;
-        $this->get(Context::class)->setAspect('workspace', new WorkspaceAspect(1));
-
-        $controller = $this->get(RecursiveSlugUpdateController::class);
-        $response = $controller->updateAction($this->createRequest(2));
-
-        $body = json_decode((string)$response->getBody(), true);
-        self::assertTrue($body['success']);
-
-        $record = BackendUtility::getRecordWSOL('pages', 3, 'slug');
-        self::assertSame('/parent/child-modified', $record['slug']);
-
-        // The controller should process exactly 1 child (the live record with overlay),
-        // not 2 (live + workspace version separately)
-        self::assertSame(1, $body['updated'], 'Should process the live record once with workspace overlay, not both live and workspace rows');
-    }
-
-    #[Test]
-    public function processesPageMovedIntoSubtreeInWorkspace(): void
-    {
-        $this->importCSVDataSet(__DIR__ . '/Fixtures/pages_recursive_workspace_moved_in.csv');
-
-        $backendUser = $GLOBALS['BE_USER'];
-        $backendUser->workspace = 1;
-        $this->get(Context::class)->setAspect('workspace', new WorkspaceAspect(1));
-
-        $controller = $this->get(RecursiveSlugUpdateController::class);
-        $response = $controller->updateAction($this->createRequest(2));
-
-        $body = json_decode((string)$response->getBody(), true);
-        self::assertTrue($body['success']);
-
-        // Base fixture has page 3 under parent 2 (updated).
-        // Page 4 was moved INTO parent 2 in workspace — should also be processed.
-        // So 2 updates total (page 3 + page 4).
-        self::assertSame(2, $body['updated'], 'Page moved into subtree in workspace should be processed');
-    }
-
-    #[Test]
-    public function skipsPageMovedOutOfSubtreeInWorkspace(): void
-    {
-        $this->importCSVDataSet(__DIR__ . '/Fixtures/pages_recursive_workspace_moved_out.csv');
-
-        $backendUser = $GLOBALS['BE_USER'];
-        $backendUser->workspace = 1;
-        $this->get(Context::class)->setAspect('workspace', new WorkspaceAspect(1));
-
-        $controller = $this->get(RecursiveSlugUpdateController::class);
-        $response = $controller->updateAction($this->createRequest(2));
-
-        $body = json_decode((string)$response->getBody(), true);
-        self::assertTrue($body['success']);
-
-        // Base fixture has page 3 under parent 2 (expected to be updated).
-        // Page 4 was moved out of parent 2 in workspace — should NOT be processed.
-        // So only 1 update (page 3), not 2.
-        self::assertSame(1, $body['updated'], 'Moved-away page should not be processed under old parent');
-    }
-
-    #[Test]
-    public function skipsWorkspaceDeletedPages(): void
-    {
-        $this->importCSVDataSet(__DIR__ . '/Fixtures/pages_recursive_workspace_deleted.csv');
-
-        $backendUser = $GLOBALS['BE_USER'];
-        $backendUser->workspace = 1;
-        $this->get(Context::class)->setAspect('workspace', new WorkspaceAspect(1));
-
-        $controller = $this->get(RecursiveSlugUpdateController::class);
-        $response = $controller->updateAction($this->createRequest(2));
-
-        $body = json_decode((string)$response->getBody(), true);
-        self::assertTrue($body['success']);
-
-        // Page uid=3 is deleted in workspace — should be skipped, live slug unchanged
-        $deletedRecord = BackendUtility::getRecord('pages', 3, 'slug');
-        self::assertSame('/old/child', $deletedRecord['slug']);
-
-        // Page uid=4 is not deleted — should be updated
-        $keptRecord = BackendUtility::getRecordWSOL('pages', 4, 'slug');
-        self::assertSame('/parent/kept-in-ws', $keptRecord['slug']);
     }
 }
