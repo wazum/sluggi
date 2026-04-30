@@ -118,6 +118,12 @@ services:
   Wazum\Sluggi\Service\SlugSyncService:
     public: true
 
+  Wazum\Sluggi\Service\MasiCompatibilityService:
+    public: true
+
+  Wazum\Sluggi\Service\SlugCascadeService:
+    public: true
+
   Wazum\Sluggi\Service\UserSettingsService:
     public: true
 
