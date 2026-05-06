@@ -2,7 +2,10 @@ name: Publish to TER
 
 on:
   release:
-    types: [published]
+    # 'released' (vs. 'published') skips prereleases and fires when a
+    # prerelease is promoted to a full release — gives a window to fix
+    # bad release notes or version numbers before TER publishes.
+    types: [released]
 
 jobs:
   publish:
