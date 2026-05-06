@@ -24,8 +24,15 @@ trait SlugSourceElementTrait
         $fieldName = $this->data['fieldName'];
         $tableName = $this->data['tableName'];
         $fieldMetadata = $this->slugConfigurationService->getFieldMetadata($tableName);
+        $sourceMetadata = $this->data['parameterArray']['fieldConf']['config']['sluggiSourceMetadata'] ?? $fieldMetadata[$fieldName] ?? null;
+        $totalFields = (int)($this->data['parameterArray']['fieldConf']['config']['sluggiSourceTotalFields'] ?? count($fieldMetadata));
 
-        if (!isset($fieldMetadata[$fieldName])) {
+        if (!is_array($sourceMetadata)
+            || !isset($sourceMetadata['slot'], $sourceMetadata['role'], $sourceMetadata['chainSize'])
+            || !is_int($sourceMetadata['slot'])
+            || !is_string($sourceMetadata['role'])
+            || !is_int($sourceMetadata['chainSize'])
+        ) {
             return $result;
         }
 
@@ -37,8 +44,8 @@ trait SlugSourceElementTrait
 
         $hidden = !$shouldShow;
         $badge = $this->badgeRenderer->renderBadgeWithMetadata(
-            $fieldMetadata[$fieldName],
-            totalFields: count($fieldMetadata)
+            $sourceMetadata,
+            totalFields: $totalFields
         );
         $confirmButton = $this->badgeRenderer->renderConfirmButton();
         $result['html'] = $this->badgeRenderer->insertBadgeIntoHtml($result['html'], $badge, $confirmButton, hidden: $hidden);

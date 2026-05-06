@@ -1,0 +1,19 @@
+{
+    "name": "wazum/sluggi-e2e-fixtures",
+    "description": "E2E test fixture extension for sluggi (configures pages slug generator with a nav_title/title fallback chain). Not intended for production use.",
+    "type": "typo3-cms-extension",
+    "license": "GPL-2.0-or-later",
+    "require": {
+        "typo3/cms-core": "^12.4 || ^13.4 || ^14.0"
+    },
+    "extra": {
+        "typo3/cms": {
+            "extension-key": "sluggi_e2e_fixtures"
+        }
+    },
+    "autoload": {
+        "psr-4": {
+            "Wazum\\SluggiE2eFixtures\\": "Classes/"
+        }
+    }
+}

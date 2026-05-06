@@ -227,7 +227,8 @@ jobs:
           cd typo3-test
           composer config --unset platform.php
           composer config repositories.sluggi path ../
-          composer require "typo3/cms-core:^${{ matrix.typo3 }}" wazum/sluggi:@dev --no-interaction --with-all-dependencies --no-security-blocking
+          composer config repositories.sluggi-e2e-fixtures path ../Tests/E2e/Fixtures/Extensions/sluggi_e2e_fixtures
+          composer require "typo3/cms-core:^${{ matrix.typo3 }}" wazum/sluggi:@dev wazum/sluggi-e2e-fixtures:@dev --no-interaction --with-all-dependencies --no-security-blocking
 
       - name: Setup TYPO3
         run: |

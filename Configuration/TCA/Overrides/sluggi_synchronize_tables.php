@@ -35,7 +35,7 @@ foreach ($synchronizeTables as $table) {
         'config' => ['type' => 'passthrough'],
     ];
 
-    foreach ($slugConfigurationService->getRequiredSourceFields($table) as $fieldName) {
+    foreach ($slugConfigurationService->getSourceFields($table) as $fieldName) {
         if (isset($GLOBALS['TCA'][$table]['columns'][$fieldName]['config'])) {
             $GLOBALS['TCA'][$table]['columns'][$fieldName]['config']['renderType'] = 'slugSourceInput';
         }

@@ -32,7 +32,7 @@ $GLOBALS['TCA']['pages']['columns']['tx_sluggi_full_path'] = [
     ],
 ];
 
-foreach ((new SlugConfigurationService())->getRequiredSourceFields('pages') as $fieldName) {
+foreach ((new SlugConfigurationService())->getSourceFields('pages') as $fieldName) {
     if (isset($GLOBALS['TCA']['pages']['columns'][$fieldName]['config'])) {
         $GLOBALS['TCA']['pages']['columns'][$fieldName]['config']['renderType'] = 'slugSourceInput';
     }

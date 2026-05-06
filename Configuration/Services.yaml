@@ -91,6 +91,9 @@ services:
   Wazum\Sluggi\Form\FormDataProvider\InitializeSyncField:
     public: true
 
+  Wazum\Sluggi\Form\FormDataProvider\EnsureSlugSourceRenderTypes:
+    public: true
+
   # Service
   Wazum\Sluggi\Service\FullPathEditingService:
     public: true

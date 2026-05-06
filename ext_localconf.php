@@ -5,6 +5,7 @@ declare(strict_types=1);
 use Psr\Http\Message\ServerRequestInterface;
 use TYPO3\CMS\Backend\Controller\FormSlugAjaxController as CoreFormSlugAjaxController;
 use TYPO3\CMS\Backend\Form\FormDataProvider\TcaColumnsProcessCommon;
+use TYPO3\CMS\Backend\Form\FormDataProvider\TcaColumnsRemoveUnused;
 use TYPO3\CMS\Core\Http\ApplicationType;
 use TYPO3\CMS\Core\DataHandling\SlugHelper as CoreSlugHelper;
 use Wazum\Sluggi\DataHandling\SlugHelper;
@@ -35,6 +36,7 @@ use Wazum\Sluggi\Form\Element\SlugElementV12;
 use Wazum\Sluggi\Form\Element\SlugElementV14;
 use Wazum\Sluggi\Form\Element\SlugSourceElementV12;
 use Wazum\Sluggi\Form\Element\SlugSourceElementV14;
+use Wazum\Sluggi\Form\FormDataProvider\EnsureSlugSourceRenderTypes;
 use Wazum\Sluggi\Form\FormDataProvider\HideSlugForExcludedPageTypes;
 use Wazum\Sluggi\Form\FormDataProvider\InitializeSyncField;
 
@@ -79,6 +81,10 @@ $GLOBALS['TYPO3_CONF_VARS']['SYS']['formEngine']['formDataGroup']['tcaDatabaseRe
 
 $GLOBALS['TYPO3_CONF_VARS']['SYS']['formEngine']['formDataGroup']['tcaDatabaseRecord'][InitializeSyncField::class] = [
     'depends' => [TcaColumnsProcessCommon::class],
+];
+
+$GLOBALS['TYPO3_CONF_VARS']['SYS']['formEngine']['formDataGroup']['tcaDatabaseRecord'][EnsureSlugSourceRenderTypes::class] = [
+    'depends' => [TcaColumnsRemoveUnused::class],
 ];
 
 // PageRenderer hook

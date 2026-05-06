@@ -11,10 +11,18 @@ final readonly class SlugConfigurationService
      */
     public function getSourceFields(string $table): array
     {
-        $fields = $this->getNormalizedFieldsConfig($table);
+        return $this->getSourceFieldsFromFieldsConfig($this->getNormalizedFieldsConfig($table));
+    }
 
+    /**
+     * @param array<int, string|string[]> $fields
+     *
+     * @return string[]
+     */
+    public function getSourceFieldsFromFieldsConfig(array $fields): array
+    {
         $result = [];
-        foreach ($fields as $field) {
+        foreach ($this->normalizeFieldsConfig($fields) as $field) {
             if (is_array($field)) {
                 $result = [...$result, ...$field];
             } else {
@@ -38,7 +46,17 @@ final readonly class SlugConfigurationService
      */
     public function getFieldMetadata(string $table): array
     {
-        $fields = $this->getNormalizedFieldsConfig($table);
+        return $this->getFieldMetadataFromFieldsConfig($this->getNormalizedFieldsConfig($table));
+    }
+
+    /**
+     * @param array<int, string|string[]> $fields
+     *
+     * @return array<string, array{slot: int, role: string, chainSize: int}>
+     */
+    public function getFieldMetadataFromFieldsConfig(array $fields): array
+    {
+        $fields = $this->normalizeFieldsConfig($fields);
         $result = [];
         $slot = 0;
 
@@ -117,8 +135,22 @@ final readonly class SlugConfigurationService
     private function getNormalizedFieldsConfig(string $table): array
     {
         $slugFieldName = $this->getSlugFieldName($table);
+        if ($slugFieldName === null) {
+            return [];
+        }
+
         $fields = $GLOBALS['TCA'][$table]['columns'][$slugFieldName]['config']['generatorOptions']['fields'] ?? [];
 
+        return $this->normalizeFieldsConfig($fields);
+    }
+
+    /**
+     * @param array<int, string|string[]> $fields
+     *
+     * @return array<int, string|string[]>
+     */
+    private function normalizeFieldsConfig(array $fields): array
+    {
         return array_map(
             static fn ($field) => is_string($field) && str_contains($field, ',')
                 ? array_map('trim', explode(',', $field))
