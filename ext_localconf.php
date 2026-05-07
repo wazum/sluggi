@@ -8,9 +8,11 @@ use TYPO3\CMS\Backend\Form\FormDataProvider\TcaColumnsProcessCommon;
 use TYPO3\CMS\Backend\Form\FormDataProvider\TcaColumnsRemoveUnused;
 use TYPO3\CMS\Core\Http\ApplicationType;
 use TYPO3\CMS\Core\DataHandling\SlugHelper as CoreSlugHelper;
+use TYPO3\CMS\Core\Utility\ExtensionManagementUtility;
 use Wazum\Sluggi\DataHandling\SlugHelper;
 use TYPO3\CMS\Core\Page\PageRenderer;
 use Wazum\Sluggi\Compatibility\Typo3Compatibility;
+use Wazum\Sluggi\Service\MasiCompatibilityService;
 use TYPO3\CMS\Redirects\Controller\RecordHistoryRollbackController as CoreRecordHistoryRollbackController;
 use Wazum\Sluggi\Controller\FormSlugAjaxControllerV12;
 use Wazum\Sluggi\Controller\FormSlugAjaxControllerV14;
@@ -39,6 +41,21 @@ use Wazum\Sluggi\Form\Element\SlugSourceElementV14;
 use Wazum\Sluggi\Form\FormDataProvider\EnsureSlugSourceRenderTypes;
 use Wazum\Sluggi\Form\FormDataProvider\HideSlugForExcludedPageTypes;
 use Wazum\Sluggi\Form\FormDataProvider\InitializeSyncField;
+
+// b13/masi explicitly opts back into having Spacer (199) and Sysfolder (254)
+// in subpage URLs ("include by default, opt-out per page" via its checkbox).
+// When masi is installed it owns those doktypes — sluggi defers and drops
+// them from exclude_doktypes at boot so all sluggi consumers (URL path
+// computation, form field hide, DataHandler slug clearing) stay out of masi's
+// way for those values. Other doktypes in exclude_doktypes are still honored.
+if (ExtensionManagementUtility::isLoaded('masi')) {
+    $configured = (string)($GLOBALS['TYPO3_CONF_VARS']['EXTENSIONS']['sluggi']['exclude_doktypes'] ?? '');
+    if ($configured !== '') {
+        $list = array_map(intval(...), array_filter(explode(',', $configured)));
+        $filtered = MasiCompatibilityService::removeManagedDoktypes($list);
+        $GLOBALS['TYPO3_CONF_VARS']['EXTENSIONS']['sluggi']['exclude_doktypes'] = implode(',', $filtered);
+    }
+}
 
 // XCLASS
 $GLOBALS['TYPO3_CONF_VARS']['SYS']['Objects'][CoreFormSlugAjaxController::class] = [

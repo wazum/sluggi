@@ -234,7 +234,7 @@ All features work out of the box with sensible defaults. Fine-tune via **System 
 
 | Setting | Description | Default |
 |---------|-------------|---------|
-| `exclude_doktypes` | Comma-separated doktypes excluded from slug path generation. The default `199,254` matches TYPO3 core's built-in exclusion of Spacer and Sysfolder (see `SlugHelper::resolveParentPageRecord()`). Add `255` to also exclude Recycler pages. If you use [b13/masi](https://github.com/b13/masi) to include sysfolders in URL paths, remove `254` from this list. | `199,254` |
+| `exclude_doktypes` | Comma-separated doktypes excluded from slug path generation. The default `199,254` matches TYPO3 core's built-in exclusion of Spacer and Sysfolder (see `SlugHelper::resolveParentPageRecord()`). Add `255` to also exclude Recycler pages. Cooperates with [b13/masi](https://github.com/b13/masi) when installed: doktypes 199 and 254 are silently dropped at boot (masi opts back into having them in URLs by design — use masi's per-page checkbox to opt individual pages out). Custom doktypes in this list are still honored alongside masi. | `199,254` |
 | `preserve_underscore` | Keep underscores in URL paths instead of converting them to dashes. Useful when your URL convention or external systems require underscores (RFC 3986 compliant). | Off |
 | `copy_url` | Show a button to copy the full page URL to the clipboard. Saves editors from navigating to the frontend just to grab a link for emails, documents, or tickets. | On |
 | `last_segment_only` | Non-admin editors can only change the last segment of a URL path. The parent path stays read-only, preventing editors from accidentally breaking the site's URL hierarchy. | Off |
@@ -424,7 +424,7 @@ For non-page tables, add the table name to the `synchronize_tables` extension se
 
 - [news-redirect-slug-change](https://github.com/georgringer/news-redirect-slug-change) – Redirects when news slugs change
 - [ig-slug](https://github.com/internetgalerie/ig_slug) – Rebuild URL slugs in bulk
-- [masi](https://github.com/b13/masi) – Exclude specific page slugs from subpage URL generation
+- [masi](https://github.com/b13/masi) – Per-page checkbox to opt pages out of subpage URL generation. When installed alongside sluggi, masi owns doktypes 199 and 254 (its "include by default, opt-out per page" semantic wins automatically). Sluggi's `exclude_doktypes` continues to apply for any other doktype.
 - [content_slug](https://github.com/sebkln/content_slug) – Slug field for human-readable content element anchors (`#my-section`)
 
 ## Fixes for TYPO3 Core Issues

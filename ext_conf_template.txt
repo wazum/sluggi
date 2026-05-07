@@ -1,4 +1,4 @@
-# cat=basic; type=string; label=Exclude page types: Comma-separated list of doktypes excluded from slug path generation. Default matches TYPO3 core (199=Spacer, 254=Sysfolder). Add 255 for Recycler.
+# cat=basic; type=string; label=Exclude page types: Comma-separated list of doktypes excluded from slug path generation. Default matches TYPO3 core (199=Spacer, 254=Sysfolder). Add 255 for Recycler. When b13/masi is installed, doktypes 199 and 254 are silently dropped at boot (masi opts back into having them in URLs by design); use masi's per-page checkbox to opt individual pages out. Custom doktypes are still honored alongside masi.
 exclude_doktypes=199,254
 # cat=basic; type=boolean; label=Preserve underscores in slugs: When enabled, underscores are not replaced by dashes during slug generation (RFC 3986 allows both characters)
 preserve_underscore=0

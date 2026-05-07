@@ -53,4 +53,37 @@ final class MasiCompatibilityServiceTest extends UnitTestCase
     {
         self::assertFalse($this->subject->getSubmittedExclusionValue([]));
     }
+
+    #[Test]
+    public function managedDoktypesAreSpacerAndSysfolder(): void
+    {
+        self::assertSame([199, 254], MasiCompatibilityService::MANAGED_DOKTYPES);
+    }
+
+    #[Test]
+    public function removeManagedDoktypesStripsSpacerAndSysfolder(): void
+    {
+        self::assertSame(
+            [],
+            MasiCompatibilityService::removeManagedDoktypes([199, 254])
+        );
+    }
+
+    #[Test]
+    public function removeManagedDoktypesKeepsCustomDoktypes(): void
+    {
+        self::assertSame(
+            [100, 101],
+            MasiCompatibilityService::removeManagedDoktypes([100, 199, 101, 254])
+        );
+    }
+
+    #[Test]
+    public function removeManagedDoktypesIsNoOpForEmptyList(): void
+    {
+        self::assertSame(
+            [],
+            MasiCompatibilityService::removeManagedDoktypes([])
+        );
+    }
 }

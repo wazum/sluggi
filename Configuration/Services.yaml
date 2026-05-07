@@ -15,6 +15,7 @@ services:
       - '../Classes/Form/Element/SlugElementV14.php'
       - '../Classes/Form/Element/SlugSourceElementV12.php'
       - '../Classes/Form/Element/SlugSourceElementV14.php'
+      - '../Classes/Slug/SluggiAwareSlugModifier.php'
 
   # DataHandler
   Wazum\Sluggi\DataHandler\ClearSlugForExcludedDoktypes:
