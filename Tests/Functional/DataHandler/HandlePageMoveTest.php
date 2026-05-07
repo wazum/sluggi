@@ -136,6 +136,31 @@ final class HandlePageMoveTest extends FunctionalTestCase
     }
 
     #[Test]
+    public function movingLockedPageStillUpdatesSlugToMatchNewParent(): void
+    {
+        // A slug_locked=1 page that is moved to a different parent must still
+        // get its parent prefix updated. Otherwise the page is positioned
+        // under the new parent but keeps a slug from the old location, which
+        // exposes that foreign path to non-admins editing the page (the form
+        // prefix falls back to the value's own parent path when it is outside
+        // the user's locked-prefix).
+        $this->setUpTest('pages_for_move_locked.csv');
+        $GLOBALS['TYPO3_CONF_VARS']['EXTENSIONS']['sluggi']['lock'] = '1';
+
+        $dataHandler = GeneralUtility::makeInstance(DataHandler::class);
+        $dataHandler->start([], [
+            'pages' => [
+                4 => [
+                    'move' => 3,
+                ],
+            ],
+        ]);
+        $dataHandler->process_cmdmap();
+
+        $this->assertCSVDataSet(__DIR__ . '/Fixtures/pages_after_move_locked.csv');
+    }
+
+    #[Test]
     public function movingPageIntoExcludedPageTypeSkipsExcludedParentInSlugPath(): void
     {
         $this->setUpTest('pages_for_move_into_excluded.csv');

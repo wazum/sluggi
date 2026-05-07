@@ -115,6 +115,24 @@ describe('SluggiElement - Modes', () => {
             expect(el.shadowRoot!.querySelector('.sluggi-editable')?.textContent?.trim()).to.equal('/child');
         });
 
+        it('editing out-of-sync slug preserves actual parent path', async () => {
+            const el = await fixture<SluggiElement>(html`
+                <sluggi-element
+                    value="/wrong-prefix/child"
+                    locked-prefix="/parent"
+                    last-segment-only
+                ></sluggi-element>
+            `);
+
+            const input = await enterEditMode(el);
+            input.value = 'fixed-child';
+            input.dispatchEvent(new Event('input', { bubbles: true }));
+            input.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+            await el.updateComplete;
+
+            expect(el.value).to.equal('/wrong-prefix/fixed-child');
+        });
+
         it('shows mismatch note below the field when prefix does not match hierarchy', async () => {
             const el = await fixture<SluggiElement>(html`
                 <sluggi-element
@@ -126,7 +144,7 @@ describe('SluggiElement - Modes', () => {
 
             const note = el.shadowRoot!.querySelector('.sluggi-note');
             expect(note).to.exist;
-            expect(note?.textContent?.toLowerCase()).to.include('hierarchy');
+            expect(note?.textContent?.toLowerCase()).to.include('custom url path');
         });
 
         it('does not show mismatch note when prefix matches hierarchy', async () => {
@@ -169,24 +187,6 @@ describe('SluggiElement - Modes', () => {
 
             const prefix = el.shadowRoot!.querySelector('.sluggi-prefix');
             expect(prefix?.classList.contains('is-out-of-sync')).to.not.be.true;
-        });
-
-        it('editing out-of-sync slug preserves actual parent path', async () => {
-            const el = await fixture<SluggiElement>(html`
-                <sluggi-element
-                    value="/wrong-prefix/child"
-                    locked-prefix="/parent"
-                    last-segment-only
-                ></sluggi-element>
-            `);
-
-            const input = await enterEditMode(el);
-            input.value = 'fixed-child';
-            input.dispatchEvent(new Event('input', { bubbles: true }));
-            input.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
-            await el.updateComplete;
-
-            expect(el.value).to.equal('/wrong-prefix/fixed-child');
         });
 
         it('hiddenInputValue preserves mismatched prefix instead of silently rewriting', async () => {
@@ -565,7 +565,7 @@ describe('SluggiElement - Modes', () => {
 
             const note = el.shadowRoot!.querySelector('.sluggi-note');
             expect(note).to.exist;
-            expect(note?.textContent?.toLowerCase()).to.include('hierarchy');
+            expect(note?.textContent?.toLowerCase()).to.include('custom url path');
         });
 
         it('shows notification for hierarchy editor with mismatch', async () => {
@@ -748,6 +748,187 @@ describe('SluggiElement - Modes', () => {
             expect(note).to.exist;
             expect(note?.textContent).to.include('Hierarchy path:');
             expect(note?.textContent).to.include('/organization/department/institute/');
+        });
+    });
+
+    describe('Locked page outside the user\'s hierarchy', () => {
+        // A locked page whose slug points outside the user's permitted
+        // hierarchy is a stuck state for restricted editors: they can't
+        // regenerate (lock blocks it) and they don't have full-path-edit
+        // permission. The field is shown read-only with a single "ask
+        // administrator" note. The slug stays visible so the editor still
+        // knows which URL the page is at.
+        //
+        // For users who CAN act (regenerate from sources, or full-path-edit)
+        // the regular mismatch indicator and advice remain unchanged.
+
+        beforeEach(() => {
+            Notification._reset();
+            const ctor = customElements.get('sluggi-element') as any;
+            ctor?.shownMismatchNotifications?.clear();
+        });
+
+        it('still renders the slug (no hiding)', async () => {
+            const el = await fixture<SluggiElement>(html`
+                <sluggi-element
+                    value="/admin-secret-area/secret-page"
+                    locked-prefix="/restricted-section"
+                    last-segment-only
+                    is-locked
+                ></sluggi-element>
+            `);
+
+            expect(el.shadowRoot!.innerHTML).to.include('/admin-secret-area/secret-page');
+        });
+
+        it('marks the editable span as non-interactive', async () => {
+            const el = await fixture<SluggiElement>(html`
+                <sluggi-element
+                    value="/admin-secret-area/secret-page"
+                    locked-prefix="/restricted-section"
+                    last-segment-only
+                    is-locked
+                ></sluggi-element>
+            `);
+
+            const editable = el.shadowRoot!.querySelector('.sluggi-editable');
+            expect(editable?.getAttribute('role')).to.not.equal('button');
+            expect(editable?.getAttribute('tabindex')).to.equal('-1');
+        });
+
+        it('hides edit and regenerate buttons', async () => {
+            const el = await fixture<SluggiElement>(html`
+                <sluggi-element
+                    value="/admin-secret-area/secret-page"
+                    locked-prefix="/restricted-section"
+                    last-segment-only
+                    is-locked
+                ></sluggi-element>
+            `);
+
+            expect(el.shadowRoot!.querySelector('.sluggi-edit-btn')).to.not.exist;
+            expect(el.shadowRoot!.querySelector('.sluggi-regenerate-btn')).to.not.exist;
+        });
+
+        it('shows the "ask administrator" note', async () => {
+            const el = await fixture<SluggiElement>(html`
+                <sluggi-element
+                    value="/admin-secret-area/secret-page"
+                    locked-prefix="/restricted-section"
+                    last-segment-only
+                    is-locked
+                    labels='{"customPath.note": "Custom URL path — please ask an administrator to change it."}'
+                ></sluggi-element>
+            `);
+
+            const note = el.shadowRoot!.querySelector('.sluggi-custom-path-note');
+            expect(note).to.exist;
+            expect(note?.textContent).to.include('administrator');
+        });
+
+        it('shows only the custom-path note (no stacked lock or mismatch advice)', async () => {
+            const el = await fixture<SluggiElement>(html`
+                <sluggi-element
+                    value="/admin-secret-area/secret-page"
+                    locked-prefix="/restricted-section"
+                    last-segment-only
+                    is-locked
+                ></sluggi-element>
+            `);
+
+            // Generic "URL path is locked" or "regenerate to fix" advice would
+            // either duplicate or contradict the "ask administrator" message.
+            const notes = el.shadowRoot!.querySelectorAll('.sluggi-note');
+            expect(notes.length).to.equal(1);
+            expect(notes[0].classList.contains('sluggi-custom-path-note')).to.be.true;
+        });
+
+        it('does not show the amber prefix-mismatch highlight', async () => {
+            const el = await fixture<SluggiElement>(html`
+                <sluggi-element
+                    value="/admin-secret-area/secret-page"
+                    locked-prefix="/restricted-section"
+                    last-segment-only
+                    is-locked
+                ></sluggi-element>
+            `);
+
+            const prefix = el.shadowRoot!.querySelector('.sluggi-prefix');
+            expect(prefix?.classList.contains('is-out-of-sync')).to.not.be.true;
+        });
+
+        it('preserves the original slug value (no save-side corruption)', async () => {
+            const el = await fixture<SluggiElement>(html`
+                <sluggi-element
+                    value="/admin-secret-area/secret-page"
+                    locked-prefix="/restricted-section"
+                    last-segment-only
+                    is-locked
+                ></sluggi-element>
+            `);
+
+            expect((el as any).hiddenInputValue).to.equal('/admin-secret-area/secret-page');
+        });
+
+        it('does not trigger for admins (no lockedPrefix)', async () => {
+            const el = await fixture<SluggiElement>(html`
+                <sluggi-element value="/admin-secret-area/secret-page"></sluggi-element>
+            `);
+
+            expect(el.shadowRoot!.querySelector('.sluggi-custom-path-note')).to.not.exist;
+        });
+
+        it('does not trigger when value is inside lockedPrefix', async () => {
+            const el = await fixture<SluggiElement>(html`
+                <sluggi-element
+                    value="/restricted-section/synced-page"
+                    locked-prefix="/restricted-section"
+                    last-segment-only
+                    is-locked
+                ></sluggi-element>
+            `);
+
+            expect(el.shadowRoot!.querySelector('.sluggi-custom-path-note')).to.not.exist;
+        });
+
+        it('does not trigger when the user can regenerate from sources', async () => {
+            // Title source field present → user has a recourse → existing
+            // mismatch advice applies, not the "ask administrator" note.
+            const container = document.createElement('div');
+            const titleInput = document.createElement('input');
+            titleInput.setAttribute('data-sluggi-source', '');
+            titleInput.setAttribute('data-formengine-input-name', 'data[pages][1][title]');
+            titleInput.value = 'Some Title';
+            container.appendChild(titleInput);
+
+            const slug = document.createElement('sluggi-element') as SluggiElement;
+            slug.setAttribute('value', '/admin-secret-area/secret-page');
+            slug.setAttribute('locked-prefix', '/restricted-section');
+            slug.setAttribute('last-segment-only', '');
+            slug.setAttribute('record-id', '1');
+            container.appendChild(slug);
+
+            document.body.appendChild(container);
+            await slug.updateComplete;
+
+            expect(slug.shadowRoot!.querySelector('.sluggi-custom-path-note')).to.not.exist;
+            expect(slug.shadowRoot!.querySelector('.sluggi-edit-btn')).to.exist;
+
+            container.remove();
+        });
+
+        it('does not trigger when full-path-edit is available', async () => {
+            const el = await fixture<SluggiElement>(html`
+                <sluggi-element
+                    value="/admin-secret-area/secret-page"
+                    locked-prefix="/restricted-section"
+                    last-segment-only
+                    full-path-feature-enabled
+                ></sluggi-element>
+            `);
+
+            // The "Edit full path" button is the affordance for these users.
+            expect(el.shadowRoot!.querySelector('.sluggi-custom-path-note')).to.not.exist;
         });
     });
 

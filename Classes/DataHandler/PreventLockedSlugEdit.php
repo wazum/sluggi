@@ -8,6 +8,7 @@ use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\Authentication\BackendUserAuthentication;
 use TYPO3\CMS\Core\DataHandling\DataHandler;
 use Wazum\Sluggi\Service\SlugLockService;
+use Wazum\Sluggi\Utility\DataHandlerUtility;
 
 final readonly class PreventLockedSlugEdit
 {
@@ -34,6 +35,12 @@ final readonly class PreventLockedSlugEdit
         }
 
         if (!is_numeric($id)) {
+            return;
+        }
+
+        // A move always rewrites the slug to match the new parent, even for
+        // locked pages — the lock prevents edits, not relocations.
+        if (DataHandlerUtility::isMoveInducedSlugUpdate($dataHandler)) {
             return;
         }
 

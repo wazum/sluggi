@@ -6,15 +6,15 @@ namespace Wazum\Sluggi\DataHandler;
 
 use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\DataHandling\DataHandler;
+use TYPO3\CMS\Core\DataHandling\Model\CorrelationId;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use Wazum\Sluggi\Service\SlugGeneratorService;
-use Wazum\Sluggi\Service\SlugLockService;
+use Wazum\Sluggi\Utility\DataHandlerUtility;
 
 final readonly class HandlePageMove
 {
     public function __construct(
         private SlugGeneratorService $slugGeneratorService,
-        private SlugLockService $lockService,
     ) {
     }
 
@@ -64,10 +64,6 @@ final readonly class HandlePageMove
             return;
         }
 
-        if ($this->lockService->isLocked($currentPage)) {
-            return;
-        }
-
         $languageId = (int)($currentPage['sys_language_uid'] ?? 0);
         $parentSlug = $this->slugGeneratorService->getParentSlug($targetId, $languageId);
         $newSlug = $this->slugGeneratorService->combineWithParent(
@@ -80,10 +76,13 @@ final readonly class HandlePageMove
         $data = ['pages' => [$id => ['slug' => $newSlug]]];
         $localDataHandler = GeneralUtility::makeInstance(DataHandler::class);
         $localDataHandler->start($data, []);
-        $correlationId = $dataHandler->getCorrelationId();
-        if ($correlationId !== null) {
-            $localDataHandler->setCorrelationId($correlationId);
-        }
+        $correlationId = $dataHandler->getCorrelationId() ?? CorrelationId::forScope('sluggi');
+        $localDataHandler->setCorrelationId(
+            $correlationId->withAspects(...array_unique([
+                ...$correlationId->getAspects(),
+                DataHandlerUtility::MOVE_CORRELATION_ASPECT,
+            ]))
+        );
         $localDataHandler->process_datamap();
     }
 }

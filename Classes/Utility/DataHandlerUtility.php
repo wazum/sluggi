@@ -13,6 +13,8 @@ use TYPO3\CMS\Redirects\Service\SlugService;
 
 final class DataHandlerUtility
 {
+    public const MOVE_CORRELATION_ASPECT = 'sluggi-move';
+
     public static function isNewRecord(string|int $id): bool
     {
         return !is_int($id) && !ctype_digit((string)$id);
@@ -36,6 +38,16 @@ final class DataHandlerUtility
 
         return in_array(SlugService::CORRELATION_ID_IDENTIFIER, $aspects, true)
             && !in_array('redirect', $aspects, true);
+    }
+
+    public static function isMoveInducedSlugUpdate(DataHandler $dataHandler): bool
+    {
+        $correlationId = $dataHandler->getCorrelationId();
+        if ($correlationId === null) {
+            return false;
+        }
+
+        return in_array(self::MOVE_CORRELATION_ASPECT, $correlationId->getAspects(), true);
     }
 
     public static function logSlugValidationError(

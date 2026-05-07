@@ -382,6 +382,7 @@ trait SlugElementTrait
             'prefixMismatch.note' => $languageService->sL($prefix . 'prefixMismatch.note'),
             'prefixMismatch.note.lock' => $languageService->sL($prefix . 'prefixMismatch.note.lock'),
             'prefixMismatch.note.expected' => $languageService->sL($prefix . 'prefixMismatch.note.expected'),
+            'customPath.note' => $languageService->sL($prefix . 'customPath.note'),
             'redirectInfo.singular' => $languageService->sL($prefix . 'redirectInfo.singular'),
             'redirectInfo.plural' => $languageService->sL($prefix . 'redirectInfo.plural'),
             'redirectInfoLink' => $languageService->sL($prefix . 'redirectInfoLink'),

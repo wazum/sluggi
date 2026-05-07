@@ -132,24 +132,6 @@ final class LockedSlugTest extends FunctionalTestCase
     }
 
     #[Test]
-    public function lockedSlugNotUpdatedOnMove(): void
-    {
-        $this->setUpTest('pages_locked_for_move.csv');
-
-        $dataHandler = GeneralUtility::makeInstance(DataHandler::class);
-        $dataHandler->start([], [
-            'pages' => [
-                3 => [
-                    'move' => 2,
-                ],
-            ],
-        ]);
-        $dataHandler->process_cmdmap();
-
-        $this->assertCSVDataSet(__DIR__ . '/Fixtures/pages_locked_after_move.csv');
-    }
-
-    #[Test]
     public function lockStateClearedOnCopy(): void
     {
         $this->setUpTest('pages_locked_for_copy.csv');

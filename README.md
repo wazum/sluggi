@@ -83,6 +83,9 @@ When sync is enabled, URL paths regenerate automatically when source fields (e.g
 - Optionally lock all descendant paths when an ancestor is locked
 - Editing the full path auto-locks it to prevent sync from overwriting your work
 
+> [!NOTE]
+> Moving a locked page updates its parent prefix to match the new location — the lock prevents edits, not relocations. The lock state itself is preserved, so the slug stays protected against further regeneration after the move.
+
 ### Translated Pages
 
 ![Translated page](Documentation/sluggi_translated.png)
@@ -131,6 +134,9 @@ The messages are tailored to the editor's permissions:
 - Admins see the full URL path with the mismatched portion highlighted
 
 Locked and synced pages suppress the indicator entirely – locked pages have intentional custom URLs, and synced pages will self-correct on the next title change.
+
+> [!NOTE]
+> When a page has a custom URL path (slug outside the editor's permitted hierarchy), the page is locked, AND the editor has no full-path-edit permission, the field is rendered read-only with a single "contact administrator" note. The regenerate-to-fix advice would be misleading there — the lock would block it. Editors with full-path-edit permission keep the regular controls and can still adjust the URL via the "Edit full path" button.
 
 ### Redirect Info
 

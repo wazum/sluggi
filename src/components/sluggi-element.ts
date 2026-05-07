@@ -308,6 +308,27 @@ export class SluggiElement extends LitElement {
         return false;
     }
 
+    /**
+     * The page has a custom URL path (slug outside the user's permitted
+     * hierarchy), the page is locked, AND the user has no full-path-edit
+     * permission. This is typically intentional — e.g. an admin set a
+     * dedicated landing-page URL — so we don't treat it as a problem to fix.
+     *
+     * The user can't change the path here (the lock blocks regenerate, only
+     * an admin can unlock or use full-path-edit). The path is still rendered
+     * as-is so the user knows which URL the page is at, but the field is
+     * read-only and the regular "regenerate to fix" mismatch advice is
+     * replaced with a single "ask an administrator" note.
+     */
+    private get hasCustomPath(): boolean {
+        if (this.isFullPathMode) return false;
+        if (!this.lockedPrefix) return false;
+        if (!this.isOutsideLockedHierarchy) return false;
+        if (!this.isLocked) return false;
+        if (this.fullPathFeatureEnabled) return false;
+        return true;
+    }
+
     private get computedPrefix(): string {
         if (this.isCompletelyReadonly) {
             return '';
@@ -341,6 +362,10 @@ export class SluggiElement extends LitElement {
     }
 
     private get hasPrefixMismatch(): boolean {
+        // When the user is in unusual-path containment, the regular mismatch
+        // affordance (amber highlight + "regenerate to fix" advice) is wrong
+        // for them — they can't act on it. Suppress it here.
+        if (this.hasCustomPath) return false;
         const expectedPrefix = this.parentSlug || this.lockedPrefix;
         if (!expectedPrefix || !this.value || this.isLocked || this.isSynced) return false;
         return !this.value.startsWith(expectedPrefix + '/') && this.value !== expectedPrefix;
@@ -431,6 +456,7 @@ export class SluggiElement extends LitElement {
                 </div>
             </div>
             ${this.renderRestrictionNote()}
+            ${this.renderCustomPathNote()}
             ${this.renderReservedPathWarning()}
             ${this.renderRedirectInfo()}
         `;
@@ -458,6 +484,16 @@ export class SluggiElement extends LitElement {
         return html`<p class="sluggi-reserved-warning" role="status" aria-live="polite">${message}</p>`;
     }
 
+    private renderCustomPathNote() {
+        if (!this.hasCustomPath) return nothing;
+        // Users with full-path-edit permission already have an affordance
+        // (the "Edit full path" button) — they don't need the "ask admin" copy.
+        if (this.fullPathFeatureEnabled) return nothing;
+        const message = this.labels['customPath.note']
+            || 'Custom URL path — please ask an administrator to change it.';
+        return html`<p class="sluggi-note sluggi-custom-path-note" role="status" aria-live="polite">${message}</p>`;
+    }
+
     private renderRestrictionNote() {
         if (this.showCopyConfirmation) {
             return html`<p class="sluggi-note sluggi-copy-confirmation" role="status" aria-live="polite">
@@ -465,6 +501,11 @@ export class SluggiElement extends LitElement {
                 <a href="${this.copiedUrl}" target="_blank" rel="noopener noreferrer" class="sluggi-open-url-link">${this.labels['openInNewTab'] || 'Open in new tab'}</a>
             </p>`;
         }
+
+        // Unusual-path containment renders its own dedicated note and replaces
+        // the generic lock/sync/mismatch advice (which would either contradict
+        // or duplicate it).
+        if (this.hasCustomPath) return nothing;
 
         if (!this.isSynced && !this.isLocked && !this.isFullPathMode && !this.hasPrefixMismatch) return nothing;
 
@@ -474,12 +515,12 @@ export class SluggiElement extends LitElement {
         } else if (this.isLocked) {
             message = this.labels.lockRestrictionNote || 'The URL path is locked and cannot be edited.';
         } else if (this.hasPrefixMismatch) {
-            const highlight = this.labels['prefixMismatch.note.highlight'] || 'URL prefix doesn\'t match the page hierarchy.';
+            const highlight = this.labels['prefixMismatch.note.highlight'] || 'Custom URL path.';
             const expectedPrefix = this.parentSlug || this.lockedPrefix;
             const expectedLine = expectedPrefix ? this.getLabel('prefixMismatch.note.expected', expectedPrefix + '/') : '';
             const advice = this.lockFeatureEnabled
-                ? (this.labels['prefixMismatch.note.lock'] || 'If not intentional, regenerate to fix it — or lock to keep this custom URL.')
-                : (this.labels['prefixMismatch.note'] || 'If not intentional, use regenerate to correct it.');
+                ? (this.labels['prefixMismatch.note.lock'] || 'If not intentional, regenerate to reset it — or lock to keep this URL.')
+                : (this.labels['prefixMismatch.note'] || 'If not intentional, use regenerate to reset it.');
             return html`<p class="sluggi-note" role="status" aria-live="polite"><span class="sluggi-note-highlight">${highlight}</span> ${advice}${expectedLine ? html`<br/>${expectedLine}` : nothing}</p>`;
         } else {
             message = this.labels.fullPathNote || 'Full path editing is enabled. You can modify the entire URL structure.';
@@ -507,7 +548,7 @@ export class SluggiElement extends LitElement {
     }
 
     private renderViewMode() {
-        const isEditable = !this.isLocked && !this.isSynced;
+        const isEditable = !this.isLocked && !this.isSynced && !this.hasCustomPath;
         const editable = this.editableValue || (this.isPageTable ? '/' : '');
         const classes = [
             'sluggi-editable',
@@ -624,6 +665,7 @@ export class SluggiElement extends LitElement {
     }
 
     private renderEditButton() {
+        if (this.hasCustomPath) return nothing;
         const disabled = this.isEditDisabled;
         return html`
             <button
@@ -640,6 +682,7 @@ export class SluggiElement extends LitElement {
     }
 
     private renderRegenerateButton() {
+        if (this.hasCustomPath) return nothing;
         if (!this.showRegenerate) return nothing;
         if (!this.hasPostModifiers && !this.hasSourceFields) return nothing;
 
@@ -759,6 +802,7 @@ export class SluggiElement extends LitElement {
 
     enterEditMode() {
         if (this.isLocked) return;
+        if (this.hasCustomPath) return;
 
         this.mode = 'edit';
         this.valueBeforeEdit = this.value;
@@ -1657,8 +1701,8 @@ export class SluggiElement extends LitElement {
         SluggiElement.shownMismatchNotifications.add(key);
         const title = this.labels['prefixMismatch.notification.title'] || 'URL Path Info';
         const message = this.lockFeatureEnabled
-            ? (this.labels['prefixMismatch.notification.messageLock'] || 'The URL path prefix doesn\'t match the page hierarchy. Regenerate to correct it, or lock the slug if this is an intentional custom URL.')
-            : (this.labels['prefixMismatch.notification.message'] || 'The URL path prefix doesn\'t match the page hierarchy. Click the regenerate button to correct it, or ask an administrator for advice.');
+            ? (this.labels['prefixMismatch.notification.messageLock'] || 'Custom URL path. Regenerate to reset it, or lock the slug if this is intentional.')
+            : (this.labels['prefixMismatch.notification.message'] || 'Custom URL path. Click the regenerate button to reset it, or ask an administrator for advice.');
         Notification.info(title, message, 15);
     }
 
