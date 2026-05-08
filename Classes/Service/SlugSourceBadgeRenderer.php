@@ -4,10 +4,17 @@ declare(strict_types=1);
 
 namespace Wazum\Sluggi\Service;
 
+use TYPO3\CMS\Core\Localization\LanguageService;
+use TYPO3\CMS\Core\Localization\LanguageServiceFactory;
 use Wazum\Sluggi\Compatibility\Typo3Compatibility;
 
 final readonly class SlugSourceBadgeRenderer
 {
+    public function __construct(
+        private LanguageServiceFactory $languageServiceFactory,
+    ) {
+    }
+
     /**
      * @param array{slot: int, role: string, chainSize: int} $metadata
      */
@@ -65,10 +72,19 @@ final readonly class SlugSourceBadgeRenderer
     public function renderConfirmButton(): string
     {
         $checkIcon = '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>';
+        $title = $this->getLanguageService()->sL(
+            'LLL:EXT:sluggi/Resources/Private/Language/locallang.xlf:sourceConfirm.title'
+        ) ?: 'Update URL path now';
 
         return sprintf(
-            '<button type="button" class="input-group-text sluggi-source-confirm" title="Update URL path now">%s</button>',
+            '<button type="button" class="input-group-text sluggi-source-confirm" title="%s">%s</button>',
+            htmlspecialchars($title, ENT_QUOTES | ENT_HTML5),
             $checkIcon
         );
+    }
+
+    private function getLanguageService(): LanguageService
+    {
+        return $this->languageServiceFactory->createFromUserPreferences($GLOBALS['BE_USER'] ?? null);
     }
 }

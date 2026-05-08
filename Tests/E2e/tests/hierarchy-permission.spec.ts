@@ -91,4 +91,73 @@ test.describe('Hierarchy Permission - Editor Slug Restrictions', () => {
     await expect(slugElement.locator('.sluggi-sync-toggle')).toBeVisible();
     await expect(slugElement.locator('.sluggi-lock-toggle')).toBeVisible();
   });
+
+  test('cannot regenerate or enable sync when stored slug diverges (sync-on)', async ({ page }) => {
+    const pageId = 64;
+    const originalSlug = '/organization/department/diverged-sync-on';
+
+    const proposalRequests: string[] = [];
+    await page.route('**/record_slug_suggest**', (route) => {
+      proposalRequests.push(route.request().url());
+      route.continue();
+    });
+
+    await page.goto(`/typo3/record/edit?edit[pages][${pageId}]=edit`);
+    const testFrame = page.frameLocator('iframe');
+    await waitForEditForm(testFrame, page);
+    const el = testFrame.locator('sluggi-element');
+
+    const regenerate = el.locator('.sluggi-regenerate-btn');
+    await expect(regenerate).toHaveAttribute('aria-disabled', 'true');
+
+    const confirm = testFrame.locator('.sluggi-source-confirm').first();
+    await expect(confirm).toHaveAttribute('disabled', '');
+    await expect(confirm).toHaveAttribute('aria-disabled', 'true');
+    await expect(confirm).toHaveAttribute('title', "Auto-sync is on but won't update this URL — turn it off to make this explicit.");
+
+    // Button is disabled — dispatch a synthetic click and verify no AJAX proposal is sent.
+    const baseline = proposalRequests.length;
+    await confirm.dispatchEvent('click');
+    await page.waitForTimeout(200);
+    expect(proposalRequests.length).toBe(baseline);
+
+    await expect(el.locator('.sluggi-sync-toggle')).not.toHaveAttribute('aria-disabled', 'true');
+
+    const titleInput = testFrame.locator('input[data-formengine-input-name*="[title]"]');
+    await titleInput.fill('Renamed by editor');
+    await testFrame.locator('button[name="_savedok"]').first().click();
+    await waitForEditForm(testFrame, page);
+    await expect(page.locator('.callout-danger, .alert-danger')).toHaveCount(0);
+
+    await expect(titleInput).toHaveValue('Renamed by editor');
+
+    const hiddenSlug = testFrame.locator('input.sluggi-hidden-field').first();
+    await expect(hiddenSlug).toHaveValue(originalSlug);
+  });
+
+  test('lock toggle works when stored slug diverges (sync-off)', async ({ page }) => {
+    const pageId = 65;
+
+    await page.goto(`/typo3/record/edit?edit[pages][${pageId}]=edit`);
+    const testFrame = page.frameLocator('iframe');
+    await waitForEditForm(testFrame, page);
+    const el = testFrame.locator('sluggi-element');
+
+    await expect(el.locator('.sluggi-regenerate-btn')).toHaveAttribute('aria-disabled', 'true');
+
+    await expect(el.locator('.sluggi-sync-toggle')).toHaveAttribute('aria-disabled', 'true');
+
+    // Inline advice shows the lock label before locking.
+    const note = el.locator('.sluggi-note');
+    await expect(note).toContainText("Lock the URL so future edits don't change it.");
+
+    const lockToggle = el.locator('.sluggi-lock-toggle');
+    await expect(lockToggle).not.toHaveAttribute('aria-disabled', 'true');
+    await lockToggle.click();
+
+    // Save. Lock persists.
+    await testFrame.locator('button[name="_savedok"]').first().click();
+    await waitForEditForm(testFrame, page);
+    await expect(el.locator('.sluggi-lock-toggle')).toHaveClass(/is-locked/);
+  });
 });

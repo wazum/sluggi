@@ -23,6 +23,7 @@ export interface ToggleConfig {
     iconOn: unknown;
     iconOff: unknown;
     onToggle: () => void;
+    disabledTitle?: string;
 }
 
 declare global {

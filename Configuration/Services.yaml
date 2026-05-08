@@ -122,6 +122,9 @@ services:
   Wazum\Sluggi\Service\ReservedPathService:
     public: true
 
+  Wazum\Sluggi\Service\SlugSourceBadgeRenderer:
+    public: true
+
   Wazum\Sluggi\Service\SlugSyncService:
     public: true
 

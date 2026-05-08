@@ -208,8 +208,8 @@
                 <target>Falls nicht beabsichtigt, neu generieren — oder sperren, um diese URL beizubehalten.</target>
             </trans-unit>
             <trans-unit id="prefixMismatch.note.expected" resname="prefixMismatch.note.expected">
-                <source>Hierarchy path: %s</source>
-                <target>Hierarchie-Pfad: %s</target>
+                <source>Actual hierarchy path: %s</source>
+                <target>Tatsächlicher Hierarchie-Pfad: %s</target>
             </trans-unit>
             <trans-unit id="customPath.note" resname="customPath.note">
                 <source>Custom URL path — please ask an administrator to change it.</source>

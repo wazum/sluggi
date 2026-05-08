@@ -8,6 +8,8 @@ use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\DataHandling\DataHandler;
 use TYPO3\CMS\Redirects\RedirectUpdate\SlugRedirectChangeItemFactory;
 use TYPO3\CMS\Redirects\Service\SlugService;
+use Wazum\Sluggi\Configuration\ExtensionConfiguration;
+use Wazum\Sluggi\Service\HierarchyPermissionService;
 use Wazum\Sluggi\Service\ReservedPathService;
 use Wazum\Sluggi\Service\SlugGeneratorService;
 use Wazum\Sluggi\Service\SlugLockService;
@@ -23,6 +25,8 @@ final readonly class HandlePageUpdate
         private SlugRedirectChangeItemFactory $changeItemFactory,
         private SlugService $slugService,
         private ReservedPathService $reservedPathService,
+        private HierarchyPermissionService $hierarchyPermissionService,
+        private ExtensionConfiguration $extensionConfiguration,
     ) {
     }
 
@@ -86,6 +90,10 @@ final readonly class HandlePageUpdate
             return;
         }
 
+        if ($this->wouldCrossHierarchyLock((int)$id, $newSlug, (string)$record['slug'])) {
+            return;
+        }
+
         $fieldArray['slug'] = $newSlug;
 
         if ($newSlug !== $record['slug'] && !$this->coreWillCascadeChildSlugs($dataHandler, (int)$id)) {
@@ -137,5 +145,22 @@ final readonly class HandlePageUpdate
 
         $changeItem = $changeItem->withChanged(array_merge($record, $fieldArray));
         $this->slugService->rebuildSlugsForSlugChange($pageId, $changeItem, $correlationId);
+    }
+
+    private function wouldCrossHierarchyLock(int $id, string $newSlug, string $existingSlug): bool
+    {
+        $backendUser = $GLOBALS['BE_USER'] ?? null;
+        if ($backendUser === null || $backendUser->isAdmin()) {
+            return false;
+        }
+        if ($this->extensionConfiguration->isLastSegmentOnlyEnabled()) {
+            return false;
+        }
+        $lockedPrefix = $this->hierarchyPermissionService->getLockedPrefixForPage($id, $existingSlug);
+        if ($lockedPrefix === '') {
+            return false;
+        }
+
+        return !$this->hierarchyPermissionService->validateSlugChange($lockedPrefix, $newSlug);
     }
 }

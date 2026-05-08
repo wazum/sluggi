@@ -216,6 +216,7 @@ export class SluggiElement extends LitElement {
         this.setupSourceConfirmListeners();
         this.observeSourceFieldInitialization();
         this.setupFormSubmitListener();
+        this.updateSourceBadgeVisibility();
         this.notifyPrefixMismatch();
     }
 
@@ -274,14 +275,45 @@ export class SluggiElement extends LitElement {
         return this.isLocked || this.isSynced;
     }
 
+    private get regenerateWouldLeaveLockedHierarchy(): boolean {
+        if (this.fullPathFeatureEnabled) return false;
+        const locked = (this.lockedPrefix || '').replace(/\/+$/, '');
+        const parent = (this.parentSlug || '').replace(/\/+$/, '');
+        if (!locked || !parent) return false;
+        return parent !== locked && !parent.startsWith(locked + '/');
+    }
+
+    private get canDisableSyncToKeepUrl(): boolean {
+        return this.isSynced && !this.isSyncToggleDisabled;
+    }
+
+    private get canLockToKeepUrl(): boolean {
+        return this.lockFeatureEnabled && !this.isLocked && !this.isLockToggleDisabled;
+    }
+
+    private get cannotRegenerateAdviceKey(): string | null {
+        if (this.isLocked) return null;
+        if (!this.regenerateWouldLeaveLockedHierarchy) return null;
+        if (this.canDisableSyncToKeepUrl) return 'prefixMismatch.cannotRegenerate.disableSync';
+        if (this.canLockToKeepUrl) return 'prefixMismatch.cannotRegenerate.lock';
+        return 'prefixMismatch.cannotRegenerate.askAdmin';
+    }
+
+    private get showCannotRegenerateAdvice(): boolean {
+        return this.cannotRegenerateAdviceKey !== null;
+    }
+
     private get isRegenerateDisabled(): boolean {
         if (this.isLocked || this.isSynced) return true;
+        if (this.regenerateWouldLeaveLockedHierarchy) return true;
         if (this.hasPostModifiers) return false;
         return !this.hasNonEmptySourceFieldValue();
     }
 
     private get isSyncToggleDisabled(): boolean {
-        return this.isLocked || this.isTranslation;
+        return this.isLocked
+            || this.isTranslation
+            || (!this.isSynced && this.regenerateWouldLeaveLockedHierarchy);
     }
 
     private get isLockToggleDisabled(): boolean {
@@ -447,7 +479,7 @@ export class SluggiElement extends LitElement {
                 @focusin="${this.handleWrapperFocusin}"
                 @focusout="${this.handleWrapperFocusout}"
             >
-                ${this.computedPrefix ? html`<span class="sluggi-prefix ${this.hasPrefixMismatch ? 'is-out-of-sync' : ''}" title="${this.hasPrefixMismatch ? this.getLabel('prefixMismatch.tooltip') : this.computedPrefix}">${this.computedPrefix}</span>` : nothing}
+                ${this.computedPrefix ? html`<span class="sluggi-prefix ${(this.hasPrefixMismatch || this.showCannotRegenerateAdvice) ? 'is-out-of-sync' : ''}" title="${this.cannotRegenerateAdviceKey ? this.getLabel(this.cannotRegenerateAdviceKey) : (this.hasPrefixMismatch ? this.getLabel('prefixMismatch.tooltip') : this.computedPrefix)}">${this.computedPrefix}</span>` : nothing}
 
                 ${this.mode === 'view' ? this.renderViewMode() : this.renderEditMode()}
 
@@ -507,7 +539,15 @@ export class SluggiElement extends LitElement {
         // or duplicate it).
         if (this.hasCustomPath) return nothing;
 
-        if (!this.isSynced && !this.isLocked && !this.isFullPathMode && !this.hasPrefixMismatch) return nothing;
+        if (!this.isSynced && !this.isLocked && !this.isFullPathMode && !this.hasPrefixMismatch && !this.showCannotRegenerateAdvice) return nothing;
+
+        if (this.cannotRegenerateAdviceKey) {
+            const highlight = this.labels['prefixMismatch.note.highlight'] || 'Custom URL path.';
+            const advice = this.getLabel(this.cannotRegenerateAdviceKey);
+            const expectedPrefix = this.parentSlug || this.lockedPrefix;
+            const expectedLine = expectedPrefix ? this.getLabel('prefixMismatch.note.expected', expectedPrefix + '/') : '';
+            return html`<p class="sluggi-note" role="status" aria-live="polite"><span class="sluggi-note-highlight">${highlight}</span> ${advice}${expectedLine ? html`<br/>${expectedLine}` : nothing}</p>`;
+        }
 
         let message: string;
         if (this.isSynced) {
@@ -732,6 +772,9 @@ export class SluggiElement extends LitElement {
             iconOn: syncOnIcon,
             iconOff: syncOffIcon,
             onToggle: this.toggleSync,
+            disabledTitle: this.cannotRegenerateAdviceKey
+                ? this.getLabel(this.cannotRegenerateAdviceKey)
+                : undefined,
         });
     }
 
@@ -755,8 +798,10 @@ export class SluggiElement extends LitElement {
     }
 
     private renderToggle(config: ToggleConfig) {
-        const { name, isActive, isDisabled, activeClass, iconBaseClass, labelOn, labelOff, defaultLabelOn, defaultLabelOff, iconOn, iconOff, onToggle } = config;
-        const title = isActive ? (labelOn || defaultLabelOn) : (labelOff || defaultLabelOff);
+        const { name, isActive, isDisabled, activeClass, iconBaseClass, labelOn, labelOff, defaultLabelOn, defaultLabelOff, iconOn, iconOff, onToggle, disabledTitle } = config;
+        const title = isDisabled && disabledTitle
+            ? disabledTitle
+            : (isActive ? (labelOn || defaultLabelOn) : (labelOff || defaultLabelOff));
 
         return html`
             <div class="sluggi-${name}-wrapper">
@@ -1170,7 +1215,7 @@ export class SluggiElement extends LitElement {
         }
 
         const shouldAutoSync = this.isSynced || (!this.syncFeatureEnabled && this.command === 'new');
-        if (shouldAutoSync && this.mode === 'view') {
+        if (shouldAutoSync && this.mode === 'view' && !this.regenerateWouldLeaveLockedHierarchy) {
             this.sendSlugProposal('recreate');
         }
     }
@@ -1474,9 +1519,18 @@ export class SluggiElement extends LitElement {
     }
 
     private updateSourceBadgeVisibility() {
-        const groups = document.querySelectorAll<HTMLElement>('.sluggi-source-group');
-        for (const group of groups) {
+        for (const element of this.sourceFieldElements.values()) {
+            const group = element.closest<HTMLElement>('.sluggi-source-group');
+            if (!group) continue;
             group.classList.toggle('sluggi-source-group--active', this.isSynced);
+        }
+        const disabled = this.regenerateWouldLeaveLockedHierarchy;
+        for (const button of this.sourceConfirmButtons) {
+            button.toggleAttribute('disabled', disabled);
+            button.setAttribute('aria-disabled', disabled ? 'true' : 'false');
+            button.title = disabled && this.cannotRegenerateAdviceKey
+                ? this.getLabel(this.cannotRegenerateAdviceKey)
+                : (this.labels['sourceConfirm.title'] || 'Update URL path now');
         }
     }
 
@@ -1570,6 +1624,8 @@ export class SluggiElement extends LitElement {
                     if (target.hasAttribute('data-sluggi-source')) {
                         if (!this.hasSourceFields) {
                             this.setupSourceFieldListeners();
+                            this.setupSourceConfirmListeners();
+                            this.updateSourceBadgeVisibility();
                         }
                         this.requestUpdate();
                         this.sourceFieldObserver?.disconnect();
@@ -1596,8 +1652,15 @@ export class SluggiElement extends LitElement {
     }
 
     private setupSourceConfirmListeners() {
-        const confirmButtons = document.querySelectorAll<HTMLButtonElement>('.sluggi-source-confirm');
-        for (const button of confirmButtons) {
+        // Idempotent: clear any previously tracked buttons before re-collecting,
+        // so calling this from both connectedCallback and the late-init observer
+        // never produces duplicate listeners or stale button refs.
+        this.removeSourceConfirmListeners();
+        for (const element of this.sourceFieldElements.values()) {
+            const group = element.closest<HTMLElement>('.sluggi-source-group');
+            if (!group) continue;
+            const button = group.querySelector<HTMLButtonElement>('.sluggi-source-confirm');
+            if (!button) continue;
             button.addEventListener('click', this.boundSourceConfirmHandler);
             this.sourceConfirmButtons.push(button);
         }
@@ -1613,7 +1676,7 @@ export class SluggiElement extends LitElement {
     private handleSourceConfirmClick(event: Event) {
         const button = event.currentTarget as HTMLButtonElement;
         button.blur();
-
+        if (this.regenerateWouldLeaveLockedHierarchy) return;
         if (this.isSynced && this.hasNonEmptySourceFieldValue()) {
             this.sendSlugProposal('recreate');
         }
@@ -1697,12 +1760,15 @@ export class SluggiElement extends LitElement {
 
     private notifyPrefixMismatch(): void {
         const key = this.recordId || this.pageId;
-        if (!this.hasPrefixMismatch || SluggiElement.shownMismatchNotifications.has(key)) return;
+        if (!this.hasPrefixMismatch && !this.showCannotRegenerateAdvice) return;
+        if (SluggiElement.shownMismatchNotifications.has(key)) return;
         SluggiElement.shownMismatchNotifications.add(key);
         const title = this.labels['prefixMismatch.notification.title'] || 'URL Path Info';
-        const message = this.lockFeatureEnabled
-            ? (this.labels['prefixMismatch.notification.messageLock'] || 'Custom URL path. Regenerate to reset it, or lock the slug if this is intentional.')
-            : (this.labels['prefixMismatch.notification.message'] || 'Custom URL path. Click the regenerate button to reset it, or ask an administrator for advice.');
+        const message = this.cannotRegenerateAdviceKey
+            ? this.getLabel(this.cannotRegenerateAdviceKey)
+            : (this.lockFeatureEnabled
+                ? (this.labels['prefixMismatch.notification.messageLock'] || 'Custom URL path. Regenerate to reset it, or lock the slug if this is intentional.')
+                : (this.labels['prefixMismatch.notification.message'] || 'Custom URL path. Click the regenerate button to reset it, or ask an administrator for advice.'));
         Notification.info(title, message, 15);
     }
 

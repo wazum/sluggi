@@ -122,17 +122,16 @@ describe('SluggiElement - Toggles', () => {
         });
 
         it('hides source badges when toggling sync OFF', async () => {
-            const titleInput = document.createElement('input');
-            titleInput.setAttribute('data-sluggi-source', '');
-            titleInput.setAttribute('data-formengine-input-name', 'data[pages][456][title]');
-            titleInput.value = 'Demo';
-            document.body.appendChild(titleInput);
-
             const wrapper = document.createElement('div');
             wrapper.className = 'sluggi-source-group sluggi-source-group--active';
             const badge = document.createElement('span');
             badge.className = 'sluggi-source-badge';
             wrapper.appendChild(badge);
+            const titleInput = document.createElement('input');
+            titleInput.setAttribute('data-sluggi-source', '');
+            titleInput.setAttribute('data-formengine-input-name', 'data[pages][456][title]');
+            titleInput.value = 'Demo';
+            wrapper.appendChild(titleInput);
             document.body.appendChild(wrapper);
 
             const el = await fixture<SluggiElement>(html`
@@ -155,22 +154,20 @@ describe('SluggiElement - Toggles', () => {
 
             expect(wrapper.classList.contains('sluggi-source-group--active')).to.be.false;
 
-            document.body.removeChild(titleInput);
             document.body.removeChild(wrapper);
         });
 
         it('shows source badges when toggling sync ON', async () => {
-            const titleInput = document.createElement('input');
-            titleInput.setAttribute('data-sluggi-source', '');
-            titleInput.setAttribute('data-formengine-input-name', 'data[pages][456][title]');
-            titleInput.value = 'Demo';
-            document.body.appendChild(titleInput);
-
             const wrapper = document.createElement('div');
             wrapper.className = 'sluggi-source-group';
             const badge = document.createElement('span');
             badge.className = 'sluggi-source-badge';
             wrapper.appendChild(badge);
+            const titleInput = document.createElement('input');
+            titleInput.setAttribute('data-sluggi-source', '');
+            titleInput.setAttribute('data-formengine-input-name', 'data[pages][456][title]');
+            titleInput.value = 'Demo';
+            wrapper.appendChild(titleInput);
             document.body.appendChild(wrapper);
 
             const el = await fixture<SluggiElement>(html`
@@ -192,7 +189,6 @@ describe('SluggiElement - Toggles', () => {
 
             expect(wrapper.classList.contains('sluggi-source-group--active')).to.be.true;
 
-            document.body.removeChild(titleInput);
             document.body.removeChild(wrapper);
         });
 

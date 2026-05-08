@@ -8,6 +8,8 @@ use Generator;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
+use TYPO3\CMS\Core\Localization\LanguageService;
+use TYPO3\CMS\Core\Localization\LanguageServiceFactory;
 use Wazum\Sluggi\Compatibility\Typo3Compatibility;
 use Wazum\Sluggi\Service\SlugSourceBadgeRenderer;
 
@@ -18,7 +20,7 @@ final class SlugSourceBadgeRendererTest extends TestCase
 
     protected function setUp(): void
     {
-        $this->subject = new SlugSourceBadgeRenderer();
+        $this->subject = $this->makeRenderer();
         $this->elementClass = Typo3Compatibility::getFormWizardsElementClass();
     }
 
@@ -315,5 +317,15 @@ final class SlugSourceBadgeRendererTest extends TestCase
 
         self::assertStringContainsString('<span class="sluggi-source-badge">badge</span><input', $result);
         self::assertStringNotContainsString('sluggi-source-confirm', $result);
+    }
+
+    private function makeRenderer(): SlugSourceBadgeRenderer
+    {
+        $languageService = $this->createMock(LanguageService::class);
+        $languageService->method('sL')->willReturn('');
+        $factory = $this->createMock(LanguageServiceFactory::class);
+        $factory->method('createFromUserPreferences')->willReturn($languageService);
+
+        return new SlugSourceBadgeRenderer($factory);
     }
 }

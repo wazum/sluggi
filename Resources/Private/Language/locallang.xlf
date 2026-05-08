@@ -160,10 +160,19 @@
                 <source>If not intentional, regenerate to reset it — or lock to keep this URL.</source>
             </trans-unit>
             <trans-unit id="prefixMismatch.note.expected" resname="prefixMismatch.note.expected">
-                <source>Hierarchy path: %s</source>
+                <source>Actual hierarchy path: %s</source>
             </trans-unit>
             <trans-unit id="customPath.note" resname="customPath.note">
                 <source>Custom URL path — please ask an administrator to change it.</source>
+            </trans-unit>
+            <trans-unit id="prefixMismatch.cannotRegenerate.disableSync" resname="prefixMismatch.cannotRegenerate.disableSync">
+                <source>Auto-sync is on but won't update this URL — turn it off to make this explicit.</source>
+            </trans-unit>
+            <trans-unit id="prefixMismatch.cannotRegenerate.lock" resname="prefixMismatch.cannotRegenerate.lock">
+                <source>Lock the URL so future edits don't change it.</source>
+            </trans-unit>
+            <trans-unit id="prefixMismatch.cannotRegenerate.askAdmin" resname="prefixMismatch.cannotRegenerate.askAdmin">
+                <source>Contact an administrator to fix this URL.</source>
             </trans-unit>
             <trans-unit id="contextMenu.recursiveSlugUpdate" resname="contextMenu.recursiveSlugUpdate">
                 <source>Re-apply URL paths recursively</source>
@@ -188,6 +197,9 @@
             </trans-unit>
             <trans-unit id="redirectInfoLink" resname="redirectInfoLink">
                 <source>Manage redirects</source>
+            </trans-unit>
+            <trans-unit id="sourceConfirm.title" resname="sourceConfirm.title">
+                <source>Update URL path now</source>
             </trans-unit>
         </body>
     </file>

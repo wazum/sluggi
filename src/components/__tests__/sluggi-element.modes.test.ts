@@ -740,13 +740,13 @@ describe('SluggiElement - Modes', () => {
                     value="/competely-different/path"
                     locked-prefix="/organization/department"
                     parent-slug="/organization/department/institute"
-                    labels='{"prefixMismatch.note.expected": "Hierarchy path: %s"}'
+                    labels='{"prefixMismatch.note.expected": "Actual hierarchy path: %s"}'
                 ></sluggi-element>
             `);
 
             const note = el.shadowRoot!.querySelector('.sluggi-note');
             expect(note).to.exist;
-            expect(note?.textContent).to.include('Hierarchy path:');
+            expect(note?.textContent).to.include('Actual hierarchy path:');
             expect(note?.textContent).to.include('/organization/department/institute/');
         });
     });

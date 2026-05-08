@@ -5,9 +5,9 @@
 -- =============================================
 DELETE FROM `be_groups` WHERE `uid` IN (2, 3);
 
--- Group 2: Institute Editors (db_mountpoints: 18,27, has sync/lock field access)
+-- Group 2: Institute Editors (db_mountpoints: 18,27,63, has sync/lock field access)
 INSERT INTO `be_groups` (`uid`, `pid`, `tstamp`, `crdate`, `hidden`, `deleted`, `title`, `tables_modify`, `pagetypes_select`, `non_exclude_fields`, `db_mountpoints`, `groupMods`)
-VALUES (2, 0, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 0, 0, 'Institute Editors', 'pages', '1,254', 'pages:slug,pages:title,pages:nav_title,pages:tx_sluggi_sync,pages:slug_locked,pages:tx_sluggi_full_path', '18,27', 'web_layout,web_list');
+VALUES (2, 0, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 0, 0, 'Institute Editors', 'pages', '1,254', 'pages:slug,pages:title,pages:nav_title,pages:tx_sluggi_sync,pages:slug_locked,pages:tx_sluggi_full_path', '18,27,63', 'web_layout,web_list');
 
 -- Group 3: Restricted Editors (db_mountpoints: 36, no sync/lock field access)
 INSERT INTO `be_groups` (`uid`, `pid`, `tstamp`, `crdate`, `hidden`, `deleted`, `title`, `tables_modify`, `pagetypes_select`, `non_exclude_fields`, `db_mountpoints`, `groupMods`)
@@ -375,3 +375,32 @@ ON DUPLICATE KEY UPDATE `title` = VALUES(`title`), `slug` = VALUES(`slug`), `tx_
 INSERT INTO `pages` (`uid`, `pid`, `title`, `nav_title`, `slug`, `doktype`, `is_siteroot`, `hidden`, `deleted`, `tstamp`, `crdate`, `tx_sluggi_sync`, `slug_locked`, `perms_userid`, `perms_groupid`, `perms_user`, `perms_group`, `perms_everybody`)
 VALUES (62, 1, 'Fallback Source Title', 'Fallback Navigation Title', '/fallback-navigation-title', 1, 0, 0, 0, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 1, 0, 1, 0, 31, 31, 31)
 ON DUPLICATE KEY UPDATE `title` = VALUES(`title`), `nav_title` = VALUES(`nav_title`), `slug` = VALUES(`slug`), `tx_sluggi_sync` = 1, `slug_locked` = 0, `perms_userid` = 1, `perms_groupid` = 0, `perms_user` = 31, `perms_group` = 31, `perms_everybody` = 31;
+
+-- =============================================
+-- hierarchy-permission.spec.ts diverged-slug scenarios (pages 63-65)
+--
+-- Page 63 is a db_mountpoint root for group 2 (read-only for the group,
+-- so it does NOT appear in editableUids when computing lockedPrefix).
+-- Pages 64 and 65 live under page 63 but carry slugs that reference an
+-- old, unrelated path (/organization/department/…).  Because the first
+-- editable page in their rootline is the page itself (not page 63), the
+-- PHP backend derives lockedPrefix from the stored slug's parent path
+-- (/organization/department), while parentSlug comes from page 63's live
+-- slug (/west-wing).  The mismatch makes regenerateWouldLeaveLockedHierarchy
+-- true in the JS component, triggering the hierarchy-deadlock UX path.
+-- =============================================
+
+-- Page 63: West Wing (read-only for group 2, acts as db_mountpoint root)
+INSERT INTO `pages` (`uid`, `pid`, `title`, `slug`, `doktype`, `is_siteroot`, `hidden`, `deleted`, `tstamp`, `crdate`, `tx_sluggi_sync`, `slug_locked`, `perms_userid`, `perms_groupid`, `perms_user`, `perms_group`, `perms_everybody`)
+VALUES (63, 1, 'West Wing', '/west-wing', 1, 0, 0, 0, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 0, 0, 1, 2, 31, 1, 1)
+ON DUPLICATE KEY UPDATE `title` = VALUES(`title`), `slug` = VALUES(`slug`), `tx_sluggi_sync` = 0, `slug_locked` = 0, `perms_userid` = 1, `perms_groupid` = 2, `perms_user` = 31, `perms_group` = 1, `perms_everybody` = 1;
+
+-- Page 64: Diverged slug, sync ON (triggers prefixMismatch.cannotRegenerate.disableSync advice)
+INSERT INTO `pages` (`uid`, `pid`, `title`, `slug`, `doktype`, `is_siteroot`, `hidden`, `deleted`, `tstamp`, `crdate`, `tx_sluggi_sync`, `slug_locked`, `perms_userid`, `perms_groupid`, `perms_user`, `perms_group`, `perms_everybody`)
+VALUES (64, 63, 'Diverged Sync On', '/organization/department/diverged-sync-on', 1, 0, 0, 0, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 1, 0, 1, 2, 31, 31, 1)
+ON DUPLICATE KEY UPDATE `title` = VALUES(`title`), `slug` = VALUES(`slug`), `tx_sluggi_sync` = 1, `slug_locked` = 0, `perms_userid` = 1, `perms_groupid` = 2, `perms_user` = 31, `perms_group` = 31, `perms_everybody` = 1;
+
+-- Page 65: Diverged slug, sync OFF (triggers prefixMismatch.cannotRegenerate.lock advice)
+INSERT INTO `pages` (`uid`, `pid`, `title`, `slug`, `doktype`, `is_siteroot`, `hidden`, `deleted`, `tstamp`, `crdate`, `tx_sluggi_sync`, `slug_locked`, `perms_userid`, `perms_groupid`, `perms_user`, `perms_group`, `perms_everybody`)
+VALUES (65, 63, 'Diverged Sync Off', '/organization/department/diverged-sync-off', 1, 0, 0, 0, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 0, 0, 1, 2, 31, 31, 1)
+ON DUPLICATE KEY UPDATE `title` = VALUES(`title`), `slug` = VALUES(`slug`), `tx_sluggi_sync` = 0, `slug_locked` = 0, `perms_userid` = 1, `perms_groupid` = 2, `perms_user` = 31, `perms_group` = 31, `perms_everybody` = 1;
