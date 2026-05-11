@@ -12,6 +12,7 @@ use TYPO3\CMS\Core\LinkHandling\LinkService;
 use TYPO3\CMS\Redirects\RedirectUpdate\SlugRedirectChangeItem;
 use TYPO3\CMS\Redirects\RedirectUpdate\SlugRedirectChangeItemFactory;
 use TYPO3\CMS\Redirects\Service\RedirectCacheService;
+use TYPO3\CMS\Redirects\Service\TemporaryPermissionMutationService;
 
 final class SlugService extends \TYPO3\CMS\Redirects\Service\SlugService
 {
@@ -26,6 +27,7 @@ final class SlugService extends \TYPO3\CMS\Redirects\Service\SlugService
         private readonly SlugRedirectChangeItemFactory $slugRedirectChangeItemFactory,
         EventDispatcherInterface $eventDispatcher,
         ConnectionPool $connectionPool,
+        TemporaryPermissionMutationService $temporaryPermissionMutationService,
     ) {
         parent::__construct(
             $context,
@@ -34,7 +36,8 @@ final class SlugService extends \TYPO3\CMS\Redirects\Service\SlugService
             $redirectCacheService,
             $slugRedirectChangeItemFactory,
             $eventDispatcher,
-            $connectionPool
+            $connectionPool,
+            $temporaryPermissionMutationService,
         );
     }
 
