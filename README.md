@@ -431,7 +431,7 @@ For non-page tables, add the table name to the `synchronize_tables` extension se
 
 _sluggi_ works around these known TYPO3 core issues:
 
-- [#108375](https://forge.typo3.org/issues/108375) – When multiple pages are updated in a single DataHandler operation (e.g. recursive slug update), TYPO3 core assigns each page its own correlation ID, making it impossible to revert all changes at once via the undo notification. _sluggi_ shares one correlation ID across all pages in the operation so the entire batch can be reverted with a single click.
+- [#108375](https://forge.typo3.org/issues/108375) – When multiple pages are updated in one operation — recursive slug updates (one DataHandler, many records) or multi-edit form saves (one DataHandler per record) — TYPO3 core assigns each page its own correlation ID, so the post-save "Revert update" notification only rolls back the last page. _sluggi_ shares one correlation ID across the operation so the whole batch can be reverted with a single click.
 - [#108870](https://forge.typo3.org/issues/108870) – The "Revert update" notification after a slug change only rolls back child page slugs and redirect records, but not the parent page's own slug change. _sluggi_ extends the rollback to include the parent page so the entire change is fully reverted.
 - [#106152](https://forge.typo3.org/issues/106152) – Restoring pages from the recycler does not check for slug conflicts, which can result in duplicate URLs and 500 errors. _sluggi_ validates and deduplicates slugs on restore.
 - [#86740](https://forge.typo3.org/issues/86740) – TYPO3 core treats slashes in page titles as path separators, turning "Products/Services" into two URL segments instead of one. _sluggi_ normalizes slashes to the fallback character globally.
