@@ -83,6 +83,9 @@ export class SluggiElement extends LitElement {
     @property({ type: Boolean, attribute: 'redirect-control' })
     redirectControlEnabled = false;
 
+    @property({ type: Boolean, attribute: 'page-hidden' })
+    pageHidden = false;
+
     @property({ type: Boolean, attribute: 'is-translation' })
     isTranslation = false;
 
@@ -1380,6 +1383,18 @@ export class SluggiElement extends LitElement {
         const sluggiElements = form.querySelectorAll('sluggi-element') as NodeListOf<SluggiElement>;
         if (sluggiElements.length === 0) return;
 
+        for (const el of Array.from(sluggiElements)) {
+            if (
+                el.redirectControlEnabled
+                && el.pageHidden
+                && !el.redirectChoiceMade
+                && el.value !== el.originalValue
+            ) {
+                el.storeRedirectChoiceInLocalStorage(false);
+                el.redirectChoiceMade = true;
+            }
+        }
+
         const elementsNeedingModal = Array.from(sluggiElements).filter(el =>
             el.redirectControlEnabled && !el.redirectChoiceMade && el.value !== el.originalValue
         );
@@ -1465,6 +1480,10 @@ export class SluggiElement extends LitElement {
             field.dispatchEvent(new Event('change', { bubbles: true }));
         }
 
+        this.storeRedirectChoiceInLocalStorage(createRedirects);
+    }
+
+    private storeRedirectChoiceInLocalStorage(createRedirects: boolean): void {
         localStorage.setItem('sluggi-redirect-choice', JSON.stringify({
             pageId: this.pageId,
             createRedirects,

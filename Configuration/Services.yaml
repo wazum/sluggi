@@ -170,3 +170,10 @@ services:
         identifier: 'sluggi/suppress-redirect-for-reserved-path'
         event: TYPO3\CMS\Redirects\Event\SlugRedirectChangeItemCreatedEvent
         after: 'redirects-add-plain-slug-replacement-source,redirects-add-page-type-zero-source'
+
+  Wazum\Sluggi\EventListener\SuppressRedirectForUnpublishedPage:
+    tags:
+      - name: event.listener
+        identifier: 'sluggi/suppress-redirect-for-unpublished-page'
+        event: TYPO3\CMS\Redirects\Event\SlugRedirectChangeItemCreatedEvent
+        after: 'redirects-add-plain-slug-replacement-source,redirects-add-page-type-zero-source'

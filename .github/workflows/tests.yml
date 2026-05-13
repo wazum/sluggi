@@ -33,10 +33,13 @@ jobs:
         with:
           php-version: '8.2'
           extensions: intl
-          tools: composer
+          tools: composer:2.9
+
+      - name: Disable Composer's auto-injected GitHub token
+        run: echo 'COMPOSER_AUTH={}' >> "$GITHUB_ENV"
 
       - name: Install dependencies
-        run: composer install --no-interaction --no-security-blocking
+        run: composer install --no-interaction
 
       - name: Run PHPStan
         run: composer phpstan
@@ -103,12 +106,15 @@ jobs:
         with:
           php-version: ${{ matrix.php }}
           extensions: intl
-          tools: composer
+          tools: composer:2.9
+
+      - name: Disable Composer's auto-injected GitHub token
+        run: echo 'COMPOSER_AUTH={}' >> "$GITHUB_ENV"
 
       - name: Install dependencies
         run: |
           composer require "typo3/cms-core:^${{ matrix.typo3 }}" "typo3/cms-backend:^${{ matrix.typo3 }}" "typo3/cms-redirects:^${{ matrix.typo3 }}" --no-update --no-interaction
-          composer install --no-interaction --no-security-blocking
+          composer install --no-interaction
 
       - name: Run unit tests
         run: vendor/bin/phpunit -c Tests/phpunit.xml --testsuite unit
@@ -148,12 +154,15 @@ jobs:
         with:
           php-version: ${{ matrix.php }}
           extensions: intl, pdo_sqlite
-          tools: composer
+          tools: composer:2.9
+
+      - name: Disable Composer's auto-injected GitHub token
+        run: echo 'COMPOSER_AUTH={}' >> "$GITHUB_ENV"
 
       - name: Install dependencies
         run: |
           composer require "typo3/cms-core:^${{ matrix.typo3 }}" "typo3/cms-backend:^${{ matrix.typo3 }}" "typo3/cms-redirects:^${{ matrix.typo3 }}" --no-update --no-interaction
-          composer install --no-interaction --no-security-blocking
+          composer install --no-interaction
 
       - name: Run functional tests
         run: typo3DatabaseDriver=pdo_sqlite vendor/bin/phpunit --bootstrap vendor/typo3/testing-framework/Resources/Core/Build/FunctionalTestsBootstrap.php Tests/Functional
@@ -212,7 +221,10 @@ jobs:
         with:
           php-version: ${{ matrix.php }}
           extensions: intl, pdo_mysql, gd, zip
-          tools: composer
+          tools: composer:2.9
+
+      - name: Disable Composer's auto-injected GitHub token
+        run: echo 'COMPOSER_AUTH={}' >> "$GITHUB_ENV"
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -228,7 +240,7 @@ jobs:
           composer config --unset platform.php
           composer config repositories.sluggi path ../
           composer config repositories.sluggi-e2e-fixtures path ../Tests/E2e/Fixtures/Extensions/sluggi_e2e_fixtures
-          composer require "typo3/cms-core:^${{ matrix.typo3 }}" wazum/sluggi:@dev wazum/sluggi-e2e-fixtures:@dev --no-interaction --with-all-dependencies --no-security-blocking
+          composer require "typo3/cms-core:^${{ matrix.typo3 }}" wazum/sluggi:@dev wazum/sluggi-e2e-fixtures:@dev --no-interaction --with-all-dependencies
 
       - name: Setup TYPO3
         run: |

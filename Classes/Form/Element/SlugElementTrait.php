@@ -182,6 +182,7 @@ trait SlugElementTrait
                 && empty($this->data['fieldListToRender'])
                 && !Typo3Compatibility::isMultiRecordEdit(),
             'preserveUnderscore' => $this->extensionConfiguration->isPreserveUnderscoreEnabled(),
+            'pageHidden' => $table === 'pages' && (bool)($row['hidden'] ?? false),
             'redirectControlEnabled' => $table === 'pages'
                 && $command !== 'new'
                 && $this->extensionConfiguration->isRedirectControlEnabled()
