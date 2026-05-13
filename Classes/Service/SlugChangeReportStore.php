@@ -4,27 +4,22 @@ declare(strict_types=1);
 
 namespace Wazum\Sluggi\Service;
 
-use LogicException;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\Authentication\BackendUserAuthentication;
 
 /**
  * Request-scoped storage for the slug-change report payload.
  *
- * Two backing slots are kept in lock-step:
- *  - module-data slot 'sluggi/slugChangeReport' (works in CLI tests)
- *  - update-signal slot 'sluggi:slugChangeReport' (production dispatch trigger;
- *    no-op in CLI per BackendUtility::setUpdateSignal early-return)
- *
- * Two request-scoped maps not persisted to UC:
- *  - directlyEdited[uid] = originalSlug — pages whose slug field was in the
- *    DataHandler datamap; only these become entries[] (revert correlations).
- *  - candidates[uid] = originalSlug — every page reported via
- *    SlugRedirectChangeItemCreatedEvent (parent + cascade descendants).
+ * The report (entries, pagesUpdated, redirectsCreated) lives in instance state
+ * and is mirrored to BackendUtility::setUpdateSignal on every mutation so the
+ * dispatch hook receives the latest payload on the next backend page render.
+ * Core clears the signal aggregator after dispatch (BackendUtility::
+ * getUpdateSignalDetails calls setUpdateSignal() with no args at the end), so
+ * the slot does not leak across renders. The in-memory state dies with the
+ * request, so unrelated subsequent saves start fresh.
  */
 final class SlugChangeReportStore
 {
-    public const MODULE_DATA_KEY = 'sluggi/slugChangeReport';
     public const UPDATE_SIGNAL_KEY = 'sluggi:slugChangeReport';
 
     /**
@@ -41,6 +36,15 @@ final class SlugChangeReportStore
      * @var array<int, true>
      */
     private array $countedCandidates = [];
+
+    /**
+     * @var array<int, array{pageId:int, correlations: array<string,string>}>
+     */
+    private array $entries = [];
+
+    private int $pagesUpdated = 0;
+
+    private int $redirectsCreated = 0;
 
     public function markDirectlyEdited(int $pageId, string $originalSlug): void
     {
@@ -80,71 +84,72 @@ final class SlugChangeReportStore
     /**
      * @return array{entries: array<int, array{pageId:int, correlations: array<string,string>}>, pagesUpdated: int, redirectsCreated: int}|null
      */
-    public function getReport(BackendUserAuthentication $beUser): ?array
+    public function getReport(): ?array
     {
-        $data = $beUser->getModuleData(self::MODULE_DATA_KEY, 'ses');
-        if ($data === null) {
+        if ($this->pagesUpdated === 0 && $this->redirectsCreated === 0 && $this->entries === []) {
             return null;
         }
-        if (!is_array($data) || !isset($data['entries'], $data['pagesUpdated'], $data['redirectsCreated'])) {
-            throw new LogicException('Corrupted slug-change report payload in module data slot.', 1747156800);
-        }
 
-        return $data;
+        return [
+            'entries' => $this->entries,
+            'pagesUpdated' => $this->pagesUpdated,
+            'redirectsCreated' => $this->redirectsCreated,
+        ];
     }
 
     /**
      * @param array<string, string> $correlations
      */
-    public function addEntry(BackendUserAuthentication $beUser, int $pageId, array $correlations): void
+    public function addEntry(int $pageId, array $correlations): void
     {
-        $report = $this->getReport($beUser) ?? self::empty();
-        $report['entries'][$pageId] = ['pageId' => $pageId, 'correlations' => $correlations];
-        $this->persist($beUser, $report);
+        $this->entries[$pageId] = ['pageId' => $pageId, 'correlations' => $correlations];
+        $this->emit();
     }
 
-    public function incrementPagesUpdated(BackendUserAuthentication $beUser, int $delta = 1): void
+    public function incrementPagesUpdated(int $delta = 1): void
     {
-        $report = $this->getReport($beUser) ?? self::empty();
-        $report['pagesUpdated'] += $delta;
-        $this->persist($beUser, $report);
+        $this->pagesUpdated += $delta;
+        $this->emit();
     }
 
-    public function incrementRedirectsCreated(BackendUserAuthentication $beUser, int $delta = 1): void
+    public function incrementRedirectsCreated(int $delta = 1): void
     {
-        $report = $this->getReport($beUser) ?? self::empty();
-        $report['redirectsCreated'] += $delta;
-        $this->persist($beUser, $report);
+        $this->redirectsCreated += $delta;
+        $this->emit();
     }
 
     /**
-     * @return array{entries: array<int, array{pageId:int, correlations: array<string,string>}>, pagesUpdated: int, redirectsCreated: int}
+     * Reset in-memory state and surgically clear our entry from the
+     * setUpdateSignal aggregator. Use this when the caller has already
+     * delivered the report to the client by other means (e.g. the recursive
+     * context-menu controller dispatches a synthetic event after its AJAX
+     * response) and the server-side render dispatch would be a duplicate.
      */
-    private static function empty(): array
+    public function discard(): void
     {
-        return ['entries' => [], 'pagesUpdated' => 0, 'redirectsCreated' => 0];
+        $this->entries = [];
+        $this->pagesUpdated = 0;
+        $this->redirectsCreated = 0;
+
+        $beUser = $GLOBALS['BE_USER'] ?? null;
+        if (!$beUser instanceof BackendUserAuthentication) {
+            return;
+        }
+        $aggregatorKey = BackendUtility::class . '::getUpdateSignal';
+        $modData = $beUser->getModuleData($aggregatorKey, 'ses');
+        if (!is_array($modData) || !isset($modData[self::UPDATE_SIGNAL_KEY])) {
+            return;
+        }
+        unset($modData[self::UPDATE_SIGNAL_KEY]);
+        $beUser->pushModuleData($aggregatorKey, $modData);
     }
 
-    /**
-     * @param array{entries: array<int, array{pageId:int, correlations: array<string,string>}>, pagesUpdated: int, redirectsCreated: int} $report
-     */
-    private function persist(BackendUserAuthentication $beUser, array $report): void
+    private function emit(): void
     {
-        $beUser->pushModuleData(self::MODULE_DATA_KEY, $report);
-        BackendUtility::setUpdateSignal(self::UPDATE_SIGNAL_KEY, self::flattenForDispatch($report));
-    }
-
-    /**
-     * @param array{entries: array<int, array{pageId:int, correlations: array<string,string>}>, pagesUpdated: int, redirectsCreated: int} $report
-     *
-     * @return array{entries: list<array{pageId:int, correlations: array<string,string>}>, pagesUpdated: int, redirectsCreated: int}
-     */
-    private static function flattenForDispatch(array $report): array
-    {
-        return [
-            'entries' => array_values($report['entries']),
-            'pagesUpdated' => $report['pagesUpdated'],
-            'redirectsCreated' => $report['redirectsCreated'],
-        ];
+        BackendUtility::setUpdateSignal(self::UPDATE_SIGNAL_KEY, [
+            'entries' => array_values($this->entries),
+            'pagesUpdated' => $this->pagesUpdated,
+            'redirectsCreated' => $this->redirectsCreated,
+        ]);
     }
 }

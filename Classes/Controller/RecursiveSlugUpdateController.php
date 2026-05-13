@@ -11,11 +11,13 @@ use TYPO3\CMS\Core\DataHandling\Model\CorrelationId;
 use TYPO3\CMS\Core\Http\JsonResponse;
 use TYPO3\CMS\Redirects\Service\SlugService;
 use Wazum\Sluggi\Service\SlugCascadeService;
+use Wazum\Sluggi\Service\SlugChangeReportStore;
 
 final readonly class RecursiveSlugUpdateController
 {
     public function __construct(
         private SlugCascadeService $slugCascadeService,
+        private SlugChangeReportStore $reportStore,
     ) {
     }
 
@@ -43,6 +45,12 @@ final readonly class RecursiveSlugUpdateController
         } catch (Throwable $e) {
             return new JsonResponse(['success' => false, 'message' => $e->getMessage()], 500);
         }
+
+        // The cascade re-enters DataHandler for each descendant, so
+        // CollectSlugChangeReport may have accumulated a server-side report.
+        // The client emits a synthetic event from the AJAX response so the
+        // server-side dispatch on next page render would be a duplicate.
+        $this->reportStore->discard();
 
         return new JsonResponse([
             'success' => true,

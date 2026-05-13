@@ -6,7 +6,6 @@ namespace Wazum\Sluggi\Tests\Unit\Service;
 
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
-use TYPO3\CMS\Core\Authentication\BackendUserAuthentication;
 use TYPO3\CMS\Core\Core\ApplicationContext;
 use TYPO3\CMS\Core\Core\Environment;
 use Wazum\Sluggi\Service\SlugChangeReportStore;
@@ -18,34 +17,32 @@ final class SlugChangeReportStoreTest extends TestCase
     {
         $store = new SlugChangeReportStore();
 
-        self::assertNull($store->getReport($this->makeBackendUser()));
+        self::assertNull($store->getReport());
     }
 
     #[Test]
     public function incrementPagesUpdatedAccumulatesAcrossCalls(): void
     {
-        $beUser = $this->makeBackendUser();
         $store = new SlugChangeReportStore();
 
-        $store->incrementPagesUpdated($beUser);
-        $store->incrementPagesUpdated($beUser);
-        $store->incrementPagesUpdated($beUser);
+        $store->incrementPagesUpdated();
+        $store->incrementPagesUpdated();
+        $store->incrementPagesUpdated();
 
-        self::assertSame(3, $store->getReport($beUser)['pagesUpdated']);
-        self::assertSame(0, $store->getReport($beUser)['redirectsCreated']);
+        self::assertSame(3, $store->getReport()['pagesUpdated']);
+        self::assertSame(0, $store->getReport()['redirectsCreated']);
     }
 
     #[Test]
     public function addEntryKeysByPageIdAndOverwritesCorrelations(): void
     {
-        $beUser = $this->makeBackendUser();
         $store = new SlugChangeReportStore();
 
-        $store->addEntry($beUser, 42, ['correlationIdSlugUpdate' => 'a/slug']);
-        $store->addEntry($beUser, 42, ['correlationIdSlugUpdate' => 'b/slug']);
-        $store->addEntry($beUser, 99, ['correlationIdSlugUpdate' => 'c/slug']);
+        $store->addEntry(42, ['correlationIdSlugUpdate' => 'a/slug']);
+        $store->addEntry(42, ['correlationIdSlugUpdate' => 'b/slug']);
+        $store->addEntry(99, ['correlationIdSlugUpdate' => 'c/slug']);
 
-        $report = $store->getReport($beUser);
+        $report = $store->getReport();
         self::assertCount(2, $report['entries']);
         self::assertSame('b/slug', $report['entries'][42]['correlations']['correlationIdSlugUpdate']);
         self::assertSame('c/slug', $report['entries'][99]['correlations']['correlationIdSlugUpdate']);
@@ -83,11 +80,24 @@ final class SlugChangeReportStoreTest extends TestCase
         self::assertTrue($store->markCounted(43));
     }
 
+    #[Test]
+    public function discardResetsReportToEmpty(): void
+    {
+        $store = new SlugChangeReportStore();
+        $store->incrementPagesUpdated();
+        $store->incrementRedirectsCreated();
+        $store->addEntry(42, ['correlationIdSlugUpdate' => 'x']);
+
+        $store->discard();
+
+        self::assertNull($store->getReport());
+    }
+
     public static function setUpBeforeClass(): void
     {
         parent::setUpBeforeClass();
         // CLI mode lets BackendUtility::setUpdateSignal() short-circuit; the
-        // module-data slot remains the assertable backing store.
+        // in-memory state remains the assertable source of truth.
         Environment::initialize(
             new ApplicationContext('Testing'),
             true,
@@ -99,23 +109,5 @@ final class SlugChangeReportStoreTest extends TestCase
             'php',
             'UNIX',
         );
-    }
-
-    private function makeBackendUser(): BackendUserAuthentication
-    {
-        $storage = [];
-        $mock = $this->createMock(BackendUserAuthentication::class);
-        $mock->method('getModuleData')->willReturnCallback(
-            static function (string $module) use (&$storage) {
-                return $storage[$module] ?? null;
-            }
-        );
-        $mock->method('pushModuleData')->willReturnCallback(
-            static function (string $module, mixed $data) use (&$storage): void {
-                $storage[$module] = $data;
-            }
-        );
-
-        return $mock;
     }
 }

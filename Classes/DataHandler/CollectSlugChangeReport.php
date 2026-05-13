@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Wazum\Sluggi\DataHandler;
 
 use Doctrine\DBAL\ParameterType;
-use TYPO3\CMS\Core\Authentication\BackendUserAuthentication;
 use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\DataHandling\DataHandler;
 use TYPO3\CMS\Core\DataHandling\Model\CorrelationId;
@@ -79,10 +78,6 @@ final readonly class CollectSlugChangeReport
         if ($table !== 'pages') {
             return;
         }
-        $beUser = $this->getBackendUser();
-        if ($beUser === null) {
-            return;
-        }
 
         foreach ($this->store->getCandidates() as $candidateUid => $originalSlug) {
             $currentSlug = $this->fetchCurrentSlug($candidateUid);
@@ -92,10 +87,9 @@ final readonly class CollectSlugChangeReport
             if (!$this->store->markCounted($candidateUid)) {
                 continue;
             }
-            $this->store->incrementPagesUpdated($beUser);
+            $this->store->incrementPagesUpdated();
             if ($this->store->isDirectlyEdited($candidateUid)) {
                 $this->store->addEntry(
-                    $beUser,
                     $candidateUid,
                     $this->buildCorrelations($dataHandler, $candidateUid),
                 );
@@ -141,12 +135,5 @@ final readonly class CollectSlugChangeReport
         }
 
         return in_array(SlugService::CORRELATION_ID_IDENTIFIER, $correlation->getAspects(), true);
-    }
-
-    private function getBackendUser(): ?BackendUserAuthentication
-    {
-        $beUser = $GLOBALS['BE_USER'] ?? null;
-
-        return $beUser instanceof BackendUserAuthentication ? $beUser : null;
     }
 }

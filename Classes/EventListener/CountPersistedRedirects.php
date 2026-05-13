@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Wazum\Sluggi\EventListener;
 
 use TYPO3\CMS\Backend\Utility\BackendUtility;
-use TYPO3\CMS\Core\Authentication\BackendUserAuthentication;
 use TYPO3\CMS\Redirects\Event\AfterAutoCreateRedirectHasBeenPersistedEvent;
 use Wazum\Sluggi\Service\SlugChangeReportStore;
 
@@ -27,17 +26,6 @@ final readonly class CountPersistedRedirects
         if (!is_array($row) || (int)($row['deleted'] ?? 0) === 1 || (int)($row['disabled'] ?? 0) === 1) {
             return;
         }
-        $beUser = $this->getBackendUser();
-        if ($beUser === null) {
-            return;
-        }
-        $this->store->incrementRedirectsCreated($beUser);
-    }
-
-    private function getBackendUser(): ?BackendUserAuthentication
-    {
-        $beUser = $GLOBALS['BE_USER'] ?? null;
-
-        return $beUser instanceof BackendUserAuthentication ? $beUser : null;
+        $this->store->incrementRedirectsCreated();
     }
 }

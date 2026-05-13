@@ -35,7 +35,7 @@ final class CollectSlugChangeReportTest extends FunctionalTestCase
     {
         $this->saveFields(2, ['slug' => '/lonely-renamed']);
 
-        $report = $this->getStore()->getReport($GLOBALS['BE_USER']);
+        $report = $this->getStore()->getReport();
         self::assertNotNull($report, 'Report should be populated after slug rename.');
         self::assertSame(1, $report['pagesUpdated']);
         self::assertCount(1, $report['entries']);
@@ -47,7 +47,7 @@ final class CollectSlugChangeReportTest extends FunctionalTestCase
     {
         $this->saveFields(6, ['slug' => '/unchanged']);
 
-        $report = $this->getStore()->getReport($GLOBALS['BE_USER']);
+        $report = $this->getStore()->getReport();
         self::assertNull($report, 'No-op slug submit must not write a report.');
     }
 
@@ -56,7 +56,7 @@ final class CollectSlugChangeReportTest extends FunctionalTestCase
     {
         $this->saveFields(3, ['slug' => '/parent-renamed']);
 
-        $report = $this->getStore()->getReport($GLOBALS['BE_USER']);
+        $report = $this->getStore()->getReport();
         self::assertNotNull($report);
         self::assertSame(2, $report['pagesUpdated'], 'Parent + child both count.');
         self::assertCount(1, $report['entries'], 'Only the directly-edited parent gets an entries[] row.');
@@ -69,7 +69,7 @@ final class CollectSlugChangeReportTest extends FunctionalTestCase
     {
         $this->saveFields(5, ['slug' => '/draft-renamed']);
 
-        $report = $this->getStore()->getReport($GLOBALS['BE_USER']);
+        $report = $this->getStore()->getReport();
         self::assertNotNull($report);
         self::assertSame(1, $report['pagesUpdated']);
         self::assertSame(0, $report['redirectsCreated']);
@@ -81,7 +81,7 @@ final class CollectSlugChangeReportTest extends FunctionalTestCase
         $this->saveFields(2, ['slug' => '/lonely-a']);
         $this->saveFields(6, ['slug' => '/unchanged-renamed']);
 
-        $report = $this->getStore()->getReport($GLOBALS['BE_USER']);
+        $report = $this->getStore()->getReport();
         self::assertNotNull($report);
         self::assertSame(2, $report['pagesUpdated']);
         self::assertCount(2, $report['entries']);

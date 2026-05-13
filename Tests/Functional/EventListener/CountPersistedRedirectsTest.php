@@ -34,7 +34,7 @@ final class CountPersistedRedirectsTest extends FunctionalTestCase
     {
         $this->saveFields(2, ['slug' => '/live-renamed']);
 
-        $report = $this->getStore()->getReport($GLOBALS['BE_USER']);
+        $report = $this->getStore()->getReport();
         self::assertNotNull($report);
         self::assertSame(1, $report['redirectsCreated']);
     }
@@ -44,7 +44,7 @@ final class CountPersistedRedirectsTest extends FunctionalTestCase
     {
         $this->saveFields(3, ['slug' => '/draft-renamed']);
 
-        $report = $this->getStore()->getReport($GLOBALS['BE_USER']);
+        $report = $this->getStore()->getReport();
         self::assertSame(0, $report['redirectsCreated']);
     }
 
@@ -83,7 +83,7 @@ final class CountPersistedRedirectsTest extends FunctionalTestCase
 
         GeneralUtility::makeInstance(CountPersistedRedirects::class)($event);
 
-        $report = $this->getStore()->getReport($GLOBALS['BE_USER']);
+        $report = $this->getStore()->getReport();
         self::assertNull($report, 'Listener must not initialize a report when the redirect row is soft-deleted.');
     }
 
