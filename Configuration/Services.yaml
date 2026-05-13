@@ -181,3 +181,11 @@ services:
         identifier: 'sluggi/suppress-redirect-for-unpublished-page'
         event: TYPO3\CMS\Redirects\Event\SlugRedirectChangeItemCreatedEvent
         after: 'redirects-add-plain-slug-replacement-source,redirects-add-page-type-zero-source'
+
+  Wazum\Sluggi\DataHandler\CollectSlugChangeReport:
+    public: true
+    tags:
+      - name: event.listener
+        identifier: 'sluggi/collect-slug-change-report'
+        event: TYPO3\CMS\Redirects\Event\SlugRedirectChangeItemCreatedEvent
+        after: 'redirects-add-plain-slug-replacement-source,redirects-add-page-type-zero-source'

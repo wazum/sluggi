@@ -1,0 +1,13 @@
+"be_users"
+,"uid","pid","username","password","admin"
+,1,0,"admin","$2y$12$ABCDEFGHIJKLMNOPQRSTUuTODxlptKMVZqU0qsfdtGTuWi3hfJWLy",1
+
+"pages"
+,"uid","pid","title","slug","doktype","hidden","tx_sluggi_sync"
+,1,0,"Root","/",1,0,0
+,2,1,"Lonely Page","/lonely",1,0,0
+,3,1,"Parent","/parent",1,0,0
+,4,3,"Child","/parent/child",1,0,0
+,5,1,"Hidden Page","/draft",1,1,0
+,6,1,"Unchanged Page","/unchanged",1,0,0
+,7,1,"Synced Title","/synced-title",1,0,1

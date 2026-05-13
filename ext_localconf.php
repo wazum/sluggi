@@ -18,6 +18,7 @@ use Wazum\Sluggi\Controller\RecordHistoryRollbackControllerV12;
 use Wazum\Sluggi\Controller\RecordHistoryRollbackControllerV14;
 use Wazum\Sluggi\DataHandler\BypassAccessCheckForRedirectCreation;
 use Wazum\Sluggi\DataHandler\ClearSlugForExcludedDoktypes;
+use Wazum\Sluggi\DataHandler\CollectSlugChangeReport;
 use Wazum\Sluggi\DataHandler\ShareCorrelationIdAcrossMultiEdit;
 use Wazum\Sluggi\DataHandler\HandlePageCopy;
 use Wazum\Sluggi\DataHandler\HandlePageMove;
@@ -180,6 +181,9 @@ $GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['t3lib/class.t3lib_tcemain.php']['proc
 
 $GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['t3lib/class.t3lib_tcemain.php']['processDatamapClass']['sluggi_share_correlation'] =
     ShareCorrelationIdAcrossMultiEdit::class;
+
+$GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['t3lib/class.t3lib_tcemain.php']['processDatamapClass']['sluggi_collect_slug_change_report'] =
+    CollectSlugChangeReport::class;
 
 // Override core "URL Segment" label to "URL Path"
 $GLOBALS['TYPO3_CONF_VARS']['SYS']['locallangXMLOverride']['EXT:core/Resources/Private/Language/locallang_tca.xlf'][] =
