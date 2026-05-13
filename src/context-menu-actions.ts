@@ -60,13 +60,14 @@ async function performUpdate(uid: string): Promise<void> {
                 Notification.success(title, parts.join(', ') + '.');
 
                 if (result.correlations) {
-                    document.dispatchEvent(new CustomEvent('typo3:redirects:slugChanged', {
+                    document.dispatchEvent(new CustomEvent('typo3:sluggi:slugChangeReport', {
                         detail: {
-                            componentName: 'redirects',
-                            eventName: 'slugChanged',
-                            correlations: result.correlations,
-                            autoUpdateSlugs: true,
-                            autoCreateRedirects: false,
+                            entries: [{
+                                pageId: Number(uid),
+                                correlations: result.correlations,
+                            }],
+                            pagesUpdated: result.updated,
+                            redirectsCreated: 0,
                         },
                     }));
                 }
