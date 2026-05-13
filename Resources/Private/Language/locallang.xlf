@@ -220,10 +220,10 @@
                 <source>%d URL paths were updated.</source>
             </trans-unit>
             <trans-unit id="notification.slugReport.multipleSlugsAndRedirects.title" resname="notification.slugReport.multipleSlugsAndRedirects.title">
-                <source>%d URL paths updated, %d redirects created</source>
+                <source>{pages} URL paths updated, {redirects} redirects created</source>
             </trans-unit>
             <trans-unit id="notification.slugReport.multipleSlugsAndRedirects.message" resname="notification.slugReport.multipleSlugsAndRedirects.message">
-                <source>%d URL paths were updated and %d redirects were created.</source>
+                <source>{pages} URL paths were updated and {redirects} redirects were created.</source>
             </trans-unit>
         </body>
     </file>

@@ -260,12 +260,12 @@
                 <target>%d URL-Pfade wurden aktualisiert.</target>
             </trans-unit>
             <trans-unit id="notification.slugReport.multipleSlugsAndRedirects.title" resname="notification.slugReport.multipleSlugsAndRedirects.title">
-                <source>%d URL paths updated, %d redirects created</source>
-                <target>%d URL-Pfade aktualisiert, %d Weiterleitungen erstellt</target>
+                <source>{pages} URL paths updated, {redirects} redirects created</source>
+                <target>{pages} URL-Pfade aktualisiert, {redirects} Weiterleitungen erstellt</target>
             </trans-unit>
             <trans-unit id="notification.slugReport.multipleSlugsAndRedirects.message" resname="notification.slugReport.multipleSlugsAndRedirects.message">
-                <source>%d URL paths were updated and %d redirects were created.</source>
-                <target>%d URL-Pfade wurden aktualisiert und %d Weiterleitungen wurden erstellt.</target>
+                <source>{pages} URL paths were updated and {redirects} redirects were created.</source>
+                <target>{pages} URL-Pfade wurden aktualisiert und {redirects} Weiterleitungen wurden erstellt.</target>
             </trans-unit>
         </body>
     </file>
