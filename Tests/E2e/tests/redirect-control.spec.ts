@@ -221,14 +221,41 @@ test.describe('Redirect Control - TYPO3 Integration', () => {
     // Wait for page to reload and notification to appear
     await page.waitForURL(/edit/, { timeout: 10000 });
 
-    // The notification should NOT contain "redirects were created"
-    const notification = page.locator('.alert-info, .typo3-notification');
-    await notification.waitFor({ state: 'visible', timeout: 10000 }).catch(() => {});
+    // Task 6 wording: when the user declines redirects, the toast must read
+    // "URL path updated" (single, no redirect) and must NOT mention any
+    // created redirects.
+    const toast = page.locator('.alert-info', { hasText: 'URL path updated' }).first();
+    await expect(toast).toBeVisible({ timeout: 10000 });
+    await expect(toast).not.toContainText('redirect created');
+    await expect(toast).not.toContainText('redirects created');
+  });
 
-    // If notification exists, it should say "slug only" not "redirects created"
-    const notificationText = await notification.textContent().catch(() => '');
-    if (notificationText.includes('slug')) {
-      expect(notificationText).not.toContain('redirects were created');
+  test('renaming a hidden page shows "URL path updated" without Revert Redirects', async ({ page }) => {
+    // Page 70 is a dedicated hidden fixture (see Tests/E2e/fixtures/database.sql).
+    // Hidden pages do not emit redirects, so the redirect modal is skipped and
+    // the toast must read "URL path updated" with no Revert Redirects button.
+    await page.goto('/typo3/record/edit?edit[pages][70]=edit');
+    frame = page.frameLocator('iframe');
+    await waitForEditForm(frame, page);
+
+    // Dismiss any stale notifications leaking from previous tests.
+    for (const btn of await page.locator('.alert-dismissible .close').all()) {
+      await btn.click().catch(() => {});
     }
+
+    const slugElement = frame.locator('sluggi-element');
+    await slugElement.locator('.sluggi-editable').click();
+    const slugInput = slugElement.locator('input.sluggi-input');
+    await slugInput.fill(`hidden-renamed-${Date.now()}`);
+    await slugInput.press('Enter');
+    await slugElement.locator('.sluggi-spinner').waitFor({ state: 'hidden', timeout: 10000 }).catch(() => {});
+
+    await frame.locator('button[name="_savedok"]').click();
+
+    const toast = page.locator('.alert-info', { hasText: 'URL path updated' }).first();
+    await expect(toast).toBeVisible({ timeout: 10000 });
+    await expect(toast).not.toContainText('redirect created');
+    await expect(toast.getByRole('button', { name: /Revert redirects/i })).toHaveCount(0);
+    await expect(toast.locator('a:has-text("Revert redirect")')).toHaveCount(0);
   });
 });

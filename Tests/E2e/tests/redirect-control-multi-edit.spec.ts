@@ -124,6 +124,11 @@ test.describe('Redirect Control - Multi-Edit', () => {
     const notification = page.locator('.alert-info:has(a:has-text("Revert"))');
     await expect(notification).toBeVisible({ timeout: 10000 });
 
+    // Task 6 wording: N pages + N redirects → "N URL paths updated, N redirects created"
+    await expect(
+      page.locator('.alert-info', { hasText: /\d+ URL paths updated, \d+ redirects created/ })
+    ).toBeVisible({ timeout: 10000 });
+
     // Bug check: there must be exactly ONE notification (not three, not one-per-page)
     expect(await page.locator('.alert-info:has(a:has-text("Revert"))').count()).toBe(1);
 

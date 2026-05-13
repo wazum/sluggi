@@ -2,6 +2,14 @@ import {expect, test} from '@playwright/test';
 import { expandPageTreeNode, getPageTreeItemByName, scrollPageTreeToBottom, waitForEditForm, waitForPageTree } from '../fixtures/typo3-compat';
 
 test.describe('Recursive Slug Update - Context Menu', () => {
+  test.use({
+    // Use the redirect-control extension config so the redirect-notification-handler
+    // module is loaded and the typo3:sluggi:slugChangeReport event produces a toast.
+    extraHTTPHeaders: {
+      'X-Playwright-Test-Id': 'redirect-control',
+    },
+  });
+
   test('updates child slug via context menu and shows statistics notification', async ({ page }) => {
     await page.goto('/typo3/module/web/layout');
     await waitForPageTree(page);
@@ -25,9 +33,15 @@ test.describe('Recursive Slug Update - Context Menu', () => {
     await dialog.getByRole('button', { name: 'Regenerate URL Paths', exact: true }).click();
     await expect(dialog).not.toBeVisible({ timeout: 5000 });
 
-    const notification = page.locator('.alert-success');
-    await expect(notification).toBeVisible({ timeout: 10000 });
-    await expect(notification).toContainText('1 updated');
+    // Task 7 contract: recursive update always reports redirectsCreated = 0.
+    // Task 6 wording: single page → "URL path updated"; multiple pages →
+    // "N URL paths updated". A "redirects created" toast must never appear.
+    await expect(
+      page.locator('.alert-info', { hasText: /URL paths? updated/ }).first()
+    ).toBeVisible({ timeout: 10000 });
+    await expect(
+      page.locator('.alert-info', { hasText: /redirects created/ })
+    ).toHaveCount(0);
 
     await page.goto('/typo3/record/edit?edit[pages][50]=edit');
     const frame = page.frameLocator('iframe');
