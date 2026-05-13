@@ -104,6 +104,10 @@ services:
   Wazum\Sluggi\Service\LastSegmentValidationService:
     public: true
 
+  Wazum\Sluggi\Service\SlugChangeReportStore:
+    public: true
+    shared: true
+
   Wazum\Sluggi\Service\SlugConfigurationService:
     public: true
 
