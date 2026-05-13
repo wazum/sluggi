@@ -41,6 +41,7 @@ use Wazum\Sluggi\Form\Element\SlugSourceElementV14;
 use Wazum\Sluggi\Form\FormDataProvider\EnsureSlugSourceRenderTypes;
 use Wazum\Sluggi\Form\FormDataProvider\HideSlugForExcludedPageTypes;
 use Wazum\Sluggi\Form\FormDataProvider\InitializeSyncField;
+use Wazum\Sluggi\Hooks\DispatchSlugChangeReport;
 
 // XCLASS
 $GLOBALS['TYPO3_CONF_VARS']['SYS']['Objects'][CoreFormSlugAjaxController::class] = [
@@ -184,6 +185,9 @@ $GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['t3lib/class.t3lib_tcemain.php']['proc
 
 $GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['t3lib/class.t3lib_tcemain.php']['processDatamapClass']['sluggi_collect_slug_change_report'] =
     CollectSlugChangeReport::class;
+
+$GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['t3lib/class.t3lib_befunc.php']['updateSignalHook']['sluggi:slugChangeReport'] =
+    DispatchSlugChangeReport::class . '->dispatch';
 
 // Override core "URL Segment" label to "URL Path"
 $GLOBALS['TYPO3_CONF_VARS']['SYS']['locallangXMLOverride']['EXT:core/Resources/Private/Language/locallang_tca.xlf'][] =
