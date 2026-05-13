@@ -161,6 +161,13 @@ services:
         method: afterPersist
         event: TYPO3\CMS\Redirects\Event\AfterAutoCreateRedirectHasBeenPersistedEvent
 
+  Wazum\Sluggi\EventListener\CountPersistedRedirects:
+    tags:
+      - name: event.listener
+        identifier: 'sluggi/count-persisted-redirects'
+        event: TYPO3\CMS\Redirects\Event\AfterAutoCreateRedirectHasBeenPersistedEvent
+        after: 'sluggi/prevent-self-referencing-redirect-after'
+
   Wazum\Sluggi\EventListener\SkipRedirectOnRequest:
     tags:
       - name: event.listener
