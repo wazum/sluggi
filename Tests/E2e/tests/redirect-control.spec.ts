@@ -221,11 +221,12 @@ test.describe('Redirect Control - TYPO3 Integration', () => {
     // Wait for page to reload and notification to appear
     await page.waitForURL(/edit/, { timeout: 10000 });
 
-    // Task 6 wording: when the user declines redirects, the toast must read
-    // "URL path updated" (single, no redirect) and must NOT mention any
-    // created redirects.
+    // When the user declines redirects, the toast must read "URL path
+    // updated" (single, no redirect), name the edited page by title + UID,
+    // and must NOT mention any created redirects.
     const toast = page.locator('.alert-info', { hasText: 'URL path updated' }).first();
     await expect(toast).toBeVisible({ timeout: 10000 });
+    await expect(toast).toContainText('UID 6');
     await expect(toast).not.toContainText('redirect created');
     await expect(toast).not.toContainText('redirects created');
   });
@@ -254,6 +255,7 @@ test.describe('Redirect Control - TYPO3 Integration', () => {
 
     const toast = page.locator('.alert-info', { hasText: 'URL path updated' }).first();
     await expect(toast).toBeVisible({ timeout: 10000 });
+    await expect(toast).toContainText('UID 70');
     await expect(toast).not.toContainText('redirect created');
     await expect(toast.getByRole('button', { name: /Revert redirects/i })).toHaveCount(0);
     await expect(toast.locator('a:has-text("Revert redirect")')).toHaveCount(0);

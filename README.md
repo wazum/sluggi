@@ -154,6 +154,8 @@ Let editors decide whether to create redirects when a URL changes:
 
 The choice applies recursively to all affected child pages. Self-referencing redirects are prevented automatically, and stale redirect cleanup only affects auto-created redirects – manually created redirects are never touched.
 
+The pre-save "Create Redirects?" modal and the post-save toast — including the accurate-count wording from [#101226 / #99828](#fixes-for-typo3-core-issues) — both rely on _sluggi's_ JavaScript handler, which is only loaded when `redirect_control` is enabled in the extension configuration. With `redirect_control` off, TYPO3 core's own (less accurate) toast is shown instead.
+
 ### Reserved URL Paths
 
 Prevent pages from using URL paths that conflict with external services (e.g. reverse-proxied `/api` endpoints, `/typo3` backend, `/fileadmin`).

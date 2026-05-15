@@ -38,12 +38,13 @@ final class SlugChangeReportStoreTest extends TestCase
     {
         $store = new SlugChangeReportStore();
 
-        $store->addEntry(42, ['correlationIdSlugUpdate' => 'a/slug']);
-        $store->addEntry(42, ['correlationIdSlugUpdate' => 'b/slug']);
-        $store->addEntry(99, ['correlationIdSlugUpdate' => 'c/slug']);
+        $store->addEntry(42, 'Page Forty-Two', ['correlationIdSlugUpdate' => 'a/slug']);
+        $store->addEntry(42, 'Page Forty-Two (renamed)', ['correlationIdSlugUpdate' => 'b/slug']);
+        $store->addEntry(99, 'Page Ninety-Nine', ['correlationIdSlugUpdate' => 'c/slug']);
 
         $report = $store->getReport();
         self::assertCount(2, $report['entries']);
+        self::assertSame('Page Forty-Two (renamed)', $report['entries'][42]['title']);
         self::assertSame('b/slug', $report['entries'][42]['correlations']['correlationIdSlugUpdate']);
         self::assertSame('c/slug', $report['entries'][99]['correlations']['correlationIdSlugUpdate']);
     }
@@ -86,7 +87,7 @@ final class SlugChangeReportStoreTest extends TestCase
         $store = new SlugChangeReportStore();
         $store->incrementPagesUpdated();
         $store->incrementRedirectsCreated();
-        $store->addEntry(42, ['correlationIdSlugUpdate' => 'x']);
+        $store->addEntry(42, 'Page Forty-Two', ['correlationIdSlugUpdate' => 'x']);
 
         $store->discard();
 

@@ -80,8 +80,8 @@ final readonly class CollectSlugChangeReport
         }
 
         foreach ($this->store->getCandidates() as $candidateUid => $originalSlug) {
-            $currentSlug = $this->fetchCurrentSlug($candidateUid);
-            if ($currentSlug === null || $currentSlug === $originalSlug) {
+            $row = $this->fetchCurrentRow($candidateUid);
+            if ($row === null || $row['slug'] === $originalSlug) {
                 continue;
             }
             if (!$this->store->markCounted($candidateUid)) {
@@ -91,24 +91,33 @@ final readonly class CollectSlugChangeReport
             if ($this->store->isDirectlyEdited($candidateUid)) {
                 $this->store->addEntry(
                     $candidateUid,
+                    $row['title'],
                     $this->buildCorrelations($dataHandler, $candidateUid),
                 );
             }
         }
     }
 
-    private function fetchCurrentSlug(int $pageId): ?string
+    /**
+     * @return array{slug: string, title: string}|null
+     */
+    private function fetchCurrentRow(int $pageId): ?array
     {
         $queryBuilder = $this->connectionPool->getQueryBuilderForTable('pages');
         $queryBuilder->getRestrictions()->removeAll();
         $row = $queryBuilder
-            ->select('slug')
+            ->select('slug', 'title')
             ->from('pages')
             ->where($queryBuilder->expr()->eq('uid', $queryBuilder->createNamedParameter($pageId, ParameterType::INTEGER)))
             ->executeQuery()
             ->fetchAssociative();
 
-        return is_array($row) ? (string)$row['slug'] : null;
+        return is_array($row) ? ['slug' => (string)$row['slug'], 'title' => (string)$row['title']] : null;
+    }
+
+    private function fetchCurrentSlug(int $pageId): ?string
+    {
+        return $this->fetchCurrentRow($pageId)['slug'] ?? null;
     }
 
     /**

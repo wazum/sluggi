@@ -7,6 +7,7 @@ interface UpdateResponse {
     success: boolean;
     updated: number;
     skipped: number;
+    title?: string;
     message?: string;
     correlations?: {
         correlationIdSlugUpdate: string;
@@ -49,29 +50,21 @@ async function performUpdate(uid: string): Promise<void> {
         const result = await response.resolve() as UpdateResponse;
 
         if (result.success) {
-            const title = TYPO3.lang['contextMenu.recursiveSlugUpdate.confirm.title'] || 'URL Paths';
-
-            if (result.updated > 0) {
-                const parts: string[] = [];
-                parts.push(`${result.updated} updated`);
-                if (result.skipped > 0) {
-                    parts.push(`${result.skipped} skipped`);
-                }
-                Notification.success(title, parts.join(', ') + '.');
-
-                if (result.correlations) {
-                    document.dispatchEvent(new CustomEvent('typo3:sluggi:slugChangeReport', {
-                        detail: {
-                            entries: [{
-                                pageId: Number(uid),
-                                correlations: result.correlations,
-                            }],
-                            pagesUpdated: result.updated,
-                            redirectsCreated: 0,
+            if (result.updated > 0 && result.correlations) {
+                document.dispatchEvent(new CustomEvent('typo3:sluggi:slugChangeReport', {
+                    detail: {
+                        entries: [],
+                        pagesUpdated: result.updated,
+                        redirectsCreated: 0,
+                        cascadeRoot: {
+                            pageId: Number(uid),
+                            title: result.title ?? '',
+                            correlations: result.correlations,
                         },
-                    }));
-                }
-            } else {
+                    },
+                }));
+            } else if (result.updated === 0) {
+                const title = TYPO3.lang['contextMenu.recursiveSlugUpdate.confirm.title'] || 'URL Paths';
                 Notification.info(title, 'No URL paths needed updating.');
             }
 

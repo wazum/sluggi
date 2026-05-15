@@ -240,32 +240,64 @@
                 <target>URL-Pfad aktualisiert</target>
             </trans-unit>
             <trans-unit id="notification.slugReport.singleSlug.message" resname="notification.slugReport.singleSlug.message">
-                <source>The URL path was updated.</source>
-                <target>Der URL-Pfad wurde aktualisiert.</target>
+                <source>The URL path for page "{title}" (UID {uid}) was updated.</source>
+                <target>Der URL-Pfad der Seite "{title}" (UID {uid}) wurde aktualisiert.</target>
             </trans-unit>
             <trans-unit id="notification.slugReport.singleSlugAndRedirect.title" resname="notification.slugReport.singleSlugAndRedirect.title">
                 <source>URL path updated, redirect created</source>
                 <target>URL-Pfad aktualisiert, Weiterleitung erstellt</target>
             </trans-unit>
             <trans-unit id="notification.slugReport.singleSlugAndRedirect.message" resname="notification.slugReport.singleSlugAndRedirect.message">
-                <source>The URL path was updated and a redirect from the old URL was created.</source>
-                <target>Der URL-Pfad wurde aktualisiert und eine Weiterleitung von der alten URL wurde erstellt.</target>
+                <source>The URL path for page "{title}" (UID {uid}) was updated and a redirect from the old URL was created.</source>
+                <target>Der URL-Pfad der Seite "{title}" (UID {uid}) wurde aktualisiert und eine Weiterleitung von der alten URL wurde erstellt.</target>
             </trans-unit>
             <trans-unit id="notification.slugReport.multipleSlugs.title" resname="notification.slugReport.multipleSlugs.title">
                 <source>%d URL paths updated</source>
                 <target>%d URL-Pfade aktualisiert</target>
             </trans-unit>
             <trans-unit id="notification.slugReport.multipleSlugs.message" resname="notification.slugReport.multipleSlugs.message">
-                <source>%d URL paths were updated.</source>
-                <target>%d URL-Pfade wurden aktualisiert.</target>
+                <source>URL paths updated for: {list}.</source>
+                <target>URL-Pfade aktualisiert für: {list}.</target>
+            </trans-unit>
+            <trans-unit id="notification.slugReport.multipleSlugsAndOneRedirect.title" resname="notification.slugReport.multipleSlugsAndOneRedirect.title">
+                <source>{pages} URL paths updated, redirect created</source>
+                <target>{pages} URL-Pfade aktualisiert, Weiterleitung erstellt</target>
+            </trans-unit>
+            <trans-unit id="notification.slugReport.multipleSlugsAndOneRedirect.message" resname="notification.slugReport.multipleSlugsAndOneRedirect.message">
+                <source>URL paths updated for: {list}. 1 redirect was created.</source>
+                <target>URL-Pfade aktualisiert für: {list}. 1 Weiterleitung wurde erstellt.</target>
             </trans-unit>
             <trans-unit id="notification.slugReport.multipleSlugsAndRedirects.title" resname="notification.slugReport.multipleSlugsAndRedirects.title">
                 <source>{pages} URL paths updated, {redirects} redirects created</source>
                 <target>{pages} URL-Pfade aktualisiert, {redirects} Weiterleitungen erstellt</target>
             </trans-unit>
             <trans-unit id="notification.slugReport.multipleSlugsAndRedirects.message" resname="notification.slugReport.multipleSlugsAndRedirects.message">
-                <source>{pages} URL paths were updated and {redirects} redirects were created.</source>
-                <target>{pages} URL-Pfade wurden aktualisiert und {redirects} Weiterleitungen wurden erstellt.</target>
+                <source>URL paths updated for: {list}. {redirects} redirects were created.</source>
+                <target>URL-Pfade aktualisiert für: {list}. {redirects} Weiterleitungen wurden erstellt.</target>
+            </trans-unit>
+            <trans-unit id="notification.slugReport.entryLine" resname="notification.slugReport.entryLine">
+                <source>"{title}" (UID {uid})</source>
+                <target>"{title}" (UID {uid})</target>
+            </trans-unit>
+            <trans-unit id="notification.slugReport.descendantSuffix.singular" resname="notification.slugReport.descendantSuffix.singular">
+                <source>1 child URL path was also updated.</source>
+                <target>1 untergeordneter URL-Pfad wurde ebenfalls aktualisiert.</target>
+            </trans-unit>
+            <trans-unit id="notification.slugReport.descendantSuffix.plural" resname="notification.slugReport.descendantSuffix.plural">
+                <source>{count} child URL paths were also updated.</source>
+                <target>{count} untergeordnete URL-Pfade wurden ebenfalls aktualisiert.</target>
+            </trans-unit>
+            <trans-unit id="notification.slugReport.cascadeRoot.title" resname="notification.slugReport.cascadeRoot.title">
+                <source>URL paths regenerated</source>
+                <target>URL-Pfade neu generiert</target>
+            </trans-unit>
+            <trans-unit id="notification.slugReport.cascadeRoot.singular" resname="notification.slugReport.cascadeRoot.singular">
+                <source>1 URL path under "{title}" (UID {uid}) was regenerated.</source>
+                <target>1 URL-Pfad unter "{title}" (UID {uid}) wurde neu generiert.</target>
+            </trans-unit>
+            <trans-unit id="notification.slugReport.cascadeRoot.plural" resname="notification.slugReport.cascadeRoot.plural">
+                <source>{count} URL paths under "{title}" (UID {uid}) were regenerated.</source>
+                <target>{count} URL-Pfade unter "{title}" (UID {uid}) wurden neu generiert.</target>
             </trans-unit>
         </body>
     </file>

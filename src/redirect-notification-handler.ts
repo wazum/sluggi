@@ -3,6 +3,7 @@ import Notification from '@typo3/backend/notification.js';
 import DeferredAction from '@typo3/backend/action-button/deferred-action.js';
 
 const STORAGE_KEY = 'sluggi-redirect-choice';
+const DEDUP_KEY = '__sluggiRecentReportSignatures';
 
 interface RedirectChoice {
     pageId: string;
@@ -17,6 +18,13 @@ interface SlugReportCorrelations {
 
 interface SlugReportEntry {
     pageId: number;
+    title: string;
+    correlations: SlugReportCorrelations;
+}
+
+interface CascadeRoot {
+    pageId: number;
+    title: string;
     correlations: SlugReportCorrelations;
 }
 
@@ -24,6 +32,7 @@ interface SlugChangeReportDetail {
     entries: SlugReportEntry[];
     pagesUpdated: number;
     redirectsCreated: number;
+    cascadeRoot?: CascadeRoot;
 }
 
 interface RevertResponse {
@@ -33,8 +42,6 @@ interface RevertResponse {
 }
 
 class RedirectNotificationHandler {
-    private readonly recentReportSignatures = new Set<string>();
-
     constructor() {
         const suppress = (event: Event): void => {
             event.stopImmediatePropagation();
@@ -82,18 +89,42 @@ class RedirectNotificationHandler {
             return;
         }
 
-        // Dedup identical reports (e.g. handler attached on both window.document
-        // and window.top.document when running in an iframe).
-        const signature = `${detail.pagesUpdated}:${detail.redirectsCreated}:${detail.entries.map((entry) => entry.pageId).join(',')}`;
-        if (this.recentReportSignatures.has(signature)) {
+        // Dedup across realms: the handler module is loaded in both the parent
+        // backend frame and any iframe, and each instance registers a listener
+        // on window.top.document. Without a shared dedup bag, both instances
+        // would fire on a single dispatch.
+        const dedupBag = this.getDedupBag();
+        const entrySignature = detail.entries.map((entry) => entry.pageId).join(',');
+        const cascadeSignature = detail.cascadeRoot ? `cr${detail.cascadeRoot.pageId}` : '';
+        const signature = `${detail.pagesUpdated}:${detail.redirectsCreated}:${entrySignature}:${cascadeSignature}`;
+        if (dedupBag.has(signature)) {
             return;
         }
-        this.recentReportSignatures.add(signature);
-        setTimeout(() => this.recentReportSignatures.delete(signature), 200);
+        dedupBag.add(signature);
+        setTimeout(() => dedupBag.delete(signature), 200);
 
         const { title, message } = this.buildTitleAndMessage(detail);
         const actions = this.buildActions(detail);
         Notification.info(title, message, 0, actions);
+    }
+
+    private getDedupBag(): Set<string> {
+        // Duck-type the Set rather than use `instanceof Set` — when this
+        // handler is loaded in two same-origin realms (parent backend +
+        // iframe), each realm has its own Set constructor, and an
+        // `instanceof` check against the other realm's Set returns false.
+        const host = (window.top ?? window) as unknown as Record<string, unknown>;
+        const existing = host[DEDUP_KEY] as { add?: unknown; has?: unknown; delete?: unknown } | undefined;
+        if (existing && typeof existing.add === 'function' && typeof existing.has === 'function' && typeof existing.delete === 'function') {
+            return existing as unknown as Set<string>;
+        }
+        const bag = new Set<string>();
+        try {
+            host[DEDUP_KEY] = bag;
+        } catch {
+            // Cross-origin top window: fall back to per-instance.
+        }
+        return bag;
     }
 
     private static derivePageUpdateCorrelationId(correlationIdSlugUpdate: string): string {
@@ -103,34 +134,82 @@ class RedirectNotificationHandler {
 
     private buildTitleAndMessage(detail: SlugChangeReportDetail): { title: string; message: string } {
         const lang = TYPO3.lang;
-        const single = detail.pagesUpdated === 1;
+
+        if (detail.cascadeRoot) {
+            const titleKey = 'notification.slugReport.cascadeRoot.title';
+            const messageKey = detail.pagesUpdated === 1
+                ? 'notification.slugReport.cascadeRoot.singular'
+                : 'notification.slugReport.cascadeRoot.plural';
+            const message = (lang[messageKey] ?? '')
+                .replace('{count}', String(detail.pagesUpdated))
+                .replace('{title}', detail.cascadeRoot.title)
+                .replace('{uid}', String(detail.cascadeRoot.pageId));
+            return { title: lang[titleKey] ?? '', message };
+        }
+
+        const single = detail.entries.length <= 1;
         const hasRedirects = detail.redirectsCreated >= 1;
+        const descendantCount = Math.max(0, detail.pagesUpdated - detail.entries.length);
+        const descendantSuffix = descendantCount === 0
+            ? ''
+            : ' ' + (descendantCount === 1
+                ? lang['notification.slugReport.descendantSuffix.singular'] ?? ''
+                : (lang['notification.slugReport.descendantSuffix.plural'] ?? '').replace('{count}', String(descendantCount)));
 
         if (single && !hasRedirects) {
+            const entry = detail.entries[0];
+            const message = entry
+                ? (lang['notification.slugReport.singleSlug.message'] ?? '')
+                    .replace('{title}', entry.title)
+                    .replace('{uid}', String(entry.pageId)) + descendantSuffix
+                : lang['notification.slugReport.singleSlug.message'] ?? '';
             return {
-                title: lang['notification.slugReport.singleSlug.title'],
-                message: lang['notification.slugReport.singleSlug.message'],
+                title: lang['notification.slugReport.singleSlug.title'] ?? '',
+                message,
             };
         }
+
         if (single && hasRedirects) {
+            const entry = detail.entries[0];
+            const message = entry
+                ? (lang['notification.slugReport.singleSlugAndRedirect.message'] ?? '')
+                    .replace('{title}', entry.title)
+                    .replace('{uid}', String(entry.pageId)) + descendantSuffix
+                : lang['notification.slugReport.singleSlugAndRedirect.message'] ?? '';
             return {
-                title: lang['notification.slugReport.singleSlugAndRedirect.title'],
-                message: lang['notification.slugReport.singleSlugAndRedirect.message'],
+                title: lang['notification.slugReport.singleSlugAndRedirect.title'] ?? '',
+                message,
             };
         }
-        if (!single && !hasRedirects) {
+
+        // Multiple directly-edited entries — list them.
+        const entryLineTemplate = lang['notification.slugReport.entryLine'] ?? '"{title}" (UID {uid})';
+        const list = detail.entries
+            .map((entry) => entryLineTemplate.replace('{title}', entry.title).replace('{uid}', String(entry.pageId)))
+            .join(', ');
+
+        if (!hasRedirects) {
+            const baseMessage = (lang['notification.slugReport.multipleSlugs.message'] ?? '').replace('{list}', list);
             return {
-                title: lang['notification.slugReport.multipleSlugs.title'].replace('%d', String(detail.pagesUpdated)),
-                message: lang['notification.slugReport.multipleSlugs.message'].replace('%d', String(detail.pagesUpdated)),
+                title: (lang['notification.slugReport.multipleSlugs.title'] ?? '').replace('%d', String(detail.pagesUpdated)),
+                message: baseMessage + descendantSuffix,
             };
         }
+
+        const titleKey = detail.redirectsCreated === 1
+            ? 'notification.slugReport.multipleSlugsAndOneRedirect.title'
+            : 'notification.slugReport.multipleSlugsAndRedirects.title';
+        const messageKey = detail.redirectsCreated === 1
+            ? 'notification.slugReport.multipleSlugsAndOneRedirect.message'
+            : 'notification.slugReport.multipleSlugsAndRedirects.message';
+        const baseMessage = (lang[messageKey] ?? '')
+            .replace('{list}', list)
+            .replace('{redirects}', String(detail.redirectsCreated));
         return {
-            title: lang['notification.slugReport.multipleSlugsAndRedirects.title']
+            title: (lang[titleKey] ?? '')
                 .replace('{pages}', String(detail.pagesUpdated))
                 .replace('{redirects}', String(detail.redirectsCreated)),
-            message: lang['notification.slugReport.multipleSlugsAndRedirects.message']
-                .replace('{pages}', String(detail.pagesUpdated))
-                .replace('{redirects}', String(detail.redirectsCreated)),
+            message: baseMessage + descendantSuffix,
         };
     }
 
@@ -139,20 +218,25 @@ class RedirectNotificationHandler {
         const slugCorrelations: string[] = [];
         const redirectCorrelations: string[] = [];
 
-        for (const entry of detail.entries) {
-            const pageUpdate = RedirectNotificationHandler.derivePageUpdateCorrelationId(entry.correlations.correlationIdSlugUpdate);
-            slugCorrelations.push(pageUpdate, entry.correlations.correlationIdSlugUpdate, entry.correlations.correlationIdRedirectCreation);
-            redirectCorrelations.push(entry.correlations.correlationIdRedirectCreation);
+        const sources: Array<{ correlations: SlugReportCorrelations }> = detail.cascadeRoot
+            ? [{ correlations: detail.cascadeRoot.correlations }]
+            : detail.entries;
+        for (const source of sources) {
+            const pageUpdate = RedirectNotificationHandler.derivePageUpdateCorrelationId(source.correlations.correlationIdSlugUpdate);
+            slugCorrelations.push(pageUpdate, source.correlations.correlationIdSlugUpdate, source.correlations.correlationIdRedirectCreation);
+            redirectCorrelations.push(source.correlations.correlationIdRedirectCreation);
         }
 
-        actions.push({
-            label: TYPO3.lang['notification.redirects.button.revert_update'],
-            action: new DeferredAction(async () => {
-                await this.revert(slugCorrelations, true);
-            }),
-        });
+        if (slugCorrelations.length > 0) {
+            actions.push({
+                label: TYPO3.lang['notification.redirects.button.revert_update'],
+                action: new DeferredAction(async () => {
+                    await this.revert(slugCorrelations, true);
+                }),
+            });
+        }
 
-        if (detail.redirectsCreated >= 1) {
+        if (detail.redirectsCreated >= 1 && redirectCorrelations.length > 0) {
             actions.push({
                 label: TYPO3.lang['notification.redirects.button.revert_redirect'],
                 action: new DeferredAction(async () => {

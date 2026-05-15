@@ -38,7 +38,7 @@ final class SlugChangeReportStore
     private array $countedCandidates = [];
 
     /**
-     * @var array<int, array{pageId:int, correlations: array<string,string>}>
+     * @var array<int, array{pageId:int, title:string, correlations: array<string,string>}>
      */
     private array $entries = [];
 
@@ -82,7 +82,7 @@ final class SlugChangeReportStore
     }
 
     /**
-     * @return array{entries: array<int, array{pageId:int, correlations: array<string,string>}>, pagesUpdated: int, redirectsCreated: int}|null
+     * @return array{entries: array<int, array{pageId:int, title:string, correlations: array<string,string>}>, pagesUpdated: int, redirectsCreated: int}|null
      */
     public function getReport(): ?array
     {
@@ -100,9 +100,9 @@ final class SlugChangeReportStore
     /**
      * @param array<string, string> $correlations
      */
-    public function addEntry(int $pageId, array $correlations): void
+    public function addEntry(int $pageId, string $title, array $correlations): void
     {
-        $this->entries[$pageId] = ['pageId' => $pageId, 'correlations' => $correlations];
+        $this->entries[$pageId] = ['pageId' => $pageId, 'title' => $title, 'correlations' => $correlations];
         $this->emit();
     }
 

@@ -7,6 +7,7 @@ namespace Wazum\Sluggi\Controller;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Throwable;
+use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\DataHandling\Model\CorrelationId;
 use TYPO3\CMS\Core\Http\JsonResponse;
 use TYPO3\CMS\Redirects\Service\SlugService;
@@ -52,10 +53,14 @@ final readonly class RecursiveSlugUpdateController
         // server-side dispatch on next page render would be a duplicate.
         $this->reportStore->discard();
 
+        $page = BackendUtility::getRecord('pages', $pageId, 'title');
+        $title = is_array($page) ? (string)($page['title'] ?? '') : '';
+
         return new JsonResponse([
             'success' => true,
             'updated' => $updated,
             'skipped' => $skipped,
+            'title' => $title,
             'correlations' => [
                 'correlationIdSlugUpdate' => (string)$correlationIdSlugUpdate,
                 'correlationIdRedirectCreation' => (string)$correlationIdRedirectCreation,

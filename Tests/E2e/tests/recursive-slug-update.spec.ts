@@ -33,15 +33,18 @@ test.describe('Recursive Slug Update - Context Menu', () => {
     await dialog.getByRole('button', { name: 'Regenerate URL Paths', exact: true }).click();
     await expect(dialog).not.toBeVisible({ timeout: 5000 });
 
-    // Task 7 contract: recursive update always reports redirectsCreated = 0.
-    // Task 6 wording: single page → "URL path updated"; multiple pages →
-    // "N URL paths updated". A "redirects created" toast must never appear.
-    await expect(
-      page.locator('.alert-info', { hasText: /URL paths? updated/ }).first()
-    ).toBeVisible({ timeout: 10000 });
+    // The recursive flow always reports redirectsCreated = 0 and uses the
+    // cascadeRoot template — the toast title is "URL paths regenerated" and
+    // the message names the parent page (title + UID) so editors know which
+    // subtree was touched. "redirects created" must never appear.
+    const toast = page.locator('.alert-info', { hasText: 'URL paths regenerated' }).first();
+    await expect(toast).toBeVisible({ timeout: 10000 });
+    await expect(toast).toContainText('Recursive Parent');
+    await expect(toast).toContainText('UID 49');
     await expect(
       page.locator('.alert-info', { hasText: /redirects created/ })
     ).toHaveCount(0);
+    await expect(toast.getByRole('button', { name: /Revert redirects/i })).toHaveCount(0);
 
     await page.goto('/typo3/record/edit?edit[pages][50]=edit');
     const frame = page.frameLocator('iframe');
