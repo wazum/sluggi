@@ -1,6 +1,6 @@
 import AjaxRequest from '@typo3/core/ajax/ajax-request.js';
 import Notification from '@typo3/backend/notification.js';
-import DeferredAction from '@typo3/backend/action-button/deferred-action.js';
+import ImmediateAction from '@typo3/backend/action-button/immediate-action.js';
 
 const STORAGE_KEY = 'sluggi-redirect-choice';
 const DEDUP_KEY = '__sluggiRecentReportSignatures';
@@ -213,8 +213,8 @@ class RedirectNotificationHandler {
         };
     }
 
-    private buildActions(detail: SlugChangeReportDetail): Array<{ label: string; action: DeferredAction }> {
-        const actions: Array<{ label: string; action: DeferredAction }> = [];
+    private buildActions(detail: SlugChangeReportDetail): Array<{ label: string; action: ImmediateAction }> {
+        const actions: Array<{ label: string; action: ImmediateAction }> = [];
         const slugCorrelations: string[] = [];
         const redirectCorrelations: string[] = [];
 
@@ -230,7 +230,7 @@ class RedirectNotificationHandler {
         if (slugCorrelations.length > 0) {
             actions.push({
                 label: TYPO3.lang['notification.redirects.button.revert_update'],
-                action: new DeferredAction(async () => {
+                action: new ImmediateAction(async () => {
                     await this.revert(slugCorrelations, true);
                 }),
             });
@@ -239,7 +239,7 @@ class RedirectNotificationHandler {
         if (detail.redirectsCreated >= 1 && redirectCorrelations.length > 0) {
             actions.push({
                 label: TYPO3.lang['notification.redirects.button.revert_redirect'],
-                action: new DeferredAction(async () => {
+                action: new ImmediateAction(async () => {
                     await this.revert(redirectCorrelations, false);
                 }),
             });
@@ -248,7 +248,7 @@ class RedirectNotificationHandler {
         return actions;
     }
 
-    private async revert(correlationIds: string[], reloadPage: boolean): Promise<void> {
+    private async revert(correlationIds: string[], reloadForm: boolean): Promise<void> {
         let success = false;
         try {
             const response = await new AjaxRequest(TYPO3.settings.ajaxUrls.redirects_revert_correlation)
@@ -268,8 +268,14 @@ class RedirectNotificationHandler {
             );
         }
         document.dispatchEvent(new CustomEvent('typo3:pagetree:refresh'));
-        if (reloadPage && success) {
-            window.location.reload();
+        if (reloadForm && success) {
+            // Refresh only the edit iframe so the form picks up the reverted
+            // slug. Reloading window.top would destroy the success notification
+            // we just queued.
+            const iframe = document.querySelector('iframe');
+            if (iframe?.contentWindow) {
+                iframe.contentWindow.location.reload();
+            }
         }
     }
 }

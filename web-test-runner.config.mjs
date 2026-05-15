@@ -26,6 +26,9 @@ function typo3MockPlugin() {
             if (source.startsWith('@typo3/backend/action-button/deferred-action')) {
                 return '/src/__mocks__/typo3-deferred-action.ts';
             }
+            if (source.startsWith('@typo3/backend/action-button/immediate-action')) {
+                return '/src/__mocks__/typo3-immediate-action.ts';
+            }
         },
         serve(context) {
             if (context.path.includes('typo3-backend.ts?severity')) {

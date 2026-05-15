@@ -9,6 +9,8 @@ use Psr\Http\Message\ServerRequestInterface;
 use TYPO3\CMS\Core\DataHandling\Model\CorrelationId;
 use TYPO3\CMS\Core\Http\JsonResponse;
 use TYPO3\CMS\Core\Localization\LanguageService;
+use TYPO3\CMS\Core\Utility\GeneralUtility;
+use Wazum\Sluggi\Service\SlugChangeReportStore;
 
 /**
  * Fixes "Revert update" to also revert the parent page's own slug change.
@@ -39,6 +41,15 @@ trait RecordHistoryRollbackControllerTrait
             }
             $this->rollBackCorrelation($correlationId);
         }
+
+        // The rollback re-applies each historic slug change via DataHandler,
+        // which triggers CollectSlugChangeReport just like a regular save. The
+        // editor clicked "Revert update" — they expect the JSON success message
+        // (rendered by Notification.success in redirect-notification-handler.ts)
+        // and nothing else, not a stale "URL paths updated" toast on the next
+        // page render. Drop whatever the rollback accumulated.
+        GeneralUtility::makeInstance(SlugChangeReportStore::class)->discard();
+
         $result = [
             'status' => 'error',
             'title' => $languageService->sL('LLL:EXT:redirects/Resources/Private/Language/locallang_slug_service.xlf:redirects_error_title'),

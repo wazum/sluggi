@@ -76,3 +76,11 @@ declare module '@typo3/backend/action-button/deferred-action.js' {
 
     export default DeferredAction;
 }
+
+declare module '@typo3/backend/action-button/immediate-action.js' {
+    class ImmediateAction {
+        constructor(callback: () => Promise<void> | void);
+    }
+
+    export default ImmediateAction;
+}
