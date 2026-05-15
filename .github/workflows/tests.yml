@@ -38,6 +38,14 @@ jobs:
       - name: Disable Composer's auto-injected GitHub token
         run: echo 'COMPOSER_AUTH={}' >> "$GITHUB_ENV"
 
+      - name: Cache Composer downloads
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/composer
+          key: composer-quality-${{ runner.os }}-php8.2-${{ hashFiles('composer.json') }}
+          restore-keys: |
+            composer-quality-${{ runner.os }}-php8.2-
+
       - name: Install dependencies
         run: composer install --no-interaction
 
@@ -58,12 +66,28 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: package-lock.json
 
       - name: Install dependencies
         run: npm ci
 
-      - name: Install Playwright browsers
+      - name: Cache Playwright browsers
+        uses: actions/cache@v4
+        id: playwright-cache
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-jsunit-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+          restore-keys: |
+            playwright-jsunit-${{ runner.os }}-
+
+      - name: Install Playwright browsers (cache miss only)
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
         run: npx playwright install --with-deps chromium
+
+      - name: Install Playwright OS deps (cache hit — binaries cached, apt deps not)
+        if: steps.playwright-cache.outputs.cache-hit == 'true'
+        run: npx playwright install-deps chromium
 
       - name: Run TypeScript check
         run: npm run typecheck
@@ -110,6 +134,15 @@ jobs:
 
       - name: Disable Composer's auto-injected GitHub token
         run: echo 'COMPOSER_AUTH={}' >> "$GITHUB_ENV"
+
+      - name: Cache Composer downloads
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/composer
+          key: composer-${{ runner.os }}-php${{ matrix.php }}-typo3${{ matrix.typo3 }}-${{ hashFiles('composer.json') }}
+          restore-keys: |
+            composer-${{ runner.os }}-php${{ matrix.php }}-typo3${{ matrix.typo3 }}-
+            composer-${{ runner.os }}-php${{ matrix.php }}-
 
       - name: Install dependencies
         run: |
@@ -158,6 +191,15 @@ jobs:
 
       - name: Disable Composer's auto-injected GitHub token
         run: echo 'COMPOSER_AUTH={}' >> "$GITHUB_ENV"
+
+      - name: Cache Composer downloads
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/composer
+          key: composer-${{ runner.os }}-php${{ matrix.php }}-typo3${{ matrix.typo3 }}-${{ hashFiles('composer.json') }}
+          restore-keys: |
+            composer-${{ runner.os }}-php${{ matrix.php }}-typo3${{ matrix.typo3 }}-
+            composer-${{ runner.os }}-php${{ matrix.php }}-
 
       - name: Install dependencies
         run: |
@@ -226,10 +268,22 @@ jobs:
       - name: Disable Composer's auto-injected GitHub token
         run: echo 'COMPOSER_AUTH={}' >> "$GITHUB_ENV"
 
+      - name: Cache Composer downloads
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/composer
+          key: composer-e2e-${{ runner.os }}-php${{ matrix.php }}-dist${{ matrix.dist }}-typo3${{ matrix.typo3 }}-${{ hashFiles('composer.json', 'Tests/E2e/Fixtures/Extensions/sluggi_e2e_fixtures/composer.json') }}
+          restore-keys: |
+            composer-e2e-${{ runner.os }}-php${{ matrix.php }}-dist${{ matrix.dist }}-typo3${{ matrix.typo3 }}-
+            composer-e2e-${{ runner.os }}-php${{ matrix.php }}-dist${{ matrix.dist }}-
+            composer-e2e-${{ runner.os }}-php${{ matrix.php }}-
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: Tests/E2e/package-lock.json
 
       - name: Create TYPO3 project
         run: composer create-project typo3/cms-base-distribution:^${{ matrix.dist }} typo3-test --no-interaction
@@ -425,11 +479,27 @@ jobs:
             exit 1
           fi
 
-      - name: Install Playwright
+      - name: Cache Playwright browsers
+        uses: actions/cache@v4
+        id: playwright-cache
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-e2e-${{ runner.os }}-${{ hashFiles('Tests/E2e/package-lock.json') }}
+          restore-keys: |
+            playwright-e2e-${{ runner.os }}-
+
+      - name: Install Playwright dependencies
         run: |
           cd Tests/E2e
           npm ci
-          npx playwright install --with-deps chromium
+
+      - name: Install Playwright browsers (cache miss only)
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
+        run: cd Tests/E2e && npx playwright install --with-deps chromium
+
+      - name: Install Playwright OS deps (cache hit — binaries cached, apt deps not)
+        if: steps.playwright-cache.outputs.cache-hit == 'true'
+        run: cd Tests/E2e && npx playwright install-deps chromium
 
       - name: Run E2E tests
         run: |
