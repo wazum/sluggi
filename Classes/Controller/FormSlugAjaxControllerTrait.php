@@ -6,15 +6,18 @@ namespace Wazum\Sluggi\Controller;
 
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
+use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\Authentication\BackendUserAuthentication;
 use TYPO3\CMS\Core\DataHandling\SlugHelper;
 use TYPO3\CMS\Core\Http\JsonResponse;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
+use Wazum\Sluggi\Service\SlugConfigurationService;
 
 trait FormSlugAjaxControllerTrait
 {
     public function suggestAction(ServerRequestInterface $request): ResponseInterface
     {
+        $request = $this->hydrateMissingSourceFieldValuesFromRecord($request);
         $request = $this->sanitizeSlashesInSourceFields($request);
 
         $response = parent::suggestAction($request);
@@ -25,6 +28,48 @@ trait FormSlugAjaxControllerTrait
         }
 
         return new JsonResponse($data);
+    }
+
+    /**
+     * Fill missing or empty source-field values from the persisted record when
+     * editing. Restricted-column edit forms (e.g. `columnsOnly[pages][0]=slug`)
+     * never render the source inputs, so the regenerate request arrives with
+     * empty `values` and core's SlugHelper falls back to `default-<random>`.
+     * Submitted non-empty values always win.
+     */
+    private function hydrateMissingSourceFieldValuesFromRecord(ServerRequestInterface $request): ServerRequestInterface
+    {
+        /** @var array<string, mixed> $params */
+        $params = $request->getParsedBody() ?? [];
+        if ((string)($params['command'] ?? '') !== 'edit') {
+            return $request;
+        }
+        $tableName = (string)($params['tableName'] ?? '');
+        $recordId = (int)($params['recordId'] ?? 0);
+        if ($tableName === '' || $recordId <= 0) {
+            return $request;
+        }
+        $sourceFields = GeneralUtility::makeInstance(SlugConfigurationService::class)->getSourceFields($tableName);
+        if ($sourceFields === []) {
+            return $request;
+        }
+        $record = BackendUtility::getRecordWSOL($tableName, $recordId);
+        if (!is_array($record)) {
+            return $request;
+        }
+        /** @var array<string, mixed> $values */
+        $values = is_array($params['values'] ?? null) ? $params['values'] : [];
+        foreach ($sourceFields as $sourceField) {
+            if (isset($values[$sourceField]) && is_string($values[$sourceField]) && $values[$sourceField] !== '') {
+                continue;
+            }
+            if (array_key_exists($sourceField, $record)) {
+                $values[$sourceField] = (string)$record[$sourceField];
+            }
+        }
+        $params['values'] = $values;
+
+        return $request->withParsedBody($params);
     }
 
     /**
