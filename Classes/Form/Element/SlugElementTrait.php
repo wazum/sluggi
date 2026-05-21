@@ -394,6 +394,7 @@ trait SlugElementTrait
             'error.proposalFailed.title' => $languageService->sL($prefix . 'error.proposalFailed.title'),
             'error.proposalFailed.message' => $languageService->sL($prefix . 'error.proposalFailed.message'),
             'warning.reservedPath' => $languageService->sL($prefix . 'warning.reservedPath'),
+            'notification.note.hiddenPageNoRedirect' => $languageService->sL($prefix . 'notification.note.hiddenPageNoRedirect'),
         ];
     }
 

@@ -494,7 +494,17 @@ export class SluggiElement extends LitElement {
             ${this.renderCustomPathNote()}
             ${this.renderReservedPathWarning()}
             ${this.renderRedirectInfo()}
+            ${this.renderHiddenPageNote()}
         `;
+    }
+
+    private renderHiddenPageNote() {
+        if (!this.pageHidden || !this.redirectControlEnabled) return nothing;
+        if (this.isLocked) return nothing;
+        if (this.isSynced && !this.hasSourceFields) return nothing;
+        const message = this.labels['notification.note.hiddenPageNoRedirect']
+            || 'This page is hidden — saving will not create a redirect for the changed URL path.';
+        return html`<p class="sluggi-note sluggi-hidden-page-note" role="status" aria-live="polite">${message}</p>`;
     }
 
     private get reservedPathPatterns(): string[] {

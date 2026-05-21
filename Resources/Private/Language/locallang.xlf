@@ -126,6 +126,9 @@
             <trans-unit id="warning.reservedPath" resname="warning.reservedPath">
                 <source>This URL path matches a reserved path and will be rejected on save.</source>
             </trans-unit>
+            <trans-unit id="notification.note.hiddenPageNoRedirect" resname="notification.note.hiddenPageNoRedirect">
+                <source>This page is hidden — saving will not create a redirect for the changed URL path.</source>
+            </trans-unit>
             <trans-unit id="error.proposalFailed.title" resname="error.proposalFailed.title">
                 <source>URL preview unavailable</source>
             </trans-unit>

@@ -171,6 +171,10 @@
                 <source>This URL path matches a reserved path and will be rejected on save.</source>
                 <target>Dieser URL-Pfad entspricht einem reservierten Pfad und wird beim Speichern abgelehnt.</target>
             </trans-unit>
+            <trans-unit id="notification.note.hiddenPageNoRedirect" resname="notification.note.hiddenPageNoRedirect">
+                <source>This page is hidden — saving will not create a redirect for the changed URL path.</source>
+                <target>Diese Seite ist versteckt — beim Speichern wird für die geänderte URL kein Redirect angelegt.</target>
+            </trans-unit>
             <trans-unit id="error.proposalFailed.title" resname="error.proposalFailed.title">
                 <source>URL preview unavailable</source>
                 <target>URL-Vorschau nicht verfügbar</target>
