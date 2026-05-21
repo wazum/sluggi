@@ -32,15 +32,19 @@ jobs:
             echo "TER_COMMENT=Release $version" >> "$GITHUB_ENV"
           else
             # Convert GitHub markdown to plain text for TER display:
+            # - Strip leaked shell-escape backslashes before " and ` so they don't survive into TER
             # - Strip ## headings but keep them as section titles with blank line before
-            # - Remove bold markers, inline code backticks, and markdown links
+            # - Remove bold markers (** and *), underscore emphasis (_foo_, lookaround-guarded
+            #   so identifiers like sys_redirect stay intact), inline code backticks, links
             # - Replace list dashes with bullets, drop "Full Changelog" line
             plain=$(echo "$body" \
+              | sed 's|\\"|"|g; s|\\`|`|g' \
               | sed '/^## /{s/^## //;s/^/\n/;}' \
               | sed '/^### /{s/^### //;s/^/\n/;}' \
               | sed '/^!\[.*\](.*)/d' \
               | sed 's/\*\*\([^*]*\)\*\*/\1/g' \
               | sed 's/\*\([^*]*\)\*/\1/g' \
+              | perl -pe 's/(?<![A-Za-z0-9_])_([^_]+)_(?![A-Za-z0-9_])/$1/g' \
               | sed 's/\[\([^]]*\)\]([^)]*)/\1/g' \
               | sed 's/^- /• /g' \
               | sed 's/`\([^`]*\)`/\1/g' \
