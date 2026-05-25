@@ -30,7 +30,7 @@ One `composer require`, sensible defaults – [highly configurable](#configurati
 composer require wazum/sluggi
 ```
 
-> **Version 14** is a complete rewrite of _sluggi_ – modern, fully tested, and **compatible** with **TYPO3 12.4, 13.4.26+, and 14**.
+> **Version 14** is a complete rewrite of _sluggi_ – modern, fully tested, and **compatible** with **TYPO3 12.4, 13.4.26+, and 14.3+**.
 > 
 > This is the version you should install regardless of your TYPO3 version. Previous major versions are no longer maintained.
 
@@ -418,7 +418,7 @@ For non-page tables, add the table name to the `synchronize_tables` extension se
 
 ## Requirements
 
-- TYPO3 12.4, 13.4.26+, or 14.x
+- TYPO3 12.4, 13.4.26+, or 14.3+
 - PHP 8.2+
 - EXT:redirects
 
