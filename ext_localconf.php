@@ -31,6 +31,7 @@ use Wazum\Sluggi\DataHandler\PersistRecordSyncState;
 use Wazum\Sluggi\DataHandler\HandleMasiExclusionChange;
 use Wazum\Sluggi\DataHandler\LockSlugOnFullPathEdit;
 use Wazum\Sluggi\DataHandler\PreventLockedSlugEdit;
+use Wazum\Sluggi\DataHandler\RejectNewPageWithoutSource;
 use Wazum\Sluggi\DataHandler\ValidateHierarchyPermission;
 use Wazum\Sluggi\DataHandler\ValidateLastSegmentOnly;
 use Wazum\Sluggi\DataHandler\ValidateReservedSlugPath;
@@ -118,6 +119,12 @@ $GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['t3lib/class.t3lib_pagerenderer.php'][
                     );
                 }
             }
+
+            // Forces FormEngine visible→hidden input sync on v14 page-wizard
+            // navigation, so typed values reach the server even on fast clicks.
+            if (Typo3Compatibility::getMajorVersion() >= 14) {
+                $pageRenderer->loadJavaScriptModule('@wazum/sluggi/page-wizard-guard.js');
+            }
         }
     };
 
@@ -128,6 +135,7 @@ $GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['t3lib/class.t3lib_pagerenderer.php'][
 //   - ValidateHierarchyPermission and PreventLockedSlugEdit guard submitted slugs before field processing.
 //   - PersistRecordSyncState captures tx_sluggi_sync from non-page table forms before HandleRecordUpdate reads it later.
 //   - ValidateLastSegmentOnly validates submitted slugs before field processing; nested slug cascades are skipped by correlation id.
+//   - RejectNewPageWithoutSource cancels new-page inserts that have sync enabled but no source-field value.
 // processDatamap_postProcessFieldArray:
 //   - ClearSlugForExcludedDoktypes strips slug/sync for excluded page types before page regeneration.
 //   - HandlePageUpdate auto-regenerates page slugs when source fields changed.
@@ -189,6 +197,9 @@ $GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['t3lib/class.t3lib_tcemain.php']['proc
 
 $GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['t3lib/class.t3lib_tcemain.php']['processDatamapClass']['sluggi_collect_slug_change_report'] =
     CollectSlugChangeReport::class;
+
+$GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['t3lib/class.t3lib_tcemain.php']['processDatamapClass']['sluggi_reject_empty_new_page'] =
+    RejectNewPageWithoutSource::class;
 
 $GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['t3lib/class.t3lib_befunc.php']['updateSignalHook']['sluggi:slugChangeReport'] =
     DispatchSlugChangeReport::class . '->dispatch';

@@ -123,6 +123,12 @@
             <trans-unit id="error.reservedPath.message" resname="error.reservedPath.message">
                 <source>This URL path is reserved and cannot be used. Please choose a different slug.</source>
             </trans-unit>
+            <trans-unit id="error.emptySourceOnNewPage.title" resname="error.emptySourceOnNewPage.title">
+                <source>Cannot create page</source>
+            </trans-unit>
+            <trans-unit id="error.emptySourceOnNewPage.message" resname="error.emptySourceOnNewPage.message">
+                <source>The submitted page has no title and URL path synchronization is enabled. Please try again and make sure the title field is filled in before continuing.</source>
+            </trans-unit>
             <trans-unit id="warning.reservedPath" resname="warning.reservedPath">
                 <source>This URL path matches a reserved path and will be rejected on save.</source>
             </trans-unit>

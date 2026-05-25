@@ -167,6 +167,14 @@
                 <source>This URL path is reserved and cannot be used. Please choose a different slug.</source>
                 <target>Dieser URL-Pfad ist reserviert und kann nicht verwendet werden. Bitte wählen Sie einen anderen Slug.</target>
             </trans-unit>
+            <trans-unit id="error.emptySourceOnNewPage.title" resname="error.emptySourceOnNewPage.title">
+                <source>Cannot create page</source>
+                <target>Seite kann nicht erstellt werden</target>
+            </trans-unit>
+            <trans-unit id="error.emptySourceOnNewPage.message" resname="error.emptySourceOnNewPage.message">
+                <source>The submitted page has no title and URL path synchronization is enabled. Please try again and make sure the title field is filled in before continuing.</source>
+                <target>Die übermittelte Seite hat keinen Titel und die URL-Pfad-Synchronisation ist aktiv. Bitte erneut versuchen und sicherstellen, dass der Titel ausgefüllt ist, bevor Sie fortfahren.</target>
+            </trans-unit>
             <trans-unit id="warning.reservedPath" resname="warning.reservedPath">
                 <source>This URL path matches a reserved path and will be rejected on save.</source>
                 <target>Dieser URL-Pfad entspricht einem reservierten Pfad und wird beim Speichern abgelehnt.</target>

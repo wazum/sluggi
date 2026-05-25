@@ -58,6 +58,9 @@ services:
   Wazum\Sluggi\DataHandler\ValidateReservedSlugPath:
     public: true
 
+  Wazum\Sluggi\DataHandler\RejectNewPageWithoutSource:
+    public: true
+
   Wazum\Sluggi\DataHandler\InitializeSyncForNewPage:
     public: true
 
