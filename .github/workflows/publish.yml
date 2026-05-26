@@ -6,6 +6,12 @@ on:
     # prerelease is promoted to a full release — gives a window to fix
     # bad release notes or version numbers before TER publishes.
     types: [released]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Release tag to publish (e.g. 14.10.0)'
+        required: true
+        type: string
 
 jobs:
   publish:
@@ -17,9 +23,20 @@ jobs:
 
       - name: Get release info
         env:
-          RELEASE_TAG: ${{ github.event.release.tag_name }}
-          RELEASE_BODY: ${{ github.event.release.body }}
+          GH_TOKEN: ${{ github.token }}
+          INPUT_TAG: ${{ inputs.tag }}
+          EVENT_TAG: ${{ github.event.release.tag_name }}
+          EVENT_BODY: ${{ github.event.release.body }}
+          REPO: ${{ github.repository }}
         run: |
+          if [[ -n "$INPUT_TAG" ]]; then
+            RELEASE_TAG="$INPUT_TAG"
+            RELEASE_BODY=$(gh release view "$RELEASE_TAG" --repo "$REPO" --json body --jq .body)
+          else
+            RELEASE_TAG="$EVENT_TAG"
+            RELEASE_BODY="$EVENT_BODY"
+          fi
+
           version="$RELEASE_TAG"
           if ! [[ "$version" =~ ^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$ ]]; then
             echo "Tag does not match semver format: $version"
