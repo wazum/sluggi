@@ -80,7 +80,7 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: '8.2'
-          tools: composer
+          tools: composer:2.9
 
       - name: Install Tailor
         run: composer global require typo3/tailor --no-interaction
