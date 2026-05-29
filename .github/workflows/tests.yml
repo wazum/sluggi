@@ -95,6 +95,36 @@ jobs:
       - name: Run unit tests
         run: npm run test
 
+  build-assets:
+    name: Built Assets Up-to-date
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build production assets
+        run: npm run build
+
+      - name: Fail if Resources/Public is out of date
+        run: |
+          if [ -n "$(git status --porcelain -- Resources/Public)" ]; then
+            echo "::error::Built assets in Resources/Public differ from the committed sources. Run 'npm run build' and commit the result."
+            git status --porcelain -- Resources/Public
+            git diff -- Resources/Public
+            exit 1
+          fi
+          echo "Resources/Public is up to date with src/."
+
   unit:
     name: Unit (PHP ${{ matrix.php }} - TYPO3 ${{ matrix.typo3 }})
     runs-on: ubuntu-latest
