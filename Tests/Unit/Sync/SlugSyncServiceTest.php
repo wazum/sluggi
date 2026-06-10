@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Wazum\Sluggi\Tests\Unit\Sync;
 
+use PDOException;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 use TYPO3\CMS\Core\Configuration\ExtensionConfiguration as CoreExtensionConfiguration;
@@ -215,5 +216,34 @@ final class SlugSyncServiceTest extends TestCase
             $subject->getRecordSyncState('tx_test', 1),
             'Pending state must override DB state'
         );
+    }
+
+    #[Test]
+    public function setRecordSyncStateFallsBackToUpdateWhenInsertHitsUniqueConstraint(): void
+    {
+        $result = $this->createMock(\Doctrine\DBAL\Result::class);
+        $result->method('fetchAssociative')->willReturn(false);
+
+        $connection = $this->createMock(\TYPO3\CMS\Core\Database\Connection::class);
+        $connection->method('select')->willReturn($result);
+        $connection->method('insert')->willThrowException(
+            new \Doctrine\DBAL\Exception\UniqueConstraintViolationException(
+                \Doctrine\DBAL\Driver\PDO\Exception::new(new PDOException('Duplicate entry')),
+                null
+            )
+        );
+        $connection->expects(self::once())->method('update')->with(
+            'tx_sluggi_record_sync',
+            ['is_synced' => 1],
+            ['tablename' => 'tx_test', 'record_uid' => 42],
+        );
+
+        $connectionPool = $this->createMock(ConnectionPool::class);
+        $connectionPool->method('getConnectionForTable')->willReturn($connection);
+
+        $coreConfig = $this->createMock(CoreExtensionConfiguration::class);
+        $subject = new SlugSyncService(new ExtensionConfiguration($coreConfig), new SlugConfigurationService(), $connectionPool, new PendingSyncStateRegistry());
+
+        $subject->setRecordSyncState('tx_test', 42, true);
     }
 }

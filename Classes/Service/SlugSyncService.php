@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Wazum\Sluggi\Service;
 
+use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\DataHandling\DataHandler;
@@ -164,12 +165,23 @@ final class SlugSyncService
                 ['is_synced' => $synced ? 1 : 0],
                 ['tablename' => $table, 'record_uid' => $uid],
             );
-        } else {
+
+            return;
+        }
+
+        try {
             $connection->insert('tx_sluggi_record_sync', [
                 'tablename' => $table,
                 'record_uid' => $uid,
                 'is_synced' => $synced ? 1 : 0,
             ]);
+        } catch (UniqueConstraintViolationException) {
+            // A concurrent request created the row between our select and insert
+            $connection->update(
+                'tx_sluggi_record_sync',
+                ['is_synced' => $synced ? 1 : 0],
+                ['tablename' => $table, 'record_uid' => $uid],
+            );
         }
     }
 
