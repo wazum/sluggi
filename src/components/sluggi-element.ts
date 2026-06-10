@@ -1336,9 +1336,12 @@ export class SluggiElement extends LitElement {
     // Private Helpers: Redirect Control
     // =========================================================================
 
+    private static connectedRedirectControlElementCount = 0;
+
     private setupFormSubmitListener(): void {
         if (!this.redirectControlEnabled) return;
 
+        SluggiElement.connectedRedirectControlElementCount++;
         // TYPO3 FormEngine doesn't fire standard 'submit' events - intercept save button clicks
         // Using the same handler function means addEventListener won't add duplicates
         this.ownerDocument.addEventListener('click', SluggiElement.handleSaveButtonClick, true);
@@ -1346,6 +1349,10 @@ export class SluggiElement extends LitElement {
 
     private removeFormSubmitListener(): void {
         if (!this.redirectControlEnabled) return;
+
+        SluggiElement.connectedRedirectControlElementCount--;
+        // Other connected elements still rely on the shared document listener
+        if (SluggiElement.connectedRedirectControlElementCount > 0) return;
         this.ownerDocument.removeEventListener('click', SluggiElement.handleSaveButtonClick, true);
     }
 

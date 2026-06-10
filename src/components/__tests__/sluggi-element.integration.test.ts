@@ -167,6 +167,61 @@ describe('SluggiElement - Integration', () => {
         });
     });
 
+    describe('Redirect Control Save Interception', () => {
+        it('still intercepts the save button after one of several elements disconnects', async () => {
+            const container = document.createElement('div');
+            container.innerHTML = `
+                <form>
+                    <sluggi-element value="/page-a" record-id="1" page-id="1" redirect-control></sluggi-element>
+                    <sluggi-element value="/page-b" record-id="2" page-id="2" redirect-control></sluggi-element>
+                    <button name="_savedok" type="button">Save</button>
+                </form>
+            `;
+            document.body.appendChild(container);
+            const elements = Array.from(container.querySelectorAll('sluggi-element')) as SluggiElement[];
+            await Promise.all(elements.map((element) => element.updateComplete));
+            for (const element of elements) {
+                element.value = `${element.value}-changed`;
+            }
+
+            elements[0].remove();
+
+            const button = container.querySelector('button[name="_savedok"]') as HTMLButtonElement;
+            const clickEvent = new MouseEvent('click', { bubbles: true, cancelable: true });
+            button.dispatchEvent(clickEvent);
+
+            expect(clickEvent.defaultPrevented).to.equal(true);
+
+            document.body.removeChild(container);
+        });
+
+        it('no longer intercepts the save button after the last element disconnects', async () => {
+            const container = document.createElement('div');
+            container.innerHTML = `
+                <form>
+                    <sluggi-element value="/page-a" record-id="1" page-id="1" redirect-control></sluggi-element>
+                    <sluggi-element value="/page-b" record-id="2" page-id="2" redirect-control></sluggi-element>
+                    <button name="_savedok" type="button">Save</button>
+                </form>
+            `;
+            document.body.appendChild(container);
+            const elements = Array.from(container.querySelectorAll('sluggi-element')) as SluggiElement[];
+            await Promise.all(elements.map((element) => element.updateComplete));
+            for (const element of elements) {
+                element.value = `${element.value}-changed`;
+                element.remove();
+            }
+
+            const button = container.querySelector('button[name="_savedok"]') as HTMLButtonElement;
+            const clickEvent = new MouseEvent('click', { bubbles: true, cancelable: true });
+            button.dispatchEvent(clickEvent);
+
+            expect(clickEvent.defaultPrevented).to.equal(false);
+
+            document.body.removeChild(container);
+        });
+    });
+
     describe('Spurious Change Event Prevention', () => {
         it('does NOT dispatch change on full-path field when canceling edit without changes', async () => {
             const container = document.createElement('div');
