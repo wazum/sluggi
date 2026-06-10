@@ -447,7 +447,7 @@ final class ExtensionConfigurationTest extends TestCase
     }
 
     #[Test]
-    public function isRedirectControlEnabledReturnsTrueWhenSettingIsMissing(): void
+    public function isRedirectControlEnabledReturnsFalseWhenSettingIsMissing(): void
     {
         $coreConfig = $this->createMock(CoreExtensionConfiguration::class);
         $coreConfig->method('get')
@@ -456,6 +456,6 @@ final class ExtensionConfigurationTest extends TestCase
 
         $subject = new ExtensionConfiguration($coreConfig);
 
-        self::assertTrue($subject->isRedirectControlEnabled());
+        self::assertFalse($subject->isRedirectControlEnabled());
     }
 }

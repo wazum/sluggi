@@ -105,11 +105,11 @@ $GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['t3lib/class.t3lib_pagerenderer.php'][
 
             // Load redirect notification handler when redirect control is enabled
             try {
-                $redirectControlEnabled = (bool)(\TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance(
+                $redirectControlEnabled = (bool)\TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance(
                     \TYPO3\CMS\Core\Configuration\ExtensionConfiguration::class
-                )->get('sluggi', 'redirect_control') ?? true);
+                )->get('sluggi', 'redirect_control');
             } catch (\Exception) {
-                $redirectControlEnabled = true;
+                $redirectControlEnabled = false;
             }
             if ($redirectControlEnabled) {
                 $pageRenderer->loadJavaScriptModule('@wazum/sluggi/redirect-notification-handler.js');

@@ -92,7 +92,7 @@ final readonly class ExtensionConfiguration
 
     public function isRedirectControlEnabled(): bool
     {
-        return $this->getBool('redirect_control', true);
+        return $this->getBool('redirect_control');
     }
 
     public function isShowRedirectsEnabled(): bool
