@@ -1128,11 +1128,16 @@ export class SluggiElement extends LitElement {
         this.sendSlugProposal('recreate');
     }
 
-    private handleCopyUrl() {
+    private async handleCopyUrl() {
         const baseUrl = this.pageUrl.replace(/\/$/, '');
         const fullUrl = baseUrl + this.value;
 
-        navigator.clipboard.writeText(fullUrl);
+        try {
+            await navigator.clipboard.writeText(fullUrl);
+        } catch (error) {
+            console.error('Copying the URL to the clipboard failed:', error);
+            return;
+        }
         this.copiedUrl = fullUrl;
         this.showCopyConfirmation = true;
 

@@ -242,6 +242,7 @@ describe('SluggiElement - Buttons', () => {
 
             const copyBtn = el.shadowRoot!.querySelector('.sluggi-copy-url-btn') as HTMLButtonElement;
             copyBtn.click();
+            await new Promise(resolve => setTimeout(resolve, 0));
             await el.updateComplete;
 
             expect(copyBtn.classList.contains('is-copied')).to.be.true;
@@ -267,6 +268,7 @@ describe('SluggiElement - Buttons', () => {
 
             const copyBtn = el.shadowRoot!.querySelector('.sluggi-copy-url-btn') as HTMLButtonElement;
             copyBtn.click();
+            await new Promise(resolve => setTimeout(resolve, 0));
             await el.updateComplete;
 
             const link = el.shadowRoot!.querySelector('.sluggi-copy-confirmation a') as HTMLAnchorElement;
@@ -274,6 +276,30 @@ describe('SluggiElement - Buttons', () => {
             expect(link.href).to.equal('https://example.com/demo-page');
             expect(link.target).to.equal('_blank');
             expect(link.rel).to.equal('noopener noreferrer');
+        });
+
+        it('does not show the copy confirmation when the clipboard write fails', async () => {
+            Object.defineProperty(navigator, 'clipboard', {
+                value: { writeText: async () => { throw new Error('denied'); } },
+                writable: true,
+                configurable: true
+            });
+
+            const el = await fixture<SluggiElement>(html`
+                <sluggi-element
+                    value="/demo-page"
+                    copy-url-feature-enabled
+                    page-url="https://example.com"
+                ></sluggi-element>
+            `);
+
+            const copyBtn = el.shadowRoot!.querySelector('.sluggi-copy-url-btn') as HTMLButtonElement;
+            copyBtn.click();
+            await new Promise(resolve => setTimeout(resolve, 0));
+            await el.updateComplete;
+
+            expect(copyBtn.classList.contains('is-copied')).to.be.false;
+            expect(el.shadowRoot!.querySelector('.sluggi-copy-confirmation')).to.be.null;
         });
 
         it('reverts to original icon after timeout', async () => {
@@ -293,6 +319,7 @@ describe('SluggiElement - Buttons', () => {
 
             const copyBtn = el.shadowRoot!.querySelector('.sluggi-copy-url-btn') as HTMLButtonElement;
             copyBtn.click();
+            await new Promise(resolve => setTimeout(resolve, 0));
             await el.updateComplete;
 
             expect(copyBtn.classList.contains('is-copied')).to.be.true;
