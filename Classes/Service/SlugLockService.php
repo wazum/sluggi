@@ -6,6 +6,7 @@ namespace Wazum\Sluggi\Service;
 
 use TYPO3\CMS\Backend\Utility\BackendUtility;
 use Wazum\Sluggi\Configuration\ExtensionConfiguration;
+use Wazum\Sluggi\Utility\DataHandlerUtility;
 
 final readonly class SlugLockService
 {
@@ -38,11 +39,8 @@ final readonly class SlugLockService
      */
     public function getLockValue(array $record): bool
     {
-        $languageId = $record['sys_language_uid'] ?? 0;
-        $languageId = (int)(is_array($languageId) ? ($languageId[0] ?? 0) : $languageId);
-
-        $l10nParent = $record['l10n_parent'] ?? 0;
-        $l10nParent = (int)(is_array($l10nParent) ? ($l10nParent[0] ?? 0) : $l10nParent);
+        $languageId = DataHandlerUtility::integerFieldValue($record, 'sys_language_uid');
+        $l10nParent = DataHandlerUtility::integerFieldValue($record, 'l10n_parent');
 
         if ($languageId > 0 && $l10nParent > 0) {
             $parentRecord = BackendUtility::getRecordWSOL('pages', $l10nParent, 'slug_locked');

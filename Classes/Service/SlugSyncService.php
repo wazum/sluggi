@@ -8,6 +8,7 @@ use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\DataHandling\DataHandler;
 use Wazum\Sluggi\Configuration\ExtensionConfiguration;
+use Wazum\Sluggi\Utility\DataHandlerUtility;
 
 final class SlugSyncService
 {
@@ -45,11 +46,8 @@ final class SlugSyncService
      */
     public function getSyncValue(array $record): bool
     {
-        $languageId = $record['sys_language_uid'] ?? 0;
-        $languageId = (int)(is_array($languageId) ? ($languageId[0] ?? 0) : $languageId);
-
-        $l10nParent = $record['l10n_parent'] ?? 0;
-        $l10nParent = (int)(is_array($l10nParent) ? ($l10nParent[0] ?? 0) : $l10nParent);
+        $languageId = DataHandlerUtility::integerFieldValue($record, 'sys_language_uid');
+        $l10nParent = DataHandlerUtility::integerFieldValue($record, 'l10n_parent');
 
         if ($languageId > 0 && $l10nParent > 0) {
             $parentRecord = BackendUtility::getRecordWSOL('pages', $l10nParent, 'tx_sluggi_sync');
@@ -94,10 +92,8 @@ final class SlugSyncService
         $transOrigPointerField = $GLOBALS['TCA'][$table]['ctrl']['transOrigPointerField'] ?? '';
 
         if ($languageField !== '' && $transOrigPointerField !== '') {
-            $languageId = $record[$languageField] ?? 0;
-            $languageId = (int)(is_array($languageId) ? ($languageId[0] ?? 0) : $languageId);
-            $l10nParent = $record[$transOrigPointerField] ?? 0;
-            $l10nParent = (int)(is_array($l10nParent) ? ($l10nParent[0] ?? 0) : $l10nParent);
+            $languageId = DataHandlerUtility::integerFieldValue($record, $languageField);
+            $l10nParent = DataHandlerUtility::integerFieldValue($record, $transOrigPointerField);
 
             if ($languageId > 0 && $l10nParent > 0) {
                 return $this->getRecordSyncState($table, $l10nParent);

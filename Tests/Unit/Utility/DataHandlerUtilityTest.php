@@ -95,4 +95,22 @@ final class DataHandlerUtilityTest extends TestCase
 
         self::assertFalse(DataHandlerUtility::isNestedSlugUpdate($dataHandler));
     }
+
+    #[Test]
+    public function integerFieldValueReturnsFirstEntryOfArrayValue(): void
+    {
+        self::assertSame(3, DataHandlerUtility::integerFieldValue(['sys_language_uid' => ['3']], 'sys_language_uid'));
+    }
+
+    #[Test]
+    public function integerFieldValueCastsScalarValue(): void
+    {
+        self::assertSame(17, DataHandlerUtility::integerFieldValue(['l10n_parent' => '17'], 'l10n_parent'));
+    }
+
+    #[Test]
+    public function integerFieldValueReturnsZeroForMissingField(): void
+    {
+        self::assertSame(0, DataHandlerUtility::integerFieldValue([], 'sys_language_uid'));
+    }
 }

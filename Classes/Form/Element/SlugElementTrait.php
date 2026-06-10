@@ -23,6 +23,7 @@ use Wazum\Sluggi\Service\SlugGeneratorService;
 use Wazum\Sluggi\Service\SlugLockService;
 use Wazum\Sluggi\Service\SlugSyncService;
 use Wazum\Sluggi\Service\UserSettingsService;
+use Wazum\Sluggi\Utility\DataHandlerUtility;
 
 trait SlugElementTrait
 {
@@ -518,11 +519,8 @@ trait SlugElementTrait
             return false;
         }
 
-        $languageId = $row[$languageField] ?? 0;
-        $languageId = (int)(is_array($languageId) ? ($languageId[0] ?? 0) : $languageId);
-
-        $l10nParent = $row[$transOrigPointerField] ?? 0;
-        $l10nParent = (int)(is_array($l10nParent) ? ($l10nParent[0] ?? 0) : $l10nParent);
+        $languageId = DataHandlerUtility::integerFieldValue($row, $languageField);
+        $l10nParent = DataHandlerUtility::integerFieldValue($row, $transOrigPointerField);
 
         return $languageId > 0 && $l10nParent > 0;
     }

@@ -20,6 +20,16 @@ final class DataHandlerUtility
         return !is_int($id) && !ctype_digit((string)$id);
     }
 
+    /**
+     * @param array<string, mixed> $record
+     */
+    public static function integerFieldValue(array $record, string $fieldName): int
+    {
+        $value = $record[$fieldName] ?? 0;
+
+        return (int)(is_array($value) ? ($value[0] ?? 0) : $value);
+    }
+
     public static function isSlugUnchanged(int $id, string $newSlug): bool
     {
         $currentRecord = BackendUtility::getRecordWSOL('pages', $id, 'slug');
