@@ -5,11 +5,13 @@ declare(strict_types=1);
 namespace Wazum\Sluggi\DataHandling;
 
 use InvalidArgumentException;
+use TYPO3\CMS\Backend\Domain\Repository\Localization\LocalizationRepository;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\DataHandling\SlugHelper as CoreSlugHelper;
 use TYPO3\CMS\Core\Exception\SiteNotFoundException;
 use TYPO3\CMS\Core\Site\SiteFinder;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
+use Wazum\Sluggi\Compatibility\Typo3Compatibility;
 use Wazum\Sluggi\Slug\SlugNormalizer;
 
 class SlugHelper extends CoreSlugHelper
@@ -21,18 +23,7 @@ class SlugHelper extends CoreSlugHelper
      */
     public function __construct(string $tableName, string $fieldName, array $configuration, int $workspaceId = 0)
     {
-        $this->tableName = $tableName;
-        $this->fieldName = $fieldName;
-        $this->configuration = $configuration;
-        $this->workspaceId = $workspaceId;
-
-        if ($this->tableName === 'pages' && $this->fieldName === 'slug') {
-            $this->prependSlashInSlug = true;
-        } else {
-            $this->prependSlashInSlug = $this->configuration['prependSlash'] ?? false;
-        }
-
-        $this->workspaceEnabled = BackendUtility::isTableWorkspaceEnabled($tableName);
+        parent::__construct($tableName, $fieldName, $configuration, $workspaceId);
         $this->sluggiNormalizer = GeneralUtility::makeInstance(SlugNormalizer::class);
     }
 
@@ -75,19 +66,41 @@ class SlugHelper extends CoreSlugHelper
             } catch (SiteNotFoundException|InvalidArgumentException) {
             }
 
-            foreach ($languageIds as $languageId) {
-                $localizedParentPageRecord = BackendUtility::getRecordLocalization(
-                    'pages',
-                    $parentPageRecord['uid'],
-                    $languageId
+            foreach ($languageIds as $fallbackLanguageId) {
+                $localizedParentPageRecord = $this->resolveLocalizedParentPageRecord(
+                    (int)$parentPageRecord['uid'],
+                    $fallbackLanguageId
                 );
-                if (!empty($localizedParentPageRecord)) {
-                    $parentPageRecord = reset($localizedParentPageRecord);
+                if ($localizedParentPageRecord !== null) {
+                    $parentPageRecord = $localizedParentPageRecord;
                     break;
                 }
             }
         }
 
         return $parentPageRecord;
+    }
+
+    /**
+     * @return array<string, mixed>|null
+     */
+    private function resolveLocalizedParentPageRecord(int $pageId, int $languageId): ?array
+    {
+        if (Typo3Compatibility::getMajorVersion() >= 14) {
+            $pageTranslations = GeneralUtility::makeInstance(LocalizationRepository::class)
+                ->getPageTranslations($pageId, [$languageId], $this->workspaceId);
+            if ($pageTranslations === []) {
+                return null;
+            }
+
+            return reset($pageTranslations)->toArray();
+        }
+
+        $localizedRecords = BackendUtility::getRecordLocalization('pages', $pageId, $languageId);
+        if (empty($localizedRecords)) {
+            return null;
+        }
+
+        return reset($localizedRecords);
     }
 }
