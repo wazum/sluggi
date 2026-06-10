@@ -524,4 +524,92 @@ describe('SluggiElement - Integration', () => {
             expect(calls[0].message).to.contain('Could not update');
         });
     });
+
+    describe('Proposal request sequencing', () => {
+        let originalFetch: typeof window.fetch;
+        let originalTypo3: any;
+
+        beforeEach(() => {
+            originalFetch = window.fetch;
+            originalTypo3 = (window as any).TYPO3;
+            (window as any).TYPO3 = { settings: { ajaxUrls: { record_slug_suggest: '/fake-endpoint' } } };
+        });
+
+        afterEach(() => {
+            window.fetch = originalFetch;
+            (window as any).TYPO3 = originalTypo3;
+        });
+
+        it('applies the newest proposal when a second request starts while one is in flight', async () => {
+            let resolveFirstResponse!: (response: Response) => void;
+            const firstResponse = new Promise<Response>((resolve) => {
+                resolveFirstResponse = resolve;
+            });
+            let requestCount = 0;
+            window.fetch = () => {
+                requestCount++;
+                if (requestCount === 1) {
+                    return firstResponse;
+                }
+                return Promise.resolve(
+                    new Response(JSON.stringify({ proposal: '/second', hasConflicts: false }), { status: 200 })
+                );
+            };
+
+            const el = await fixture<SluggiElement>(html`
+                <sluggi-element
+                    value="/test"
+                    record-id="123"
+                    page-id="1"
+                    table-name="pages"
+                    field-name="slug"
+                ></sluggi-element>
+            `);
+
+            const firstCall = el.sendSlugProposal('manual');
+            const secondCall = el.sendSlugProposal('manual');
+            resolveFirstResponse(
+                new Response(JSON.stringify({ proposal: '/first', hasConflicts: false }), { status: 200 })
+            );
+            await Promise.all([firstCall, secondCall]);
+
+            expect(el.value).to.equal('/second');
+        });
+
+        it('ignores the failure of a superseded proposal request', async () => {
+            let rejectFirstResponse!: (error: Error) => void;
+            const firstResponse = new Promise<Response>((_, reject) => {
+                rejectFirstResponse = reject;
+            });
+            let requestCount = 0;
+            window.fetch = () => {
+                requestCount++;
+                if (requestCount === 1) {
+                    return firstResponse;
+                }
+                return Promise.resolve(
+                    new Response(JSON.stringify({ proposal: '/second', hasConflicts: false }), { status: 200 })
+                );
+            };
+            (Notification as any)._reset();
+
+            const el = await fixture<SluggiElement>(html`
+                <sluggi-element
+                    value="/test"
+                    record-id="123"
+                    page-id="1"
+                    table-name="pages"
+                    field-name="slug"
+                ></sluggi-element>
+            `);
+
+            const firstCall = el.sendSlugProposal('manual');
+            const secondCall = el.sendSlugProposal('manual');
+            rejectFirstResponse(new Error('connection lost'));
+            await Promise.all([firstCall, secondCall]);
+
+            expect((Notification as any)._calls).to.have.lengthOf(0);
+            expect(el.value).to.equal('/second');
+        });
+    });
 });

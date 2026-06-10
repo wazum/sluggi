@@ -186,6 +186,7 @@ export class SluggiElement extends LitElement {
     private valueBeforeSync = '';
     private initialSyncValue = '';
     private initialLockValue = '';
+    private latestProposalRequestId = 0;
 
     private hideTimeoutId: number | null = null;
 
@@ -976,10 +977,6 @@ export class SluggiElement extends LitElement {
     }
 
     async sendSlugProposal(mode: 'auto' | 'recreate' | 'manual') {
-        if (this.loading) {
-            return;
-        }
-
         this.dispatchEvent(new CustomEvent('sluggi-request-proposal', {
             bubbles: true,
             composed: true,
@@ -1002,6 +999,7 @@ export class SluggiElement extends LitElement {
             return;
         }
 
+        const requestId = ++this.latestProposalRequestId;
         this.loading = true;
 
         try {
@@ -1036,15 +1034,23 @@ export class SluggiElement extends LitElement {
             }
 
             const data = await response.json();
+            if (requestId !== this.latestProposalRequestId) {
+                return;
+            }
             this.setProposal(data.proposal, data.hasConflicts, data.slug);
         } catch (error) {
+            if (requestId !== this.latestProposalRequestId) {
+                return;
+            }
             console.error('Slug proposal request failed:', error);
             Notification.warning(
                 this.labels['error.proposalFailed.title'] || 'URL preview unavailable',
                 this.labels['error.proposalFailed.message'] || 'Could not update the URL preview. Please check your connection and try again.',
             );
         } finally {
-            this.loading = false;
+            if (requestId === this.latestProposalRequestId) {
+                this.loading = false;
+            }
         }
     }
 
