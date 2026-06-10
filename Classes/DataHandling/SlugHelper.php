@@ -101,6 +101,9 @@ class SlugHelper extends CoreSlugHelper
             return null;
         }
 
-        return reset($localizedRecords);
+        $localizedRecord = reset($localizedRecords);
+        BackendUtility::workspaceOL('pages', $localizedRecord, $this->workspaceId);
+
+        return is_array($localizedRecord) ? $localizedRecord : null;
     }
 }
