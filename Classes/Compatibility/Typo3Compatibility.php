@@ -149,6 +149,18 @@ final class Typo3Compatibility
     }
 
     /**
+     * VersionState NEW_PLACEHOLDER value.
+     * TYPO3 12: class constant (Enumeration subclass)
+     * TYPO3 13+: backed enum case.
+     *
+     * @deprecated Remove when dropping TYPO3 12 support — use VersionState::NEW_PLACEHOLDER->value directly
+     */
+    public static function versionStateNewPlaceholder(): int
+    {
+        return 1;
+    }
+
+    /**
      * Write site configuration compatible across TYPO3 versions
      * TYPO3 12: SiteConfiguration->write()
      * TYPO3 13+: SiteWriter->write().

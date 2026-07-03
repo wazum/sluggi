@@ -191,6 +191,31 @@ final class SlugCascadeServiceTest extends FunctionalTestCase
     }
 
     #[Test]
+    public function processesPageCreatedInWorkspace(): void
+    {
+        $this->importCSVDataSet(__DIR__ . '/Fixtures/pages_recursive_workspace_new.csv');
+        $GLOBALS['BE_USER']->workspace = 1;
+        $this->get(Context::class)->setAspect('workspace', new WorkspaceAspect(1));
+        $updated = 0;
+        $this->cascade(2, $updated);
+        $record = BackendUtility::getRecordWSOL('pages', 100, 'slug');
+        self::assertSame('/parent/new-in-workspace', $record['slug']);
+        self::assertSame(2, $updated);
+    }
+
+    #[Test]
+    public function processesTranslationCreatedInWorkspace(): void
+    {
+        $this->setUpSite(withGerman: true);
+        $this->importCSVDataSet(__DIR__ . '/Fixtures/pages_recursive_workspace_new_translation.csv');
+        $GLOBALS['BE_USER']->workspace = 1;
+        $this->get(Context::class)->setAspect('workspace', new WorkspaceAspect(1));
+        $this->cascade(2);
+        $record = BackendUtility::getRecordWSOL('pages', 100, 'slug');
+        self::assertSame('/eltern-seite/kind-seite', $record['slug']);
+    }
+
+    #[Test]
     public function skipsPageMovedOutOfSubtreeInWorkspace(): void
     {
         $this->importCSVDataSet(__DIR__ . '/Fixtures/pages_recursive_workspace_moved_out.csv');

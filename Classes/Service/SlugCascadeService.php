@@ -141,7 +141,11 @@ final readonly class SlugCascadeService
 
         $result = $this->applyWorkspaceOverlay($rows);
 
-        return [...$result, ...$this->getMovePointersTargeting($parentPageId, 0)];
+        return [
+            ...$result,
+            ...$this->getMovePointersTargeting($parentPageId, 0),
+            ...$this->getRecordsCreatedInWorkspace($parentPageId, 0),
+        ];
     }
 
     /**
@@ -166,7 +170,39 @@ final readonly class SlugCascadeService
             ->executeQuery()
             ->fetchAllAssociative();
 
-        return $this->applyWorkspaceOverlay($rows);
+        return [
+            ...$this->applyWorkspaceOverlay($rows),
+            ...$this->getTranslationsCreatedInWorkspace($defaultLanguageUid),
+        ];
+    }
+
+    /**
+     * @return list<array<string, mixed>>
+     *
+     * @throws Exception
+     */
+    private function getTranslationsCreatedInWorkspace(int $defaultLanguageUid): array
+    {
+        $workspaceId = (int)($GLOBALS['BE_USER']->workspace ?? 0);
+        if ($workspaceId === 0) {
+            return [];
+        }
+
+        $queryBuilder = $this->connectionPool->getQueryBuilderForTable('pages');
+        $queryBuilder->getRestrictions()->removeByType(HiddenRestriction::class);
+
+        return $queryBuilder
+            ->select('*')
+            ->from('pages')
+            ->where(
+                $queryBuilder->expr()->eq('l10n_parent', $queryBuilder->createNamedParameter($defaultLanguageUid, ParameterType::INTEGER)),
+                $queryBuilder->expr()->gt('sys_language_uid', $queryBuilder->createNamedParameter(0, ParameterType::INTEGER)),
+                $queryBuilder->expr()->eq('t3ver_wsid', $queryBuilder->createNamedParameter($workspaceId, ParameterType::INTEGER)),
+                $queryBuilder->expr()->eq('t3ver_state', $queryBuilder->createNamedParameter(Typo3Compatibility::versionStateNewPlaceholder(), ParameterType::INTEGER)),
+            )
+            ->orderBy('sys_language_uid', 'ASC')
+            ->executeQuery()
+            ->fetchAllAssociative();
     }
 
     private function persistSlug(int $uid, string $newSlug, CorrelationId $correlationId): void
@@ -212,6 +248,39 @@ final readonly class SlugCascadeService
         }
 
         return $result;
+    }
+
+    /**
+     * Pages created inside a workspace have no live counterpart — they exist
+     * only as a NEW_PLACEHOLDER version row and are invisible to the
+     * live-record queries above.
+     *
+     * @return list<array<string, mixed>>
+     *
+     * @throws Exception
+     */
+    private function getRecordsCreatedInWorkspace(int $parentPid, int $languageId): array
+    {
+        $workspaceId = (int)($GLOBALS['BE_USER']->workspace ?? 0);
+        if ($workspaceId === 0) {
+            return [];
+        }
+
+        $queryBuilder = $this->connectionPool->getQueryBuilderForTable('pages');
+        $queryBuilder->getRestrictions()->removeByType(HiddenRestriction::class);
+
+        return $queryBuilder
+            ->select('*')
+            ->from('pages')
+            ->where(
+                $queryBuilder->expr()->eq('pid', $queryBuilder->createNamedParameter($parentPid, ParameterType::INTEGER)),
+                $queryBuilder->expr()->eq('sys_language_uid', $queryBuilder->createNamedParameter($languageId, ParameterType::INTEGER)),
+                $queryBuilder->expr()->eq('t3ver_wsid', $queryBuilder->createNamedParameter($workspaceId, ParameterType::INTEGER)),
+                $queryBuilder->expr()->eq('t3ver_state', $queryBuilder->createNamedParameter(Typo3Compatibility::versionStateNewPlaceholder(), ParameterType::INTEGER)),
+            )
+            ->orderBy('uid', 'ASC')
+            ->executeQuery()
+            ->fetchAllAssociative();
     }
 
     /**
