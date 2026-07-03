@@ -1073,6 +1073,8 @@ export class SluggiElement extends LitElement {
 
     private handleInput(e: InputEvent) {
         const input = e.target as HTMLInputElement;
+        const caretPosition = input.selectionStart ?? input.value.length;
+        const lengthBeforeSanitizing = input.value.length;
         let value = this.sanitizeSlug(input.value, false);
 
         if ((this.lastSegmentOnly || this.isOutsideLockedHierarchy) && !this.isFullPathMode) {
@@ -1082,6 +1084,10 @@ export class SluggiElement extends LitElement {
         }
 
         input.value = value;
+        // Reassigning the value moves the caret to the end; put it back where
+        // the user was typing, shifted by what sanitization removed
+        const restoredCaretPosition = Math.max(0, caretPosition - (lengthBeforeSanitizing - value.length));
+        input.setSelectionRange(restoredCaretPosition, restoredCaretPosition);
         this.editValue = value;
     }
 

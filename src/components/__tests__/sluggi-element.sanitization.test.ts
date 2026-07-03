@@ -232,4 +232,36 @@ describe('SluggiElement - Input Sanitization', () => {
             });
         });
     });
+
+    describe('caret position preservation', () => {
+        it('keeps the caret in place when a character is sanitized mid-string', async () => {
+            const el = await fixture<SluggiElement>(html`
+                <sluggi-element value="/page"></sluggi-element>
+            `);
+
+            const inputEl = await enterEditMode(el);
+            inputEl.value = 'abc-Xdef';
+            inputEl.setSelectionRange(5, 5);
+            inputEl.dispatchEvent(new Event('input', { bubbles: true }));
+            await el.updateComplete;
+
+            expect(inputEl.value).to.equal('abc-xdef');
+            expect(inputEl.selectionStart).to.equal(5);
+        });
+
+        it('moves the caret back when sanitization removes characters', async () => {
+            const el = await fixture<SluggiElement>(html`
+                <sluggi-element value="/page"></sluggi-element>
+            `);
+
+            const inputEl = await enterEditMode(el);
+            inputEl.value = 'abc@def';
+            inputEl.setSelectionRange(4, 4);
+            inputEl.dispatchEvent(new Event('input', { bubbles: true }));
+            await el.updateComplete;
+
+            expect(inputEl.value).to.equal('abcdef');
+            expect(inputEl.selectionStart).to.equal(3);
+        });
+    });
 });
