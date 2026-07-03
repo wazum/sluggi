@@ -267,6 +267,31 @@ final class HierarchyPermissionValidationTest extends FunctionalTestCase
     }
 
     #[Test]
+    public function moveInducedSlugUpdateIsNotBlockedByHierarchyPermission(): void
+    {
+        parent::setUp();
+        $this->importCSVDataSet(__DIR__ . '/Fixtures/pages_hierarchy_move.csv');
+        $this->setUpSite();
+        $GLOBALS['LANG'] = GeneralUtility::makeInstance(LanguageServiceFactory::class)->create('default');
+        $this->setUpBackendUser(2);
+
+        // Editor may create pages below Institute Two (uid=6) but not edit it,
+        // so the hierarchy prefix derived from their permissions does not
+        // cover the destination — the move must still rewrite the slug
+        $dataHandler = GeneralUtility::makeInstance(DataHandler::class);
+        $dataHandler->start([], [
+            'pages' => [
+                5 => [
+                    'move' => 6,
+                ],
+            ],
+        ]);
+        $dataHandler->process_cmdmap();
+
+        $this->assertCSVDataSet(__DIR__ . '/Fixtures/pages_hierarchy_after_move.csv');
+    }
+
+    #[Test]
     public function editorCannotRemoveLockedSegments(): void
     {
         $this->setUpBackendUser(2);

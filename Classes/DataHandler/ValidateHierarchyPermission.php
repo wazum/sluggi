@@ -54,6 +54,13 @@ final readonly class ValidateHierarchyPermission
             return;
         }
 
+        // A move always rewrites the slug to match the new parent, even when
+        // the destination lies outside the editor's hierarchy prefix — the
+        // move permission was already checked by the DataHandler.
+        if (DataHandlerUtility::isMoveInducedSlugUpdate($dataHandler)) {
+            return;
+        }
+
         $newSlug = (string)$fieldArray['slug'];
         $isNewRecord = DataHandlerUtility::isNewRecord($id);
 
