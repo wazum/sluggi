@@ -880,7 +880,7 @@ export class SluggiElement extends LitElement {
 
         const sanitizedValue = this.sanitizeSlug(this.editValue, true);
 
-        if ((this.lastSegmentOnly || this.isOutsideLockedHierarchy) && !sanitizedValue) {
+        if ((this.lastSegmentOnly || this.isOutsideLockedHierarchy || (this.lockedPrefix && !this.isFullPathMode)) && !sanitizedValue) {
             this.cancelEdit();
             return;
         }

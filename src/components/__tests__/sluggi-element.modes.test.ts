@@ -710,6 +710,23 @@ describe('SluggiElement - Modes', () => {
             expect(el.value).to.equal('/competely-different/path');
         });
 
+        it('cancels edit when segment is emptied inside the locked hierarchy', async () => {
+            const el = await fixture<SluggiElement>(html`
+                <sluggi-element
+                    value="/organization/department/team"
+                    locked-prefix="/organization/department"
+                ></sluggi-element>
+            `);
+
+            const input = await enterEditMode(el);
+            input.value = '';
+            input.dispatchEvent(new Event('input', { bubbles: true }));
+            input.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+            await el.updateComplete;
+
+            expect(el.value).to.equal('/organization/department/team');
+        });
+
         it('single-segment slug outside hierarchy has no prefix', async () => {
             const el = await fixture<SluggiElement>(html`
                 <sluggi-element
