@@ -90,6 +90,7 @@ final class SlugElementNonPageTableTest extends FunctionalTestCase
         $formData['parameterArray'] = [
             'itemFormElValue' => $formData['databaseRow']['slug'],
             'itemFormElName' => 'data[tx_sluggitest_article][' . $recordId . '][slug]',
+            'itemFormElID' => 'data_tx_sluggitest_article_' . $recordId . '_slug',
             'fieldConf' => $formData['processedTca']['columns']['slug'],
         ];
 

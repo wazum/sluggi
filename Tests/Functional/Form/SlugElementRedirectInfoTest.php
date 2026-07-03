@@ -71,6 +71,7 @@ final class SlugElementRedirectInfoTest extends FunctionalTestCase
         $formData['parameterArray'] = [
             'itemFormElValue' => $formData['databaseRow']['slug'],
             'itemFormElName' => 'data[pages][' . $pageId . '][slug]',
+            'itemFormElID' => 'data_pages_' . $pageId . '_slug',
             'fieldConf' => $formData['processedTca']['columns']['slug'],
         ];
 
