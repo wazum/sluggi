@@ -1264,11 +1264,19 @@ export class SluggiElement extends LitElement {
     // =========================================================================
 
     private cancelEdit() {
+        this.discardPendingProposal();
         this.mode = 'view';
         this.editValue = '';
         this.isFullPathMode = false;
         this.notifyFullPathFieldOfChange();
         this.dispatchEvent(new CustomEvent('sluggi-edit-cancel', { bubbles: true, composed: true }));
+    }
+
+    // A proposal request resolving after the user reversed the triggering
+    // action must not overwrite the value they just restored
+    private discardPendingProposal() {
+        this.latestProposalRequestId++;
+        this.loading = false;
     }
 
     private buildFullSlug(segment: string): string {
@@ -1555,12 +1563,15 @@ export class SluggiElement extends LitElement {
             if (this.hasNonEmptySourceFieldValue()) {
                 this.sendSlugProposal('recreate');
             }
-        } else if (this.valueBeforeSync) {
-            const changed = this.value !== this.valueBeforeSync;
-            this.value = this.valueBeforeSync;
-            this.valueBeforeSync = '';
-            if (changed) {
-                this.notifyFormEngineOfChange();
+        } else {
+            this.discardPendingProposal();
+            if (this.valueBeforeSync) {
+                const changed = this.value !== this.valueBeforeSync;
+                this.value = this.valueBeforeSync;
+                this.valueBeforeSync = '';
+                if (changed) {
+                    this.notifyFormEngineOfChange();
+                }
             }
         }
     }
@@ -1606,9 +1617,12 @@ export class SluggiElement extends LitElement {
         this.isLocked = !this.isLocked;
         this.notifyLockFieldOfChange();
 
-        if (this.isLocked && this.isFullPathMode) {
-            this.isFullPathMode = false;
-            this.notifyFullPathFieldOfChange();
+        if (this.isLocked) {
+            this.discardPendingProposal();
+            if (this.isFullPathMode) {
+                this.isFullPathMode = false;
+                this.notifyFullPathFieldOfChange();
+            }
         }
     }
 

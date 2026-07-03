@@ -611,5 +611,108 @@ describe('SluggiElement - Integration', () => {
             expect((Notification as any)._calls).to.have.lengthOf(0);
             expect(el.value).to.equal('/second');
         });
+
+        it('discards an in-flight proposal when sync is toggled off before it resolves', async () => {
+            let resolveResponse!: (response: Response) => void;
+            const pendingResponse = new Promise<Response>((resolve) => {
+                resolveResponse = resolve;
+            });
+            window.fetch = () => pendingResponse;
+
+            const titleInput = document.createElement('input');
+            titleInput.setAttribute('data-sluggi-source', '');
+            titleInput.setAttribute('data-formengine-input-name', 'data[pages][123][title]');
+            titleInput.value = 'Demo';
+            document.body.appendChild(titleInput);
+
+            const el = await fixture<SluggiElement>(html`
+                <sluggi-element
+                    value="/test"
+                    record-id="123"
+                    page-id="1"
+                    table-name="pages"
+                    field-name="slug"
+                    sync-feature-enabled
+                ></sluggi-element>
+            `);
+
+            const syncToggle = el.shadowRoot!.querySelector('.sluggi-sync-toggle') as HTMLElement;
+            syncToggle.click();
+            await el.updateComplete;
+            syncToggle.click();
+            resolveResponse(
+                new Response(JSON.stringify({ proposal: '/synced-proposal', hasConflicts: false }), { status: 200 })
+            );
+            await new Promise((resolve) => setTimeout(resolve));
+            await new Promise((resolve) => setTimeout(resolve));
+
+            expect(el.value).to.equal('/test');
+            expect(el.loading).to.be.false;
+
+            document.body.removeChild(titleInput);
+        });
+
+        it('discards an in-flight proposal when the slug is locked before it resolves', async () => {
+            let resolveResponse!: (response: Response) => void;
+            const pendingResponse = new Promise<Response>((resolve) => {
+                resolveResponse = resolve;
+            });
+            window.fetch = () => pendingResponse;
+
+            const el = await fixture<SluggiElement>(html`
+                <sluggi-element
+                    value="/test"
+                    record-id="123"
+                    page-id="1"
+                    table-name="pages"
+                    field-name="slug"
+                    lock-feature-enabled
+                ></sluggi-element>
+            `);
+
+            const proposalCall = el.sendSlugProposal('recreate');
+            const lockToggle = el.shadowRoot!.querySelector('.sluggi-lock-toggle') as HTMLElement;
+            lockToggle.click();
+            resolveResponse(
+                new Response(JSON.stringify({ proposal: '/synced-proposal', hasConflicts: false }), { status: 200 })
+            );
+            await proposalCall;
+
+            expect(el.value).to.equal('/test');
+            expect(el.loading).to.be.false;
+        });
+
+        it('discards an in-flight proposal when editing is cancelled before it resolves', async () => {
+            let resolveResponse!: (response: Response) => void;
+            const pendingResponse = new Promise<Response>((resolve) => {
+                resolveResponse = resolve;
+            });
+            window.fetch = () => pendingResponse;
+
+            const el = await fixture<SluggiElement>(html`
+                <sluggi-element
+                    value="/test"
+                    record-id="123"
+                    page-id="1"
+                    table-name="pages"
+                    field-name="slug"
+                ></sluggi-element>
+            `);
+
+            const editable = el.shadowRoot!.querySelector('.sluggi-editable') as HTMLElement;
+            editable.click();
+            await el.updateComplete;
+
+            const proposalCall = el.sendSlugProposal('recreate');
+            const input = el.shadowRoot!.querySelector('input.sluggi-input') as HTMLInputElement;
+            input.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+            resolveResponse(
+                new Response(JSON.stringify({ proposal: '/synced-proposal', hasConflicts: false }), { status: 200 })
+            );
+            await proposalCall;
+
+            expect(el.value).to.equal('/test');
+            expect(el.loading).to.be.false;
+        });
     });
 });
