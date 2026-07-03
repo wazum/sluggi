@@ -118,6 +118,34 @@ final class HandlePageCopyTest extends FunctionalTestCase
     }
 
     #[Test]
+    public function copyingPageTreeCopiesTranslatedChildrenWithLocalizedParentSlugs(): void
+    {
+        $this->setUpTest('pages_for_copy_translated_tree.csv');
+
+        // Enable recursive copy (copy subpages)
+        $backendUser = $this->setUpBackendUser(1);
+        $backendUser->uc['copyLevels'] = 10;
+        $backendUser->writeUC();
+
+        // Copy Source Parent (page 4) with its translated child into Target Parent (page 2)
+        // The German child must be prefixed with the German parent slug, not the English one
+        $dataHandler = GeneralUtility::makeInstance(DataHandler::class);
+        // @deprecated TYPO3 12 requires copyTree to be set manually (v13+ reads from user settings)
+        // @phpstan-ignore property.deprecated
+        @$dataHandler->copyTree = $backendUser->uc['copyLevels'];
+        $dataHandler->start([], [
+            'pages' => [
+                4 => [
+                    'copy' => 2,
+                ],
+            ],
+        ]);
+        $dataHandler->process_cmdmap();
+
+        $this->assertCSVDataSet(__DIR__ . '/Fixtures/pages_after_copy_translated_tree.csv');
+    }
+
+    #[Test]
     public function copyingPageTreeUpdatesChildSlugsWithNewParentPrefix(): void
     {
         $this->setUpTest('pages_for_copy_with_children.csv');

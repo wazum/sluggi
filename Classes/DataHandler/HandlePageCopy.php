@@ -42,7 +42,7 @@ final readonly class HandlePageCopy
     /**
      * @param array<string, array<int, array<string, mixed>>> $pasteDataMap
      * @param array<int, int>                                 $copiedPages
-     * @param array<int, string>                              $processedSlugs
+     * @param array<int, array<int, string>>                  $processedSlugs
      */
     private function updateSlugForCopiedPage(
         int $sourceUid,
@@ -65,7 +65,8 @@ final readonly class HandlePageCopy
         $parentPid = (int)$targetPage['pid'];
 
         // Check if parent was also copied and we already processed its slug
-        $parentSlug = $processedSlugs[$parentPid] ?? $this->slugGeneratorService->getParentSlug($parentPid, $languageId);
+        $parentSlug = $processedSlugs[$parentPid][$languageId]
+            ?? $this->slugGeneratorService->getParentSlug($parentPid, $languageId);
 
         $newSlug = $this->slugGeneratorService->combineWithParent(
             $parentSlug,
@@ -79,7 +80,12 @@ final readonly class HandlePageCopy
         $pasteDataMap['pages'][$targetUid]['slug'] = $newSlug;
         $pasteDataMap['pages'][$targetUid]['slug_locked'] = 0;
 
-        // Track this slug for child pages that might reference it
-        $processedSlugs[$targetUid] = $newSlug;
+        // Track this slug for child pages that might reference it;
+        // children carry the default-language uid as pid, so translations
+        // register under their l10n_parent
+        $cacheUid = $languageId === 0 ? $targetUid : (int)($targetPage['l10n_parent'] ?? 0);
+        if ($cacheUid > 0) {
+            $processedSlugs[$cacheUid][$languageId] = $newSlug;
+        }
     }
 }
