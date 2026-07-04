@@ -174,6 +174,22 @@ final class ReservedSlugPathTest extends FunctionalTestCase
     }
 
     #[Test]
+    public function movingPageWhoseNewSlugWouldBeReservedGetsPlaceholderSlug(): void
+    {
+        // Moving page 5 (/foo/child) to the root recalculates its slug to
+        // /child, which is reserved here. Vetoing the update would leave the
+        // page under the new parent with the old slug, so it must get the
+        // same temporary placeholder a new record gets.
+        $this->setUpSite(['/child']);
+
+        $dataHandler = GeneralUtility::makeInstance(DataHandler::class);
+        $dataHandler->start([], ['pages' => [5 => ['move' => 1]]]);
+        $dataHandler->process_cmdmap();
+
+        self::assertMatchesRegularExpression('#^/child-[0-9a-f]{10}$#', $this->getSlug(5));
+    }
+
+    #[Test]
     public function reservedPathsAreScopedPerSite(): void
     {
         $connection = GeneralUtility::makeInstance(ConnectionPool::class)

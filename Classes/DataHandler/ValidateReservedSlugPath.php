@@ -49,13 +49,15 @@ final readonly class ValidateReservedSlugPath
             return;
         }
 
-        if (DataHandlerUtility::isNewRecord($id)) {
+        if (DataHandlerUtility::isNewRecord($id) || DataHandlerUtility::isMoveInducedSlugUpdate($dataHandler)) {
             // On create we can't just clear the slug — TYPO3 then falls back to
             // the empty default which ends up as '/' and collides with the site
             // root. Rewrite the first path segment with a random suffix so the
             // record gets a valid, non-reserved, obviously temporary slug that
             // the editor has to fix. Client-side submit blocking prevents this
             // path under normal editor workflows; this runs as a safety net.
+            // On move, vetoing the update would leave the page under its new
+            // parent with the old slug, so it gets the same placeholder.
             $fieldArray['slug'] = $this->placeholderSlugFor($slug);
         } else {
             unset($fieldArray['slug']);
