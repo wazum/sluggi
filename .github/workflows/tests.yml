@@ -176,6 +176,9 @@ jobs:
 
       - name: Install dependencies
         run: |
+          # TYPO3 12.4 patch releases carry security advisories whose fixes are
+          # ELTS-only; without an ELTS subscription Composer 2.9 blocks them.
+          composer config --global audit.block-insecure false
           composer require "typo3/cms-core:^${{ matrix.typo3 }}" "typo3/cms-backend:^${{ matrix.typo3 }}" "typo3/cms-redirects:^${{ matrix.typo3 }}" --no-update --no-interaction
           composer install --no-interaction
 
@@ -233,6 +236,9 @@ jobs:
 
       - name: Install dependencies
         run: |
+          # TYPO3 12.4 patch releases carry security advisories whose fixes are
+          # ELTS-only; without an ELTS subscription Composer 2.9 blocks them.
+          composer config --global audit.block-insecure false
           composer require "typo3/cms-core:^${{ matrix.typo3 }}" "typo3/cms-backend:^${{ matrix.typo3 }}" "typo3/cms-redirects:^${{ matrix.typo3 }}" --no-update --no-interaction
           composer install --no-interaction
 
@@ -316,7 +322,11 @@ jobs:
           cache-dependency-path: Tests/E2e/package-lock.json
 
       - name: Create TYPO3 project
-        run: composer create-project typo3/cms-base-distribution:^${{ matrix.dist }} typo3-test --no-interaction
+        run: |
+          # TYPO3 12.4 patch releases carry security advisories whose fixes are
+          # ELTS-only; without an ELTS subscription Composer 2.9 blocks them.
+          composer config --global audit.block-insecure false
+          composer create-project typo3/cms-base-distribution:^${{ matrix.dist }} typo3-test --no-interaction
 
       - name: Install sluggi extension
         run: |
