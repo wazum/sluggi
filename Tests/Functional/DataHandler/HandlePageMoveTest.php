@@ -181,4 +181,43 @@ final class HandlePageMoveTest extends FunctionalTestCase
 
         $this->assertCSVDataSet(__DIR__ . '/Fixtures/pages_after_move_into_excluded.csv');
     }
+
+    #[Test]
+    public function movingPageAsRestrictedEditorStillUpdatesSlugToMatchNewParent(): void
+    {
+        // With last_segment_only=1 a non-admin may only edit the last slug
+        // segment by hand. A page move must still re-prefix the slug to the
+        // new parent — the move re-writes the parent path automatically, which
+        // is not the manual parent-path edit the restriction guards against.
+        $this->setUpTest('pages_for_move_last_segment.csv');
+        $GLOBALS['TYPO3_CONF_VARS']['EXTENSIONS']['sluggi']['last_segment_only'] = '1';
+        $this->setUpBackendUser(2);
+
+        $dataHandler = GeneralUtility::makeInstance(DataHandler::class);
+        $dataHandler->start([], [
+            'pages' => [
+                4 => [
+                    'move' => 3,
+                ],
+            ],
+        ]);
+        $dataHandler->process_cmdmap();
+
+        self::assertEmpty($dataHandler->errorLog, implode(', ', $dataHandler->errorLog));
+        $this->assertCSVDataSet(__DIR__ . '/Fixtures/pages_after_move_last_segment.csv');
+    }
+
+    #[Test]
+    public function controlRestrictedEditorManualParentEditIsBlocked(): void
+    {
+        $this->setUpTest('pages_for_move_last_segment.csv');
+        $GLOBALS['TYPO3_CONF_VARS']['EXTENSIONS']['sluggi']['last_segment_only'] = '1';
+        $this->setUpBackendUser(2);
+
+        $dataHandler = GeneralUtility::makeInstance(DataHandler::class);
+        $dataHandler->start(['pages' => [4 => ['slug' => '/parent-b/child-page']]], []);
+        $dataHandler->process_datamap();
+
+        self::assertNotEmpty($dataHandler->errorLog, 'Manual parent-path edit must stay blocked');
+    }
 }
