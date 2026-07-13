@@ -124,6 +124,20 @@ final class SlugHelperTest extends FunctionalTestCase
     }
 
     #[Test]
+    public function generateReplacesSlashInTitleWithFallbackCharacter(): void
+    {
+        $this->setUpTest();
+
+        $GLOBALS['TYPO3_CONF_VARS']['EXTENSIONS']['sluggi']['exclude_doktypes'] = '199,254';
+
+        $slugHelper = $this->createSlugHelper();
+        $record = ['title' => 'x / x', 'uid' => 3];
+        $slug = $slugHelper->generate($record, 2);
+
+        self::assertSame('/x-x', $slug);
+    }
+
+    #[Test]
     public function generateIncludesSysfolderInSlugWhenNotExcluded(): void
     {
         $this->setUpTest();

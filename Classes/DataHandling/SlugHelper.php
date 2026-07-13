@@ -23,6 +23,9 @@ class SlugHelper extends CoreSlugHelper
      */
     public function __construct(string $tableName, string $fieldName, array $configuration, int $workspaceId = 0)
     {
+        // Core treats "/" in source-field values as a path separator during
+        // generation; a TCA replacements entry for "/" wins over this default.
+        $configuration['generatorOptions']['replacements']['/'] ??= (string)($configuration['fallbackCharacter'] ?? '-');
         parent::__construct($tableName, $fieldName, $configuration, $workspaceId);
         $this->sluggiNormalizer = GeneralUtility::makeInstance(SlugNormalizer::class);
     }

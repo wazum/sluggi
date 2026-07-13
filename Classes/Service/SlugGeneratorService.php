@@ -36,11 +36,10 @@ final readonly class SlugGeneratorService
     {
         $fieldConfig = $GLOBALS['TCA'][$table]['columns'][$slugField]['config'] ?? [];
         $slugHelper = $this->getSlugHelperForTable($table, $slugField, $fieldConfig);
-        $sanitizedRecord = $this->sanitizeSourceFieldValues($record, $fieldConfig);
 
         $state = RecordStateFactory::forName($table)
-            ->fromArray($sanitizedRecord, $pid, $sanitizedRecord['uid'] ?? 0);
-        $slug = $slugHelper->generate($sanitizedRecord, $pid);
+            ->fromArray($record, $pid, $record['uid'] ?? 0);
+        $slug = $slugHelper->generate($record, $pid);
 
         $prependSlash = (bool)($fieldConfig['prependSlash'] ?? ($table === 'pages'));
         $eval = (string)($fieldConfig['eval'] ?? '');
@@ -152,31 +151,6 @@ final readonly class SlugGeneratorService
         } catch (SiteNotFoundException) {
             return $slug;
         }
-    }
-
-    /**
-     * @param array<string, mixed> $record
-     * @param array<string, mixed> $fieldConfig
-     *
-     * @return array<string, mixed>
-     */
-    private function sanitizeSourceFieldValues(array $record, array $fieldConfig): array
-    {
-        $fallbackCharacter = (string)($fieldConfig['generatorOptions']['fallbackCharacter'] ?? '-');
-        $sourceFields = $fieldConfig['generatorOptions']['fields'] ?? [];
-
-        foreach ($sourceFields as $fieldNameParts) {
-            if (is_string($fieldNameParts)) {
-                $fieldNameParts = array_map('trim', explode(',', $fieldNameParts));
-            }
-            foreach ($fieldNameParts as $fieldName) {
-                if (isset($record[$fieldName]) && is_string($record[$fieldName])) {
-                    $record[$fieldName] = str_replace('/', $fallbackCharacter, $record[$fieldName]);
-                }
-            }
-        }
-
-        return $record;
     }
 
     /**

@@ -18,7 +18,6 @@ trait FormSlugAjaxControllerTrait
     public function suggestAction(ServerRequestInterface $request): ResponseInterface
     {
         $request = $this->hydrateMissingSourceFieldValuesFromRecord($request);
-        $request = $this->sanitizeSlashesInSourceFields($request);
 
         $response = parent::suggestAction($request);
         $data = json_decode((string)$response->getBody(), true);
@@ -67,40 +66,6 @@ trait FormSlugAjaxControllerTrait
                 $values[$sourceField] = (string)$record[$sourceField];
             }
         }
-        $params['values'] = $values;
-
-        return $request->withParsedBody($params);
-    }
-
-    /**
-     * Replace slashes in source field values with the fallback character.
-     * TYPO3 core treats slashes as path separators, creating unintended segments.
-     */
-    private function sanitizeSlashesInSourceFields(ServerRequestInterface $request): ServerRequestInterface
-    {
-        /** @var array<string, mixed> $params */
-        $params = $request->getParsedBody() ?? [];
-        $tableName = (string)($params['tableName'] ?? '');
-        $fieldName = (string)($params['fieldName'] ?? '');
-        $fieldConfig = $GLOBALS['TCA'][$tableName]['columns'][$fieldName]['config'] ?? [];
-
-        $fallbackCharacter = (string)($fieldConfig['generatorOptions']['fallbackCharacter'] ?? '-');
-        $sourceFields = $fieldConfig['generatorOptions']['fields'] ?? [];
-
-        /** @var array<string, mixed> $values */
-        $values = $params['values'] ?? [];
-
-        foreach ($sourceFields as $fieldNameParts) {
-            if (is_string($fieldNameParts)) {
-                $fieldNameParts = array_map('trim', explode(',', $fieldNameParts));
-            }
-            foreach ($fieldNameParts as $sourceField) {
-                if (isset($values[$sourceField]) && is_string($values[$sourceField])) {
-                    $values[$sourceField] = str_replace('/', $fallbackCharacter, $values[$sourceField]);
-                }
-            }
-        }
-
         $params['values'] = $values;
 
         return $request->withParsedBody($params);
