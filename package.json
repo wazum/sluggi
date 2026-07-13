@@ -27,6 +27,12 @@
     },
     "overrides": {
         "yauzl": "^3.2.1",
-        "qs": "^6.15.2"
+        "qs": "^6.15.2",
+        "@web/dev-server-core": {
+            "ws": "^7.5.11"
+        },
+        "puppeteer-core": {
+            "ws": "^8.21.0"
+        }
     }
 }
