@@ -1002,6 +1002,7 @@ export class SluggiElement extends LitElement {
 
         const requestId = ++this.latestProposalRequestId;
         this.loading = true;
+        SluggiElement.lockSaveButtons(this.ownerDocument);
 
         try {
             const formData = new FormData();
@@ -1052,9 +1053,44 @@ export class SluggiElement extends LitElement {
                 this.labels['error.proposalFailed.message'] || 'Could not update the URL preview. Please check your connection and try again.',
             );
         } finally {
+            SluggiElement.unlockSaveButtons(this.ownerDocument);
             if (requestId === this.latestProposalRequestId) {
                 this.loading = false;
             }
+        }
+    }
+
+    // =========================================================================
+    // Private Helpers: Save Button Lock
+    // =========================================================================
+
+    private static pendingProposalRequestCount = 0;
+
+    // Saving while a proposal request is in flight would submit a provisional
+    // slug and skip the conflict modal — lock the document save buttons for
+    // the duration. FormEngine's Ctrl+S shortcut clicks the save button, so a
+    // disabled button blocks keyboard saves too.
+    private static lockSaveButtons(doc: Document): void {
+        SluggiElement.pendingProposalRequestCount++;
+        if (SluggiElement.pendingProposalRequestCount > 1) {
+            return;
+        }
+        for (const button of doc.querySelectorAll<HTMLButtonElement>('button[name^="_save"]:not([disabled])')) {
+            button.disabled = true;
+            button.dataset.sluggiDisabled = 'true';
+        }
+    }
+
+    private static unlockSaveButtons(doc: Document): void {
+        SluggiElement.pendingProposalRequestCount = Math.max(0, SluggiElement.pendingProposalRequestCount - 1);
+        if (SluggiElement.pendingProposalRequestCount > 0) {
+            return;
+        }
+        // Only re-enable buttons this lock disabled — a button disabled for
+        // other reasons must stay disabled.
+        for (const button of doc.querySelectorAll<HTMLButtonElement>('button[data-sluggi-disabled]')) {
+            button.disabled = false;
+            delete button.dataset.sluggiDisabled;
         }
     }
 

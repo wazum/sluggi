@@ -596,6 +596,72 @@ describe('SluggiElement - Integration', () => {
         });
     });
 
+    describe('Save button lock during proposal requests', () => {
+        let originalFetch: typeof window.fetch;
+        let originalTypo3: any;
+
+        beforeEach(() => {
+            originalFetch = window.fetch;
+            originalTypo3 = (window as any).TYPO3;
+            (window as any).TYPO3 = { settings: { ajaxUrls: { record_slug_suggest: '/fake-endpoint' } } };
+        });
+
+        afterEach(() => {
+            window.fetch = originalFetch;
+            (window as any).TYPO3 = originalTypo3;
+        });
+
+        const proposalResponse = () => new Response(
+            JSON.stringify({ proposal: '/proposed', hasConflicts: false, manual: '' }),
+            { status: 200, headers: { 'Content-Type': 'application/json' } },
+        );
+
+        it('disables document save buttons while a proposal request is in flight', async () => {
+            let resolveResponse!: (response: Response) => void;
+            window.fetch = () => new Promise<Response>((resolve) => {
+                resolveResponse = resolve;
+            });
+
+            const container = document.createElement('div');
+            container.innerHTML = `
+                <sluggi-element value="/test" record-id="123" page-id="1" table-name="pages" field-name="slug"></sluggi-element>
+                <button name="_savedok" type="button">Save</button>
+            `;
+            document.body.appendChild(container);
+            const el = container.querySelector('sluggi-element') as SluggiElement;
+            const saveButton = container.querySelector('button[name="_savedok"]') as HTMLButtonElement;
+            await el.updateComplete;
+
+            const request = el.sendSlugProposal('manual');
+            expect(saveButton.disabled, 'save button must be disabled while the request is pending').to.equal(true);
+
+            resolveResponse(proposalResponse());
+            await request;
+            expect(saveButton.disabled, 'save button must be re-enabled after the request settles').to.equal(false);
+
+            document.body.removeChild(container);
+        });
+
+        it('does not re-enable buttons that were disabled for other reasons', async () => {
+            window.fetch = async () => proposalResponse();
+
+            const container = document.createElement('div');
+            container.innerHTML = `
+                <sluggi-element value="/test" record-id="123" page-id="1" table-name="pages" field-name="slug"></sluggi-element>
+                <button name="_savedok" type="button" disabled>Save</button>
+            `;
+            document.body.appendChild(container);
+            const el = container.querySelector('sluggi-element') as SluggiElement;
+            const saveButton = container.querySelector('button[name="_savedok"]') as HTMLButtonElement;
+            await el.updateComplete;
+
+            await el.sendSlugProposal('manual');
+            expect(saveButton.disabled, 'a button disabled beforehand must stay disabled').to.equal(true);
+
+            document.body.removeChild(container);
+        });
+    });
+
     describe('Proposal request sequencing', () => {
         let originalFetch: typeof window.fetch;
         let originalTypo3: any;
