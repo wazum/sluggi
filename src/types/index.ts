@@ -2,8 +2,18 @@ export interface SlugProposalResponse {
     hasConflicts: boolean;
     manual: string;
     proposal: string;
-    inaccessibleSegments?: string;
-    lastSegmentOnly?: boolean;
+    /** The original slug, added by sluggi's XCLASS when a conflict exists */
+    slug?: string;
+}
+
+export function isSlugProposalResponse(value: unknown): value is SlugProposalResponse {
+    if (typeof value !== 'object' || value === null) {
+        return false;
+    }
+    const candidate = value as Record<string, unknown>;
+    return typeof candidate.proposal === 'string'
+        && typeof candidate.hasConflicts === 'boolean'
+        && (candidate.slug === undefined || typeof candidate.slug === 'string');
 }
 
 export type ProposalMode = 'auto' | 'recreate' | 'manual';

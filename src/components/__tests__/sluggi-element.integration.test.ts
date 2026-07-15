@@ -570,6 +570,30 @@ describe('SluggiElement - Integration', () => {
             expect(calls[0].title).to.equal('URL preview unavailable');
             expect(calls[0].message).to.contain('Could not update');
         });
+
+        it('shows a warning and keeps the value when the proposal response is malformed', async () => {
+            window.fetch = async () => new Response(JSON.stringify({ unexpected: true }), {
+                status: 200,
+                headers: { 'Content-Type': 'application/json' },
+            });
+
+            const el = await fixture<SluggiElement>(html`
+                <sluggi-element
+                    value="/test"
+                    record-id="123"
+                    page-id="1"
+                    table-name="pages"
+                    field-name="slug"
+                ></sluggi-element>
+            `);
+
+            await el.sendSlugProposal('manual');
+
+            expect(el.value, 'value must not be clobbered by a malformed response').to.equal('/test');
+            const calls = (Notification as any)._calls as Array<{ type: string }>;
+            expect(calls).to.have.lengthOf(1);
+            expect(calls[0].type).to.equal('warning');
+        });
     });
 
     describe('Proposal request sequencing', () => {

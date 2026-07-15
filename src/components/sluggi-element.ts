@@ -3,6 +3,7 @@ import { customElement, property, state, query } from 'lit/decorators.js';
 import Modal from '@typo3/backend/modal.js';
 import Severity from '@typo3/backend/severity.js';
 import Notification from '@typo3/backend/notification.js';
+import { isSlugProposalResponse } from '../types/index.js';
 import type { ComponentMode, ToggleConfig } from '@/types';
 import { editIcon, fullPathEditIcon, refreshIcon, checkIcon, closeIcon, syncOnIcon, syncOffIcon, lockOnIcon, lockOffIcon, copyIcon, menuIcon } from './icons.js';
 import styles from '../styles/sluggi-element.scss?inline';
@@ -1033,11 +1034,14 @@ export class SluggiElement extends LitElement {
                 throw new Error(`HTTP error ${response.status}`);
             }
 
-            const data = await response.json();
+            const data: unknown = await response.json();
             if (requestId !== this.latestProposalRequestId) {
                 return;
             }
-            this.setProposal(data.proposal, data.hasConflicts, data.slug);
+            if (!isSlugProposalResponse(data)) {
+                throw new Error('Malformed slug proposal response');
+            }
+            this.setProposal(data.proposal, data.hasConflicts, data.slug ?? '');
         } catch (error) {
             if (requestId !== this.latestProposalRequestId) {
                 return;
