@@ -50,6 +50,29 @@ final class SlugChangeReportStoreTest extends TestCase
     }
 
     #[Test]
+    public function discardDoesNotTouchSessionModuleDataOnCli(): void
+    {
+        // A CLI backend user (CommandLineUserAuthentication) has no user
+        // session — getModuleData would fatal on it. Core guards its
+        // setUpdateSignal aggregator with Environment::isCli(); discard()
+        // must do the same.
+        $backendUser = $this->createMock(\TYPO3\CMS\Core\Authentication\BackendUserAuthentication::class);
+        $backendUser->expects(self::never())->method('getModuleData');
+        $previousBackendUser = $GLOBALS['BE_USER'] ?? null;
+        $GLOBALS['BE_USER'] = $backendUser;
+
+        try {
+            $store = new SlugChangeReportStore();
+            $store->incrementPagesUpdated();
+            $store->discard();
+
+            self::assertNull($store->getReport());
+        } finally {
+            $GLOBALS['BE_USER'] = $previousBackendUser;
+        }
+    }
+
+    #[Test]
     public function markCandidateRecordsOriginalSlugOnce(): void
     {
         $store = new SlugChangeReportStore();

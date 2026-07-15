@@ -6,6 +6,7 @@ namespace Wazum\Sluggi\Service;
 
 use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\Authentication\BackendUserAuthentication;
+use TYPO3\CMS\Core\Core\Environment;
 
 /**
  * Request-scoped storage for the slug-change report payload.
@@ -130,6 +131,12 @@ final class SlugChangeReportStore
         $this->entries = [];
         $this->pagesUpdated = 0;
         $this->redirectsCreated = 0;
+
+        // A CLI backend user has no user session — getModuleData would fatal.
+        // Core guards its setUpdateSignal aggregator the same way.
+        if (Environment::isCli()) {
+            return;
+        }
 
         $beUser = $GLOBALS['BE_USER'] ?? null;
         if (!$beUser instanceof BackendUserAuthentication) {
