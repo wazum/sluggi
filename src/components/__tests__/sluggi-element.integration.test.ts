@@ -616,7 +616,7 @@ describe('SluggiElement - Integration', () => {
             { status: 200, headers: { 'Content-Type': 'application/json' } },
         );
 
-        it('disables document save buttons while a proposal request is in flight', async () => {
+        it('defers a save click while a proposal request is in flight and replays it afterwards', async () => {
             let resolveResponse!: (response: Response) => void;
             window.fetch = () => new Promise<Response>((resolve) => {
                 resolveResponse = resolve;
@@ -632,31 +632,71 @@ describe('SluggiElement - Integration', () => {
             const saveButton = container.querySelector('button[name="_savedok"]') as HTMLButtonElement;
             await el.updateComplete;
 
+            const reachedButton: MouseEvent[] = [];
+            saveButton.addEventListener('click', (event) => reachedButton.push(event));
+
             const request = el.sendSlugProposal('manual');
-            expect(saveButton.disabled, 'save button must be disabled while the request is pending').to.equal(true);
+            const blockedClick = new MouseEvent('click', { bubbles: true, cancelable: true });
+            const proceeded = saveButton.dispatchEvent(blockedClick);
+            expect(proceeded, 'a save click during a pending request must be canceled').to.equal(false);
+            expect(reachedButton, 'the canceled click must not reach the button').to.have.lengthOf(0);
 
             resolveResponse(proposalResponse());
             await request;
-            expect(saveButton.disabled, 'save button must be re-enabled after the request settles').to.equal(false);
+            expect(reachedButton, 'the save click must be replayed after the request settles').to.have.lengthOf(1);
+            expect(reachedButton[0].defaultPrevented).to.equal(false);
 
             document.body.removeChild(container);
         });
 
-        it('does not re-enable buttons that were disabled for other reasons', async () => {
-            window.fetch = async () => proposalResponse();
+        it('drops a deferred save click when the proposal came back with a conflict', async () => {
+            let resolveResponse!: (response: Response) => void;
+            window.fetch = () => new Promise<Response>((resolve) => {
+                resolveResponse = resolve;
+            });
 
             const container = document.createElement('div');
             container.innerHTML = `
                 <sluggi-element value="/test" record-id="123" page-id="1" table-name="pages" field-name="slug"></sluggi-element>
-                <button name="_savedok" type="button" disabled>Save</button>
+                <button name="_savedok" type="button">Save</button>
             `;
             document.body.appendChild(container);
             const el = container.querySelector('sluggi-element') as SluggiElement;
             const saveButton = container.querySelector('button[name="_savedok"]') as HTMLButtonElement;
             await el.updateComplete;
 
-            await el.sendSlugProposal('manual');
-            expect(saveButton.disabled, 'a button disabled beforehand must stay disabled').to.equal(true);
+            const reachedButton: MouseEvent[] = [];
+            saveButton.addEventListener('click', (event) => reachedButton.push(event));
+
+            const request = el.sendSlugProposal('manual');
+            saveButton.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
+
+            resolveResponse(new Response(
+                JSON.stringify({ proposal: '/test-1', hasConflicts: true, manual: '', slug: '/test' }),
+                { status: 200, headers: { 'Content-Type': 'application/json' } },
+            ));
+            await request;
+            expect(reachedButton, 'the editor must decide on the conflict before the save replays').to.have.lengthOf(0);
+
+            document.body.removeChild(container);
+        });
+
+        it('leaves save clicks alone when no proposal request is pending', async () => {
+            window.fetch = async () => proposalResponse();
+
+            const container = document.createElement('div');
+            container.innerHTML = `
+                <sluggi-element value="/test" record-id="123" page-id="1" table-name="pages" field-name="slug"></sluggi-element>
+                <button name="_savedok" type="button">Save</button>
+            `;
+            document.body.appendChild(container);
+            const el = container.querySelector('sluggi-element') as SluggiElement;
+            const saveButton = container.querySelector('button[name="_savedok"]') as HTMLButtonElement;
+            await el.updateComplete;
+
+            const clickEvent = new MouseEvent('click', { bubbles: true, cancelable: true });
+            const proceeded = saveButton.dispatchEvent(clickEvent);
+            expect(proceeded).to.equal(true);
 
             document.body.removeChild(container);
         });

@@ -217,6 +217,12 @@ export class SluggiElement extends LitElement {
         this.originalValue = this.value;
         this.initialSyncValue = (this.parentElement?.querySelector('.sluggi-sync-field') as HTMLInputElement | null)?.value ?? '';
         this.initialLockValue = (this.parentElement?.querySelector('.sluggi-lock-field') as HTMLInputElement | null)?.value ?? '';
+        // Registered before the redirect-modal interceptor so a pending
+        // proposal defers the save before any modal decision is made.
+        SluggiElement.connectedElementCount++;
+        if (SluggiElement.connectedElementCount === 1) {
+            this.ownerDocument.addEventListener('click', SluggiElement.handleSaveClickDuringProposal, true);
+        }
         this.setupSourceFieldListeners();
         this.setupSourceConfirmListeners();
         this.observeSourceFieldInitialization();
@@ -227,6 +233,12 @@ export class SluggiElement extends LitElement {
 
     override disconnectedCallback() {
         super.disconnectedCallback();
+        SluggiElement.connectedElementCount--;
+        if (SluggiElement.connectedElementCount <= 0) {
+            this.ownerDocument.removeEventListener('click', SluggiElement.handleSaveClickDuringProposal, true);
+            SluggiElement.pendingProposalRequestCount = 0;
+            SluggiElement.deferredSaveButton = null;
+        }
         this.removeSourceFieldListeners();
         this.removeSourceConfirmListeners();
         this.sourceFieldObserver?.disconnect();
@@ -1002,7 +1014,7 @@ export class SluggiElement extends LitElement {
 
         const requestId = ++this.latestProposalRequestId;
         this.loading = true;
-        SluggiElement.lockSaveButtons(this.ownerDocument);
+        SluggiElement.pendingProposalRequestCount++;
 
         try {
             const formData = new FormData();
@@ -1053,7 +1065,7 @@ export class SluggiElement extends LitElement {
                 this.labels['error.proposalFailed.message'] || 'Could not update the URL preview. Please check your connection and try again.',
             );
         } finally {
-            SluggiElement.unlockSaveButtons(this.ownerDocument);
+            this.endProposalRequest();
             if (requestId === this.latestProposalRequestId) {
                 this.loading = false;
             }
@@ -1061,36 +1073,48 @@ export class SluggiElement extends LitElement {
     }
 
     // =========================================================================
-    // Private Helpers: Save Button Lock
+    // Private Helpers: Save Deferral During Proposal Requests
     // =========================================================================
 
     private static pendingProposalRequestCount = 0;
 
+    private static deferredSaveButton: HTMLButtonElement | null = null;
+
+    private static connectedElementCount = 0;
+
     // Saving while a proposal request is in flight would submit a provisional
-    // slug and skip the conflict modal — lock the document save buttons for
-    // the duration. FormEngine's Ctrl+S shortcut clicks the save button, so a
-    // disabled button blocks keyboard saves too.
-    private static lockSaveButtons(doc: Document): void {
-        SluggiElement.pendingProposalRequestCount++;
-        if (SluggiElement.pendingProposalRequestCount > 1) {
+    // slug and skip the conflict modal. Disabling the buttons instead would
+    // swallow clicks whose mousedown already happened — the mousedown blurs
+    // the source field, which fires the change event that starts the request,
+    // so by mouseup the button would be disabled and the activation lost.
+    // Defer the click and replay it once the request settles. FormEngine's
+    // Ctrl+S shortcut clicks the save button, so keyboard saves defer too.
+    private static handleSaveClickDuringProposal(event: MouseEvent): void {
+        if (SluggiElement.pendingProposalRequestCount === 0) {
             return;
         }
-        for (const button of doc.querySelectorAll<HTMLButtonElement>('button[name^="_save"]:not([disabled])')) {
-            button.disabled = true;
-            button.dataset.sluggiDisabled = 'true';
+        const target = event.target as HTMLElement;
+        const saveButton = target.closest('button[name^="_save"]') as HTMLButtonElement | null;
+        if (!saveButton) {
+            return;
         }
+        event.preventDefault();
+        event.stopPropagation();
+        event.stopImmediatePropagation();
+        SluggiElement.deferredSaveButton = saveButton;
     }
 
-    private static unlockSaveButtons(doc: Document): void {
+    private endProposalRequest(): void {
         SluggiElement.pendingProposalRequestCount = Math.max(0, SluggiElement.pendingProposalRequestCount - 1);
         if (SluggiElement.pendingProposalRequestCount > 0) {
             return;
         }
-        // Only re-enable buttons this lock disabled — a button disabled for
-        // other reasons must stay disabled.
-        for (const button of doc.querySelectorAll<HTMLButtonElement>('button[data-sluggi-disabled]')) {
-            button.disabled = false;
-            delete button.dataset.sluggiDisabled;
+        const deferredSaveButton = SluggiElement.deferredSaveButton;
+        SluggiElement.deferredSaveButton = null;
+        // A conflict needs the editor's decision first — the deferred save
+        // must not race past the conflict modal.
+        if (deferredSaveButton !== null && !this.hasConflict) {
+            deferredSaveButton.click();
         }
     }
 
