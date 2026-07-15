@@ -240,6 +240,36 @@ final class SlugCascadeServiceTest extends FunctionalTestCase
     }
 
     #[Test]
+    public function countsChildAsSkippedWhenGeneratedSlugIsRejected(): void
+    {
+        // /parent/child-page is what the cascade would generate for page 3 —
+        // reserving it makes the nested DataHandler update drop the slug.
+        Typo3Compatibility::writeSiteConfiguration('test', [
+            'rootPageId' => 1,
+            'base' => '/',
+            'languages' => [[
+                'languageId' => 0,
+                'title' => 'English',
+                'locale' => 'en_US.UTF-8',
+                'base' => '/',
+            ]],
+            'settings' => [
+                'redirects' => ['autoUpdateSlugs' => true, 'autoCreateRedirects' => true],
+                'sluggi' => ['reservedPaths' => ['/parent/child-page']],
+            ],
+        ]);
+
+        $updated = 0;
+        $skipped = 0;
+        $this->cascade(2, $updated, $skipped);
+
+        $record = BackendUtility::getRecordWSOL('pages', 3, 'slug');
+        self::assertSame('/old/child', $record['slug'], 'Reserved slug must not be persisted');
+        self::assertSame(0, $updated, 'A rejected slug must not be reported as updated');
+        self::assertSame(1, $skipped, 'A rejected slug must be reported as skipped');
+    }
+
+    #[Test]
     public function slugChangesShareCorrelationIdInHistory(): void
     {
         $this->importCSVDataSet(__DIR__ . '/Fixtures/pages_recursive_update_deep.csv');

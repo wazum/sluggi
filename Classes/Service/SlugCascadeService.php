@@ -83,14 +83,14 @@ final readonly class SlugCascadeService
             return;
         }
 
-        $this->regenerateSlug($page, $correlationId, $updated);
+        $this->regenerateSlug($page, $correlationId, $updated, $skipped);
 
         foreach ($this->getTranslations($pageId) as $translation) {
             if ($this->slugLockService->isLocked($translation)) {
                 ++$skipped;
                 continue;
             }
-            $this->regenerateSlug($translation, $correlationId, $updated);
+            $this->regenerateSlug($translation, $correlationId, $updated, $skipped);
         }
 
         $this->processChildren($pageId, $correlationId, $updated, $skipped);
@@ -99,7 +99,7 @@ final readonly class SlugCascadeService
     /**
      * @param array<string, mixed> $record
      */
-    private function regenerateSlug(array $record, CorrelationId $correlationId, int &$updated): void
+    private function regenerateSlug(array $record, CorrelationId $correlationId, int &$updated, int &$skipped): void
     {
         $languageId = (int)($record['sys_language_uid'] ?? 0);
         $parentSlug = $this->slugGeneratorService->getParentSlug((int)$record['pid'], $languageId);
@@ -111,9 +111,14 @@ final readonly class SlugCascadeService
             (int)$record['pid'],
         );
 
-        if ($newSlug !== $record['slug']) {
-            $this->persistSlug((int)$record['uid'], $newSlug, $correlationId);
+        if ($newSlug === $record['slug']) {
+            return;
+        }
+
+        if ($this->persistSlug((int)$record['uid'], $newSlug, $correlationId)) {
             ++$updated;
+        } else {
+            ++$skipped;
         }
     }
 
@@ -205,12 +210,25 @@ final readonly class SlugCascadeService
             ->fetchAllAssociative();
     }
 
-    private function persistSlug(int $uid, string $newSlug, CorrelationId $correlationId): void
+    /**
+     * Returns whether the slug was actually persisted — validation hooks
+     * (reserved paths, permissions) may silently drop the change inside
+     * the nested DataHandler run.
+     */
+    private function persistSlug(int $uid, string $newSlug, CorrelationId $correlationId): bool
     {
         $dataHandler = GeneralUtility::makeInstance(DataHandler::class);
         $dataHandler->start(['pages' => [$uid => ['slug' => $newSlug]]], []);
         $dataHandler->setCorrelationId($correlationId);
         $dataHandler->process_datamap();
+
+        if ($dataHandler->errorLog !== []) {
+            return false;
+        }
+
+        $record = BackendUtility::getRecordWSOL('pages', $uid, 'slug');
+
+        return $record !== null && (string)$record['slug'] === $newSlug;
     }
 
     private function disableCoreSlugHook(): void
