@@ -8,5 +8,6 @@ return [
     'sluggi_recursive_slug_update' => [
         'path' => '/sluggi/recursive-slug-update',
         'target' => RecursiveSlugUpdateController::class . '::updateAction',
+        'methods' => ['POST'],
     ],
 ];

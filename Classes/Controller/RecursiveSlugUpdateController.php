@@ -6,6 +6,7 @@ namespace Wazum\Sluggi\Controller;
 
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
+use Psr\Log\LoggerInterface;
 use Throwable;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\DataHandling\Model\CorrelationId;
@@ -19,6 +20,7 @@ final readonly class RecursiveSlugUpdateController
     public function __construct(
         private SlugCascadeService $slugCascadeService,
         private SlugChangeReportStore $reportStore,
+        private LoggerInterface $logger,
     ) {
     }
 
@@ -28,7 +30,8 @@ final readonly class RecursiveSlugUpdateController
             return new JsonResponse(['success' => false, 'message' => 'Admin access required'], 403);
         }
 
-        $pageId = (int)($request->getQueryParams()['id'] ?? 0);
+        $parsedBody = $request->getParsedBody();
+        $pageId = is_array($parsedBody) ? (int)($parsedBody['id'] ?? 0) : 0;
         if ($pageId <= 0) {
             return new JsonResponse(['success' => false, 'message' => 'Invalid page ID'], 400);
         }
@@ -43,8 +46,13 @@ final readonly class RecursiveSlugUpdateController
 
         try {
             $this->slugCascadeService->cascadeFromPage($pageId, $correlationIdSlugUpdate, $updated, $skipped);
-        } catch (Throwable $e) {
-            return new JsonResponse(['success' => false, 'message' => $e->getMessage()], 500);
+        } catch (Throwable $exception) {
+            $this->logger->error('Recursive slug update failed', [
+                'pageId' => $pageId,
+                'exception' => $exception,
+            ]);
+
+            return new JsonResponse(['success' => false, 'message' => 'The recursive URL path update failed unexpectedly.'], 500);
         }
 
         // The cascade re-enters DataHandler for each descendant, so

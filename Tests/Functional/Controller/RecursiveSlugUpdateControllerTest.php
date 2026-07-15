@@ -43,8 +43,8 @@ final class RecursiveSlugUpdateControllerTest extends FunctionalTestCase
 
     private function createRequest(int $pageId): ServerRequestInterface
     {
-        return (new ServerRequest(new Uri('https://example.com/typo3/ajax/sluggi/recursive-slug-update')))
-            ->withQueryParams(['id' => (string)$pageId]);
+        return (new ServerRequest(new Uri('https://example.com/typo3/ajax/sluggi/recursive-slug-update'), 'POST'))
+            ->withParsedBody(['id' => (string)$pageId]);
     }
 
     #[Test]

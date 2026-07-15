@@ -44,8 +44,7 @@ function recursiveSlugUpdate(_table: string, uid: string): void {
 async function performUpdate(uid: string): Promise<void> {
     try {
         const response = await new AjaxRequest(TYPO3.settings.ajaxUrls.sluggi_recursive_slug_update)
-            .withQueryArguments({ id: uid })
-            .get();
+            .post({ id: uid });
 
         const result = await response.resolve() as UpdateResponse;
 
