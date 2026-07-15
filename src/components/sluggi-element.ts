@@ -1363,6 +1363,8 @@ export class SluggiElement extends LitElement {
 
     private static connectedRedirectControlElementCount = 0;
 
+    private static redirectModalPending = false;
+
     private setupFormSubmitListener(): void {
         if (!this.redirectControlEnabled) return;
 
@@ -1379,6 +1381,8 @@ export class SluggiElement extends LitElement {
         // Other connected elements still rely on the shared document listener
         if (SluggiElement.connectedRedirectControlElementCount > 0) return;
         this.ownerDocument.removeEventListener('click', SluggiElement.handleSaveButtonClick, true);
+        // No element left that could resolve a pending modal decision
+        SluggiElement.redirectModalPending = false;
     }
 
     private syncReservedSlugValidity(): void {
@@ -1416,8 +1420,19 @@ export class SluggiElement extends LitElement {
 
     private static handleSaveButtonClick(event: MouseEvent): void {
         const target = event.target as HTMLElement;
-        const saveButton = target.closest('button[name="_savedok"]') as HTMLButtonElement | null;
+        // Covers every FormEngine save submitter (_savedok, _saveandclosedok, …)
+        const saveButton = target.closest('button[name^="_save"]') as HTMLButtonElement | null;
         if (!saveButton) return;
+
+        if (SluggiElement.redirectModalPending) {
+            // A modal decision is still pending — the elements are already
+            // marked redirectChoiceMade, so without this guard a second save
+            // trigger would sail through to TYPO3's original handler.
+            event.preventDefault();
+            event.stopPropagation();
+            event.stopImmediatePropagation();
+            return;
+        }
 
         const form = SluggiElement.findAssociatedForm(saveButton);
         if (!form) return;
@@ -1458,6 +1473,7 @@ export class SluggiElement extends LitElement {
     }
 
     private static showRedirectModalForAll(elements: SluggiElement[], form: HTMLFormElement): void {
+        SluggiElement.redirectModalPending = true;
         for (const el of elements) {
             el.redirectChoiceMade = true;
         }
@@ -1470,7 +1486,15 @@ export class SluggiElement extends LitElement {
         const skipButton = firstElement.getLabel('redirectModal.button.skip');
         const createButton = firstElement.getLabel('redirectModal.button.create');
 
-        Modal.confirm(
+        let decisionMade = false;
+        const cancelDecision = (): void => {
+            SluggiElement.redirectModalPending = false;
+            for (const el of elements) {
+                el.redirectChoiceMade = false;
+            }
+        };
+
+        const modal = Modal.confirm(
             title,
             `${message}\n\n${messageRecursive}`,
             Severity.info,
@@ -1479,16 +1503,17 @@ export class SluggiElement extends LitElement {
                     text: cancelButton,
                     btnClass: 'btn-default',
                     trigger: () => {
+                        decisionMade = true;
                         Modal.dismiss();
-                        for (const el of elements) {
-                            el.redirectChoiceMade = false;
-                        }
+                        cancelDecision();
                     },
                 },
                 {
                     text: skipButton,
                     btnClass: 'btn-warning',
                     trigger: () => {
+                        decisionMade = true;
+                        SluggiElement.redirectModalPending = false;
                         Modal.dismiss();
                         SluggiElement.applyRedirectChoiceToAll(elements, false);
                         SluggiElement.submitForm(form);
@@ -1499,6 +1524,8 @@ export class SluggiElement extends LitElement {
                     active: true,
                     btnClass: 'btn-primary',
                     trigger: () => {
+                        decisionMade = true;
+                        SluggiElement.redirectModalPending = false;
                         Modal.dismiss();
                         SluggiElement.applyRedirectChoiceToAll(elements, true);
                         SluggiElement.submitForm(form);
@@ -1506,6 +1533,14 @@ export class SluggiElement extends LitElement {
                 },
             ]
         );
+
+        // Closing the modal via Escape, backdrop or the X bypasses every
+        // button trigger — treat it as cancel so saving isn't blocked forever.
+        modal?.addEventListener('typo3-modal-hidden', () => {
+            if (!decisionMade) {
+                cancelDecision();
+            }
+        });
     }
 
     private static applyRedirectChoiceToAll(elements: SluggiElement[], createRedirects: boolean): void {

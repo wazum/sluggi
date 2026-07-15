@@ -14,7 +14,8 @@ declare module '@typo3/backend/modal.js' {
     }
 
     const Modal: {
-        confirm(title: string, message: string, severity: number, buttons: ModalButton[]): void;
+        // Returns the ModalElement in the TYPO3 backend; the test mock returns nothing.
+        confirm(title: string, message: string, severity: number, buttons: ModalButton[]): HTMLElement | undefined;
         dismiss(): void;
     };
 

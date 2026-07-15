@@ -195,6 +195,53 @@ describe('SluggiElement - Integration', () => {
             document.body.removeChild(container);
         });
 
+        it('keeps blocking save clicks while the redirect modal decision is pending', async () => {
+            const container = document.createElement('div');
+            container.innerHTML = `
+                <form>
+                    <sluggi-element value="/page-a" record-id="1" page-id="1" redirect-control></sluggi-element>
+                    <button name="_savedok" type="button">Save</button>
+                </form>
+            `;
+            document.body.appendChild(container);
+            const element = container.querySelector('sluggi-element') as SluggiElement;
+            await element.updateComplete;
+            element.value = '/page-a-changed';
+
+            const button = container.querySelector('button[name="_savedok"]') as HTMLButtonElement;
+            const firstClick = new MouseEvent('click', { bubbles: true, cancelable: true });
+            button.dispatchEvent(firstClick);
+            expect(firstClick.defaultPrevented, 'first click opens the modal and is blocked').to.equal(true);
+
+            const secondClick = new MouseEvent('click', { bubbles: true, cancelable: true });
+            button.dispatchEvent(secondClick);
+            expect(secondClick.defaultPrevented, 'second click while the modal is pending must be blocked too').to.equal(true);
+
+            document.body.removeChild(container);
+        });
+
+        it('intercepts other save submitters like save-and-close', async () => {
+            const container = document.createElement('div');
+            container.innerHTML = `
+                <form>
+                    <sluggi-element value="/page-a" record-id="1" page-id="1" redirect-control></sluggi-element>
+                    <button name="_saveandclosedok" type="button">Save and close</button>
+                </form>
+            `;
+            document.body.appendChild(container);
+            const element = container.querySelector('sluggi-element') as SluggiElement;
+            await element.updateComplete;
+            element.value = '/page-a-changed';
+
+            const button = container.querySelector('button[name="_saveandclosedok"]') as HTMLButtonElement;
+            const clickEvent = new MouseEvent('click', { bubbles: true, cancelable: true });
+            button.dispatchEvent(clickEvent);
+
+            expect(clickEvent.defaultPrevented).to.equal(true);
+
+            document.body.removeChild(container);
+        });
+
         it('no longer intercepts the save button after the last element disconnects', async () => {
             const container = document.createElement('div');
             container.innerHTML = `
