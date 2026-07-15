@@ -3,10 +3,12 @@
 ,1,0,"admin","$2y$12$ABCDEFGHIJKLMNOPQRSTUuTODxlptKMVZqU0qsfdtGTuWi3hfJWLy",1
 
 "pages"
-,"uid","pid","title","slug","doktype","hidden"
-,1,0,"Root","/",1,0
-,2,1,"Draft Page","/draft-a",1,1
-,3,1,"Live Page","/live-a",1,0
-,4,1,"Publishing Page","/draft-c",1,1
-,5,1,"Hidden Parent","/hidden-parent",1,1
-,6,5,"Visible Child","/hidden-parent/visible-child",1,0
+,"uid","pid","title","slug","doktype","hidden","starttime","endtime"
+,1,0,"Root","/",1,0,0,0
+,2,1,"Draft Page","/draft-a",1,1,0,0
+,3,1,"Live Page","/live-a",1,0,0,0
+,4,1,"Publishing Page","/draft-c",1,1,0,0
+,5,1,"Hidden Parent","/hidden-parent",1,1,0,0
+,6,5,"Visible Child","/hidden-parent/visible-child",1,0,0,0
+,7,1,"Scheduled Page","/scheduled-a",1,0,2145916800,0
+,8,1,"Expired Page","/expired-a",1,0,0,946684800

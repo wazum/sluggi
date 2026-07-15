@@ -40,6 +40,22 @@ final class SuppressRedirectForUnpublishedPageTest extends FunctionalTestCase
     }
 
     #[Test]
+    public function futureStarttimePageSlugRenameDoesNotCreateRedirect(): void
+    {
+        $this->saveFields(7, ['slug' => '/scheduled-b']);
+
+        self::assertSame(0, $this->countAllRedirects());
+    }
+
+    #[Test]
+    public function expiredEndtimePageSlugRenameDoesNotCreateRedirect(): void
+    {
+        $this->saveFields(8, ['slug' => '/expired-b']);
+
+        self::assertSame(0, $this->countAllRedirects());
+    }
+
+    #[Test]
     public function publishAndRenameInSameSaveDoesNotCreateRedirect(): void
     {
         $this->saveFields(4, ['slug' => '/live-d', 'hidden' => 0]);
