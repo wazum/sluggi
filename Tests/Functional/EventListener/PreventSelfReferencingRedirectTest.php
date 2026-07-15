@@ -145,7 +145,7 @@ final class PreventSelfReferencingRedirectTest extends FunctionalTestCase
         $connection->insert('sys_redirect', [
             'source_host' => 'other-site.example.com',
             'source_path' => '/page-b',
-            'target' => '/some-target',
+            'target' => 't3://page?uid=2&_language=0',
             'target_statuscode' => 301,
         ]);
         $otherSiteRedirectUid = (int)$connection->lastInsertId();
@@ -207,10 +207,12 @@ final class PreventSelfReferencingRedirectTest extends FunctionalTestCase
     {
         $connection = GeneralUtility::makeInstance(ConnectionPool::class)
             ->getConnectionForTable('sys_redirect');
+        // Link-wizard style target without URL parameters — the canonical
+        // form of a manually created redirect pointing to the same page.
         $connection->insert('sys_redirect', [
             'source_host' => '*',
             'source_path' => '/page-b',
-            'target' => '/intentional-target',
+            'target' => 't3://page?uid=2',
             'target_statuscode' => 301,
             'creation_type' => 1,
         ]);
@@ -230,6 +232,64 @@ final class PreventSelfReferencingRedirectTest extends FunctionalTestCase
         );
 
         self::assertCount(1, $manualRedirect, 'Manually created redirect must not be deleted by cleanup');
+    }
+
+    #[Test]
+    public function redirectsTargetingPagesWithSameUidPrefixAreNotDeleted(): void
+    {
+        $connection = GeneralUtility::makeInstance(ConnectionPool::class)
+            ->getConnectionForTable('sys_redirect');
+        $connection->insert('sys_redirect', [
+            'source_host' => '*',
+            'source_path' => '/page-b',
+            'target' => 't3://page?uid=20&_language=0',
+            'target_statuscode' => 301,
+        ]);
+        $otherPageRedirectUid = (int)$connection->lastInsertId();
+
+        $dataHandler = GeneralUtility::makeInstance(DataHandler::class);
+        $dataHandler->start(
+            ['pages' => [2 => ['slug' => '/page-b']]],
+            []
+        );
+        $dataHandler->process_datamap();
+
+        $allRedirects = $this->getAllRedirects();
+        $otherPageRedirect = array_filter(
+            $allRedirects,
+            static fn (array $r) => (int)$r['uid'] === $otherPageRedirectUid && (int)$r['deleted'] === 0
+        );
+
+        self::assertCount(1, $otherPageRedirect, 'Redirect targeting page 20 must not be deleted when page 2 changes');
+    }
+
+    #[Test]
+    public function staleRedirectsAreSoftDeletedNotHardDeleted(): void
+    {
+        $connection = GeneralUtility::makeInstance(ConnectionPool::class)
+            ->getConnectionForTable('sys_redirect');
+        $connection->insert('sys_redirect', [
+            'source_host' => '*',
+            'source_path' => '/page-b',
+            'target' => 't3://page?uid=2&_language=0',
+            'target_statuscode' => 301,
+        ]);
+        $staleRedirectUid = (int)$connection->lastInsertId();
+
+        $dataHandler = GeneralUtility::makeInstance(DataHandler::class);
+        $dataHandler->start(
+            ['pages' => [2 => ['slug' => '/page-b']]],
+            []
+        );
+        $dataHandler->process_datamap();
+
+        $stale = array_filter(
+            $this->getAllRedirects(),
+            static fn (array $r) => (int)$r['uid'] === $staleRedirectUid
+        );
+
+        self::assertCount(1, $stale, 'Stale redirect must still exist as a soft-deleted row');
+        self::assertSame(1, (int)array_values($stale)[0]['deleted'], 'Stale redirect must be soft-deleted');
     }
 
     private function getRedirectsForPage(): array

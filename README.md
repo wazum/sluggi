@@ -152,7 +152,7 @@ Let editors decide whether to create redirects when a URL changes:
 
 ![Redirect modal](Documentation/sluggi_create_redirects.png)
 
-The choice applies recursively to all affected child pages. Self-referencing redirects are prevented automatically, and stale redirect cleanup only affects auto-created redirects – manually created redirects are never touched.
+The choice applies recursively to all affected child pages. Self-referencing redirects are prevented automatically, and stale redirects are soft-deleted, never removed. Cleanup is limited to redirects that point to the affected page with the auto-created target format (`t3://page?uid=<id>&…`) and a matching source host – redirects created manually via the link wizard (`t3://page?uid=<id>` without parameters) or for other hosts are not touched.
 
 The pre-save "Create Redirects?" modal and the post-save toast — including the accurate-count wording from [#101226 / #99828](#fixes-for-typo3-core-issues) — both rely on _sluggi's_ JavaScript handler, which is only loaded when `redirect_control` is enabled in the extension configuration. With `redirect_control` off, TYPO3 core's own (less accurate) toast is shown instead.
 

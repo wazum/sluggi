@@ -24,7 +24,8 @@ final readonly class PreventSelfReferencingRedirect
             return;
         }
 
-        $this->deleteExistingRedirectsForSlug($newSlug, $changeItem->getPageId());
+        $sourceHost = (string)($event->getRedirectRecord()['source_host'] ?? '*');
+        $this->softDeleteExistingRedirectsForSlug($newSlug, $changeItem->getPageId(), $sourceHost);
     }
 
     public function afterPersist(AfterAutoCreateRedirectHasBeenPersistedEvent $event): void
@@ -53,17 +54,26 @@ final readonly class PreventSelfReferencingRedirect
         return rtrim($sourcePath, '/') === rtrim($newSlug, '/');
     }
 
-    private function deleteExistingRedirectsForSlug(string $slug, int $pageId): void
+    private function softDeleteExistingRedirectsForSlug(string $slug, int $pageId, string $sourceHost): void
     {
         $queryBuilder = $this->connectionPool->getQueryBuilderForTable('sys_redirect');
 
+        // Auto-created redirects always carry URL parameters in their target
+        // (at least &_language=), so requiring the ampersand both pins the
+        // page uid exactly (uid=1 must not match uid=10) and spares manually
+        // created link-wizard targets like t3://page?uid=1 without parameters.
         $queryBuilder
-            ->delete('sys_redirect')
+            ->update('sys_redirect')
+            ->set('deleted', 1)
             ->where(
                 $queryBuilder->expr()->eq('source_path', $queryBuilder->createNamedParameter($slug)),
                 $queryBuilder->expr()->like(
                     'target',
-                    $queryBuilder->createNamedParameter('t3://page?uid=' . $pageId . '%')
+                    $queryBuilder->createNamedParameter('t3://page?uid=' . $pageId . '&%')
+                ),
+                $queryBuilder->expr()->or(
+                    $queryBuilder->expr()->eq('source_host', $queryBuilder->createNamedParameter($sourceHost)),
+                    $queryBuilder->expr()->eq('source_host', $queryBuilder->createNamedParameter('*'))
                 ),
                 $queryBuilder->expr()->eq('deleted', 0)
             )
