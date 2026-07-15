@@ -251,9 +251,12 @@ class RedirectNotificationHandler {
     private async revert(correlationIds: string[], reloadForm: boolean): Promise<void> {
         let success = false;
         try {
+            // TYPO3 13.4.33/14.3.5 made the revert endpoint POST-only and read
+            // the ids from the request body; older cores accept any method and
+            // read the query string. Send both so every core version works.
             const response = await new AjaxRequest(TYPO3.settings.ajaxUrls.redirects_revert_correlation)
                 .withQueryArguments({ correlation_ids: correlationIds })
-                .get();
+                .post({ correlation_ids: correlationIds });
             const result = await response.resolve() as RevertResponse;
             if (result.status === 'ok') {
                 Notification.success(result.title, result.message);

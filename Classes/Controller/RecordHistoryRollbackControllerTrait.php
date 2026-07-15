@@ -28,7 +28,11 @@ trait RecordHistoryRollbackControllerTrait
     {
         $languageService = $this->createLanguageService();
         $revertedCorrelationTypes = [];
-        $correlationIds = $request->getQueryParams()['correlation_ids'] ?? [];
+        // TYPO3 13.4.33/14.3.5 send the ids in the POST body, older cores in
+        // the query string.
+        $parsedBody = $request->getParsedBody();
+        $correlationIds = is_array($parsedBody) ? ($parsedBody['correlation_ids'] ?? null) : null;
+        $correlationIds ??= $request->getQueryParams()['correlation_ids'] ?? [];
         /** @var CorrelationId[] $correlationIds */
         $correlationIds = array_map(
             static fn (string $correlationId) => CorrelationId::fromString($correlationId),
