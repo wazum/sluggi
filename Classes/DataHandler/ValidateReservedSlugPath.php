@@ -29,10 +29,6 @@ final readonly class ValidateReservedSlugPath
             return;
         }
 
-        if (DataHandlerUtility::isNestedSlugUpdate($dataHandler)) {
-            return;
-        }
-
         $pageId = is_int($id) ? $id : (int)($fieldArray['pid'] ?? 0);
         $site = $this->reservedPathService->findSiteForPage($pageId);
         if ($site === null) {
@@ -61,6 +57,14 @@ final readonly class ValidateReservedSlugPath
             $fieldArray['slug'] = $this->placeholderSlugFor($slug);
         } else {
             unset($fieldArray['slug']);
+        }
+
+        // Nested slug updates (core child cascade, sluggi's recursive cascade)
+        // enforce the invariant above all the same, but stay silent: the
+        // triggering update already notified the editor, and one flash message
+        // per descendant would be noise.
+        if (DataHandlerUtility::isNestedSlugUpdate($dataHandler)) {
+            return;
         }
         DataHandlerUtility::logSlugValidationError(
             $dataHandler,

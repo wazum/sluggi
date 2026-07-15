@@ -132,13 +132,14 @@ final class ValidateReservedSlugPathTest extends TestCase
     }
 
     #[Test]
-    public function skipsWhenNestedSlugCascade(): void
+    public function rejectsReservedSlugOnNestedCascadeWithoutErrorLog(): void
     {
         $subject = $this->createSubjectWithReservedPaths(['/api']);
         $dataHandler = $this->createMock(DataHandler::class);
         $correlationId = CorrelationId::forScope('test')
             ->withAspects(SlugService::CORRELATION_ID_IDENTIFIER, 'slug');
         $dataHandler->method('getCorrelationId')->willReturn($correlationId);
+        $dataHandler->expects(self::never())->method('log');
 
         $fieldArray = ['slug' => '/api'];
         $subject->processDatamap_postProcessFieldArray(
@@ -149,7 +150,7 @@ final class ValidateReservedSlugPathTest extends TestCase
             $dataHandler,
         );
 
-        self::assertSame(['slug' => '/api'], $fieldArray);
+        self::assertArrayNotHasKey('slug', $fieldArray, 'Reserved slug must be rejected on nested updates too');
     }
 
     #[Test]

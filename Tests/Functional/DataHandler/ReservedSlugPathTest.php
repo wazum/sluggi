@@ -244,11 +244,12 @@ final class ReservedSlugPathTest extends FunctionalTestCase
     }
 
     #[Test]
-    public function nestedSlugCascadeDoesNotTriggerReservedPathErrorLog(): void
+    public function nestedSlugCascadeRejectsReservedSlugWithoutErrorLog(): void
     {
         // In cascade flow (correlation id set by SlugService), the reserved-path
-        // hook must short-circuit. We verify that by asserting no reserved-path
-        // error was added to the DataHandler log, even for a slug under /api.
+        // invariant still holds — the generated slug must not be persisted —
+        // but no error is logged: the triggering (non-nested) update already
+        // notified the editor, one flash message per descendant would be noise.
         $dataHandler = GeneralUtility::makeInstance(DataHandler::class);
         $correlationId = \TYPO3\CMS\Core\DataHandling\Model\CorrelationId::forScope('test')
             ->withAspects(
@@ -264,5 +265,6 @@ final class ReservedSlugPathTest extends FunctionalTestCase
             static fn (string $message): bool => str_contains($message, 'reserved URL path') || str_contains($message, 'URL path is reserved'),
         );
         self::assertSame([], $reservedErrors, 'Reserved-path hook must not emit errors during cascade');
+        self::assertSame('/foo/child', $this->getSlug(5), 'Reserved slug must not be persisted during cascade');
     }
 }
