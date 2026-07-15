@@ -270,6 +270,35 @@ final class SlugCascadeServiceTest extends FunctionalTestCase
     }
 
     #[Test]
+    public function restoresReplacedCoreSlugHookAfterCascade(): void
+    {
+        // A third party may have replaced the core hook with its own class —
+        // the cascade must restore exactly that, not the core default.
+        $GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['t3lib/class.t3lib_tcemain.php']['processDatamapClass']['redirects']
+            = 'Vendor\\Custom\\ReplacementSlugUpdateHook';
+
+        $this->cascade(2);
+
+        self::assertSame(
+            'Vendor\\Custom\\ReplacementSlugUpdateHook',
+            $GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['t3lib/class.t3lib_tcemain.php']['processDatamapClass']['redirects'] ?? null,
+        );
+    }
+
+    #[Test]
+    public function keepsDeliberatelyAbsentCoreSlugHookAbsentAfterCascade(): void
+    {
+        unset($GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['t3lib/class.t3lib_tcemain.php']['processDatamapClass']['redirects']);
+
+        $this->cascade(2);
+
+        self::assertArrayNotHasKey(
+            'redirects',
+            $GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['t3lib/class.t3lib_tcemain.php']['processDatamapClass'] ?? [],
+        );
+    }
+
+    #[Test]
     public function slugChangesShareCorrelationIdInHistory(): void
     {
         $this->importCSVDataSet(__DIR__ . '/Fixtures/pages_recursive_update_deep.csv');

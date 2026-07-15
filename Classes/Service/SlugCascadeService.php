@@ -12,7 +12,6 @@ use TYPO3\CMS\Core\Database\Query\Restriction\HiddenRestriction;
 use TYPO3\CMS\Core\DataHandling\DataHandler;
 use TYPO3\CMS\Core\DataHandling\Model\CorrelationId;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
-use TYPO3\CMS\Redirects\Hooks\DataHandlerSlugUpdateHook;
 use Wazum\Sluggi\Compatibility\Typo3Compatibility;
 use Wazum\Sluggi\Configuration\ExtensionConfiguration;
 
@@ -37,11 +36,18 @@ final readonly class SlugCascadeService
         int &$updated,
         int &$skipped,
     ): void {
-        $this->disableCoreSlugHook();
+        // The core hook would create a redirect and its own child cascade for
+        // every single descendant update — suspend it for the duration and
+        // restore exactly what was registered before (a third party may have
+        // replaced it, or removed it on purpose).
+        $previousHook = $GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['t3lib/class.t3lib_tcemain.php']['processDatamapClass'][self::CORE_HOOK_KEY] ?? null;
+        unset($GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['t3lib/class.t3lib_tcemain.php']['processDatamapClass'][self::CORE_HOOK_KEY]);
         try {
             $this->processChildren($pageId, $correlationId, $updated, $skipped);
         } finally {
-            $this->enableCoreSlugHook();
+            if ($previousHook !== null) {
+                $GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['t3lib/class.t3lib_tcemain.php']['processDatamapClass'][self::CORE_HOOK_KEY] = $previousHook;
+            }
         }
     }
 
@@ -229,17 +235,6 @@ final readonly class SlugCascadeService
         $record = BackendUtility::getRecordWSOL('pages', $uid, 'slug');
 
         return $record !== null && (string)$record['slug'] === $newSlug;
-    }
-
-    private function disableCoreSlugHook(): void
-    {
-        unset($GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['t3lib/class.t3lib_tcemain.php']['processDatamapClass'][self::CORE_HOOK_KEY]);
-    }
-
-    private function enableCoreSlugHook(): void
-    {
-        $GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['t3lib/class.t3lib_tcemain.php']['processDatamapClass'][self::CORE_HOOK_KEY] =
-            DataHandlerSlugUpdateHook::class;
     }
 
     /**
