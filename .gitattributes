@@ -25,6 +25,9 @@
 /src export-ignore
 /src/** export-ignore
 
+# Source maps embed the TypeScript sources excluded above
+/Resources/Public/**/*.map export-ignore
+
 # Documentation
 /CLAUDE.md export-ignore
 
