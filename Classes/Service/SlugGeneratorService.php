@@ -19,6 +19,7 @@ final readonly class SlugGeneratorService
 {
     public function __construct(
         private ExtensionConfiguration $extensionConfiguration,
+        private MasiCompatibilityService $masiCompatibilityService,
         private PageTranslationResolver $pageTranslationResolver,
     ) {
     }
@@ -86,10 +87,21 @@ final readonly class SlugGeneratorService
      */
     public function getParentSlug(int $pageId, int $languageId = 0): string
     {
-        $rootLine = BackendUtility::BEgetRootLine($pageId, '', true, ['doktype']);
+        $rootLine = BackendUtility::BEgetRootLine(
+            $pageId,
+            '',
+            true,
+            $this->masiCompatibilityService->getAdditionalRootLineFields()
+        );
 
         foreach ($rootLine as $page) {
             if ($this->extensionConfiguration->isPageTypeExcluded((int)($page['doktype'] ?? 1))) {
+                continue;
+            }
+
+            // masi drops such a page's segment from every descendant path, so
+            // the effective prefix comes from further up the rootline.
+            if ($this->masiCompatibilityService->excludesSlugForSubpages($page)) {
                 continue;
             }
 

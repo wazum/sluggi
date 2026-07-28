@@ -17,6 +17,24 @@ final readonly class MasiCompatibilityService
     }
 
     /**
+     * @return list<string>
+     */
+    public function getAdditionalRootLineFields(): array
+    {
+        // BEgetRootLine() puts additional fields straight into its SELECT, and
+        // the column only exists once masi is installed.
+        return $this->isActive() ? [self::FIELD_NAME] : [];
+    }
+
+    /**
+     * @param array<string, mixed> $page
+     */
+    public function excludesSlugForSubpages(array $page): bool
+    {
+        return (bool)($page[self::FIELD_NAME] ?? false);
+    }
+
+    /**
      * @param array<string, mixed> $fieldArray
      */
     public function isExclusionFieldSubmitted(array $fieldArray): bool

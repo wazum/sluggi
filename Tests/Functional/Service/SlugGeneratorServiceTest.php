@@ -15,11 +15,18 @@ final class SlugGeneratorServiceTest extends FunctionalTestCase
 {
     protected array $testExtensionsToLoad = [
         'wazum/sluggi',
+        'b13/masi',
     ];
 
     protected array $coreExtensionsToLoad = [
         'redirects',
     ];
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $GLOBALS['LANG'] = GeneralUtility::makeInstance(LanguageServiceFactory::class)->create('default');
+    }
 
     /**
      * Language 2 has no translations of its own and falls back to language 1.
@@ -55,12 +62,22 @@ final class SlugGeneratorServiceTest extends FunctionalTestCase
     }
 
     #[Test]
+    public function parentSlugSkipsPageExcludedFromSubpagePaths(): void
+    {
+        $this->importCSVDataSet(__DIR__ . '/Fixtures/pages_masi_excluded_parent.csv');
+        $this->setUpBackendUser(1);
+
+        $parentSlug = $this->get(SlugGeneratorService::class)->getParentSlug(3);
+
+        self::assertSame('/section', $parentSlug);
+    }
+
+    #[Test]
     public function parentSlugFollowsTheConfiguredFallbackLanguageChain(): void
     {
         $this->importCSVDataSet(__DIR__ . '/Fixtures/pages_language_fallback_parent.csv');
         $this->setUpSiteWithFallbackLanguage();
         $this->setUpBackendUser(1);
-        $GLOBALS['LANG'] = GeneralUtility::makeInstance(LanguageServiceFactory::class)->create('default');
 
         $parentSlug = $this->get(SlugGeneratorService::class)->getParentSlug(2, 2);
 
