@@ -1,0 +1,9 @@
+"be_users"
+,"uid","pid","username","password","admin"
+,1,0,"admin","$2y$12$abc123",1
+
+"pages"
+,"uid","pid","title","slug","doktype","sys_language_uid","l10n_parent","l10n_source"
+,1,0,"Root Page","/",1,0,0,0
+,2,1,"Section","/section",1,0,0,0
+,3,1,"Bereich","/bereich",1,1,2,2

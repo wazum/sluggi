@@ -19,6 +19,7 @@ final readonly class SlugGeneratorService
 {
     public function __construct(
         private ExtensionConfiguration $extensionConfiguration,
+        private PageTranslationResolver $pageTranslationResolver,
     ) {
     }
 
@@ -100,19 +101,11 @@ final readonly class SlugGeneratorService
 
     private function getSlugForPage(int $pageId, int $languageId): string
     {
-        $pageUid = $pageId;
+        $translation = $this->pageTranslationResolver->resolve($pageId, $languageId, $this->getWorkspaceId());
+        $pageUid = $translation !== null ? (int)$translation['uid'] : $pageId;
 
-        if ($languageId > 0) {
-            $localizedRecords = BackendUtility::getRecordLocalization('pages', $pageId, $languageId);
-            if (!empty($localizedRecords)) {
-                $localizedRecord = reset($localizedRecords);
-                BackendUtility::workspaceOL('pages', $localizedRecord);
-                if (is_array($localizedRecord)) {
-                    $pageUid = (int)$localizedRecord['uid'];
-                }
-            }
-        }
-
+        // Re-read rather than trusting the resolved row: BEgetRootLine() results
+        // are held in a runtime cache, and a cascade rewrites slugs mid-request.
         $record = BackendUtility::getRecordWSOL('pages', $pageUid, 'slug');
         $slug = (string)($record['slug'] ?? '');
 
