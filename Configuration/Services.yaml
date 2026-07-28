@@ -145,6 +145,9 @@ services:
   Wazum\Sluggi\Upgrade\ClearExcludedPageTypeSlugsWizard:
     public: true
 
+  Wazum\Sluggi\Upgrade\CoupleMasiExclusionWizard:
+    public: true
+
   Wazum\Sluggi\Upgrade\SetDefaultExcludedPageTypesWizard:
     public: true
 
