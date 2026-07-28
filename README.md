@@ -248,6 +248,9 @@ All features work out of the box with sensible defaults. Fine-tune via **System 
 | `last_segment_only` | Non-admin editors can only change the last segment of a URL path. The parent path stays read-only, preventing editors from accidentally breaking the site's URL hierarchy. | Off |
 | `allow_full_path_editing` | Show a button that lets permitted editors temporarily unlock the full path for editing (requires `last_segment_only`). The slug auto-locks afterwards to prevent sync from overwriting the custom path. | Off |
 
+> [!NOTE]
+> With [_masi_](#masi) installed, Recycler pages (`255`) are always left out of URL paths, whether or not `exclude_doktypes` lists them.
+
 **Sync**
 
 | Setting | Description | Default |
@@ -464,6 +467,7 @@ For non-page tables, add the table name to the `synchronize_tables` extension se
 [b13/masi](https://github.com/b13/masi) hooks in as a TCA `postModifier` and runs after slug generation, so both extensions work side by side.
 
 - **Folders in URL paths:** keep `254` in `exclude_doktypes` to leave them out, remove it to let _masi_ include them.
+- **Recyclers are always skipped:** _masi_ never puts a recycler in a path, so _sluggi_ does the same while it is installed, regardless of `exclude_doktypes`.
 - **One value per page:** _sluggi_ couples `exclude_slug_for_subpages` to the default language, so it is not editable on a translation. A per-language value would not match the paths _sluggi_ resolves from the rootline. Run the wizard _"Align the masi subpage exclusion with the default language"_ if translations differ from an earlier setup.
 - **Moving and copying keep the segment:** the page's existing last segment is carried to the new parent. A `postModifier` may still rewrite the prefix there, but not the segment. Regular edits are unaffected.
 

@@ -11,9 +11,19 @@ final readonly class MasiCompatibilityService
 {
     private const FIELD_NAME = 'exclude_slug_for_subpages';
 
+    private const PAGE_TYPE_RECYCLER = 255;
+
     public function isActive(): bool
     {
         return ExtensionManagementUtility::isLoaded('masi');
+    }
+
+    /**
+     * masi always keeps a recycler out of the path, whatever exclude_doktypes says.
+     */
+    public function excludesPageType(int $pageType): bool
+    {
+        return $this->isActive() && $pageType === self::PAGE_TYPE_RECYCLER;
     }
 
     public function getExclusionFieldName(): string
