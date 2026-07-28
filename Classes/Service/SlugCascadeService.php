@@ -12,6 +12,7 @@ use TYPO3\CMS\Core\Database\Query\Restriction\HiddenRestriction;
 use TYPO3\CMS\Core\DataHandling\DataHandler;
 use TYPO3\CMS\Core\DataHandling\Model\CorrelationId;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
+use TYPO3\CMS\Redirects\RedirectUpdate\SlugRedirectChangeItemFactory;
 use Wazum\Sluggi\Compatibility\Typo3Compatibility;
 use Wazum\Sluggi\Configuration\ExtensionConfiguration;
 
@@ -22,6 +23,8 @@ final readonly class SlugCascadeService
     public function __construct(
         private SlugGeneratorService $slugGeneratorService,
         private SlugLockService $slugLockService,
+        private SlugRedirectChangeItemFactory $changeItemFactory,
+        private CascadeRedirectService $cascadeRedirectService,
         private ExtensionConfiguration $extensionConfiguration,
         private ConnectionPool $connectionPool,
     ) {
@@ -105,8 +108,12 @@ final readonly class SlugCascadeService
     /**
      * @param array<string, mixed> $record
      */
-    private function regenerateSlug(array $record, CorrelationId $correlationId, int &$updated, int &$skipped): void
-    {
+    private function regenerateSlug(
+        array $record,
+        CorrelationId $correlationId,
+        int &$updated,
+        int &$skipped,
+    ): void {
         $languageId = (int)($record['sys_language_uid'] ?? 0);
         $parentSlug = $this->slugGeneratorService->getParentSlug((int)$record['pid'], $languageId);
         $generatedSlug = $this->slugGeneratorService->generate($record, (int)$record['pid']);
@@ -121,11 +128,27 @@ final readonly class SlugCascadeService
             return;
         }
 
-        if ($this->persistSlug((int)$record['uid'], $newSlug, $correlationId)) {
-            ++$updated;
-        } else {
+        $pageId = (int)$record['uid'];
+        // The factory reads the stored slug to build the redirect sources, so
+        // the change item has to be captured before the update.
+        $changeItem = $this->changeItemFactory->create($pageId);
+
+        if (!$this->persistSlug($pageId, $newSlug, $correlationId)) {
             ++$skipped;
+
+            return;
         }
+
+        ++$updated;
+
+        if ($changeItem === null) {
+            return;
+        }
+
+        $this->cascadeRedirectService->createRedirectsForSlugChange(
+            $changeItem->withChanged(array_merge($record, ['slug' => $newSlug])),
+            $correlationId,
+        );
     }
 
     /**

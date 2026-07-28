@@ -12,6 +12,7 @@ use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\DataHandling\Model\CorrelationId;
 use TYPO3\CMS\Core\Localization\LanguageServiceFactory;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
+use TYPO3\CMS\Redirects\Service\RedirectCacheService;
 use TYPO3\CMS\Redirects\Service\SlugService;
 use TYPO3\TestingFramework\Core\Functional\FunctionalTestCase;
 use Wazum\Sluggi\Compatibility\Typo3Compatibility;
@@ -78,6 +79,37 @@ final class SlugCascadeServiceTest extends FunctionalTestCase
         $this->cascade(2, $updated);
         self::assertGreaterThan(0, $updated);
         $this->assertCSVDataSet(__DIR__ . '/Fixtures/pages_after_recursive_update.csv');
+    }
+
+    #[Test]
+    public function createsRedirectForChangedDescendant(): void
+    {
+        $this->cascade(2);
+
+        $queryBuilder = $this->get(ConnectionPool::class)->getQueryBuilderForTable('sys_redirect');
+        $sourcePaths = $queryBuilder
+            ->select('source_path')
+            ->from('sys_redirect')
+            ->orderBy('source_path', 'ASC')
+            ->executeQuery()
+            ->fetchFirstColumn();
+
+        self::assertSame(['/old/child'], $sourcePaths);
+    }
+
+    #[Test]
+    public function createdRedirectIsResolvableAgainstAPrimedRedirectCache(): void
+    {
+        $redirectCacheService = $this->get(RedirectCacheService::class);
+        // A primed cache is returned as-is, so the redirect resolves only
+        // because the DataHandler insert triggers core's cache rebuild.
+        $redirectCacheService->getRedirects('*');
+
+        $this->cascade(2);
+
+        $redirects = $redirectCacheService->getRedirects('*');
+
+        self::assertArrayHasKey('/old/child/', $redirects['flat'] ?? []);
     }
 
     #[Test]
