@@ -131,6 +131,107 @@ final class InitializeSyncOnNewPageTest extends FunctionalTestCase
     }
 
     #[Test]
+    public function newPageUsesPageTsConfigDefaultWithoutSyncFieldPermission(): void
+    {
+        $GLOBALS['TYPO3_CONF_VARS']['EXTENSIONS']['sluggi']['synchronize_default'] = '0';
+        $this->importCSVDataSet(__DIR__ . '/Fixtures/pages_tcadefaults_sync.csv');
+        $this->setUpBackendUser(2);
+
+        $dataHandler = GeneralUtility::makeInstance(DataHandler::class);
+        $dataHandler->start(
+            [
+                'pages' => [
+                    'NEW123' => [
+                        'pid' => 2,
+                        'title' => 'New Page',
+                        'doktype' => 1,
+                        'sys_language_uid' => 0,
+                    ],
+                ],
+            ],
+            []
+        );
+        $dataHandler->process_datamap();
+
+        self::assertSame([], $dataHandler->errorLog);
+
+        $newPageId = (int)$dataHandler->substNEWwithIDs['NEW123'];
+        $syncState = $this->getConnectionPool()
+            ->getConnectionForTable('pages')
+            ->executeQuery('SELECT tx_sluggi_sync FROM pages WHERE uid = ?', [$newPageId])
+            ->fetchOne();
+
+        self::assertSame(1, (int)$syncState);
+    }
+
+    #[Test]
+    public function pageTsConfigDefaultOverridesSynchronizeDefaultSetting(): void
+    {
+        $this->importCSVDataSet(__DIR__ . '/Fixtures/pages_tcadefaults_sync.csv');
+        $this->setUpBackendUser(3);
+
+        $dataHandler = GeneralUtility::makeInstance(DataHandler::class);
+        $dataHandler->start(
+            [
+                'pages' => [
+                    'NEW123' => [
+                        'pid' => 3,
+                        'title' => 'New Page',
+                        'doktype' => 1,
+                        'sys_language_uid' => 0,
+                    ],
+                ],
+            ],
+            []
+        );
+        $dataHandler->process_datamap();
+
+        self::assertSame([], $dataHandler->errorLog);
+
+        $newPageId = (int)$dataHandler->substNEWwithIDs['NEW123'];
+        $syncState = $this->getConnectionPool()
+            ->getConnectionForTable('pages')
+            ->executeQuery('SELECT tx_sluggi_sync FROM pages WHERE uid = ?', [$newPageId])
+            ->fetchOne();
+
+        self::assertSame(0, (int)$syncState);
+    }
+
+    #[Test]
+    public function excludedPageTypeKeepsSyncDisabledDespitePageTsConfigDefault(): void
+    {
+        $GLOBALS['TYPO3_CONF_VARS']['EXTENSIONS']['sluggi']['exclude_doktypes'] = '199,254';
+        $this->importCSVDataSet(__DIR__ . '/Fixtures/pages_tcadefaults_sync.csv');
+        $this->setUpBackendUser(1);
+
+        $dataHandler = GeneralUtility::makeInstance(DataHandler::class);
+        $dataHandler->start(
+            [
+                'pages' => [
+                    'NEW123' => [
+                        'pid' => 2,
+                        'title' => 'New Folder',
+                        'doktype' => 254,
+                        'sys_language_uid' => 0,
+                    ],
+                ],
+            ],
+            []
+        );
+        $dataHandler->process_datamap();
+
+        self::assertSame([], $dataHandler->errorLog);
+
+        $newPageId = (int)$dataHandler->substNEWwithIDs['NEW123'];
+        $syncState = $this->getConnectionPool()
+            ->getConnectionForTable('pages')
+            ->executeQuery('SELECT tx_sluggi_sync FROM pages WHERE uid = ?', [$newPageId])
+            ->fetchOne();
+
+        self::assertSame(0, (int)$syncState);
+    }
+
+    #[Test]
     public function newPageKeepsSyncDisabledWhenEditorExplicitlyTurnsItOff(): void
     {
         $this->importCSVDataSet(__DIR__ . '/Fixtures/pages_for_new_page.csv');

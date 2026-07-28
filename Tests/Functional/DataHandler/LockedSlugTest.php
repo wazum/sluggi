@@ -150,6 +150,39 @@ final class LockedSlugTest extends FunctionalTestCase
     }
 
     #[Test]
+    public function newPageUsesPageTsConfigLockDefaultWithoutLockFieldPermission(): void
+    {
+        $this->setUpTest('pages_tcadefaults_lock.csv');
+        $this->setUpBackendUser(2);
+
+        $dataHandler = GeneralUtility::makeInstance(DataHandler::class);
+        $dataHandler->start(
+            [
+                'pages' => [
+                    'NEW123' => [
+                        'pid' => 2,
+                        'title' => 'New Page',
+                        'doktype' => 1,
+                        'sys_language_uid' => 0,
+                    ],
+                ],
+            ],
+            []
+        );
+        $dataHandler->process_datamap();
+
+        self::assertSame([], $dataHandler->errorLog);
+
+        $newPageId = (int)$dataHandler->substNEWwithIDs['NEW123'];
+        $lockState = $this->getConnectionPool()
+            ->getConnectionForTable('pages')
+            ->executeQuery('SELECT slug_locked FROM pages WHERE uid = ?', [$newPageId])
+            ->fetchOne();
+
+        self::assertSame(1, (int)$lockState);
+    }
+
+    #[Test]
     public function lockStateClearedOnCopyWithoutLockFieldPermission(): void
     {
         parent::setUp();

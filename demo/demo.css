@@ -157,6 +157,20 @@ code {
     background: light-dark(#2a2a2a, #333);
 }
 
+.demo-install-block--multiline {
+    align-items: flex-start;
+    padding: 14px 16px 14px 20px;
+    margin: 0;
+    max-width: 100%;
+}
+
+.demo-install-block--multiline code {
+    white-space: pre;
+    line-height: 1.7;
+    text-align: left;
+    overflow-x: auto;
+}
+
 .demo-install-block code {
     color: #e0e0e0;
     font-size: 0.875rem;
@@ -189,7 +203,7 @@ code {
 
 .demo-install-block.copied .demo-check-icon {
     display: block;
-    color: #ff8700;
+    color: #79a548;
 }
 
 /* ================================================================

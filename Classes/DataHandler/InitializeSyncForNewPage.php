@@ -8,10 +8,15 @@ use TYPO3\CMS\Core\DataHandling\DataHandler;
 use Wazum\Sluggi\Configuration\ExtensionConfiguration;
 use Wazum\Sluggi\Utility\DataHandlerUtility;
 
-final readonly class InitializeSyncForNewPage
+final class InitializeSyncForNewPage
 {
+    /**
+     * @var array<string, int>
+     */
+    private array $seededRecords = [];
+
     public function __construct(
-        private ExtensionConfiguration $extensionConfiguration,
+        private readonly ExtensionConfiguration $extensionConfiguration,
     ) {
     }
 
@@ -28,12 +33,14 @@ final readonly class InitializeSyncForNewPage
             return;
         }
 
-        $this->applySyncDefault($fieldArray, $table);
+        if ($this->applySyncDefault($fieldArray, $table)) {
+            $this->seededRecords[$table . ':' . $id] = (int)$fieldArray['tx_sluggi_sync'];
+        }
     }
 
     /**
-     * Re-applies the default after fillInFieldArray() dropped tx_sluggi_sync
-     * for users without non_exclude_fields permission.
+     * Core applies TCAdefaults only to fields in a showitem, so this column needs it
+     * applied here — after fillInFieldArray() dropped it for restricted editors.
      *
      * @param array<string, mixed> $fieldArray
      */
@@ -44,7 +51,21 @@ final readonly class InitializeSyncForNewPage
         array &$fieldArray,
         DataHandler $dataHandler,
     ): void {
-        if ($status !== 'new') {
+        if ($status !== 'new' || $table !== 'pages') {
+            return;
+        }
+
+        $seededValue = $this->seededRecords[$table . ':' . $id] ?? null;
+        unset($this->seededRecords[$table . ':' . $id]);
+
+        $currentValue = $fieldArray['tx_sluggi_sync'] ?? null;
+        // Never overwrite what another hook set, only our own seed.
+        $isReplaceable = $currentValue === null || (int)$currentValue === $seededValue;
+        $tsConfigDefault = DataHandlerUtility::tcaDefaultValue($dataHandler, $table, 'tx_sluggi_sync');
+
+        if ($tsConfigDefault !== null && $isReplaceable) {
+            $fieldArray['tx_sluggi_sync'] = $tsConfigDefault;
+
             return;
         }
 
@@ -54,18 +75,22 @@ final readonly class InitializeSyncForNewPage
     /**
      * @param array<string, mixed> $fieldArray
      */
-    private function applySyncDefault(array &$fieldArray, string $table): void
+    private function applySyncDefault(array &$fieldArray, string $table): bool
     {
         if (array_key_exists('tx_sluggi_sync', $fieldArray)) {
-            return;
+            return false;
         }
 
         if ($table !== 'pages') {
-            return;
+            return false;
         }
 
-        if ($this->extensionConfiguration->isSyncEnabled() && $this->extensionConfiguration->isSyncDefaultEnabled()) {
-            $fieldArray['tx_sluggi_sync'] = 1;
+        if (!$this->extensionConfiguration->isSyncEnabled() || !$this->extensionConfiguration->isSyncDefaultEnabled()) {
+            return false;
         }
+
+        $fieldArray['tx_sluggi_sync'] = 1;
+
+        return true;
     }
 }

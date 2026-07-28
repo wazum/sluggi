@@ -71,9 +71,8 @@ final class LockSlugOnFullPathEdit
     }
 
     /**
-     * Re-applies the lock after fillInFieldArray() dropped slug_locked for users
-     * without non_exclude_fields permission. The tx_sluggi_full_path flag the
-     * decision depends on is gone by then, so it is staged above instead.
+     * Re-applies the lock dropped by fillInFieldArray(). Staged in preProcess because
+     * tx_sluggi_full_path is no longer in the field array here.
      *
      * @param array<string, mixed> $fieldArray
      */

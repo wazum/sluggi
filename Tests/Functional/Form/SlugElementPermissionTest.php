@@ -141,6 +141,24 @@ final class SlugElementPermissionTest extends FunctionalTestCase
     }
 
     #[Test]
+    public function pageTsConfigHidesSyncToggleEvenForAdmin(): void
+    {
+        $this->setUpBackendUser(1);
+        $html = $this->renderSlugElement(6);
+
+        self::assertStringNotContainsString('sync-feature-enabled', $html);
+    }
+
+    #[Test]
+    public function pageTsConfigHidesLockToggleEvenForAdmin(): void
+    {
+        $this->setUpBackendUser(1);
+        $html = $this->renderSlugElement(6);
+
+        self::assertStringNotContainsString('lock-feature-enabled', $html);
+    }
+
+    #[Test]
     public function userWithoutLockAccessStillSeesLockedStateOnLockedPage(): void
     {
         $this->setUpBackendUser(3); // sync_only user - no access to slug_locked field

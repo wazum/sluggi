@@ -120,6 +120,8 @@ Tables configured in `synchronize_tables` (e.g. `tx_news_domain_model_news`) get
 
 ![Hierarchy permissions](Documentation/sluggi_restricted_permissions.png)
 
+**Per page tree** – Backend group permissions apply to the whole installation. With page TSconfig you can enforce a policy for one branch or one site instead, and it applies to admins too. See [Enforcing a policy per page tree](#enforcing-a-policy-per-page-tree).
+
 ### Out-of-Sync URL Detection
 
 When a page's URL path doesn't match the page hierarchy (e.g. after a page move, a manual admin edit, or a database import), _sluggi_ detects the mismatch and informs the editor with a subtle amber highlight on the prefix, a one-time notification, and an inline note below the field:
@@ -392,6 +394,30 @@ Example setup for a typical editorial team:
 **Senior Editor** – Can lock critical URLs before a campaign launch, toggle sync for pages with manually crafted paths, and edit full URL paths when needed.
 
 **Editor** – Can edit the last segment of a URL (with `last_segment_only` enabled), but cannot disable sync or unlock a locked URL. URLs stay consistent without extra training.
+
+### Enforcing a policy per page tree
+
+Group permissions are global: one setting per backend group for the whole installation, and administrators always bypass them. To enforce a policy for a single branch or a single site, use page TSconfig on the topmost page of that branch – it is inherited by every page below.
+
+Two standard TYPO3 settings are honoured for _sluggi_'s fields:
+
+| Setting | Effect |
+|---------|--------|
+| `TCAdefaults.pages.<field>` | Value for newly created pages (`tx_sluggi_sync`, `slug_locked`) |
+| `TCEFORM.pages.<field>.disabled` | Hides the control, **also for administrators** |
+
+Always synchronized URLs, no way to turn it off:
+
+```
+TCAdefaults.pages.tx_sluggi_sync = 1
+TCEFORM.pages.tx_sluggi_sync.disabled = 1
+```
+
+Use both keys together. Each one alone gives you half a policy: `TCAdefaults` sets the value but leaves the toggle available, `TCEFORM` hides the toggle but does not decide the value.
+
+`TCEFORM.pages.<field>.disabled` works for `tx_sluggi_sync`, `slug_locked` and `tx_sluggi_full_path`. `TCAdefaults` only applies to the two stored fields – `tx_sluggi_full_path` is a transient control and is never saved.
+
+This affects newly created pages. Existing pages keep their current state; use **Update URL paths recursively** in the page context menu to change them.
 
 ## User Settings
 

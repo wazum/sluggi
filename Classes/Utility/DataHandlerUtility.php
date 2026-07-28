@@ -30,6 +30,17 @@ final class DataHandlerUtility
         return (int)(is_array($value) ? ($value[0] ?? 0) : $value);
     }
 
+    /**
+     * Resolved TCAdefaults value from page and user TSconfig, null when unconfigured.
+     * Core applies these only to fields in a showitem, so passthrough columns need this.
+     */
+    public static function tcaDefaultValue(DataHandler $dataHandler, string $table, string $fieldName): ?int
+    {
+        $value = $dataHandler->defaultValues[$table][$fieldName] ?? null;
+
+        return $value === null ? null : (int)$value;
+    }
+
     public static function isSlugUnchanged(int $id, string $newSlug): bool
     {
         $currentRecord = BackendUtility::getRecordWSOL('pages', $id, 'slug');

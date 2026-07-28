@@ -101,6 +101,15 @@ final class SlugElementFullPathPermissionTest extends FunctionalTestCase
     }
 
     #[Test]
+    public function pageTsConfigHidesFullPathToggleDespitePermission(): void
+    {
+        $this->setUpBackendUser(2);
+        $html = $this->renderSlugElement(5);
+
+        self::assertStringNotContainsString('full-path-feature-enabled', $html);
+    }
+
+    #[Test]
     public function userWithoutFullPathPermissionDoesNotSeeToggle(): void
     {
         $this->setUpBackendUser(3);

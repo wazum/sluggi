@@ -10,7 +10,9 @@
 ,3,0,"no_full_path_access","$2y$12$abc123",0,"2"
 
 "pages"
-,"uid","pid","title","slug","tx_sluggi_sync","slug_locked","doktype","perms_userid","perms_groupid","perms_user","perms_group","perms_everybody"
-,1,0,"Root Page","/",0,0,1,1,0,31,31,31
-,2,1,"Parent Page","/parent",0,0,1,1,0,31,31,31
-,3,2,"Child Page","/parent/child",0,0,1,1,0,31,31,31
+,"uid","pid","title","slug","tx_sluggi_sync","slug_locked","doktype","TSconfig","perms_userid","perms_groupid","perms_user","perms_group","perms_everybody"
+,1,0,"Root Page","/",0,0,1,"",1,0,31,31,31
+,2,1,"Parent Page","/parent",0,0,1,"",1,0,31,31,31
+,3,2,"Child Page","/parent/child",0,0,1,"",1,0,31,31,31
+,4,1,"Enforced Parent","/enforced",0,0,1,"TCEFORM.pages.tx_sluggi_full_path.disabled = 1",1,0,31,31,31
+,5,4,"Enforced Child","/enforced/child",0,0,1,"",1,0,31,31,31

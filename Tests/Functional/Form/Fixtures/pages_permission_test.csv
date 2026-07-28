@@ -14,8 +14,11 @@
 ,5,0,"no_sluggi","$2y$12$abc123",0,"4"
 
 "pages"
-,"uid","pid","title","slug","tx_sluggi_sync","slug_locked","doktype","perms_userid","perms_groupid","perms_user","perms_group","perms_everybody"
-,1,0,"Root Page","/",0,0,1,1,0,31,31,31
-,2,1,"Test Page","/test-page",0,0,1,1,0,31,31,31
-,3,1,"Locked Page","/locked-page",0,1,1,1,0,31,31,31
-,4,1,"Synced Page","/synced-page",1,0,1,1,0,31,31,31
+,"uid","pid","title","slug","tx_sluggi_sync","slug_locked","doktype","TSconfig","perms_userid","perms_groupid","perms_user","perms_group","perms_everybody"
+,1,0,"Root Page","/",0,0,1,"",1,0,31,31,31
+,2,1,"Test Page","/test-page",0,0,1,"",1,0,31,31,31
+,3,1,"Locked Page","/locked-page",0,1,1,"",1,0,31,31,31
+,4,1,"Synced Page","/synced-page",1,0,1,"",1,0,31,31,31
+,5,1,"Enforced Area","/enforced-area",0,0,1,"TCEFORM.pages.tx_sluggi_sync.disabled = 1
+TCEFORM.pages.slug_locked.disabled = 1",1,0,31,31,31
+,6,5,"Enforced Child","/enforced-area/child",1,0,1,"",1,0,31,31,31

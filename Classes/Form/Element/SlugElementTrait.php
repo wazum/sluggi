@@ -450,6 +450,10 @@ trait SlugElementTrait
 
     private function canUserAccessSyncField(string $table): bool
     {
+        if ($this->isFieldDisabledByPageTsConfig($table, 'tx_sluggi_sync')) {
+            return false;
+        }
+
         if (!($GLOBALS['TCA'][$table]['columns']['tx_sluggi_sync']['exclude'] ?? false)) {
             return true;
         }
@@ -459,12 +463,14 @@ trait SlugElementTrait
 
     private function canUserAccessLockField(string $table): bool
     {
-        return $this->getBackendUser()->check('non_exclude_fields', $table . ':slug_locked');
+        return !$this->isFieldDisabledByPageTsConfig($table, 'slug_locked')
+            && $this->getBackendUser()->check('non_exclude_fields', $table . ':slug_locked');
     }
 
     private function canUserAccessFullPathField(string $table): bool
     {
-        return $this->getBackendUser()->check('non_exclude_fields', $table . ':tx_sluggi_full_path');
+        return !$this->isFieldDisabledByPageTsConfig($table, 'tx_sluggi_full_path')
+            && $this->getBackendUser()->check('non_exclude_fields', $table . ':tx_sluggi_full_path');
     }
 
     private function isFullPathFeatureEnabled(string $table, bool $lastSegmentOnly, string $lockedPrefix): bool
@@ -474,6 +480,15 @@ trait SlugElementTrait
         return $this->fullPathEditingService->isEnabled()
             && $hasRestriction
             && $this->canUserAccessFullPathField($table);
+    }
+
+    /**
+     * Honours TCEFORM.<table>.<field>.disabled, which core only evaluates for fields
+     * rendered by SingleFieldContainer — never for the controls drawn in this element.
+     */
+    private function isFieldDisabledByPageTsConfig(string $table, string $fieldName): bool
+    {
+        return (bool)($this->data['pageTsConfig']['TCEFORM.'][$table . '.'][$fieldName . '.']['disabled'] ?? false);
     }
 
     private function isSiteAutoCreateRedirectsEnabled(): bool

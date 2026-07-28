@@ -253,6 +253,43 @@
                     <input type="hidden" class="sluggi-redirect-field" value="0" />
                 </div>
             </fieldset>
+
+            <h3 class="demo-subheading">Enforced Sync</h3>
+            <p class="demo-subdescription">Page TSconfig can enforce a policy for one branch of the page tree instead of a whole backend group – and unlike group permissions it applies to administrators too. Here sync is on and the toggle is gone, so the URL always follows the title. The same works for the other two controls, <code>slug_locked</code> and <code>tx_sluggi_full_path</code>.</p>
+
+            <fieldset class="demo-slug-fieldset" style="margin-top: 0;">
+                <legend class="demo-slug-legend">
+                    <svg class="demo-chain-icon" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+                    URL Segment <span class="demo-domain">(https://example.com)</span>
+                </legend>
+                <div class="demo-element-wrapper">
+                    <sluggi-element
+                        value="/news/annual-report"
+                        is-synced
+                        page-id="7"
+                        record-id="7"
+                        table-name="pages"
+                        field-name="slug"
+                        language="0"
+                        signature="demo"
+                        command="edit"
+                        parent-page-id="0"
+                    ></sluggi-element>
+                    <input type="hidden" class="sluggi-hidden-field" name="data[pages][7][slug]" value="/news/annual-report" />
+                    <input type="hidden" class="sluggi-sync-field" name="data[pages][7][tx_sluggi_sync]" value="1" />
+                    <input type="hidden" class="sluggi-lock-field" name="data[pages][7][slug_locked]" value="0" />
+                    <input type="hidden" class="sluggi-full-path-field" value="0" />
+                    <input type="hidden" class="sluggi-redirect-field" value="0" />
+                </div>
+            </fieldset>
+
+            <p class="demo-config-hint">Set this on the topmost page of the branch – it is inherited by every page below:</p>
+            <button type="button" class="demo-install-block demo-install-block--multiline" aria-label="Copy to clipboard" onclick="navigator.clipboard.writeText('TCAdefaults.pages.tx_sluggi_sync = 1\nTCEFORM.pages.tx_sluggi_sync.disabled = 1').then(() => { this.classList.add('copied'); setTimeout(() => this.classList.remove('copied'), 1500); })">
+                <code>TCAdefaults.pages.tx_sluggi_sync = 1
+TCEFORM.pages.tx_sluggi_sync.disabled = 1</code>
+                <svg class="demo-copy-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                <svg class="demo-check-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            </button>
         </section>
 
         <!-- Reserved Paths -->

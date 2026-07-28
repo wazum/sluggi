@@ -25,6 +25,7 @@ use Wazum\Sluggi\DataHandler\HandlePageMove;
 use Wazum\Sluggi\DataHandler\HandlePageUndelete;
 use Wazum\Sluggi\DataHandler\HandlePageUpdate;
 use Wazum\Sluggi\DataHandler\HandleRecordUndelete;
+use Wazum\Sluggi\DataHandler\InitializeLockForNewPage;
 use Wazum\Sluggi\DataHandler\InitializeSyncForNewPage;
 use Wazum\Sluggi\DataHandler\HandleRecordUpdate;
 use Wazum\Sluggi\DataHandler\PersistRecordSyncState;
@@ -141,8 +142,10 @@ $GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['t3lib/class.t3lib_pagerenderer.php'][
 //   - HandlePageUpdate auto-regenerates page slugs when source fields changed.
 //   - HandleRecordUpdate auto-regenerates non-page table slugs configured in synchronize_tables.
 //   - ValidateReservedSlugPath rejects reserved final page slugs on update and rewrites reserved slugs on create.
-//   - InitializeSyncForNewPage re-seeds tx_sluggi_sync dropped by core's field access control.
-//     Must stay after ClearSlugForExcludedDoktypes so excluded page types keep sync off.
+//   - InitializeSyncForNewPage and InitializeLockForNewPage apply the page TSconfig
+//     TCAdefaults for their column and re-seed values dropped by core's field access
+//     control. Must stay after ClearSlugForExcludedDoktypes so excluded page types
+//     keep sync off.
 // processCmdmap hooks (copy/undelete) and moveRecord (move) run independently per operation.
 // Sync/lock field initialisers are registered last because they only seed defaults on new records.
 $GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['t3lib/class.t3lib_tcemain.php']['processDatamapClass']['sluggi_redirect_access'] =
@@ -187,6 +190,9 @@ $GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['t3lib/class.t3lib_tcemain.php']['move
 
 $GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['t3lib/class.t3lib_tcemain.php']['processDatamapClass']['sluggi_sync_new'] =
     InitializeSyncForNewPage::class;
+
+$GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['t3lib/class.t3lib_tcemain.php']['processDatamapClass']['sluggi_lock_new'] =
+    InitializeLockForNewPage::class;
 
 $GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['t3lib/class.t3lib_tcemain.php']['processDatamapClass']['sluggi_lock_full_path'] =
     LockSlugOnFullPathEdit::class;
