@@ -459,6 +459,13 @@ For non-page tables, add the table name to the `synchronize_tables` extension se
 - [masi](https://github.com/b13/masi) – Exclude specific page slugs from subpage URL generation
 - [content_slug](https://github.com/sebkln/content_slug) – Slug field for human-readable content element anchors (`#my-section`)
 
+## _masi_
+
+[b13/masi](https://github.com/b13/masi) hooks in as a TCA `postModifier` and runs after slug generation, so both extensions work side by side.
+
+- **Folders in URL paths:** keep `254` in `exclude_doktypes` to leave them out, remove it to let _masi_ include them.
+- **One value per page:** _sluggi_ couples `exclude_slug_for_subpages` to the default language, so it is not editable on a translation. A per-language value would not match the paths _sluggi_ resolves from the rootline. Run the wizard _"Align the masi subpage exclusion with the default language"_ if translations differ from an earlier setup.
+
 ## Fixes for TYPO3 Core Issues
 
 _sluggi_ works around these known TYPO3 core issues:
@@ -511,7 +518,7 @@ Sluggi now also overrides core's `resolveParentPageRecord()` so that _all_ slug 
 
 **Upgrade wizard:** Run **Admin Tools > Upgrade > Upgrade Wizard** after updating. The wizard _"Set default excluded page types for sluggi"_ sets `exclude_doktypes` to `199,254` for existing installations where it was empty.
 
-**[b13/masi](https://github.com/b13/masi) users:** If you use masi to include sysfolders in URL paths, remove `254` from `exclude_doktypes` after the upgrade. Masi uses a TCA `postModifier` (not an XCLASS), so both extensions work together without conflicts — masi overrides the generated slug after sluggi's `SlugHelper`, and both will consistently include the sysfolder when `254` is not in the exclusion list.
+**_masi_ users:** Remove `254` from `exclude_doktypes` after the upgrade if you want folders in URL paths. See [_masi_](#masi).
 
 ## Support and Feature Requests
 
