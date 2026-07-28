@@ -53,7 +53,7 @@ final class SlugElementLastSegmentPrefixTest extends FunctionalTestCase
         $GLOBALS['LANG'] = GeneralUtility::makeInstance(LanguageServiceFactory::class)->create('default');
     }
 
-    private function renderSlugElement(int $pageId): string
+    private function renderSlugElement(int $pageId, string $command = 'edit'): string
     {
         $request = (new ServerRequest('https://example.com/typo3/'))
             ->withAttribute('normalizedParams', NormalizedParams::createFromServerParams($_SERVER))
@@ -65,7 +65,7 @@ final class SlugElementLastSegmentPrefixTest extends FunctionalTestCase
         $formData = $formDataCompiler->compile([
             'tableName' => 'pages',
             'vanillaUid' => $pageId,
-            'command' => 'edit',
+            'command' => $command,
             'request' => $request,
         ], $formDataGroup);
 
@@ -95,6 +95,21 @@ final class SlugElementLastSegmentPrefixTest extends FunctionalTestCase
 
         self::assertStringContainsString('locked-prefix="/parent"', $html);
         self::assertStringContainsString('last-segment-only', $html);
+    }
+
+    #[Test]
+    public function newPageIsNotPreFilledWithTheParentSlug(): void
+    {
+        $this->setUpBackendUser(2);
+
+        // Creating a subpage below "Parent Page" (uid=2, slug /parent). The
+        // parent path belongs in the prefix, never in the value — a value that
+        // is exactly the parent path is indistinguishable from a page whose own
+        // segment happens to match it.
+        $html = $this->renderSlugElement(2, 'new');
+
+        self::assertStringContainsString('parent-slug="/parent"', $html);
+        self::assertStringNotContainsString('value="/parent"', $html);
     }
 
     #[Test]

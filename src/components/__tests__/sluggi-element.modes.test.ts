@@ -100,6 +100,41 @@ describe('SluggiElement - Modes', () => {
             expect(el.value).to.equal('/parent-section/new-test-page');
         });
 
+        it('prefers the parent path over a shallower locked prefix on a new page', async () => {
+            const el = await fixture<SluggiElement>(html`
+                <sluggi-element
+                    parent-slug="/organization/department/institute"
+                    locked-prefix="/organization/department"
+                    command="new"
+                ></sluggi-element>
+            `);
+
+            expect(el.shadowRoot!.querySelector('.sluggi-prefix')?.textContent)
+                .to.equal('/organization/department/institute');
+        });
+
+        it('shows the parent path as prefix on a new page with an empty value', async () => {
+            const el = await fixture<SluggiElement>(html`
+                <sluggi-element parent-slug="/demo" command="new"></sluggi-element>
+            `);
+
+            expect(el.shadowRoot!.querySelector('.sluggi-prefix')?.textContent).to.equal('/demo');
+        });
+
+        it('treats the whole seeded value as prefix on a new page with no own segment yet', async () => {
+            const el = await fixture<SluggiElement>(html`
+                <sluggi-element
+                    value="/home/department"
+                    parent-slug="/home/department"
+                    locked-prefix="/home/department"
+                    last-segment-only
+                    command="new"
+                ></sluggi-element>
+            `);
+
+            expect(el.shadowRoot!.querySelector('.sluggi-prefix')?.textContent).to.equal('/home/department');
+        });
+
         it('shows out-of-sync indicator on prefix when slug does not match hierarchy', async () => {
             const el = await fixture<SluggiElement>(html`
                 <sluggi-element

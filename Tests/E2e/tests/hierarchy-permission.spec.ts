@@ -61,14 +61,16 @@ test.describe('Hierarchy Permission - Editor Slug Restrictions', () => {
     await expect(slugElement).toBeVisible();
     await expect(slugElement).toHaveAttribute('locked-prefix', '/organization/department');
 
+    // The whole parent path is prefix — "/institute" belongs to the parent, so
+    // offering it as the editable segment would drop that level on save
     const prefix = slugElement.locator('.sluggi-prefix');
     await expect(prefix).toBeVisible();
-    await expect(prefix).toContainText('/organization/department');
+    await expect(prefix).toHaveText('/organization/department/institute');
 
     const editableArea = slugElement.locator('.sluggi-editable');
     await expect(editableArea).toBeVisible();
     const editableText = await editableArea.textContent();
-    expect(editableText).toContain('/institute');
+    expect(editableText).not.toContain('/institute');
   });
 
   test('backend blocks attempt to modify locked prefix segments', async ({ page }) => {

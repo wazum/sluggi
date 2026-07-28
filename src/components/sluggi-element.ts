@@ -386,12 +386,31 @@ export class SluggiElement extends LitElement {
         return true;
     }
 
+    private get hasNoOwnSegmentYet(): boolean {
+        if (this.command !== 'new') {
+            return false;
+        }
+
+        return this.value === '' || this.value === this.parentPath;
+    }
+
+    // Where the page actually lands, not how far the editor may reach
+    private get parentPath(): string {
+        return this.parentSlug || this.lockedPrefix;
+    }
+
     private get computedPrefix(): string {
         if (this.isCompletelyReadonly) {
             return '';
         }
         if (this.isFullPathMode) {
             return this.prefix;
+        }
+        // Without an own segment the parent path is the whole prefix. Deriving
+        // it from the value instead would hand the parent's last segment to the
+        // editor as if it were theirs.
+        if (this.hasNoOwnSegmentYet && this.parentPath !== '') {
+            return this.parentPath;
         }
         if (this.lastSegmentOnly && this.value) {
             const parts = this.value.split('/').filter(Boolean);
@@ -480,6 +499,10 @@ export class SluggiElement extends LitElement {
     private get hiddenInputValue(): string {
         if (this.isFullPathMode) {
             return this.value;
+        }
+        // Let the server generate rather than submitting the parent's own slug
+        if (this.hasNoOwnSegmentYet) {
+            return '';
         }
         if (this.lastSegmentOnly) {
             return this.computedPrefix + this.editableValue;

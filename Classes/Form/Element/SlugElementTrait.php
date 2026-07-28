@@ -124,9 +124,6 @@ trait SlugElementTrait
                         ? $parentSlug
                         : $this->hierarchyPermissionService->getLockedPrefixForPage($effectivePid, $parentSlug);
                 }
-                if ($itemValue === '' && $parentSlug !== '') {
-                    $itemValue = $parentSlug;
-                }
             } elseif (is_numeric($recordId) && (int)$recordId > 0) {
                 $existingRecord = BackendUtility::getRecordWSOL('pages', (int)$recordId, 'pid,sys_language_uid');
                 if ($existingRecord !== null) {
