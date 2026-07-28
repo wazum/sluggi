@@ -130,7 +130,7 @@ final class PostModifierTest extends FunctionalTestCase
             ->executeQuery('SELECT slug FROM pages WHERE uid = 4')
             ->fetchOne();
 
-        self::assertStringEndsWith('-slash-dash', $slug);
+        self::assertStringStartsWith('/slash-dash/', $slug);
     }
 
     #[Test]
@@ -152,6 +152,31 @@ final class PostModifierTest extends FunctionalTestCase
         $dataHandler->process_cmdmap();
 
         $this->assertCSVDataSet(__DIR__ . '/Fixtures/pages_after_postmodifier_move.csv');
+    }
+
+    #[Test]
+    public function postModifierStillRewritesThePrefixOfAMovedPageWithItsOwnSegment(): void
+    {
+        $this->setUpTestWithPostModifier('pages_for_postmodifier_move_handcrafted.csv');
+
+        // "/strip" is stripped by the postModifier, "hand-crafted" is the page's
+        // own segment and survives the move
+        $dataHandler = GeneralUtility::makeInstance(DataHandler::class);
+        $dataHandler->start([], [
+            'pages' => [
+                4 => [
+                    'move' => 2,
+                ],
+            ],
+        ]);
+        $dataHandler->process_cmdmap();
+
+        $slug = $this->getConnectionPool()
+            ->getConnectionForTable('pages')
+            ->executeQuery('SELECT slug FROM pages WHERE uid = 4')
+            ->fetchOne();
+
+        self::assertSame('/hand-crafted', $slug);
     }
 
     #[Test]

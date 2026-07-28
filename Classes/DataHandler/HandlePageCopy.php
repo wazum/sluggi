@@ -68,7 +68,7 @@ final readonly class HandlePageCopy
         $parentSlug = $processedSlugs[$parentPid][$languageId]
             ?? $this->slugGeneratorService->getParentSlug($parentPid, $languageId);
 
-        $newSlug = $this->slugGeneratorService->combineWithParent(
+        $newSlug = $this->slugGeneratorService->reparentSlug(
             $parentSlug,
             $sourcePage['slug'] ?? '',
             $targetPage,

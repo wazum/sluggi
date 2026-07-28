@@ -30,7 +30,8 @@ final class TestSlugPostModifier
 
     /**
      * PostModifier that reports the slash replacement it received in the
-     * effective slug configuration.
+     * effective slug configuration, as a prefix segment: the caller's own
+     * segment is restored after the modifiers ran.
      *
      * @param array{slug: string, workspaceId: int, configuration: array<string, mixed>, record: array<string, mixed>, pid: int, prefix: string, tableName: string, fieldName: string} $params
      */
@@ -38,7 +39,7 @@ final class TestSlugPostModifier
     {
         $replacement = $params['configuration']['generatorOptions']['replacements']['/'] ?? null;
 
-        return $params['slug'] . '-slash-' . ($replacement === '-' ? 'dash' : 'none');
+        return 'slash-' . ($replacement === '-' ? 'dash' : 'none') . '/' . $params['slug'];
     }
 
     /**

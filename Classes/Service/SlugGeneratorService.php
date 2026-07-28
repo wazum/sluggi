@@ -82,6 +82,24 @@ final readonly class SlugGeneratorService
     }
 
     /**
+     * Re-prefixes an existing slug, keeping the page's own segment. Post
+     * modifiers may still rewrite the prefix.
+     *
+     * @param array<string, mixed> $record
+     */
+    public function reparentSlug(string $parentSlug, string $childSlug, array $record, int $pid): string
+    {
+        $slug = $this->combineWithParent($parentSlug, $childSlug, $record, $pid);
+        $childSegment = '/' . SlugUtility::getLastSegment($childSlug);
+
+        if ($childSegment === '/' || '/' . SlugUtility::getLastSegment($slug) === $childSegment) {
+            return $slug;
+        }
+
+        return SlugUtility::enforceParentPath(SlugUtility::getParentPath($slug), $childSegment);
+    }
+
+    /**
      * Get the parent slug, skipping excluded page types (sysfolders, spacers, etc.).
      * This ensures children of excluded pages get correct URL prefixes.
      */
