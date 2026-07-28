@@ -170,6 +170,45 @@ final class HierarchyPermissionValidationTest extends FunctionalTestCase
     }
 
     #[Test]
+    public function editorNewPageUnderExcludedPageTypeIsLockedToEffectiveParentPath(): void
+    {
+        parent::setUp();
+        $this->importCSVDataSet(__DIR__ . '/Fixtures/pages_hierarchy_new_page_under_excluded_folder.csv');
+        $this->setUpSite();
+        $GLOBALS['LANG'] = GeneralUtility::makeInstance(LanguageServiceFactory::class)->create('default');
+        $this->setUpBackendUser(2);
+
+        // The editor may create pages below the storage folder (uid=3) but not
+        // edit it, so no rootline page is editable and the locked prefix falls
+        // back to the parent path. The folder is an excluded page type with an
+        // empty slug, so the effective parent path is the one of "Home".
+        $dataHandler = GeneralUtility::makeInstance(DataHandler::class);
+        $dataHandler->start(
+            [
+                'pages' => [
+                    'NEW1' => [
+                        'pid' => 3,
+                        'title' => 'New Page',
+                        'slug' => '/totally/different/new-page',
+                        'doktype' => 1,
+                    ],
+                ],
+            ],
+            []
+        );
+        $dataHandler->process_datamap();
+
+        self::assertEmpty($dataHandler->errorLog, implode(' | ', $dataHandler->errorLog));
+
+        $slug = $this->getConnectionPool()
+            ->getConnectionForTable('pages')
+            ->executeQuery('SELECT slug FROM pages WHERE uid = 4')
+            ->fetchOne();
+
+        self::assertSame('/home/new-page', $slug);
+    }
+
+    #[Test]
     public function editorCanFixOutOfSyncSlugWithCorrectHierarchyPrefix(): void
     {
         parent::setUp();

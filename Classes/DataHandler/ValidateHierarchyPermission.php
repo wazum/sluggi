@@ -107,11 +107,14 @@ final readonly class ValidateHierarchyPermission
             return null;
         }
 
+        // getLockedPrefixForPage() takes the parent path of the slug it is
+        // given, so it needs the prospective slug of the new record. The
+        // parent's own slug would yield the grandparent path, or nothing at all
+        // for an excluded page type whose slug sluggi cleared.
         $parentSlug = $this->slugGeneratorService->getParentSlug($pid);
-        $parentRecord = BackendUtility::getRecordWSOL('pages', $pid, 'slug');
-        $currentParentSlug = (string)($parentRecord['slug'] ?? $parentSlug);
+        $prospectiveSlug = SlugUtility::enforceParentPath($parentSlug, (string)($fieldArray['slug'] ?? ''));
 
-        return $this->hierarchyPermissionService->getLockedPrefixForPage($pid, $currentParentSlug);
+        return $this->hierarchyPermissionService->getLockedPrefixForPage($pid, $prospectiveSlug);
     }
 
     private function resolveLockedPrefixForExistingRecord(int $id): ?string
