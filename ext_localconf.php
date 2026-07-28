@@ -104,21 +104,13 @@ $GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['t3lib/class.t3lib_pagerenderer.php'][
                 'notification.'
             );
 
-            // Load redirect notification handler when redirect control is enabled
-            try {
-                $redirectControlEnabled = (bool)\TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance(
-                    \TYPO3\CMS\Core\Configuration\ExtensionConfiguration::class
-                )->get('sluggi', 'redirect_control');
-            } catch (\Exception) {
-                $redirectControlEnabled = false;
-            }
-            if ($redirectControlEnabled) {
-                $pageRenderer->loadJavaScriptModule('@wazum/sluggi/redirect-notification-handler.js');
-                if (Typo3Compatibility::getMajorVersion() >= 14) {
-                    $pageRenderer->addInlineLanguageLabelFile(
-                        'EXT:redirects/Resources/Private/Language/locallang_slug_service.xlf'
-                    );
-                }
+            // The slug-change report is emitted for every slug change, not only
+            // when redirect control is enabled, so its handler always loads.
+            $pageRenderer->loadJavaScriptModule('@wazum/sluggi/redirect-notification-handler.js');
+            if (Typo3Compatibility::getMajorVersion() >= 14) {
+                $pageRenderer->addInlineLanguageLabelFile(
+                    'EXT:redirects/Resources/Private/Language/locallang_slug_service.xlf'
+                );
             }
 
             // Forces FormEngine visible→hidden input sync on v14 page-wizard
