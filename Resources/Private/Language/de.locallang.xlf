@@ -195,6 +195,14 @@
                 <source>Custom URL path. Click the regenerate button to reset it to the page hierarchy.</source>
                 <target>Benutzerdefinierter URL-Pfad. Klicken Sie auf „Neu generieren", um ihn auf die Seitenhierarchie zurückzusetzen.</target>
             </trans-unit>
+            <trans-unit id="syncRestore.notification.title" resname="syncRestore.notification.title">
+                <source>URL path reset</source>
+                <target>URL-Pfad zurückgesetzt</target>
+            </trans-unit>
+            <trans-unit id="syncRestore.notification.message" resname="syncRestore.notification.message">
+                <source>Auto-sync was turned off — the URL path was reset to %s.</source>
+                <target>Auto-Sync wurde ausgeschaltet — der URL-Pfad wurde auf %s zurückgesetzt.</target>
+            </trans-unit>
             <trans-unit id="prefixMismatch.notification.title" resname="prefixMismatch.notification.title">
                 <source>URL Path Info</source>
                 <target>URL-Pfad-Information</target>

@@ -172,6 +172,9 @@ export class SluggiElement extends LitElement {
     private copiedUrl = '';
 
     @state()
+    private showRestoreHighlight = false;
+
+    @state()
     private controlsExpanded = false;
 
     private static shownMismatchNotifications = new Set<string>();
@@ -190,6 +193,7 @@ export class SluggiElement extends LitElement {
     private latestProposalRequestId = 0;
 
     private hideTimeoutId: number | null = null;
+    private restoreHighlightTimeoutId: number | null = null;
 
     @query('input.sluggi-input')
     private inputElement?: HTMLInputElement;
@@ -215,6 +219,9 @@ export class SluggiElement extends LitElement {
     override connectedCallback() {
         super.connectedCallback();
         this.originalValue = this.value;
+        if (this.isSynced) {
+            this.valueBeforeSync = this.value;
+        }
         this.initialSyncValue = (this.parentElement?.querySelector('.sluggi-sync-field') as HTMLInputElement | null)?.value ?? '';
         this.initialLockValue = (this.parentElement?.querySelector('.sluggi-lock-field') as HTMLInputElement | null)?.value ?? '';
         // Registered before the redirect-modal interceptor so a pending
@@ -248,6 +255,7 @@ export class SluggiElement extends LitElement {
             clearTimeout(this.hideTimeoutId);
             this.hideTimeoutId = null;
         }
+        this.clearRestoreHighlight();
         if (this.sourceFieldInputTimeout !== null) {
             clearTimeout(this.sourceFieldInputTimeout);
             this.sourceFieldInputTimeout = null;
@@ -622,6 +630,7 @@ export class SluggiElement extends LitElement {
             this.isLocked ? 'locked' : '',
             this.isSynced ? 'synced' : '',
             this.hasNoControls ? 'no-edit' : '',
+            this.showRestoreHighlight ? 'is-restored' : '',
         ].filter(Boolean).join(' ');
 
         const lastSlashIndex = editable.lastIndexOf('/');
@@ -1664,6 +1673,7 @@ export class SluggiElement extends LitElement {
         this.updateSourceBadgeVisibility();
 
         if (this.isSynced) {
+            this.clearRestoreHighlight();
             this.valueBeforeSync = this.value;
             if (this.isFullPathMode) {
                 this.isFullPathMode = false;
@@ -1680,8 +1690,34 @@ export class SluggiElement extends LitElement {
                 this.valueBeforeSync = '';
                 if (changed) {
                     this.notifyFormEngineOfChange();
+                    this.announceSyncRestore(this.value);
                 }
             }
+        }
+    }
+
+    private announceSyncRestore(restoredValue: string) {
+        const message = this.labels['syncRestore.notification.message']
+            || 'Auto-sync was turned off — the URL path was reset to %s.';
+        Notification.info(
+            this.labels['syncRestore.notification.title'] || 'URL path reset',
+            message.replace('%s', restoredValue),
+            10,
+        );
+
+        this.clearRestoreHighlight();
+        this.showRestoreHighlight = true;
+        this.restoreHighlightTimeoutId = window.setTimeout(() => {
+            this.showRestoreHighlight = false;
+            this.restoreHighlightTimeoutId = null;
+        }, 2500);
+    }
+
+    private clearRestoreHighlight() {
+        this.showRestoreHighlight = false;
+        if (this.restoreHighlightTimeoutId !== null) {
+            clearTimeout(this.restoreHighlightTimeoutId);
+            this.restoreHighlightTimeoutId = null;
         }
     }
 

@@ -150,6 +150,12 @@
             <trans-unit id="prefixMismatch.tooltip" resname="prefixMismatch.tooltip">
                 <source>Custom URL path. Click the regenerate button to reset it to the page hierarchy.</source>
             </trans-unit>
+            <trans-unit id="syncRestore.notification.title" resname="syncRestore.notification.title">
+                <source>URL path reset</source>
+            </trans-unit>
+            <trans-unit id="syncRestore.notification.message" resname="syncRestore.notification.message">
+                <source>Auto-sync was turned off — the URL path was reset to %s.</source>
+            </trans-unit>
             <trans-unit id="prefixMismatch.notification.title" resname="prefixMismatch.notification.title">
                 <source>URL Path Info</source>
             </trans-unit>

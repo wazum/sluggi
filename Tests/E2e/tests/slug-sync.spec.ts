@@ -134,6 +134,31 @@ test.describe('Slug Sync Toggle - TYPO3 Integration', () => {
     await expect(syncToggle).toHaveClass(/is-synced/);
   });
 
+  test('turning sync off after a title change restores the stored URL path', async ({ page }) => {
+    await page.goto('/typo3/record/edit?edit[pages][2]=edit');
+    const frame = page.frameLocator('iframe');
+    await waitForEditForm(frame, page);
+    const slugElement = frame.locator('sluggi-element');
+    const hiddenInput = frame.locator('input.sluggi-hidden-field');
+
+    const storedSlug = await hiddenInput.inputValue();
+
+    const titleInput = frame.locator('input[data-formengine-input-name*="[title]"]');
+    await titleInput.fill('Renamed By Live Update');
+    await titleInput.blur();
+
+    await expect(hiddenInput).not.toHaveValue(storedSlug, { timeout: 10000 });
+
+    const syncToggle = slugElement.locator('.sluggi-sync-toggle');
+    await expect(syncToggle).toHaveClass(/is-synced/);
+    await syncToggle.click();
+
+    await expect(syncToggle).not.toHaveClass(/is-synced/);
+    await expect(hiddenInput).toHaveValue(storedSlug);
+    await expect(slugElement.locator('.sluggi-editable')).toHaveClass(/is-restored/);
+    await expect(page.locator('.alert-info', { hasText: storedSlug })).toBeVisible({ timeout: 5000 });
+  });
+
   test('toggling sync marks form as dirty and shows unsaved changes modal', async ({ page }) => {
     await page.goto('/typo3/record/edit?edit[pages][16]=edit');
     const frame = page.frameLocator('iframe');

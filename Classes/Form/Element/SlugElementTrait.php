@@ -350,6 +350,8 @@ trait SlugElementTrait
             'conflict.button.cancel' => $languageService->sL($prefix . 'conflict.button.cancel'),
             'conflict.button.useSuggestion' => $languageService->sL($prefix . 'conflict.button.useSuggestion'),
             'syncRestrictionNote' => $languageService->sL($prefix . 'restriction.sync'),
+            'syncRestore.notification.title' => $languageService->sL($prefix . 'syncRestore.notification.title'),
+            'syncRestore.notification.message' => $languageService->sL($prefix . 'syncRestore.notification.message'),
             'lockRestrictionNote' => $languageService->sL($prefix . 'restriction.lock'),
             'fullPathNote' => $languageService->sL($prefix . 'restriction.fullPath'),
             'button.edit' => $languageService->sL($prefix . 'button.edit'),

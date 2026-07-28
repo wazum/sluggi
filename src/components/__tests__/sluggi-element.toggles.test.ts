@@ -1,6 +1,7 @@
 import '../sluggi-element.js';
 import { fixture, html, expect, oneEvent } from './helpers.js';
 import type { SluggiElement } from './helpers.js';
+import Notification from '@typo3/backend/notification.js';
 
 describe('SluggiElement - Toggles', () => {
     describe('Sync Toggle', () => {
@@ -263,6 +264,176 @@ describe('SluggiElement - Toggles', () => {
 
             expect(el.isSynced).to.be.false;
             expect(el.value).to.equal('/my-custom-slug');
+
+            document.body.removeChild(titleInput);
+        });
+
+        it('restores the loaded value when a page that loads synced is toggled OFF', async () => {
+            const titleInput = document.createElement('input');
+            titleInput.setAttribute('data-sluggi-source', '');
+            titleInput.setAttribute('data-formengine-input-name', 'data[pages][456][title]');
+            titleInput.value = 'Some Title';
+            document.body.appendChild(titleInput);
+
+            const el = await fixture<SluggiElement>(html`
+                <sluggi-element
+                    value="/loaded-slug"
+                    page-id="123"
+                    record-id="456"
+                    table-name="pages"
+                    field-name="slug"
+                    is-synced
+                    sync-feature-enabled
+                ></sluggi-element>
+            `);
+
+            el.setProposal('/some-title');
+            await el.updateComplete;
+            expect(el.value).to.equal('/some-title');
+
+            const syncToggle = el.shadowRoot!.querySelector('.sluggi-sync-toggle') as HTMLElement;
+            syncToggle.click();
+            await el.updateComplete;
+
+            expect(el.isSynced).to.be.false;
+            expect(el.value).to.equal('/loaded-slug');
+
+            document.body.removeChild(titleInput);
+        });
+
+        it('notifies about the restored path when toggling sync OFF', async () => {
+            (Notification as any)._reset();
+
+            const titleInput = document.createElement('input');
+            titleInput.setAttribute('data-sluggi-source', '');
+            titleInput.setAttribute('data-formengine-input-name', 'data[pages][456][title]');
+            titleInput.value = 'Some Title';
+            document.body.appendChild(titleInput);
+
+            const el = await fixture<SluggiElement>(html`
+                <sluggi-element
+                    value="/loaded-slug"
+                    page-id="123"
+                    record-id="456"
+                    table-name="pages"
+                    field-name="slug"
+                    is-synced
+                    sync-feature-enabled
+                ></sluggi-element>
+            `);
+
+            el.setProposal('/some-title');
+            await el.updateComplete;
+
+            const syncToggle = el.shadowRoot!.querySelector('.sluggi-sync-toggle') as HTMLElement;
+            syncToggle.click();
+            await el.updateComplete;
+
+            const calls = (Notification as any)._calls as Array<{ type: string; message: string }>;
+            expect(calls).to.have.lengthOf(1);
+            expect(calls[0].type).to.equal('info');
+            expect(calls[0].message).to.contain('/loaded-slug');
+
+            document.body.removeChild(titleInput);
+        });
+
+        it('highlights the restored path and clears the highlight afterwards', async () => {
+            const titleInput = document.createElement('input');
+            titleInput.setAttribute('data-sluggi-source', '');
+            titleInput.setAttribute('data-formengine-input-name', 'data[pages][456][title]');
+            titleInput.value = 'Some Title';
+            document.body.appendChild(titleInput);
+
+            const el = await fixture<SluggiElement>(html`
+                <sluggi-element
+                    value="/loaded-slug"
+                    page-id="123"
+                    record-id="456"
+                    table-name="pages"
+                    field-name="slug"
+                    is-synced
+                    sync-feature-enabled
+                ></sluggi-element>
+            `);
+
+            el.setProposal('/some-title');
+            await el.updateComplete;
+
+            const syncToggle = el.shadowRoot!.querySelector('.sluggi-sync-toggle') as HTMLElement;
+            syncToggle.click();
+            await el.updateComplete;
+
+            expect(el.shadowRoot!.querySelector('.sluggi-editable')!.classList.contains('is-restored')).to.be.true;
+
+            await new Promise(resolve => setTimeout(resolve, 2600));
+            await el.updateComplete;
+
+            expect(el.shadowRoot!.querySelector('.sluggi-editable')!.classList.contains('is-restored')).to.be.false;
+
+            document.body.removeChild(titleInput);
+        });
+
+        it('stays quiet when toggling sync OFF left the value untouched', async () => {
+            (Notification as any)._reset();
+
+            const titleInput = document.createElement('input');
+            titleInput.setAttribute('data-sluggi-source', '');
+            titleInput.setAttribute('data-formengine-input-name', 'data[pages][456][title]');
+            titleInput.value = 'Some Title';
+            document.body.appendChild(titleInput);
+
+            const el = await fixture<SluggiElement>(html`
+                <sluggi-element
+                    value="/loaded-slug"
+                    page-id="123"
+                    record-id="456"
+                    table-name="pages"
+                    field-name="slug"
+                    is-synced
+                    sync-feature-enabled
+                ></sluggi-element>
+            `);
+
+            const syncToggle = el.shadowRoot!.querySelector('.sluggi-sync-toggle') as HTMLElement;
+            syncToggle.click();
+            await el.updateComplete;
+
+            expect(el.value).to.equal('/loaded-slug');
+            expect((Notification as any)._calls).to.have.lengthOf(0);
+            expect(el.shadowRoot!.querySelector('.sluggi-editable')!.classList.contains('is-restored')).to.be.false;
+
+            document.body.removeChild(titleInput);
+        });
+
+        it('keeps the generated slug on a new page when toggled OFF', async () => {
+            const titleInput = document.createElement('input');
+            titleInput.setAttribute('data-sluggi-source', '');
+            titleInput.setAttribute('data-formengine-input-name', 'data[pages][NEW123][title]');
+            titleInput.value = 'Some Title';
+            document.body.appendChild(titleInput);
+
+            const el = await fixture<SluggiElement>(html`
+                <sluggi-element
+                    value=""
+                    page-id="123"
+                    record-id="NEW123"
+                    table-name="pages"
+                    field-name="slug"
+                    command="new"
+                    is-synced
+                    sync-feature-enabled
+                ></sluggi-element>
+            `);
+
+            el.setProposal('/some-title');
+            await el.updateComplete;
+
+            const syncToggle = el.shadowRoot!.querySelector('.sluggi-sync-toggle') as HTMLElement;
+            syncToggle.click();
+            await el.updateComplete;
+
+            expect(el.isSynced).to.be.false;
+            expect(el.value).to.equal('/some-title');
 
             document.body.removeChild(titleInput);
         });
