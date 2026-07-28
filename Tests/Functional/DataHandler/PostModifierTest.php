@@ -130,7 +130,7 @@ final class PostModifierTest extends FunctionalTestCase
             ->executeQuery('SELECT slug FROM pages WHERE uid = 4')
             ->fetchOne();
 
-        self::assertStringEndsWith('-slash-dash', $slug);
+        self::assertStringStartsWith('/slash-dash/', $slug);
     }
 
     #[Test]

@@ -465,6 +465,7 @@ For non-page tables, add the table name to the `synchronize_tables` extension se
 
 - **Folders in URL paths:** keep `254` in `exclude_doktypes` to leave them out, remove it to let _masi_ include them.
 - **One value per page:** _sluggi_ couples `exclude_slug_for_subpages` to the default language, so it is not editable on a translation. A per-language value would not match the paths _sluggi_ resolves from the rootline. Run the wizard _"Align the masi subpage exclusion with the default language"_ if translations differ from an earlier setup.
+- **Moving and copying keep the segment:** the page's existing last segment is carried to the new parent. A `postModifier` may still rewrite the prefix there, but not the segment. Regular edits are unaffected.
 
 ## Fixes for TYPO3 Core Issues
 

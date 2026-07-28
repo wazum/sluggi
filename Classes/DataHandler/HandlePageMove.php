@@ -66,7 +66,7 @@ final readonly class HandlePageMove
 
         $languageId = (int)($currentPage['sys_language_uid'] ?? 0);
         $parentSlug = $this->slugGeneratorService->getParentSlug($targetId, $languageId);
-        $newSlug = $this->slugGeneratorService->combineWithParent(
+        $newSlug = $this->slugGeneratorService->reparentSlug(
             $parentSlug,
             $currentPage['slug'] ?? '',
             $currentPage,
