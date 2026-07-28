@@ -73,6 +73,18 @@ final class SlugGeneratorServiceTest extends FunctionalTestCase
     }
 
     #[Test]
+    public function parentSlugSkipsARecyclerJustAsMasiDoes(): void
+    {
+        $GLOBALS['TYPO3_CONF_VARS']['EXTENSIONS']['sluggi']['exclude_doktypes'] = '199,254';
+        $this->importCSVDataSet(__DIR__ . '/Fixtures/pages_masi_recycler_parent.csv');
+        $this->setUpBackendUser(1);
+
+        $parentSlug = $this->get(SlugGeneratorService::class)->getParentSlug(3);
+
+        self::assertSame('/section', $parentSlug);
+    }
+
+    #[Test]
     public function parentSlugFollowsTheConfiguredFallbackLanguageChain(): void
     {
         $this->importCSVDataSet(__DIR__ . '/Fixtures/pages_language_fallback_parent.csv');

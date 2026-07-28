@@ -113,7 +113,10 @@ final readonly class SlugGeneratorService
         );
 
         foreach ($rootLine as $page) {
-            if ($this->extensionConfiguration->isPageTypeExcluded((int)($page['doktype'] ?? 1))) {
+            $pageType = (int)($page['doktype'] ?? 1);
+            if ($this->extensionConfiguration->isPageTypeExcluded($pageType)
+                || $this->masiCompatibilityService->excludesPageType($pageType)
+            ) {
                 continue;
             }
 
