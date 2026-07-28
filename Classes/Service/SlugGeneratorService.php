@@ -12,6 +12,7 @@ use TYPO3\CMS\Core\DataHandling\SlugHelper;
 use TYPO3\CMS\Core\Exception\SiteNotFoundException;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use Wazum\Sluggi\Configuration\ExtensionConfiguration;
+use Wazum\Sluggi\DataHandling\SlugHelper as SluggiSlugHelper;
 use Wazum\Sluggi\Utility\SlugUtility;
 
 final readonly class SlugGeneratorService
@@ -158,7 +159,9 @@ final readonly class SlugGeneratorService
      */
     private function applyPostModifiers(string $slug, array $record, int $pid): string
     {
-        $fieldConfig = $GLOBALS['TCA']['pages']['columns']['slug']['config'] ?? [];
+        $fieldConfig = SluggiSlugHelper::applyDefaultReplacements(
+            $GLOBALS['TCA']['pages']['columns']['slug']['config'] ?? []
+        );
         $postModifiers = $fieldConfig['generatorOptions']['postModifiers'] ?? [];
 
         if ($postModifiers === []) {

@@ -29,6 +29,19 @@ final class TestSlugPostModifier
     }
 
     /**
+     * PostModifier that reports the slash replacement it received in the
+     * effective slug configuration.
+     *
+     * @param array{slug: string, workspaceId: int, configuration: array<string, mixed>, record: array<string, mixed>, pid: int, prefix: string, tableName: string, fieldName: string} $params
+     */
+    public function appendSlashReplacement(array $params): string
+    {
+        $replacement = $params['configuration']['generatorOptions']['replacements']['/'] ?? null;
+
+        return $params['slug'] . '-slash-' . ($replacement === '-' ? 'dash' : 'none');
+    }
+
+    /**
      * PostModifier that appends workspace ID to slug for testing.
      *
      * @param array{slug: string, workspaceId: int, configuration: array<string, mixed>, record: array<string, mixed>, pid: int, prefix: string, tableName: string, fieldName: string} $params

@@ -93,6 +93,46 @@ final class PostModifierTest extends FunctionalTestCase
         }
     }
 
+    private function setUpTestWithSlashReplacementPostModifier(string $fixture): void
+    {
+        parent::setUp();
+        $this->importCSVDataSet(__DIR__ . '/Fixtures/' . $fixture);
+        $this->setUpSite();
+        $this->setUpBackendUser(1);
+        $GLOBALS['LANG'] = GeneralUtility::makeInstance(LanguageServiceFactory::class)->create('default');
+
+        $GLOBALS['TCA']['pages']['columns']['slug']['config']['generatorOptions']['postModifiers'] = [
+            TestSlugPostModifier::class . '->appendSlashReplacement',
+        ];
+
+        if (Typo3Compatibility::hasTcaSchemaFactory()) {
+            GeneralUtility::makeInstance(TcaSchemaFactory::class)->load($GLOBALS['TCA'], true);
+        }
+    }
+
+    #[Test]
+    public function postModifierReceivesEffectiveConfigurationWhenPageIsMoved(): void
+    {
+        $this->setUpTestWithSlashReplacementPostModifier('pages_for_postmodifier_move.csv');
+
+        $dataHandler = GeneralUtility::makeInstance(DataHandler::class);
+        $dataHandler->start([], [
+            'pages' => [
+                4 => [
+                    'move' => 2,
+                ],
+            ],
+        ]);
+        $dataHandler->process_cmdmap();
+
+        $slug = $this->getConnectionPool()
+            ->getConnectionForTable('pages')
+            ->executeQuery('SELECT slug FROM pages WHERE uid = 4')
+            ->fetchOne();
+
+        self::assertStringEndsWith('-slash-dash', $slug);
+    }
+
     #[Test]
     public function postModifierIsAppliedWhenPageIsMoved(): void
     {

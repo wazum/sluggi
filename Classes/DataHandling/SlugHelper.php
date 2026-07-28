@@ -23,11 +23,25 @@ class SlugHelper extends CoreSlugHelper
      */
     public function __construct(string $tableName, string $fieldName, array $configuration, int $workspaceId = 0)
     {
+        parent::__construct($tableName, $fieldName, self::applyDefaultReplacements($configuration), $workspaceId);
+        $this->sluggiNormalizer = GeneralUtility::makeInstance(SlugNormalizer::class);
+    }
+
+    /**
+     * @param array<string, mixed> $configuration
+     *
+     * @return array<string, mixed>
+     */
+    public static function applyDefaultReplacements(array $configuration): array
+    {
         // Core treats "/" in source-field values as a path separator during
         // generation; a TCA replacements entry for "/" wins over this default.
+        // Callers that pass the configuration to postModifiers themselves must
+        // route it through here, or a postModifier sees a different
+        // configuration depending on whether core or sluggi invoked it.
         $configuration['generatorOptions']['replacements']['/'] ??= (string)($configuration['fallbackCharacter'] ?? '-');
-        parent::__construct($tableName, $fieldName, $configuration, $workspaceId);
-        $this->sluggiNormalizer = GeneralUtility::makeInstance(SlugNormalizer::class);
+
+        return $configuration;
     }
 
     public function sanitize(string $slug): string
