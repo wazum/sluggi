@@ -40,14 +40,43 @@ VALUES (3, 0, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 'restricted_editor', '$argon2i
 -- =============================================
 INSERT INTO `pages` (`uid`, `pid`, `title`, `slug`, `doktype`, `is_siteroot`, `hidden`, `deleted`, `tstamp`, `crdate`, `perms_userid`, `perms_groupid`, `perms_user`, `perms_group`, `perms_everybody`)
 VALUES (1, 0, 'Root', '/', 1, 1, 0, 0, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 1, 0, 31, 31, 31)
-ON DUPLICATE KEY UPDATE `title` = VALUES(`title`), `slug` = VALUES(`slug`), `is_siteroot` = 1, `perms_userid` = 1, `perms_groupid` = 0, `perms_user` = 31, `perms_group` = 31, `perms_everybody` = 31;
+ON DUPLICATE KEY UPDATE
+  `pid` = VALUES(`pid`),
+  `title` = VALUES(`title`),
+  `slug` = VALUES(`slug`),
+  `doktype` = VALUES(`doktype`),
+  `is_siteroot` = VALUES(`is_siteroot`),
+  `hidden` = VALUES(`hidden`),
+  `deleted` = VALUES(`deleted`),
+  `tstamp` = VALUES(`tstamp`),
+  `crdate` = VALUES(`crdate`),
+  `perms_userid` = VALUES(`perms_userid`),
+  `perms_groupid` = VALUES(`perms_groupid`),
+  `perms_user` = VALUES(`perms_user`),
+  `perms_group` = VALUES(`perms_group`),
+  `perms_everybody` = VALUES(`perms_everybody`);
 
 -- =============================================
 -- page-tree-sync.spec.ts (uses page 2)
 -- =============================================
 INSERT INTO `pages` (`uid`, `pid`, `title`, `slug`, `doktype`, `is_siteroot`, `hidden`, `deleted`, `tstamp`, `crdate`, `tx_sluggi_sync`, `perms_userid`, `perms_groupid`, `perms_user`, `perms_group`, `perms_everybody`)
 VALUES (2, 1, 'Test Page', '/test-page', 1, 0, 0, 0, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 1, 1, 0, 31, 31, 31)
-ON DUPLICATE KEY UPDATE `title` = VALUES(`title`), `slug` = VALUES(`slug`), `tx_sluggi_sync` = 1, `perms_userid` = 1, `perms_groupid` = 0, `perms_user` = 31, `perms_group` = 31, `perms_everybody` = 31;
+ON DUPLICATE KEY UPDATE
+  `pid` = VALUES(`pid`),
+  `title` = VALUES(`title`),
+  `slug` = VALUES(`slug`),
+  `doktype` = VALUES(`doktype`),
+  `is_siteroot` = VALUES(`is_siteroot`),
+  `hidden` = VALUES(`hidden`),
+  `deleted` = VALUES(`deleted`),
+  `tstamp` = VALUES(`tstamp`),
+  `crdate` = VALUES(`crdate`),
+  `tx_sluggi_sync` = VALUES(`tx_sluggi_sync`),
+  `perms_userid` = VALUES(`perms_userid`),
+  `perms_groupid` = VALUES(`perms_groupid`),
+  `perms_user` = VALUES(`perms_user`),
+  `perms_group` = VALUES(`perms_group`),
+  `perms_everybody` = VALUES(`perms_everybody`);
 
 -- =============================================
 -- slug-conflicts.spec.ts (uses pages 3, 4, 5)
@@ -55,17 +84,61 @@ ON DUPLICATE KEY UPDATE `title` = VALUES(`title`), `slug` = VALUES(`slug`), `tx_
 -- Page 3: Conflict test - we'll try to change its slug to /demo (which conflicts with page 4)
 INSERT INTO `pages` (`uid`, `pid`, `title`, `slug`, `doktype`, `is_siteroot`, `hidden`, `deleted`, `tstamp`, `crdate`, `tx_sluggi_sync`, `perms_userid`, `perms_groupid`, `perms_user`, `perms_group`, `perms_everybody`)
 VALUES (3, 1, 'Conflict Test Page', '/conflict-test', 1, 0, 0, 0, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 0, 1, 0, 31, 31, 31)
-ON DUPLICATE KEY UPDATE `title` = VALUES(`title`), `slug` = VALUES(`slug`), `tx_sluggi_sync` = 0, `perms_userid` = 1, `perms_groupid` = 0, `perms_user` = 31, `perms_group` = 31, `perms_everybody` = 31;
+ON DUPLICATE KEY UPDATE
+  `pid` = VALUES(`pid`),
+  `title` = VALUES(`title`),
+  `slug` = VALUES(`slug`),
+  `doktype` = VALUES(`doktype`),
+  `is_siteroot` = VALUES(`is_siteroot`),
+  `hidden` = VALUES(`hidden`),
+  `deleted` = VALUES(`deleted`),
+  `tstamp` = VALUES(`tstamp`),
+  `crdate` = VALUES(`crdate`),
+  `tx_sluggi_sync` = VALUES(`tx_sluggi_sync`),
+  `perms_userid` = VALUES(`perms_userid`),
+  `perms_groupid` = VALUES(`perms_groupid`),
+  `perms_user` = VALUES(`perms_user`),
+  `perms_group` = VALUES(`perms_group`),
+  `perms_everybody` = VALUES(`perms_everybody`);
 
 -- Page 4: Owns /demo slug (used to create conflicts)
 INSERT INTO `pages` (`uid`, `pid`, `title`, `slug`, `doktype`, `is_siteroot`, `hidden`, `deleted`, `tstamp`, `crdate`, `perms_userid`, `perms_groupid`, `perms_user`, `perms_group`, `perms_everybody`)
 VALUES (4, 1, 'Demo', '/demo', 1, 0, 0, 0, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 1, 0, 31, 31, 31)
-ON DUPLICATE KEY UPDATE `title` = VALUES(`title`), `slug` = VALUES(`slug`), `perms_userid` = 1, `perms_groupid` = 0, `perms_user` = 31, `perms_group` = 31, `perms_everybody` = 31;
+ON DUPLICATE KEY UPDATE
+  `pid` = VALUES(`pid`),
+  `title` = VALUES(`title`),
+  `slug` = VALUES(`slug`),
+  `doktype` = VALUES(`doktype`),
+  `is_siteroot` = VALUES(`is_siteroot`),
+  `hidden` = VALUES(`hidden`),
+  `deleted` = VALUES(`deleted`),
+  `tstamp` = VALUES(`tstamp`),
+  `crdate` = VALUES(`crdate`),
+  `perms_userid` = VALUES(`perms_userid`),
+  `perms_groupid` = VALUES(`perms_groupid`),
+  `perms_user` = VALUES(`perms_user`),
+  `perms_group` = VALUES(`perms_group`),
+  `perms_everybody` = VALUES(`perms_everybody`);
 
 -- Page 5: Has title "Demo" but already de-duplicated slug /demo-1 (for no-conflict-when-correct test)
 INSERT INTO `pages` (`uid`, `pid`, `title`, `slug`, `doktype`, `is_siteroot`, `hidden`, `deleted`, `tstamp`, `crdate`, `tx_sluggi_sync`, `perms_userid`, `perms_groupid`, `perms_user`, `perms_group`, `perms_everybody`)
 VALUES (5, 1, 'Demo', '/demo-1', 1, 0, 0, 0, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 0, 1, 0, 31, 31, 31)
-ON DUPLICATE KEY UPDATE `title` = VALUES(`title`), `slug` = VALUES(`slug`), `tx_sluggi_sync` = 0, `perms_userid` = 1, `perms_groupid` = 0, `perms_user` = 31, `perms_group` = 31, `perms_everybody` = 31;
+ON DUPLICATE KEY UPDATE
+  `pid` = VALUES(`pid`),
+  `title` = VALUES(`title`),
+  `slug` = VALUES(`slug`),
+  `doktype` = VALUES(`doktype`),
+  `is_siteroot` = VALUES(`is_siteroot`),
+  `hidden` = VALUES(`hidden`),
+  `deleted` = VALUES(`deleted`),
+  `tstamp` = VALUES(`tstamp`),
+  `crdate` = VALUES(`crdate`),
+  `tx_sluggi_sync` = VALUES(`tx_sluggi_sync`),
+  `perms_userid` = VALUES(`perms_userid`),
+  `perms_groupid` = VALUES(`perms_groupid`),
+  `perms_user` = VALUES(`perms_user`),
+  `perms_group` = VALUES(`perms_group`),
+  `perms_everybody` = VALUES(`perms_everybody`);
 
 -- =============================================
 -- slug-editing.spec.ts (uses pages 6, 8)
@@ -73,12 +146,42 @@ ON DUPLICATE KEY UPDATE `title` = VALUES(`title`), `slug` = VALUES(`slug`), `tx_
 -- Page 6: Form save persistence test
 INSERT INTO `pages` (`uid`, `pid`, `title`, `slug`, `doktype`, `is_siteroot`, `hidden`, `deleted`, `tstamp`, `crdate`, `tx_sluggi_sync`, `perms_userid`, `perms_groupid`, `perms_user`, `perms_group`, `perms_everybody`)
 VALUES (6, 1, 'Save Test Page', '/save-test-page', 1, 0, 0, 0, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 0, 1, 0, 31, 31, 31)
-ON DUPLICATE KEY UPDATE `title` = VALUES(`title`), `slug` = VALUES(`slug`), `tx_sluggi_sync` = 0, `perms_userid` = 1, `perms_groupid` = 0, `perms_user` = 31, `perms_group` = 31, `perms_everybody` = 31;
+ON DUPLICATE KEY UPDATE
+  `pid` = VALUES(`pid`),
+  `title` = VALUES(`title`),
+  `slug` = VALUES(`slug`),
+  `doktype` = VALUES(`doktype`),
+  `is_siteroot` = VALUES(`is_siteroot`),
+  `hidden` = VALUES(`hidden`),
+  `deleted` = VALUES(`deleted`),
+  `tstamp` = VALUES(`tstamp`),
+  `crdate` = VALUES(`crdate`),
+  `tx_sluggi_sync` = VALUES(`tx_sluggi_sync`),
+  `perms_userid` = VALUES(`perms_userid`),
+  `perms_groupid` = VALUES(`perms_groupid`),
+  `perms_user` = VALUES(`perms_user`),
+  `perms_group` = VALUES(`perms_group`),
+  `perms_everybody` = VALUES(`perms_everybody`);
 
 -- Page 8: Regenerate button test (sync OFF, unique slug)
 INSERT INTO `pages` (`uid`, `pid`, `title`, `slug`, `doktype`, `is_siteroot`, `hidden`, `deleted`, `tstamp`, `crdate`, `tx_sluggi_sync`, `perms_userid`, `perms_groupid`, `perms_user`, `perms_group`, `perms_everybody`)
 VALUES (8, 1, 'Regenerate Test', '/regenerate-test', 1, 0, 0, 0, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 0, 1, 0, 31, 31, 31)
-ON DUPLICATE KEY UPDATE `title` = VALUES(`title`), `slug` = VALUES(`slug`), `tx_sluggi_sync` = 0, `perms_userid` = 1, `perms_groupid` = 0, `perms_user` = 31, `perms_group` = 31, `perms_everybody` = 31;
+ON DUPLICATE KEY UPDATE
+  `pid` = VALUES(`pid`),
+  `title` = VALUES(`title`),
+  `slug` = VALUES(`slug`),
+  `doktype` = VALUES(`doktype`),
+  `is_siteroot` = VALUES(`is_siteroot`),
+  `hidden` = VALUES(`hidden`),
+  `deleted` = VALUES(`deleted`),
+  `tstamp` = VALUES(`tstamp`),
+  `crdate` = VALUES(`crdate`),
+  `tx_sluggi_sync` = VALUES(`tx_sluggi_sync`),
+  `perms_userid` = VALUES(`perms_userid`),
+  `perms_groupid` = VALUES(`perms_groupid`),
+  `perms_user` = VALUES(`perms_user`),
+  `perms_group` = VALUES(`perms_group`),
+  `perms_everybody` = VALUES(`perms_everybody`);
 
 -- =============================================
 -- slug-sync.spec.ts (uses pages 7, 9, 10)
@@ -86,42 +189,162 @@ ON DUPLICATE KEY UPDATE `title` = VALUES(`title`), `slug` = VALUES(`slug`), `tx_
 -- Page 7: Sync toggle visual state test
 INSERT INTO `pages` (`uid`, `pid`, `title`, `slug`, `doktype`, `is_siteroot`, `hidden`, `deleted`, `tstamp`, `crdate`, `tx_sluggi_sync`, `perms_userid`, `perms_groupid`, `perms_user`, `perms_group`, `perms_everybody`)
 VALUES (7, 1, 'Sync Visual Test', '/sync-visual-test', 1, 0, 0, 0, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 0, 1, 0, 31, 31, 31)
-ON DUPLICATE KEY UPDATE `title` = VALUES(`title`), `slug` = VALUES(`slug`), `tx_sluggi_sync` = 0, `perms_userid` = 1, `perms_groupid` = 0, `perms_user` = 31, `perms_group` = 31, `perms_everybody` = 31;
+ON DUPLICATE KEY UPDATE
+  `pid` = VALUES(`pid`),
+  `title` = VALUES(`title`),
+  `slug` = VALUES(`slug`),
+  `doktype` = VALUES(`doktype`),
+  `is_siteroot` = VALUES(`is_siteroot`),
+  `hidden` = VALUES(`hidden`),
+  `deleted` = VALUES(`deleted`),
+  `tstamp` = VALUES(`tstamp`),
+  `crdate` = VALUES(`crdate`),
+  `tx_sluggi_sync` = VALUES(`tx_sluggi_sync`),
+  `perms_userid` = VALUES(`perms_userid`),
+  `perms_groupid` = VALUES(`perms_groupid`),
+  `perms_user` = VALUES(`perms_user`),
+  `perms_group` = VALUES(`perms_group`),
+  `perms_everybody` = VALUES(`perms_everybody`);
 
 -- Page 9: Enabling sync triggers regeneration test
 INSERT INTO `pages` (`uid`, `pid`, `title`, `slug`, `doktype`, `is_siteroot`, `hidden`, `deleted`, `tstamp`, `crdate`, `tx_sluggi_sync`, `perms_userid`, `perms_groupid`, `perms_user`, `perms_group`, `perms_everybody`)
 VALUES (9, 1, 'Sync Regen Test', '/sync-regen-test', 1, 0, 0, 0, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 0, 1, 0, 31, 31, 31)
-ON DUPLICATE KEY UPDATE `title` = VALUES(`title`), `slug` = VALUES(`slug`), `tx_sluggi_sync` = 0, `perms_userid` = 1, `perms_groupid` = 0, `perms_user` = 31, `perms_group` = 31, `perms_everybody` = 31;
+ON DUPLICATE KEY UPDATE
+  `pid` = VALUES(`pid`),
+  `title` = VALUES(`title`),
+  `slug` = VALUES(`slug`),
+  `doktype` = VALUES(`doktype`),
+  `is_siteroot` = VALUES(`is_siteroot`),
+  `hidden` = VALUES(`hidden`),
+  `deleted` = VALUES(`deleted`),
+  `tstamp` = VALUES(`tstamp`),
+  `crdate` = VALUES(`crdate`),
+  `tx_sluggi_sync` = VALUES(`tx_sluggi_sync`),
+  `perms_userid` = VALUES(`perms_userid`),
+  `perms_groupid` = VALUES(`perms_groupid`),
+  `perms_user` = VALUES(`perms_user`),
+  `perms_group` = VALUES(`perms_group`),
+  `perms_everybody` = VALUES(`perms_everybody`);
 
 -- Page 10: Source badge immediate visibility test
 INSERT INTO `pages` (`uid`, `pid`, `title`, `slug`, `doktype`, `is_siteroot`, `hidden`, `deleted`, `tstamp`, `crdate`, `tx_sluggi_sync`, `perms_userid`, `perms_groupid`, `perms_user`, `perms_group`, `perms_everybody`)
 VALUES (10, 1, 'Badge Visibility Test', '/badge-visibility-test', 1, 0, 0, 0, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 0, 1, 0, 31, 31, 31)
-ON DUPLICATE KEY UPDATE `title` = VALUES(`title`), `slug` = VALUES(`slug`), `tx_sluggi_sync` = 0, `perms_userid` = 1, `perms_groupid` = 0, `perms_user` = 31, `perms_group` = 31, `perms_everybody` = 31;
+ON DUPLICATE KEY UPDATE
+  `pid` = VALUES(`pid`),
+  `title` = VALUES(`title`),
+  `slug` = VALUES(`slug`),
+  `doktype` = VALUES(`doktype`),
+  `is_siteroot` = VALUES(`is_siteroot`),
+  `hidden` = VALUES(`hidden`),
+  `deleted` = VALUES(`deleted`),
+  `tstamp` = VALUES(`tstamp`),
+  `crdate` = VALUES(`crdate`),
+  `tx_sluggi_sync` = VALUES(`tx_sluggi_sync`),
+  `perms_userid` = VALUES(`perms_userid`),
+  `perms_groupid` = VALUES(`perms_groupid`),
+  `perms_user` = VALUES(`perms_user`),
+  `perms_group` = VALUES(`perms_group`),
+  `perms_everybody` = VALUES(`perms_everybody`);
 
 -- Page 11: Sync toggle visibility regression test
 INSERT INTO `pages` (`uid`, `pid`, `title`, `slug`, `doktype`, `is_siteroot`, `hidden`, `deleted`, `tstamp`, `crdate`, `tx_sluggi_sync`, `perms_userid`, `perms_groupid`, `perms_user`, `perms_group`, `perms_everybody`)
 VALUES (11, 1, 'Toggle Visible Test', '/toggle-visible-test', 1, 0, 0, 0, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 0, 1, 0, 31, 31, 31)
-ON DUPLICATE KEY UPDATE `title` = VALUES(`title`), `slug` = VALUES(`slug`), `tx_sluggi_sync` = 0, `perms_userid` = 1, `perms_groupid` = 0, `perms_user` = 31, `perms_group` = 31, `perms_everybody` = 31;
+ON DUPLICATE KEY UPDATE
+  `pid` = VALUES(`pid`),
+  `title` = VALUES(`title`),
+  `slug` = VALUES(`slug`),
+  `doktype` = VALUES(`doktype`),
+  `is_siteroot` = VALUES(`is_siteroot`),
+  `hidden` = VALUES(`hidden`),
+  `deleted` = VALUES(`deleted`),
+  `tstamp` = VALUES(`tstamp`),
+  `crdate` = VALUES(`crdate`),
+  `tx_sluggi_sync` = VALUES(`tx_sluggi_sync`),
+  `perms_userid` = VALUES(`perms_userid`),
+  `perms_groupid` = VALUES(`perms_groupid`),
+  `perms_user` = VALUES(`perms_user`),
+  `perms_group` = VALUES(`perms_group`),
+  `perms_everybody` = VALUES(`perms_everybody`);
 
 -- Page 12: Source badge hidden when sync off test
 INSERT INTO `pages` (`uid`, `pid`, `title`, `slug`, `doktype`, `is_siteroot`, `hidden`, `deleted`, `tstamp`, `crdate`, `tx_sluggi_sync`, `perms_userid`, `perms_groupid`, `perms_user`, `perms_group`, `perms_everybody`)
 VALUES (12, 1, 'Badge Hidden Test', '/badge-hidden-test', 1, 0, 0, 0, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 0, 1, 0, 31, 31, 31)
-ON DUPLICATE KEY UPDATE `title` = VALUES(`title`), `slug` = VALUES(`slug`), `tx_sluggi_sync` = 0, `perms_userid` = 1, `perms_groupid` = 0, `perms_user` = 31, `perms_group` = 31, `perms_everybody` = 31;
+ON DUPLICATE KEY UPDATE
+  `pid` = VALUES(`pid`),
+  `title` = VALUES(`title`),
+  `slug` = VALUES(`slug`),
+  `doktype` = VALUES(`doktype`),
+  `is_siteroot` = VALUES(`is_siteroot`),
+  `hidden` = VALUES(`hidden`),
+  `deleted` = VALUES(`deleted`),
+  `tstamp` = VALUES(`tstamp`),
+  `crdate` = VALUES(`crdate`),
+  `tx_sluggi_sync` = VALUES(`tx_sluggi_sync`),
+  `perms_userid` = VALUES(`perms_userid`),
+  `perms_groupid` = VALUES(`perms_groupid`),
+  `perms_user` = VALUES(`perms_user`),
+  `perms_group` = VALUES(`perms_group`),
+  `perms_everybody` = VALUES(`perms_everybody`);
 
 -- Page 13: Source badge visible when sync on test
 INSERT INTO `pages` (`uid`, `pid`, `title`, `slug`, `doktype`, `is_siteroot`, `hidden`, `deleted`, `tstamp`, `crdate`, `tx_sluggi_sync`, `perms_userid`, `perms_groupid`, `perms_user`, `perms_group`, `perms_everybody`)
 VALUES (13, 1, 'Badge Shown Test', '/badge-shown-test', 1, 0, 0, 0, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 0, 1, 0, 31, 31, 31)
-ON DUPLICATE KEY UPDATE `title` = VALUES(`title`), `slug` = VALUES(`slug`), `tx_sluggi_sync` = 0, `perms_userid` = 1, `perms_groupid` = 0, `perms_user` = 31, `perms_group` = 31, `perms_everybody` = 31;
+ON DUPLICATE KEY UPDATE
+  `pid` = VALUES(`pid`),
+  `title` = VALUES(`title`),
+  `slug` = VALUES(`slug`),
+  `doktype` = VALUES(`doktype`),
+  `is_siteroot` = VALUES(`is_siteroot`),
+  `hidden` = VALUES(`hidden`),
+  `deleted` = VALUES(`deleted`),
+  `tstamp` = VALUES(`tstamp`),
+  `crdate` = VALUES(`crdate`),
+  `tx_sluggi_sync` = VALUES(`tx_sluggi_sync`),
+  `perms_userid` = VALUES(`perms_userid`),
+  `perms_groupid` = VALUES(`perms_groupid`),
+  `perms_user` = VALUES(`perms_user`),
+  `perms_group` = VALUES(`perms_group`),
+  `perms_everybody` = VALUES(`perms_everybody`);
 
 -- Page 14: Sync state persistence test
 INSERT INTO `pages` (`uid`, `pid`, `title`, `slug`, `doktype`, `is_siteroot`, `hidden`, `deleted`, `tstamp`, `crdate`, `tx_sluggi_sync`, `perms_userid`, `perms_groupid`, `perms_user`, `perms_group`, `perms_everybody`)
 VALUES (14, 1, 'Sync Persist Test', '/sync-persist-test', 1, 0, 0, 0, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 0, 1, 0, 31, 31, 31)
-ON DUPLICATE KEY UPDATE `title` = VALUES(`title`), `slug` = VALUES(`slug`), `tx_sluggi_sync` = 0, `perms_userid` = 1, `perms_groupid` = 0, `perms_user` = 31, `perms_group` = 31, `perms_everybody` = 31;
+ON DUPLICATE KEY UPDATE
+  `pid` = VALUES(`pid`),
+  `title` = VALUES(`title`),
+  `slug` = VALUES(`slug`),
+  `doktype` = VALUES(`doktype`),
+  `is_siteroot` = VALUES(`is_siteroot`),
+  `hidden` = VALUES(`hidden`),
+  `deleted` = VALUES(`deleted`),
+  `tstamp` = VALUES(`tstamp`),
+  `crdate` = VALUES(`crdate`),
+  `tx_sluggi_sync` = VALUES(`tx_sluggi_sync`),
+  `perms_userid` = VALUES(`perms_userid`),
+  `perms_groupid` = VALUES(`perms_groupid`),
+  `perms_user` = VALUES(`perms_user`),
+  `perms_group` = VALUES(`perms_group`),
+  `perms_everybody` = VALUES(`perms_everybody`);
 
 -- Page 15: Sync toggle label test
 INSERT INTO `pages` (`uid`, `pid`, `title`, `slug`, `doktype`, `is_siteroot`, `hidden`, `deleted`, `tstamp`, `crdate`, `tx_sluggi_sync`, `perms_userid`, `perms_groupid`, `perms_user`, `perms_group`, `perms_everybody`)
 VALUES (15, 1, 'Sync Label Test', '/sync-label-test', 1, 0, 0, 0, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 0, 1, 0, 31, 31, 31)
-ON DUPLICATE KEY UPDATE `title` = VALUES(`title`), `slug` = VALUES(`slug`), `tx_sluggi_sync` = 0, `perms_userid` = 1, `perms_groupid` = 0, `perms_user` = 31, `perms_group` = 31, `perms_everybody` = 31;
+ON DUPLICATE KEY UPDATE
+  `pid` = VALUES(`pid`),
+  `title` = VALUES(`title`),
+  `slug` = VALUES(`slug`),
+  `doktype` = VALUES(`doktype`),
+  `is_siteroot` = VALUES(`is_siteroot`),
+  `hidden` = VALUES(`hidden`),
+  `deleted` = VALUES(`deleted`),
+  `tstamp` = VALUES(`tstamp`),
+  `crdate` = VALUES(`crdate`),
+  `tx_sluggi_sync` = VALUES(`tx_sluggi_sync`),
+  `perms_userid` = VALUES(`perms_userid`),
+  `perms_groupid` = VALUES(`perms_groupid`),
+  `perms_user` = VALUES(`perms_user`),
+  `perms_group` = VALUES(`perms_group`),
+  `perms_everybody` = VALUES(`perms_everybody`);
 
 -- =============================================
 -- page-move.spec.ts (uses pages 16, 17)
@@ -129,12 +352,42 @@ ON DUPLICATE KEY UPDATE `title` = VALUES(`title`), `slug` = VALUES(`slug`), `tx_
 -- Page 16: Parent page for move test
 INSERT INTO `pages` (`uid`, `pid`, `title`, `slug`, `doktype`, `is_siteroot`, `hidden`, `deleted`, `tstamp`, `crdate`, `tx_sluggi_sync`, `perms_userid`, `perms_groupid`, `perms_user`, `perms_group`, `perms_everybody`)
 VALUES (16, 1, 'Parent Page', '/parent-page', 1, 0, 0, 0, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 0, 1, 0, 31, 31, 31)
-ON DUPLICATE KEY UPDATE `title` = VALUES(`title`), `slug` = VALUES(`slug`), `tx_sluggi_sync` = 0, `perms_userid` = 1, `perms_groupid` = 0, `perms_user` = 31, `perms_group` = 31, `perms_everybody` = 31;
+ON DUPLICATE KEY UPDATE
+  `pid` = VALUES(`pid`),
+  `title` = VALUES(`title`),
+  `slug` = VALUES(`slug`),
+  `doktype` = VALUES(`doktype`),
+  `is_siteroot` = VALUES(`is_siteroot`),
+  `hidden` = VALUES(`hidden`),
+  `deleted` = VALUES(`deleted`),
+  `tstamp` = VALUES(`tstamp`),
+  `crdate` = VALUES(`crdate`),
+  `tx_sluggi_sync` = VALUES(`tx_sluggi_sync`),
+  `perms_userid` = VALUES(`perms_userid`),
+  `perms_groupid` = VALUES(`perms_groupid`),
+  `perms_user` = VALUES(`perms_user`),
+  `perms_group` = VALUES(`perms_group`),
+  `perms_everybody` = VALUES(`perms_everybody`);
 
 -- Page 17: Child page to be moved into page 16
 INSERT INTO `pages` (`uid`, `pid`, `title`, `slug`, `doktype`, `is_siteroot`, `hidden`, `deleted`, `tstamp`, `crdate`, `tx_sluggi_sync`, `perms_userid`, `perms_groupid`, `perms_user`, `perms_group`, `perms_everybody`)
 VALUES (17, 1, 'Child Page', '/child-page', 1, 0, 0, 0, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 0, 1, 0, 31, 31, 31)
-ON DUPLICATE KEY UPDATE `title` = VALUES(`title`), `slug` = VALUES(`slug`), `tx_sluggi_sync` = 0, `perms_userid` = 1, `perms_groupid` = 0, `perms_user` = 31, `perms_group` = 31, `perms_everybody` = 31;
+ON DUPLICATE KEY UPDATE
+  `pid` = VALUES(`pid`),
+  `title` = VALUES(`title`),
+  `slug` = VALUES(`slug`),
+  `doktype` = VALUES(`doktype`),
+  `is_siteroot` = VALUES(`is_siteroot`),
+  `hidden` = VALUES(`hidden`),
+  `deleted` = VALUES(`deleted`),
+  `tstamp` = VALUES(`tstamp`),
+  `crdate` = VALUES(`crdate`),
+  `tx_sluggi_sync` = VALUES(`tx_sluggi_sync`),
+  `perms_userid` = VALUES(`perms_userid`),
+  `perms_groupid` = VALUES(`perms_groupid`),
+  `perms_user` = VALUES(`perms_user`),
+  `perms_group` = VALUES(`perms_group`),
+  `perms_everybody` = VALUES(`perms_everybody`);
 
 -- =============================================
 -- last-segment-only.spec.ts (uses pages 18-22)
@@ -142,27 +395,102 @@ ON DUPLICATE KEY UPDATE `title` = VALUES(`title`), `slug` = VALUES(`slug`), `tx_
 -- Page 18: Parent page for last-segment-only tests
 INSERT INTO `pages` (`uid`, `pid`, `title`, `slug`, `doktype`, `is_siteroot`, `hidden`, `deleted`, `tstamp`, `crdate`, `tx_sluggi_sync`, `perms_userid`, `perms_groupid`, `perms_user`, `perms_group`, `perms_everybody`)
 VALUES (18, 1, 'Parent Section', '/parent-section', 1, 0, 0, 0, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 0, 1, 2, 31, 31, 0)
-ON DUPLICATE KEY UPDATE `title` = VALUES(`title`), `slug` = VALUES(`slug`), `tx_sluggi_sync` = 0, `perms_userid` = 1, `perms_groupid` = 2, `perms_user` = 31, `perms_group` = 31, `perms_everybody` = 0;
+ON DUPLICATE KEY UPDATE
+  `pid` = VALUES(`pid`),
+  `title` = VALUES(`title`),
+  `slug` = VALUES(`slug`),
+  `doktype` = VALUES(`doktype`),
+  `is_siteroot` = VALUES(`is_siteroot`),
+  `hidden` = VALUES(`hidden`),
+  `deleted` = VALUES(`deleted`),
+  `tstamp` = VALUES(`tstamp`),
+  `crdate` = VALUES(`crdate`),
+  `tx_sluggi_sync` = VALUES(`tx_sluggi_sync`),
+  `perms_userid` = VALUES(`perms_userid`),
+  `perms_groupid` = VALUES(`perms_groupid`),
+  `perms_user` = VALUES(`perms_user`),
+  `perms_group` = VALUES(`perms_group`),
+  `perms_everybody` = VALUES(`perms_everybody`);
 
 -- Page 19: Child page for read-only last-segment-only tests
 INSERT INTO `pages` (`uid`, `pid`, `title`, `slug`, `doktype`, `is_siteroot`, `hidden`, `deleted`, `tstamp`, `crdate`, `tx_sluggi_sync`, `perms_userid`, `perms_groupid`, `perms_user`, `perms_group`, `perms_everybody`)
 VALUES (19, 18, 'Nested Page', '/parent-section/nested-page', 1, 0, 0, 0, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 0, 1, 2, 31, 31, 0)
-ON DUPLICATE KEY UPDATE `title` = VALUES(`title`), `slug` = VALUES(`slug`), `tx_sluggi_sync` = 0, `perms_userid` = 1, `perms_groupid` = 2, `perms_user` = 31, `perms_group` = 31, `perms_everybody` = 0;
+ON DUPLICATE KEY UPDATE
+  `pid` = VALUES(`pid`),
+  `title` = VALUES(`title`),
+  `slug` = VALUES(`slug`),
+  `doktype` = VALUES(`doktype`),
+  `is_siteroot` = VALUES(`is_siteroot`),
+  `hidden` = VALUES(`hidden`),
+  `deleted` = VALUES(`deleted`),
+  `tstamp` = VALUES(`tstamp`),
+  `crdate` = VALUES(`crdate`),
+  `tx_sluggi_sync` = VALUES(`tx_sluggi_sync`),
+  `perms_userid` = VALUES(`perms_userid`),
+  `perms_groupid` = VALUES(`perms_groupid`),
+  `perms_user` = VALUES(`perms_user`),
+  `perms_group` = VALUES(`perms_group`),
+  `perms_everybody` = VALUES(`perms_everybody`);
 
 -- Page 20: For "editor can change only the last segment" test (saves)
 INSERT INTO `pages` (`uid`, `pid`, `title`, `slug`, `doktype`, `is_siteroot`, `hidden`, `deleted`, `tstamp`, `crdate`, `tx_sluggi_sync`, `perms_userid`, `perms_groupid`, `perms_user`, `perms_group`, `perms_everybody`)
 VALUES (20, 18, 'Change Segment Test', '/parent-section/change-segment-test', 1, 0, 0, 0, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 0, 1, 2, 31, 31, 0)
-ON DUPLICATE KEY UPDATE `title` = VALUES(`title`), `slug` = VALUES(`slug`), `tx_sluggi_sync` = 0, `perms_userid` = 1, `perms_groupid` = 2, `perms_user` = 31, `perms_group` = 31, `perms_everybody` = 0;
+ON DUPLICATE KEY UPDATE
+  `pid` = VALUES(`pid`),
+  `title` = VALUES(`title`),
+  `slug` = VALUES(`slug`),
+  `doktype` = VALUES(`doktype`),
+  `is_siteroot` = VALUES(`is_siteroot`),
+  `hidden` = VALUES(`hidden`),
+  `deleted` = VALUES(`deleted`),
+  `tstamp` = VALUES(`tstamp`),
+  `crdate` = VALUES(`crdate`),
+  `tx_sluggi_sync` = VALUES(`tx_sluggi_sync`),
+  `perms_userid` = VALUES(`perms_userid`),
+  `perms_groupid` = VALUES(`perms_groupid`),
+  `perms_user` = VALUES(`perms_user`),
+  `perms_group` = VALUES(`perms_group`),
+  `perms_everybody` = VALUES(`perms_everybody`);
 
 -- Page 21: For "backend blocks attempt to change parent segment" test (saves)
 INSERT INTO `pages` (`uid`, `pid`, `title`, `slug`, `doktype`, `is_siteroot`, `hidden`, `deleted`, `tstamp`, `crdate`, `tx_sluggi_sync`, `perms_userid`, `perms_groupid`, `perms_user`, `perms_group`, `perms_everybody`)
 VALUES (21, 18, 'Block Parent Change Test', '/parent-section/block-parent-change-test', 1, 0, 0, 0, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 0, 1, 2, 31, 31, 0)
-ON DUPLICATE KEY UPDATE `title` = VALUES(`title`), `slug` = VALUES(`slug`), `tx_sluggi_sync` = 0, `perms_userid` = 1, `perms_groupid` = 2, `perms_user` = 31, `perms_group` = 31, `perms_everybody` = 0;
+ON DUPLICATE KEY UPDATE
+  `pid` = VALUES(`pid`),
+  `title` = VALUES(`title`),
+  `slug` = VALUES(`slug`),
+  `doktype` = VALUES(`doktype`),
+  `is_siteroot` = VALUES(`is_siteroot`),
+  `hidden` = VALUES(`hidden`),
+  `deleted` = VALUES(`deleted`),
+  `tstamp` = VALUES(`tstamp`),
+  `crdate` = VALUES(`crdate`),
+  `tx_sluggi_sync` = VALUES(`tx_sluggi_sync`),
+  `perms_userid` = VALUES(`perms_userid`),
+  `perms_groupid` = VALUES(`perms_groupid`),
+  `perms_user` = VALUES(`perms_user`),
+  `perms_group` = VALUES(`perms_group`),
+  `perms_everybody` = VALUES(`perms_everybody`);
 
 -- Page 22: Synced page for "slash in title via page tree inline edit" test (saves)
 INSERT INTO `pages` (`uid`, `pid`, `title`, `slug`, `doktype`, `is_siteroot`, `hidden`, `deleted`, `tstamp`, `crdate`, `tx_sluggi_sync`, `perms_userid`, `perms_groupid`, `perms_user`, `perms_group`, `perms_everybody`)
 VALUES (22, 18, 'Synced Page', '/parent-section/synced-page', 1, 0, 0, 0, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 1, 1, 2, 31, 31, 0)
-ON DUPLICATE KEY UPDATE `title` = VALUES(`title`), `slug` = VALUES(`slug`), `tx_sluggi_sync` = 1, `perms_userid` = 1, `perms_groupid` = 2, `perms_user` = 31, `perms_group` = 31, `perms_everybody` = 0;
+ON DUPLICATE KEY UPDATE
+  `pid` = VALUES(`pid`),
+  `title` = VALUES(`title`),
+  `slug` = VALUES(`slug`),
+  `doktype` = VALUES(`doktype`),
+  `is_siteroot` = VALUES(`is_siteroot`),
+  `hidden` = VALUES(`hidden`),
+  `deleted` = VALUES(`deleted`),
+  `tstamp` = VALUES(`tstamp`),
+  `crdate` = VALUES(`crdate`),
+  `tx_sluggi_sync` = VALUES(`tx_sluggi_sync`),
+  `perms_userid` = VALUES(`perms_userid`),
+  `perms_groupid` = VALUES(`perms_groupid`),
+  `perms_user` = VALUES(`perms_user`),
+  `perms_group` = VALUES(`perms_group`),
+  `perms_everybody` = VALUES(`perms_everybody`);
 
 -- =============================================
 -- page-copy.spec.ts (uses pages 23, 24)
@@ -170,12 +498,42 @@ ON DUPLICATE KEY UPDATE `title` = VALUES(`title`), `slug` = VALUES(`slug`), `tx_
 -- Page 23: Source page to be copied
 INSERT INTO `pages` (`uid`, `pid`, `title`, `slug`, `doktype`, `is_siteroot`, `hidden`, `deleted`, `tstamp`, `crdate`, `tx_sluggi_sync`, `perms_userid`, `perms_groupid`, `perms_user`, `perms_group`, `perms_everybody`)
 VALUES (23, 1, 'Copy Source', '/copy-source', 1, 0, 0, 0, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 0, 1, 0, 31, 31, 31)
-ON DUPLICATE KEY UPDATE `title` = VALUES(`title`), `slug` = VALUES(`slug`), `tx_sluggi_sync` = 0, `perms_userid` = 1, `perms_groupid` = 0, `perms_user` = 31, `perms_group` = 31, `perms_everybody` = 31;
+ON DUPLICATE KEY UPDATE
+  `pid` = VALUES(`pid`),
+  `title` = VALUES(`title`),
+  `slug` = VALUES(`slug`),
+  `doktype` = VALUES(`doktype`),
+  `is_siteroot` = VALUES(`is_siteroot`),
+  `hidden` = VALUES(`hidden`),
+  `deleted` = VALUES(`deleted`),
+  `tstamp` = VALUES(`tstamp`),
+  `crdate` = VALUES(`crdate`),
+  `tx_sluggi_sync` = VALUES(`tx_sluggi_sync`),
+  `perms_userid` = VALUES(`perms_userid`),
+  `perms_groupid` = VALUES(`perms_groupid`),
+  `perms_user` = VALUES(`perms_user`),
+  `perms_group` = VALUES(`perms_group`),
+  `perms_everybody` = VALUES(`perms_everybody`);
 
 -- Page 24: Target parent page for copy
 INSERT INTO `pages` (`uid`, `pid`, `title`, `slug`, `doktype`, `is_siteroot`, `hidden`, `deleted`, `tstamp`, `crdate`, `tx_sluggi_sync`, `perms_userid`, `perms_groupid`, `perms_user`, `perms_group`, `perms_everybody`)
 VALUES (24, 1, 'Copy Target', '/copy-target', 1, 0, 0, 0, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 0, 1, 0, 31, 31, 31)
-ON DUPLICATE KEY UPDATE `title` = VALUES(`title`), `slug` = VALUES(`slug`), `tx_sluggi_sync` = 0, `perms_userid` = 1, `perms_groupid` = 0, `perms_user` = 31, `perms_group` = 31, `perms_everybody` = 31;
+ON DUPLICATE KEY UPDATE
+  `pid` = VALUES(`pid`),
+  `title` = VALUES(`title`),
+  `slug` = VALUES(`slug`),
+  `doktype` = VALUES(`doktype`),
+  `is_siteroot` = VALUES(`is_siteroot`),
+  `hidden` = VALUES(`hidden`),
+  `deleted` = VALUES(`deleted`),
+  `tstamp` = VALUES(`tstamp`),
+  `crdate` = VALUES(`crdate`),
+  `tx_sluggi_sync` = VALUES(`tx_sluggi_sync`),
+  `perms_userid` = VALUES(`perms_userid`),
+  `perms_groupid` = VALUES(`perms_groupid`),
+  `perms_user` = VALUES(`perms_user`),
+  `perms_group` = VALUES(`perms_group`),
+  `perms_everybody` = VALUES(`perms_everybody`);
 
 -- =============================================
 -- hierarchy-permission.spec.ts (pages 25-28)
@@ -184,22 +542,82 @@ ON DUPLICATE KEY UPDATE `title` = VALUES(`title`), `slug` = VALUES(`slug`), `tx_
 -- Page 25: Hierarchy test - root section (admin only, editor cannot edit)
 INSERT INTO `pages` (`uid`, `pid`, `title`, `slug`, `doktype`, `is_siteroot`, `hidden`, `deleted`, `tstamp`, `crdate`, `tx_sluggi_sync`, `perms_userid`, `perms_groupid`, `perms_user`, `perms_group`, `perms_everybody`)
 VALUES (25, 1, 'Organization', '/organization', 1, 0, 0, 0, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 0, 1, 0, 31, 0, 1)
-ON DUPLICATE KEY UPDATE `title` = VALUES(`title`), `slug` = VALUES(`slug`), `tx_sluggi_sync` = 0, `perms_userid` = 1, `perms_groupid` = 0, `perms_user` = 31, `perms_group` = 0, `perms_everybody` = 1;
+ON DUPLICATE KEY UPDATE
+  `pid` = VALUES(`pid`),
+  `title` = VALUES(`title`),
+  `slug` = VALUES(`slug`),
+  `doktype` = VALUES(`doktype`),
+  `is_siteroot` = VALUES(`is_siteroot`),
+  `hidden` = VALUES(`hidden`),
+  `deleted` = VALUES(`deleted`),
+  `tstamp` = VALUES(`tstamp`),
+  `crdate` = VALUES(`crdate`),
+  `tx_sluggi_sync` = VALUES(`tx_sluggi_sync`),
+  `perms_userid` = VALUES(`perms_userid`),
+  `perms_groupid` = VALUES(`perms_groupid`),
+  `perms_user` = VALUES(`perms_user`),
+  `perms_group` = VALUES(`perms_group`),
+  `perms_everybody` = VALUES(`perms_everybody`);
 
 -- Page 26: Hierarchy test - department section (admin only, editor cannot edit)
 INSERT INTO `pages` (`uid`, `pid`, `title`, `slug`, `doktype`, `is_siteroot`, `hidden`, `deleted`, `tstamp`, `crdate`, `tx_sluggi_sync`, `perms_userid`, `perms_groupid`, `perms_user`, `perms_group`, `perms_everybody`)
 VALUES (26, 25, 'Department', '/organization/department', 1, 0, 0, 0, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 0, 1, 0, 31, 0, 1)
-ON DUPLICATE KEY UPDATE `title` = VALUES(`title`), `slug` = VALUES(`slug`), `tx_sluggi_sync` = 0, `perms_userid` = 1, `perms_groupid` = 0, `perms_user` = 31, `perms_group` = 0, `perms_everybody` = 1;
+ON DUPLICATE KEY UPDATE
+  `pid` = VALUES(`pid`),
+  `title` = VALUES(`title`),
+  `slug` = VALUES(`slug`),
+  `doktype` = VALUES(`doktype`),
+  `is_siteroot` = VALUES(`is_siteroot`),
+  `hidden` = VALUES(`hidden`),
+  `deleted` = VALUES(`deleted`),
+  `tstamp` = VALUES(`tstamp`),
+  `crdate` = VALUES(`crdate`),
+  `tx_sluggi_sync` = VALUES(`tx_sluggi_sync`),
+  `perms_userid` = VALUES(`perms_userid`),
+  `perms_groupid` = VALUES(`perms_groupid`),
+  `perms_user` = VALUES(`perms_user`),
+  `perms_group` = VALUES(`perms_group`),
+  `perms_everybody` = VALUES(`perms_everybody`);
 
 -- Page 27: Hierarchy test - institute section (editor can edit via group 2)
 INSERT INTO `pages` (`uid`, `pid`, `title`, `slug`, `doktype`, `is_siteroot`, `hidden`, `deleted`, `tstamp`, `crdate`, `tx_sluggi_sync`, `perms_userid`, `perms_groupid`, `perms_user`, `perms_group`, `perms_everybody`)
 VALUES (27, 26, 'Institute', '/organization/department/institute', 1, 0, 0, 0, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 0, 1, 2, 31, 31, 1)
-ON DUPLICATE KEY UPDATE `title` = VALUES(`title`), `slug` = VALUES(`slug`), `tx_sluggi_sync` = 0, `perms_userid` = 1, `perms_groupid` = 2, `perms_user` = 31, `perms_group` = 31, `perms_everybody` = 1;
+ON DUPLICATE KEY UPDATE
+  `pid` = VALUES(`pid`),
+  `title` = VALUES(`title`),
+  `slug` = VALUES(`slug`),
+  `doktype` = VALUES(`doktype`),
+  `is_siteroot` = VALUES(`is_siteroot`),
+  `hidden` = VALUES(`hidden`),
+  `deleted` = VALUES(`deleted`),
+  `tstamp` = VALUES(`tstamp`),
+  `crdate` = VALUES(`crdate`),
+  `tx_sluggi_sync` = VALUES(`tx_sluggi_sync`),
+  `perms_userid` = VALUES(`perms_userid`),
+  `perms_groupid` = VALUES(`perms_groupid`),
+  `perms_user` = VALUES(`perms_user`),
+  `perms_group` = VALUES(`perms_group`),
+  `perms_everybody` = VALUES(`perms_everybody`);
 
 -- Page 28: Hierarchy test - about us (editor can edit via group 2)
 INSERT INTO `pages` (`uid`, `pid`, `title`, `slug`, `doktype`, `is_siteroot`, `hidden`, `deleted`, `tstamp`, `crdate`, `tx_sluggi_sync`, `perms_userid`, `perms_groupid`, `perms_user`, `perms_group`, `perms_everybody`)
 VALUES (28, 27, 'About Us', '/organization/department/institute/about-us', 1, 0, 0, 0, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 0, 1, 2, 31, 31, 1)
-ON DUPLICATE KEY UPDATE `title` = VALUES(`title`), `slug` = VALUES(`slug`), `tx_sluggi_sync` = 0, `perms_userid` = 1, `perms_groupid` = 2, `perms_user` = 31, `perms_group` = 31, `perms_everybody` = 1;
+ON DUPLICATE KEY UPDATE
+  `pid` = VALUES(`pid`),
+  `title` = VALUES(`title`),
+  `slug` = VALUES(`slug`),
+  `doktype` = VALUES(`doktype`),
+  `is_siteroot` = VALUES(`is_siteroot`),
+  `hidden` = VALUES(`hidden`),
+  `deleted` = VALUES(`deleted`),
+  `tstamp` = VALUES(`tstamp`),
+  `crdate` = VALUES(`crdate`),
+  `tx_sluggi_sync` = VALUES(`tx_sluggi_sync`),
+  `perms_userid` = VALUES(`perms_userid`),
+  `perms_groupid` = VALUES(`perms_groupid`),
+  `perms_user` = VALUES(`perms_user`),
+  `perms_group` = VALUES(`perms_group`),
+  `perms_everybody` = VALUES(`perms_everybody`);
 
 -- =============================================
 -- excluded-doktypes.spec.ts (uses page 29)
@@ -207,7 +625,22 @@ ON DUPLICATE KEY UPDATE `title` = VALUES(`title`), `slug` = VALUES(`slug`), `tx_
 -- Page 29: SysFolder with existing slug (legacy data) - slug should be cleared on save, field should be hidden
 INSERT INTO `pages` (`uid`, `pid`, `title`, `slug`, `doktype`, `is_siteroot`, `hidden`, `deleted`, `tstamp`, `crdate`, `tx_sluggi_sync`, `perms_userid`, `perms_groupid`, `perms_user`, `perms_group`, `perms_everybody`)
 VALUES (29, 1, 'News Records', '/news-records', 254, 0, 0, 0, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 0, 1, 0, 31, 31, 31)
-ON DUPLICATE KEY UPDATE `title` = VALUES(`title`), `slug` = VALUES(`slug`), `doktype` = 254, `tx_sluggi_sync` = 0, `perms_userid` = 1, `perms_groupid` = 0, `perms_user` = 31, `perms_group` = 31, `perms_everybody` = 31;
+ON DUPLICATE KEY UPDATE
+  `pid` = VALUES(`pid`),
+  `title` = VALUES(`title`),
+  `slug` = VALUES(`slug`),
+  `doktype` = VALUES(`doktype`),
+  `is_siteroot` = VALUES(`is_siteroot`),
+  `hidden` = VALUES(`hidden`),
+  `deleted` = VALUES(`deleted`),
+  `tstamp` = VALUES(`tstamp`),
+  `crdate` = VALUES(`crdate`),
+  `tx_sluggi_sync` = VALUES(`tx_sluggi_sync`),
+  `perms_userid` = VALUES(`perms_userid`),
+  `perms_groupid` = VALUES(`perms_groupid`),
+  `perms_user` = VALUES(`perms_user`),
+  `perms_group` = VALUES(`perms_group`),
+  `perms_everybody` = VALUES(`perms_everybody`);
 
 -- =============================================
 -- slug-lock.spec.ts (uses pages 30-35)
@@ -215,32 +648,128 @@ ON DUPLICATE KEY UPDATE `title` = VALUES(`title`), `slug` = VALUES(`slug`), `dok
 -- Page 30: Lock toggle visibility test (unlocked)
 INSERT INTO `pages` (`uid`, `pid`, `title`, `slug`, `doktype`, `is_siteroot`, `hidden`, `deleted`, `tstamp`, `crdate`, `tx_sluggi_sync`, `slug_locked`, `perms_userid`, `perms_groupid`, `perms_user`, `perms_group`, `perms_everybody`)
 VALUES (30, 1, 'Lock Toggle Test', '/lock-toggle-test', 1, 0, 0, 0, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 0, 0, 1, 0, 31, 31, 31)
-ON DUPLICATE KEY UPDATE `title` = VALUES(`title`), `slug` = VALUES(`slug`), `tx_sluggi_sync` = 0, `slug_locked` = 0, `perms_userid` = 1, `perms_groupid` = 0, `perms_user` = 31, `perms_group` = 31, `perms_everybody` = 31;
+ON DUPLICATE KEY UPDATE
+  `pid` = VALUES(`pid`),
+  `title` = VALUES(`title`),
+  `slug` = VALUES(`slug`),
+  `doktype` = VALUES(`doktype`),
+  `is_siteroot` = VALUES(`is_siteroot`),
+  `hidden` = VALUES(`hidden`),
+  `deleted` = VALUES(`deleted`),
+  `tstamp` = VALUES(`tstamp`),
+  `crdate` = VALUES(`crdate`),
+  `tx_sluggi_sync` = VALUES(`tx_sluggi_sync`),
+  `slug_locked` = VALUES(`slug_locked`),
+  `perms_userid` = VALUES(`perms_userid`),
+  `perms_groupid` = VALUES(`perms_groupid`),
+  `perms_user` = VALUES(`perms_user`),
+  `perms_group` = VALUES(`perms_group`),
+  `perms_everybody` = VALUES(`perms_everybody`);
 
 -- Page 31: Lock visual state test (unlocked initially)
 INSERT INTO `pages` (`uid`, `pid`, `title`, `slug`, `doktype`, `is_siteroot`, `hidden`, `deleted`, `tstamp`, `crdate`, `tx_sluggi_sync`, `slug_locked`, `perms_userid`, `perms_groupid`, `perms_user`, `perms_group`, `perms_everybody`)
 VALUES (31, 1, 'Lock Visual Test', '/lock-visual-test', 1, 0, 0, 0, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 0, 0, 1, 0, 31, 31, 31)
-ON DUPLICATE KEY UPDATE `title` = VALUES(`title`), `slug` = VALUES(`slug`), `tx_sluggi_sync` = 0, `slug_locked` = 0, `perms_userid` = 1, `perms_groupid` = 0, `perms_user` = 31, `perms_group` = 31, `perms_everybody` = 31;
+ON DUPLICATE KEY UPDATE
+  `pid` = VALUES(`pid`),
+  `title` = VALUES(`title`),
+  `slug` = VALUES(`slug`),
+  `doktype` = VALUES(`doktype`),
+  `is_siteroot` = VALUES(`is_siteroot`),
+  `hidden` = VALUES(`hidden`),
+  `deleted` = VALUES(`deleted`),
+  `tstamp` = VALUES(`tstamp`),
+  `crdate` = VALUES(`crdate`),
+  `tx_sluggi_sync` = VALUES(`tx_sluggi_sync`),
+  `slug_locked` = VALUES(`slug_locked`),
+  `perms_userid` = VALUES(`perms_userid`),
+  `perms_groupid` = VALUES(`perms_groupid`),
+  `perms_user` = VALUES(`perms_user`),
+  `perms_group` = VALUES(`perms_group`),
+  `perms_everybody` = VALUES(`perms_everybody`);
 
 -- Page 32: Lock persistence test (unlocked initially)
 INSERT INTO `pages` (`uid`, `pid`, `title`, `slug`, `doktype`, `is_siteroot`, `hidden`, `deleted`, `tstamp`, `crdate`, `tx_sluggi_sync`, `slug_locked`, `perms_userid`, `perms_groupid`, `perms_user`, `perms_group`, `perms_everybody`)
 VALUES (32, 1, 'Lock Persist Test', '/lock-persist-test', 1, 0, 0, 0, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 0, 0, 1, 0, 31, 31, 31)
-ON DUPLICATE KEY UPDATE `title` = VALUES(`title`), `slug` = VALUES(`slug`), `tx_sluggi_sync` = 0, `slug_locked` = 0, `perms_userid` = 1, `perms_groupid` = 0, `perms_user` = 31, `perms_group` = 31, `perms_everybody` = 31;
+ON DUPLICATE KEY UPDATE
+  `pid` = VALUES(`pid`),
+  `title` = VALUES(`title`),
+  `slug` = VALUES(`slug`),
+  `doktype` = VALUES(`doktype`),
+  `is_siteroot` = VALUES(`is_siteroot`),
+  `hidden` = VALUES(`hidden`),
+  `deleted` = VALUES(`deleted`),
+  `tstamp` = VALUES(`tstamp`),
+  `crdate` = VALUES(`crdate`),
+  `tx_sluggi_sync` = VALUES(`tx_sluggi_sync`),
+  `slug_locked` = VALUES(`slug_locked`),
+  `perms_userid` = VALUES(`perms_userid`),
+  `perms_groupid` = VALUES(`perms_groupid`),
+  `perms_user` = VALUES(`perms_user`),
+  `perms_group` = VALUES(`perms_group`),
+  `perms_everybody` = VALUES(`perms_everybody`);
 
 -- Page 33: Locked page editing test (locked)
 INSERT INTO `pages` (`uid`, `pid`, `title`, `slug`, `doktype`, `is_siteroot`, `hidden`, `deleted`, `tstamp`, `crdate`, `tx_sluggi_sync`, `slug_locked`, `perms_userid`, `perms_groupid`, `perms_user`, `perms_group`, `perms_everybody`)
 VALUES (33, 1, 'Already Locked Page', '/already-locked-page', 1, 0, 0, 0, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 0, 1, 1, 0, 31, 31, 31)
-ON DUPLICATE KEY UPDATE `title` = VALUES(`title`), `slug` = VALUES(`slug`), `tx_sluggi_sync` = 0, `slug_locked` = 1, `perms_userid` = 1, `perms_groupid` = 0, `perms_user` = 31, `perms_group` = 31, `perms_everybody` = 31;
+ON DUPLICATE KEY UPDATE
+  `pid` = VALUES(`pid`),
+  `title` = VALUES(`title`),
+  `slug` = VALUES(`slug`),
+  `doktype` = VALUES(`doktype`),
+  `is_siteroot` = VALUES(`is_siteroot`),
+  `hidden` = VALUES(`hidden`),
+  `deleted` = VALUES(`deleted`),
+  `tstamp` = VALUES(`tstamp`),
+  `crdate` = VALUES(`crdate`),
+  `tx_sluggi_sync` = VALUES(`tx_sluggi_sync`),
+  `slug_locked` = VALUES(`slug_locked`),
+  `perms_userid` = VALUES(`perms_userid`),
+  `perms_groupid` = VALUES(`perms_groupid`),
+  `perms_user` = VALUES(`perms_user`),
+  `perms_group` = VALUES(`perms_group`),
+  `perms_everybody` = VALUES(`perms_everybody`);
 
 -- Page 34: Lock vs Sync mutual exclusion test (unlocked and unsynced initially)
 INSERT INTO `pages` (`uid`, `pid`, `title`, `slug`, `doktype`, `is_siteroot`, `hidden`, `deleted`, `tstamp`, `crdate`, `tx_sluggi_sync`, `slug_locked`, `perms_userid`, `perms_groupid`, `perms_user`, `perms_group`, `perms_everybody`)
 VALUES (34, 1, 'Lock Sync Test', '/lock-sync-test', 1, 0, 0, 0, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 0, 0, 1, 0, 31, 31, 31)
-ON DUPLICATE KEY UPDATE `title` = VALUES(`title`), `slug` = VALUES(`slug`), `tx_sluggi_sync` = 0, `slug_locked` = 0, `perms_userid` = 1, `perms_groupid` = 0, `perms_user` = 31, `perms_group` = 31, `perms_everybody` = 31;
+ON DUPLICATE KEY UPDATE
+  `pid` = VALUES(`pid`),
+  `title` = VALUES(`title`),
+  `slug` = VALUES(`slug`),
+  `doktype` = VALUES(`doktype`),
+  `is_siteroot` = VALUES(`is_siteroot`),
+  `hidden` = VALUES(`hidden`),
+  `deleted` = VALUES(`deleted`),
+  `tstamp` = VALUES(`tstamp`),
+  `crdate` = VALUES(`crdate`),
+  `tx_sluggi_sync` = VALUES(`tx_sluggi_sync`),
+  `slug_locked` = VALUES(`slug_locked`),
+  `perms_userid` = VALUES(`perms_userid`),
+  `perms_groupid` = VALUES(`perms_groupid`),
+  `perms_user` = VALUES(`perms_user`),
+  `perms_group` = VALUES(`perms_group`),
+  `perms_everybody` = VALUES(`perms_everybody`);
 
 -- Page 35: Sync vs Lock mutual exclusion test (synced initially)
 INSERT INTO `pages` (`uid`, `pid`, `title`, `slug`, `doktype`, `is_siteroot`, `hidden`, `deleted`, `tstamp`, `crdate`, `tx_sluggi_sync`, `slug_locked`, `perms_userid`, `perms_groupid`, `perms_user`, `perms_group`, `perms_everybody`)
 VALUES (35, 1, 'Sync Lock Test', '/sync-lock-test', 1, 0, 0, 0, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 1, 0, 1, 0, 31, 31, 31)
-ON DUPLICATE KEY UPDATE `title` = VALUES(`title`), `slug` = VALUES(`slug`), `tx_sluggi_sync` = 1, `slug_locked` = 0, `perms_userid` = 1, `perms_groupid` = 0, `perms_user` = 31, `perms_group` = 31, `perms_everybody` = 31;
+ON DUPLICATE KEY UPDATE
+  `pid` = VALUES(`pid`),
+  `title` = VALUES(`title`),
+  `slug` = VALUES(`slug`),
+  `doktype` = VALUES(`doktype`),
+  `is_siteroot` = VALUES(`is_siteroot`),
+  `hidden` = VALUES(`hidden`),
+  `deleted` = VALUES(`deleted`),
+  `tstamp` = VALUES(`tstamp`),
+  `crdate` = VALUES(`crdate`),
+  `tx_sluggi_sync` = VALUES(`tx_sluggi_sync`),
+  `slug_locked` = VALUES(`slug_locked`),
+  `perms_userid` = VALUES(`perms_userid`),
+  `perms_groupid` = VALUES(`perms_groupid`),
+  `perms_user` = VALUES(`perms_user`),
+  `perms_group` = VALUES(`perms_group`),
+  `perms_everybody` = VALUES(`perms_everybody`);
 
 -- =============================================
 -- field-access-restriction.spec.ts (pages 36-38)
@@ -249,17 +778,65 @@ ON DUPLICATE KEY UPDATE `title` = VALUES(`title`), `slug` = VALUES(`slug`), `tx_
 -- Page 36: Parent for restricted editor tests
 INSERT INTO `pages` (`uid`, `pid`, `title`, `slug`, `doktype`, `is_siteroot`, `hidden`, `deleted`, `tstamp`, `crdate`, `tx_sluggi_sync`, `slug_locked`, `perms_userid`, `perms_groupid`, `perms_user`, `perms_group`, `perms_everybody`)
 VALUES (36, 1, 'Restricted Section', '/restricted-section', 1, 0, 0, 0, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 0, 0, 1, 3, 31, 31, 0)
-ON DUPLICATE KEY UPDATE `title` = VALUES(`title`), `slug` = VALUES(`slug`), `tx_sluggi_sync` = 0, `slug_locked` = 0, `perms_userid` = 1, `perms_groupid` = 3, `perms_user` = 31, `perms_group` = 31, `perms_everybody` = 0;
+ON DUPLICATE KEY UPDATE
+  `pid` = VALUES(`pid`),
+  `title` = VALUES(`title`),
+  `slug` = VALUES(`slug`),
+  `doktype` = VALUES(`doktype`),
+  `is_siteroot` = VALUES(`is_siteroot`),
+  `hidden` = VALUES(`hidden`),
+  `deleted` = VALUES(`deleted`),
+  `tstamp` = VALUES(`tstamp`),
+  `crdate` = VALUES(`crdate`),
+  `tx_sluggi_sync` = VALUES(`tx_sluggi_sync`),
+  `slug_locked` = VALUES(`slug_locked`),
+  `perms_userid` = VALUES(`perms_userid`),
+  `perms_groupid` = VALUES(`perms_groupid`),
+  `perms_user` = VALUES(`perms_user`),
+  `perms_group` = VALUES(`perms_group`),
+  `perms_everybody` = VALUES(`perms_everybody`);
 
 -- Page 37: Synced page that restricted editor can see but not toggle sync
 INSERT INTO `pages` (`uid`, `pid`, `title`, `slug`, `doktype`, `is_siteroot`, `hidden`, `deleted`, `tstamp`, `crdate`, `tx_sluggi_sync`, `slug_locked`, `perms_userid`, `perms_groupid`, `perms_user`, `perms_group`, `perms_everybody`)
 VALUES (37, 36, 'Synced No Toggle', '/restricted-section/synced-no-toggle', 1, 0, 0, 0, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 1, 0, 1, 3, 31, 31, 0)
-ON DUPLICATE KEY UPDATE `title` = VALUES(`title`), `slug` = VALUES(`slug`), `tx_sluggi_sync` = 1, `slug_locked` = 0, `perms_userid` = 1, `perms_groupid` = 3, `perms_user` = 31, `perms_group` = 31, `perms_everybody` = 0;
+ON DUPLICATE KEY UPDATE
+  `pid` = VALUES(`pid`),
+  `title` = VALUES(`title`),
+  `slug` = VALUES(`slug`),
+  `doktype` = VALUES(`doktype`),
+  `is_siteroot` = VALUES(`is_siteroot`),
+  `hidden` = VALUES(`hidden`),
+  `deleted` = VALUES(`deleted`),
+  `tstamp` = VALUES(`tstamp`),
+  `crdate` = VALUES(`crdate`),
+  `tx_sluggi_sync` = VALUES(`tx_sluggi_sync`),
+  `slug_locked` = VALUES(`slug_locked`),
+  `perms_userid` = VALUES(`perms_userid`),
+  `perms_groupid` = VALUES(`perms_groupid`),
+  `perms_user` = VALUES(`perms_user`),
+  `perms_group` = VALUES(`perms_group`),
+  `perms_everybody` = VALUES(`perms_everybody`);
 
 -- Page 38: Locked page that restricted editor can see but not toggle lock
 INSERT INTO `pages` (`uid`, `pid`, `title`, `slug`, `doktype`, `is_siteroot`, `hidden`, `deleted`, `tstamp`, `crdate`, `tx_sluggi_sync`, `slug_locked`, `perms_userid`, `perms_groupid`, `perms_user`, `perms_group`, `perms_everybody`)
 VALUES (38, 36, 'Locked No Toggle', '/restricted-section/locked-no-toggle', 1, 0, 0, 0, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 0, 1, 1, 3, 31, 31, 0)
-ON DUPLICATE KEY UPDATE `title` = VALUES(`title`), `slug` = VALUES(`slug`), `tx_sluggi_sync` = 0, `slug_locked` = 1, `perms_userid` = 1, `perms_groupid` = 3, `perms_user` = 31, `perms_group` = 31, `perms_everybody` = 0;
+ON DUPLICATE KEY UPDATE
+  `pid` = VALUES(`pid`),
+  `title` = VALUES(`title`),
+  `slug` = VALUES(`slug`),
+  `doktype` = VALUES(`doktype`),
+  `is_siteroot` = VALUES(`is_siteroot`),
+  `hidden` = VALUES(`hidden`),
+  `deleted` = VALUES(`deleted`),
+  `tstamp` = VALUES(`tstamp`),
+  `crdate` = VALUES(`crdate`),
+  `tx_sluggi_sync` = VALUES(`tx_sluggi_sync`),
+  `slug_locked` = VALUES(`slug_locked`),
+  `perms_userid` = VALUES(`perms_userid`),
+  `perms_groupid` = VALUES(`perms_groupid`),
+  `perms_user` = VALUES(`perms_user`),
+  `perms_group` = VALUES(`perms_group`),
+  `perms_everybody` = VALUES(`perms_everybody`);
 
 -- =============================================
 -- full-path-editing.spec.ts (uses pages 39-42)
@@ -267,22 +844,82 @@ ON DUPLICATE KEY UPDATE `title` = VALUES(`title`), `slug` = VALUES(`slug`), `tx_
 -- Page 39: Full path toggle test (matches hierarchy)
 INSERT INTO `pages` (`uid`, `pid`, `title`, `slug`, `doktype`, `is_siteroot`, `hidden`, `deleted`, `tstamp`, `crdate`, `tx_sluggi_sync`, `perms_userid`, `perms_groupid`, `perms_user`, `perms_group`, `perms_everybody`)
 VALUES (39, 18, 'Full Path Test', '/parent-section/full-path-test', 1, 0, 0, 0, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 0, 1, 2, 31, 31, 0)
-ON DUPLICATE KEY UPDATE `title` = VALUES(`title`), `slug` = VALUES(`slug`), `tx_sluggi_sync` = 0, `perms_userid` = 1, `perms_groupid` = 2, `perms_user` = 31, `perms_group` = 31, `perms_everybody` = 0;
+ON DUPLICATE KEY UPDATE
+  `pid` = VALUES(`pid`),
+  `title` = VALUES(`title`),
+  `slug` = VALUES(`slug`),
+  `doktype` = VALUES(`doktype`),
+  `is_siteroot` = VALUES(`is_siteroot`),
+  `hidden` = VALUES(`hidden`),
+  `deleted` = VALUES(`deleted`),
+  `tstamp` = VALUES(`tstamp`),
+  `crdate` = VALUES(`crdate`),
+  `tx_sluggi_sync` = VALUES(`tx_sluggi_sync`),
+  `perms_userid` = VALUES(`perms_userid`),
+  `perms_groupid` = VALUES(`perms_groupid`),
+  `perms_user` = VALUES(`perms_user`),
+  `perms_group` = VALUES(`perms_group`),
+  `perms_everybody` = VALUES(`perms_everybody`);
 
 -- Page 40: Full path save test
 INSERT INTO `pages` (`uid`, `pid`, `title`, `slug`, `doktype`, `is_siteroot`, `hidden`, `deleted`, `tstamp`, `crdate`, `tx_sluggi_sync`, `perms_userid`, `perms_groupid`, `perms_user`, `perms_group`, `perms_everybody`)
 VALUES (40, 18, 'Full Path Save', '/parent-section/full-path-save', 1, 0, 0, 0, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 0, 1, 2, 31, 31, 0)
-ON DUPLICATE KEY UPDATE `title` = VALUES(`title`), `slug` = VALUES(`slug`), `tx_sluggi_sync` = 0, `perms_userid` = 1, `perms_groupid` = 2, `perms_user` = 31, `perms_group` = 31, `perms_everybody` = 0;
+ON DUPLICATE KEY UPDATE
+  `pid` = VALUES(`pid`),
+  `title` = VALUES(`title`),
+  `slug` = VALUES(`slug`),
+  `doktype` = VALUES(`doktype`),
+  `is_siteroot` = VALUES(`is_siteroot`),
+  `hidden` = VALUES(`hidden`),
+  `deleted` = VALUES(`deleted`),
+  `tstamp` = VALUES(`tstamp`),
+  `crdate` = VALUES(`crdate`),
+  `tx_sluggi_sync` = VALUES(`tx_sluggi_sync`),
+  `perms_userid` = VALUES(`perms_userid`),
+  `perms_groupid` = VALUES(`perms_groupid`),
+  `perms_user` = VALUES(`perms_user`),
+  `perms_group` = VALUES(`perms_group`),
+  `perms_everybody` = VALUES(`perms_everybody`);
 
 -- Page 41: Regenerate test - slug matches hierarchy
 INSERT INTO `pages` (`uid`, `pid`, `title`, `slug`, `doktype`, `is_siteroot`, `hidden`, `deleted`, `tstamp`, `crdate`, `tx_sluggi_sync`, `perms_userid`, `perms_groupid`, `perms_user`, `perms_group`, `perms_everybody`)
 VALUES (41, 18, 'Regen Match', '/parent-section/regen-match', 1, 0, 0, 0, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 0, 1, 2, 31, 31, 0)
-ON DUPLICATE KEY UPDATE `title` = VALUES(`title`), `slug` = VALUES(`slug`), `tx_sluggi_sync` = 0, `perms_userid` = 1, `perms_groupid` = 2, `perms_user` = 31, `perms_group` = 31, `perms_everybody` = 0;
+ON DUPLICATE KEY UPDATE
+  `pid` = VALUES(`pid`),
+  `title` = VALUES(`title`),
+  `slug` = VALUES(`slug`),
+  `doktype` = VALUES(`doktype`),
+  `is_siteroot` = VALUES(`is_siteroot`),
+  `hidden` = VALUES(`hidden`),
+  `deleted` = VALUES(`deleted`),
+  `tstamp` = VALUES(`tstamp`),
+  `crdate` = VALUES(`crdate`),
+  `tx_sluggi_sync` = VALUES(`tx_sluggi_sync`),
+  `perms_userid` = VALUES(`perms_userid`),
+  `perms_groupid` = VALUES(`perms_groupid`),
+  `perms_user` = VALUES(`perms_user`),
+  `perms_group` = VALUES(`perms_group`),
+  `perms_everybody` = VALUES(`perms_everybody`);
 
 -- Page 42: Regenerate test - slug was shortened (doesn't match hierarchy)
 INSERT INTO `pages` (`uid`, `pid`, `title`, `slug`, `doktype`, `is_siteroot`, `hidden`, `deleted`, `tstamp`, `crdate`, `tx_sluggi_sync`, `perms_userid`, `perms_groupid`, `perms_user`, `perms_group`, `perms_everybody`)
 VALUES (42, 18, 'Short URL Page', '/short-url', 1, 0, 0, 0, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 0, 1, 2, 31, 31, 0)
-ON DUPLICATE KEY UPDATE `title` = VALUES(`title`), `slug` = VALUES(`slug`), `tx_sluggi_sync` = 0, `perms_userid` = 1, `perms_groupid` = 2, `perms_user` = 31, `perms_group` = 31, `perms_everybody` = 0;
+ON DUPLICATE KEY UPDATE
+  `pid` = VALUES(`pid`),
+  `title` = VALUES(`title`),
+  `slug` = VALUES(`slug`),
+  `doktype` = VALUES(`doktype`),
+  `is_siteroot` = VALUES(`is_siteroot`),
+  `hidden` = VALUES(`hidden`),
+  `deleted` = VALUES(`deleted`),
+  `tstamp` = VALUES(`tstamp`),
+  `crdate` = VALUES(`crdate`),
+  `tx_sluggi_sync` = VALUES(`tx_sluggi_sync`),
+  `perms_userid` = VALUES(`perms_userid`),
+  `perms_groupid` = VALUES(`perms_groupid`),
+  `perms_user` = VALUES(`perms_user`),
+  `perms_group` = VALUES(`perms_group`),
+  `perms_everybody` = VALUES(`perms_everybody`);
 
 -- =============================================
 -- collapsed-controls.spec.ts (uses pages 43, 44)
@@ -290,12 +927,44 @@ ON DUPLICATE KEY UPDATE `title` = VALUES(`title`), `slug` = VALUES(`slug`), `tx_
 -- Page 43: Single-record collapsed controls test
 INSERT INTO `pages` (`uid`, `pid`, `title`, `slug`, `doktype`, `is_siteroot`, `hidden`, `deleted`, `tstamp`, `crdate`, `tx_sluggi_sync`, `slug_locked`, `perms_userid`, `perms_groupid`, `perms_user`, `perms_group`, `perms_everybody`)
 VALUES (43, 1, 'Collapsed Controls Test', '/collapsed-controls-test', 1, 0, 0, 0, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 0, 0, 1, 0, 31, 31, 31)
-ON DUPLICATE KEY UPDATE `title` = VALUES(`title`), `slug` = VALUES(`slug`), `tx_sluggi_sync` = 0, `slug_locked` = 0, `perms_userid` = 1, `perms_groupid` = 0, `perms_user` = 31, `perms_group` = 31, `perms_everybody` = 31;
+ON DUPLICATE KEY UPDATE
+  `pid` = VALUES(`pid`),
+  `title` = VALUES(`title`),
+  `slug` = VALUES(`slug`),
+  `doktype` = VALUES(`doktype`),
+  `is_siteroot` = VALUES(`is_siteroot`),
+  `hidden` = VALUES(`hidden`),
+  `deleted` = VALUES(`deleted`),
+  `tstamp` = VALUES(`tstamp`),
+  `crdate` = VALUES(`crdate`),
+  `tx_sluggi_sync` = VALUES(`tx_sluggi_sync`),
+  `slug_locked` = VALUES(`slug_locked`),
+  `perms_userid` = VALUES(`perms_userid`),
+  `perms_groupid` = VALUES(`perms_groupid`),
+  `perms_user` = VALUES(`perms_user`),
+  `perms_group` = VALUES(`perms_group`),
+  `perms_everybody` = VALUES(`perms_everybody`);
 
 -- Page 44: Second page for multi-edit test
 INSERT INTO `pages` (`uid`, `pid`, `title`, `slug`, `doktype`, `is_siteroot`, `hidden`, `deleted`, `tstamp`, `crdate`, `tx_sluggi_sync`, `slug_locked`, `perms_userid`, `perms_groupid`, `perms_user`, `perms_group`, `perms_everybody`)
 VALUES (44, 1, 'Multi Edit Test', '/multi-edit-test', 1, 0, 0, 0, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 1, 0, 1, 0, 31, 31, 31)
-ON DUPLICATE KEY UPDATE `title` = VALUES(`title`), `slug` = VALUES(`slug`), `tx_sluggi_sync` = 1, `slug_locked` = 0, `perms_userid` = 1, `perms_groupid` = 0, `perms_user` = 31, `perms_group` = 31, `perms_everybody` = 31;
+ON DUPLICATE KEY UPDATE
+  `pid` = VALUES(`pid`),
+  `title` = VALUES(`title`),
+  `slug` = VALUES(`slug`),
+  `doktype` = VALUES(`doktype`),
+  `is_siteroot` = VALUES(`is_siteroot`),
+  `hidden` = VALUES(`hidden`),
+  `deleted` = VALUES(`deleted`),
+  `tstamp` = VALUES(`tstamp`),
+  `crdate` = VALUES(`crdate`),
+  `tx_sluggi_sync` = VALUES(`tx_sluggi_sync`),
+  `slug_locked` = VALUES(`slug_locked`),
+  `perms_userid` = VALUES(`perms_userid`),
+  `perms_groupid` = VALUES(`perms_groupid`),
+  `perms_user` = VALUES(`perms_user`),
+  `perms_group` = VALUES(`perms_group`),
+  `perms_everybody` = VALUES(`perms_everybody`);
 
 -- =============================================
 -- redirect-control-multi-edit.spec.ts (uses pages 45-48)
@@ -303,22 +972,82 @@ ON DUPLICATE KEY UPDATE `title` = VALUES(`title`), `slug` = VALUES(`slug`), `tx_
 -- Page 45: Parent page for multi-edit redirect tests
 INSERT INTO `pages` (`uid`, `pid`, `title`, `slug`, `doktype`, `is_siteroot`, `hidden`, `deleted`, `tstamp`, `crdate`, `tx_sluggi_sync`, `perms_userid`, `perms_groupid`, `perms_user`, `perms_group`, `perms_everybody`)
 VALUES (45, 1, 'Multi Edit Parent', '/multi-edit-parent', 1, 0, 0, 0, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 0, 1, 0, 31, 31, 31)
-ON DUPLICATE KEY UPDATE `title` = VALUES(`title`), `slug` = VALUES(`slug`), `tx_sluggi_sync` = 0, `perms_userid` = 1, `perms_groupid` = 0, `perms_user` = 31, `perms_group` = 31, `perms_everybody` = 31;
+ON DUPLICATE KEY UPDATE
+  `pid` = VALUES(`pid`),
+  `title` = VALUES(`title`),
+  `slug` = VALUES(`slug`),
+  `doktype` = VALUES(`doktype`),
+  `is_siteroot` = VALUES(`is_siteroot`),
+  `hidden` = VALUES(`hidden`),
+  `deleted` = VALUES(`deleted`),
+  `tstamp` = VALUES(`tstamp`),
+  `crdate` = VALUES(`crdate`),
+  `tx_sluggi_sync` = VALUES(`tx_sluggi_sync`),
+  `perms_userid` = VALUES(`perms_userid`),
+  `perms_groupid` = VALUES(`perms_groupid`),
+  `perms_user` = VALUES(`perms_user`),
+  `perms_group` = VALUES(`perms_group`),
+  `perms_everybody` = VALUES(`perms_everybody`);
 
 -- Page 46: Child 1 for multi-edit redirect tests
 INSERT INTO `pages` (`uid`, `pid`, `title`, `slug`, `doktype`, `is_siteroot`, `hidden`, `deleted`, `tstamp`, `crdate`, `tx_sluggi_sync`, `perms_userid`, `perms_groupid`, `perms_user`, `perms_group`, `perms_everybody`)
 VALUES (46, 45, 'Multi Edit Child 1', '/multi-edit-parent/child-1', 1, 0, 0, 0, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 0, 1, 0, 31, 31, 31)
-ON DUPLICATE KEY UPDATE `title` = VALUES(`title`), `slug` = VALUES(`slug`), `tx_sluggi_sync` = 0, `perms_userid` = 1, `perms_groupid` = 0, `perms_user` = 31, `perms_group` = 31, `perms_everybody` = 31;
+ON DUPLICATE KEY UPDATE
+  `pid` = VALUES(`pid`),
+  `title` = VALUES(`title`),
+  `slug` = VALUES(`slug`),
+  `doktype` = VALUES(`doktype`),
+  `is_siteroot` = VALUES(`is_siteroot`),
+  `hidden` = VALUES(`hidden`),
+  `deleted` = VALUES(`deleted`),
+  `tstamp` = VALUES(`tstamp`),
+  `crdate` = VALUES(`crdate`),
+  `tx_sluggi_sync` = VALUES(`tx_sluggi_sync`),
+  `perms_userid` = VALUES(`perms_userid`),
+  `perms_groupid` = VALUES(`perms_groupid`),
+  `perms_user` = VALUES(`perms_user`),
+  `perms_group` = VALUES(`perms_group`),
+  `perms_everybody` = VALUES(`perms_everybody`);
 
 -- Page 47: Child 2 for multi-edit redirect tests
 INSERT INTO `pages` (`uid`, `pid`, `title`, `slug`, `doktype`, `is_siteroot`, `hidden`, `deleted`, `tstamp`, `crdate`, `tx_sluggi_sync`, `perms_userid`, `perms_groupid`, `perms_user`, `perms_group`, `perms_everybody`)
 VALUES (47, 45, 'Multi Edit Child 2', '/multi-edit-parent/child-2', 1, 0, 0, 0, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 0, 1, 0, 31, 31, 31)
-ON DUPLICATE KEY UPDATE `title` = VALUES(`title`), `slug` = VALUES(`slug`), `tx_sluggi_sync` = 0, `perms_userid` = 1, `perms_groupid` = 0, `perms_user` = 31, `perms_group` = 31, `perms_everybody` = 31;
+ON DUPLICATE KEY UPDATE
+  `pid` = VALUES(`pid`),
+  `title` = VALUES(`title`),
+  `slug` = VALUES(`slug`),
+  `doktype` = VALUES(`doktype`),
+  `is_siteroot` = VALUES(`is_siteroot`),
+  `hidden` = VALUES(`hidden`),
+  `deleted` = VALUES(`deleted`),
+  `tstamp` = VALUES(`tstamp`),
+  `crdate` = VALUES(`crdate`),
+  `tx_sluggi_sync` = VALUES(`tx_sluggi_sync`),
+  `perms_userid` = VALUES(`perms_userid`),
+  `perms_groupid` = VALUES(`perms_groupid`),
+  `perms_user` = VALUES(`perms_user`),
+  `perms_group` = VALUES(`perms_group`),
+  `perms_everybody` = VALUES(`perms_everybody`);
 
 -- Page 48: Child 3 for multi-edit redirect tests
 INSERT INTO `pages` (`uid`, `pid`, `title`, `slug`, `doktype`, `is_siteroot`, `hidden`, `deleted`, `tstamp`, `crdate`, `tx_sluggi_sync`, `perms_userid`, `perms_groupid`, `perms_user`, `perms_group`, `perms_everybody`)
 VALUES (48, 45, 'Multi Edit Child 3', '/multi-edit-parent/child-3', 1, 0, 0, 0, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 0, 1, 0, 31, 31, 31)
-ON DUPLICATE KEY UPDATE `title` = VALUES(`title`), `slug` = VALUES(`slug`), `tx_sluggi_sync` = 0, `perms_userid` = 1, `perms_groupid` = 0, `perms_user` = 31, `perms_group` = 31, `perms_everybody` = 31;
+ON DUPLICATE KEY UPDATE
+  `pid` = VALUES(`pid`),
+  `title` = VALUES(`title`),
+  `slug` = VALUES(`slug`),
+  `doktype` = VALUES(`doktype`),
+  `is_siteroot` = VALUES(`is_siteroot`),
+  `hidden` = VALUES(`hidden`),
+  `deleted` = VALUES(`deleted`),
+  `tstamp` = VALUES(`tstamp`),
+  `crdate` = VALUES(`crdate`),
+  `tx_sluggi_sync` = VALUES(`tx_sluggi_sync`),
+  `perms_userid` = VALUES(`perms_userid`),
+  `perms_groupid` = VALUES(`perms_groupid`),
+  `perms_user` = VALUES(`perms_user`),
+  `perms_group` = VALUES(`perms_group`),
+  `perms_everybody` = VALUES(`perms_everybody`);
 
 -- =============================================
 -- recursive-slug-update.spec.ts (uses pages 49, 50)
@@ -326,12 +1055,42 @@ ON DUPLICATE KEY UPDATE `title` = VALUES(`title`), `slug` = VALUES(`slug`), `tx_
 -- Page 49: Parent page with correct slug
 INSERT INTO `pages` (`uid`, `pid`, `title`, `slug`, `doktype`, `is_siteroot`, `hidden`, `deleted`, `tstamp`, `crdate`, `tx_sluggi_sync`, `perms_userid`, `perms_groupid`, `perms_user`, `perms_group`, `perms_everybody`)
 VALUES (49, 1, 'Recursive Parent', '/recursive-parent', 1, 0, 0, 0, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 1, 1, 0, 31, 31, 31)
-ON DUPLICATE KEY UPDATE `title` = VALUES(`title`), `slug` = VALUES(`slug`), `tx_sluggi_sync` = 1, `perms_userid` = 1, `perms_groupid` = 0, `perms_user` = 31, `perms_group` = 31, `perms_everybody` = 31;
+ON DUPLICATE KEY UPDATE
+  `pid` = VALUES(`pid`),
+  `title` = VALUES(`title`),
+  `slug` = VALUES(`slug`),
+  `doktype` = VALUES(`doktype`),
+  `is_siteroot` = VALUES(`is_siteroot`),
+  `hidden` = VALUES(`hidden`),
+  `deleted` = VALUES(`deleted`),
+  `tstamp` = VALUES(`tstamp`),
+  `crdate` = VALUES(`crdate`),
+  `tx_sluggi_sync` = VALUES(`tx_sluggi_sync`),
+  `perms_userid` = VALUES(`perms_userid`),
+  `perms_groupid` = VALUES(`perms_groupid`),
+  `perms_user` = VALUES(`perms_user`),
+  `perms_group` = VALUES(`perms_group`),
+  `perms_everybody` = VALUES(`perms_everybody`);
 
 -- Page 50: Child with WRONG parent prefix (simulates reverted/stale slug)
 INSERT INTO `pages` (`uid`, `pid`, `title`, `slug`, `doktype`, `is_siteroot`, `hidden`, `deleted`, `tstamp`, `crdate`, `tx_sluggi_sync`, `perms_userid`, `perms_groupid`, `perms_user`, `perms_group`, `perms_everybody`)
 VALUES (50, 49, 'Recursive Child', '/wrong-prefix/recursive-child', 1, 0, 0, 0, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 1, 1, 0, 31, 31, 31)
-ON DUPLICATE KEY UPDATE `title` = VALUES(`title`), `slug` = VALUES(`slug`), `tx_sluggi_sync` = 1, `perms_userid` = 1, `perms_groupid` = 0, `perms_user` = 31, `perms_group` = 31, `perms_everybody` = 31;
+ON DUPLICATE KEY UPDATE
+  `pid` = VALUES(`pid`),
+  `title` = VALUES(`title`),
+  `slug` = VALUES(`slug`),
+  `doktype` = VALUES(`doktype`),
+  `is_siteroot` = VALUES(`is_siteroot`),
+  `hidden` = VALUES(`hidden`),
+  `deleted` = VALUES(`deleted`),
+  `tstamp` = VALUES(`tstamp`),
+  `crdate` = VALUES(`crdate`),
+  `tx_sluggi_sync` = VALUES(`tx_sluggi_sync`),
+  `perms_userid` = VALUES(`perms_userid`),
+  `perms_groupid` = VALUES(`perms_groupid`),
+  `perms_user` = VALUES(`perms_user`),
+  `perms_group` = VALUES(`perms_group`),
+  `perms_everybody` = VALUES(`perms_everybody`);
 
 -- =============================================
 -- translation-inheritance.spec.ts (uses pages 51-53)
@@ -339,22 +1098,94 @@ ON DUPLICATE KEY UPDATE `title` = VALUES(`title`), `slug` = VALUES(`slug`), `tx_
 -- Page 51: Default language page with sync ON and lock OFF
 INSERT INTO `pages` (`uid`, `pid`, `title`, `slug`, `doktype`, `is_siteroot`, `hidden`, `deleted`, `tstamp`, `crdate`, `tx_sluggi_sync`, `slug_locked`, `sys_language_uid`, `l10n_parent`, `perms_userid`, `perms_groupid`, `perms_user`, `perms_group`, `perms_everybody`)
 VALUES (51, 1, 'Translation Test Page', '/translation-test-page', 1, 0, 0, 0, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 1, 0, 0, 0, 1, 0, 31, 31, 31)
-ON DUPLICATE KEY UPDATE `title` = VALUES(`title`), `slug` = VALUES(`slug`), `tx_sluggi_sync` = 1, `slug_locked` = 0, `sys_language_uid` = 0, `l10n_parent` = 0;
+ON DUPLICATE KEY UPDATE
+  `pid` = VALUES(`pid`),
+  `title` = VALUES(`title`),
+  `slug` = VALUES(`slug`),
+  `doktype` = VALUES(`doktype`),
+  `is_siteroot` = VALUES(`is_siteroot`),
+  `hidden` = VALUES(`hidden`),
+  `deleted` = VALUES(`deleted`),
+  `tstamp` = VALUES(`tstamp`),
+  `crdate` = VALUES(`crdate`),
+  `tx_sluggi_sync` = VALUES(`tx_sluggi_sync`),
+  `slug_locked` = VALUES(`slug_locked`),
+  `sys_language_uid` = VALUES(`sys_language_uid`),
+  `l10n_parent` = VALUES(`l10n_parent`),
+  `perms_userid` = VALUES(`perms_userid`),
+  `perms_groupid` = VALUES(`perms_groupid`),
+  `perms_user` = VALUES(`perms_user`),
+  `perms_group` = VALUES(`perms_group`),
+  `perms_everybody` = VALUES(`perms_everybody`);
 
 -- Page 52: German translation of page 51 (sync/lock values should be ignored, inherited from default)
 INSERT INTO `pages` (`uid`, `pid`, `title`, `slug`, `doktype`, `is_siteroot`, `hidden`, `deleted`, `tstamp`, `crdate`, `tx_sluggi_sync`, `slug_locked`, `sys_language_uid`, `l10n_parent`, `perms_userid`, `perms_groupid`, `perms_user`, `perms_group`, `perms_everybody`)
 VALUES (52, 1, 'Übersetzungstest Seite', '/uebersetzungstest-seite', 1, 0, 0, 0, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 0, 0, 1, 51, 1, 0, 31, 31, 31)
-ON DUPLICATE KEY UPDATE `title` = VALUES(`title`), `slug` = VALUES(`slug`), `tx_sluggi_sync` = 0, `slug_locked` = 0, `sys_language_uid` = 1, `l10n_parent` = 51;
+ON DUPLICATE KEY UPDATE
+  `pid` = VALUES(`pid`),
+  `title` = VALUES(`title`),
+  `slug` = VALUES(`slug`),
+  `doktype` = VALUES(`doktype`),
+  `is_siteroot` = VALUES(`is_siteroot`),
+  `hidden` = VALUES(`hidden`),
+  `deleted` = VALUES(`deleted`),
+  `tstamp` = VALUES(`tstamp`),
+  `crdate` = VALUES(`crdate`),
+  `tx_sluggi_sync` = VALUES(`tx_sluggi_sync`),
+  `slug_locked` = VALUES(`slug_locked`),
+  `sys_language_uid` = VALUES(`sys_language_uid`),
+  `l10n_parent` = VALUES(`l10n_parent`),
+  `perms_userid` = VALUES(`perms_userid`),
+  `perms_groupid` = VALUES(`perms_groupid`),
+  `perms_user` = VALUES(`perms_user`),
+  `perms_group` = VALUES(`perms_group`),
+  `perms_everybody` = VALUES(`perms_everybody`);
 
 -- Page 53: Default language page with sync OFF and lock ON
 INSERT INTO `pages` (`uid`, `pid`, `title`, `slug`, `doktype`, `is_siteroot`, `hidden`, `deleted`, `tstamp`, `crdate`, `tx_sluggi_sync`, `slug_locked`, `sys_language_uid`, `l10n_parent`, `perms_userid`, `perms_groupid`, `perms_user`, `perms_group`, `perms_everybody`)
 VALUES (53, 1, 'Locked Translation Test', '/locked-translation-test', 1, 0, 0, 0, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 0, 1, 0, 0, 1, 0, 31, 31, 31)
-ON DUPLICATE KEY UPDATE `title` = VALUES(`title`), `slug` = VALUES(`slug`), `tx_sluggi_sync` = 0, `slug_locked` = 1, `sys_language_uid` = 0, `l10n_parent` = 0;
+ON DUPLICATE KEY UPDATE
+  `pid` = VALUES(`pid`),
+  `title` = VALUES(`title`),
+  `slug` = VALUES(`slug`),
+  `doktype` = VALUES(`doktype`),
+  `is_siteroot` = VALUES(`is_siteroot`),
+  `hidden` = VALUES(`hidden`),
+  `deleted` = VALUES(`deleted`),
+  `tstamp` = VALUES(`tstamp`),
+  `crdate` = VALUES(`crdate`),
+  `tx_sluggi_sync` = VALUES(`tx_sluggi_sync`),
+  `slug_locked` = VALUES(`slug_locked`),
+  `sys_language_uid` = VALUES(`sys_language_uid`),
+  `l10n_parent` = VALUES(`l10n_parent`),
+  `perms_userid` = VALUES(`perms_userid`),
+  `perms_groupid` = VALUES(`perms_groupid`),
+  `perms_user` = VALUES(`perms_user`),
+  `perms_group` = VALUES(`perms_group`),
+  `perms_everybody` = VALUES(`perms_everybody`);
 
 -- Page 54: German translation of page 53 (locked state should be inherited from default)
 INSERT INTO `pages` (`uid`, `pid`, `title`, `slug`, `doktype`, `is_siteroot`, `hidden`, `deleted`, `tstamp`, `crdate`, `tx_sluggi_sync`, `slug_locked`, `sys_language_uid`, `l10n_parent`, `perms_userid`, `perms_groupid`, `perms_user`, `perms_group`, `perms_everybody`)
 VALUES (54, 1, 'Gesperrter Übersetzungstest', '/gesperrter-uebersetzungstest', 1, 0, 0, 0, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 0, 0, 1, 53, 1, 0, 31, 31, 31)
-ON DUPLICATE KEY UPDATE `title` = VALUES(`title`), `slug` = VALUES(`slug`), `tx_sluggi_sync` = 0, `slug_locked` = 0, `sys_language_uid` = 1, `l10n_parent` = 53;
+ON DUPLICATE KEY UPDATE
+  `pid` = VALUES(`pid`),
+  `title` = VALUES(`title`),
+  `slug` = VALUES(`slug`),
+  `doktype` = VALUES(`doktype`),
+  `is_siteroot` = VALUES(`is_siteroot`),
+  `hidden` = VALUES(`hidden`),
+  `deleted` = VALUES(`deleted`),
+  `tstamp` = VALUES(`tstamp`),
+  `crdate` = VALUES(`crdate`),
+  `tx_sluggi_sync` = VALUES(`tx_sluggi_sync`),
+  `slug_locked` = VALUES(`slug_locked`),
+  `sys_language_uid` = VALUES(`sys_language_uid`),
+  `l10n_parent` = VALUES(`l10n_parent`),
+  `perms_userid` = VALUES(`perms_userid`),
+  `perms_groupid` = VALUES(`perms_groupid`),
+  `perms_user` = VALUES(`perms_user`),
+  `perms_group` = VALUES(`perms_group`),
+  `perms_everybody` = VALUES(`perms_everybody`);
 
 -- =============================================
 -- redirect-control.spec.ts revert test (uses pages 60-61)
@@ -362,19 +1193,66 @@ ON DUPLICATE KEY UPDATE `title` = VALUES(`title`), `slug` = VALUES(`slug`), `tx_
 -- Page 60: Parent page for revert test
 INSERT INTO `pages` (`uid`, `pid`, `title`, `slug`, `doktype`, `is_siteroot`, `hidden`, `deleted`, `tstamp`, `crdate`, `tx_sluggi_sync`, `perms_userid`, `perms_groupid`, `perms_user`, `perms_group`, `perms_everybody`)
 VALUES (60, 1, 'Revert Parent', '/revert-parent', 1, 0, 0, 0, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 0, 1, 0, 31, 31, 31)
-ON DUPLICATE KEY UPDATE `title` = VALUES(`title`), `slug` = VALUES(`slug`), `tx_sluggi_sync` = 0, `perms_userid` = 1, `perms_groupid` = 0, `perms_user` = 31, `perms_group` = 31, `perms_everybody` = 31;
+ON DUPLICATE KEY UPDATE
+  `pid` = VALUES(`pid`),
+  `title` = VALUES(`title`),
+  `slug` = VALUES(`slug`),
+  `doktype` = VALUES(`doktype`),
+  `is_siteroot` = VALUES(`is_siteroot`),
+  `hidden` = VALUES(`hidden`),
+  `deleted` = VALUES(`deleted`),
+  `tstamp` = VALUES(`tstamp`),
+  `crdate` = VALUES(`crdate`),
+  `tx_sluggi_sync` = VALUES(`tx_sluggi_sync`),
+  `perms_userid` = VALUES(`perms_userid`),
+  `perms_groupid` = VALUES(`perms_groupid`),
+  `perms_user` = VALUES(`perms_user`),
+  `perms_group` = VALUES(`perms_group`),
+  `perms_everybody` = VALUES(`perms_everybody`);
 
 -- Page 61: Child page for revert test (slug includes parent prefix)
 INSERT INTO `pages` (`uid`, `pid`, `title`, `slug`, `doktype`, `is_siteroot`, `hidden`, `deleted`, `tstamp`, `crdate`, `tx_sluggi_sync`, `perms_userid`, `perms_groupid`, `perms_user`, `perms_group`, `perms_everybody`)
 VALUES (61, 60, 'Revert Child', '/revert-parent/revert-child', 1, 0, 0, 0, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 0, 1, 0, 31, 31, 31)
-ON DUPLICATE KEY UPDATE `title` = VALUES(`title`), `slug` = VALUES(`slug`), `tx_sluggi_sync` = 0, `perms_userid` = 1, `perms_groupid` = 0, `perms_user` = 31, `perms_group` = 31, `perms_everybody` = 31;
+ON DUPLICATE KEY UPDATE
+  `pid` = VALUES(`pid`),
+  `title` = VALUES(`title`),
+  `slug` = VALUES(`slug`),
+  `doktype` = VALUES(`doktype`),
+  `is_siteroot` = VALUES(`is_siteroot`),
+  `hidden` = VALUES(`hidden`),
+  `deleted` = VALUES(`deleted`),
+  `tstamp` = VALUES(`tstamp`),
+  `crdate` = VALUES(`crdate`),
+  `tx_sluggi_sync` = VALUES(`tx_sluggi_sync`),
+  `perms_userid` = VALUES(`perms_userid`),
+  `perms_groupid` = VALUES(`perms_groupid`),
+  `perms_user` = VALUES(`perms_user`),
+  `perms_group` = VALUES(`perms_group`),
+  `perms_everybody` = VALUES(`perms_everybody`);
 
 -- =============================================
 -- source-badge-fallback-chain.spec.ts (uses page 62)
 -- =============================================
 INSERT INTO `pages` (`uid`, `pid`, `title`, `nav_title`, `slug`, `doktype`, `is_siteroot`, `hidden`, `deleted`, `tstamp`, `crdate`, `tx_sluggi_sync`, `slug_locked`, `perms_userid`, `perms_groupid`, `perms_user`, `perms_group`, `perms_everybody`)
 VALUES (62, 1, 'Fallback Source Title', 'Fallback Navigation Title', '/fallback-navigation-title', 1, 0, 0, 0, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 1, 0, 1, 0, 31, 31, 31)
-ON DUPLICATE KEY UPDATE `title` = VALUES(`title`), `nav_title` = VALUES(`nav_title`), `slug` = VALUES(`slug`), `tx_sluggi_sync` = 1, `slug_locked` = 0, `perms_userid` = 1, `perms_groupid` = 0, `perms_user` = 31, `perms_group` = 31, `perms_everybody` = 31;
+ON DUPLICATE KEY UPDATE
+  `pid` = VALUES(`pid`),
+  `title` = VALUES(`title`),
+  `nav_title` = VALUES(`nav_title`),
+  `slug` = VALUES(`slug`),
+  `doktype` = VALUES(`doktype`),
+  `is_siteroot` = VALUES(`is_siteroot`),
+  `hidden` = VALUES(`hidden`),
+  `deleted` = VALUES(`deleted`),
+  `tstamp` = VALUES(`tstamp`),
+  `crdate` = VALUES(`crdate`),
+  `tx_sluggi_sync` = VALUES(`tx_sluggi_sync`),
+  `slug_locked` = VALUES(`slug_locked`),
+  `perms_userid` = VALUES(`perms_userid`),
+  `perms_groupid` = VALUES(`perms_groupid`),
+  `perms_user` = VALUES(`perms_user`),
+  `perms_group` = VALUES(`perms_group`),
+  `perms_everybody` = VALUES(`perms_everybody`);
 
 -- =============================================
 -- hierarchy-permission.spec.ts diverged-slug scenarios (pages 63-65)
@@ -393,17 +1271,65 @@ ON DUPLICATE KEY UPDATE `title` = VALUES(`title`), `nav_title` = VALUES(`nav_tit
 -- Page 63: West Wing (read-only for group 2, acts as db_mountpoint root)
 INSERT INTO `pages` (`uid`, `pid`, `title`, `slug`, `doktype`, `is_siteroot`, `hidden`, `deleted`, `tstamp`, `crdate`, `tx_sluggi_sync`, `slug_locked`, `perms_userid`, `perms_groupid`, `perms_user`, `perms_group`, `perms_everybody`)
 VALUES (63, 1, 'West Wing', '/west-wing', 1, 0, 0, 0, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 0, 0, 1, 2, 31, 1, 1)
-ON DUPLICATE KEY UPDATE `title` = VALUES(`title`), `slug` = VALUES(`slug`), `tx_sluggi_sync` = 0, `slug_locked` = 0, `perms_userid` = 1, `perms_groupid` = 2, `perms_user` = 31, `perms_group` = 1, `perms_everybody` = 1;
+ON DUPLICATE KEY UPDATE
+  `pid` = VALUES(`pid`),
+  `title` = VALUES(`title`),
+  `slug` = VALUES(`slug`),
+  `doktype` = VALUES(`doktype`),
+  `is_siteroot` = VALUES(`is_siteroot`),
+  `hidden` = VALUES(`hidden`),
+  `deleted` = VALUES(`deleted`),
+  `tstamp` = VALUES(`tstamp`),
+  `crdate` = VALUES(`crdate`),
+  `tx_sluggi_sync` = VALUES(`tx_sluggi_sync`),
+  `slug_locked` = VALUES(`slug_locked`),
+  `perms_userid` = VALUES(`perms_userid`),
+  `perms_groupid` = VALUES(`perms_groupid`),
+  `perms_user` = VALUES(`perms_user`),
+  `perms_group` = VALUES(`perms_group`),
+  `perms_everybody` = VALUES(`perms_everybody`);
 
 -- Page 64: Diverged slug, sync ON (triggers prefixMismatch.cannotRegenerate.disableSync advice)
 INSERT INTO `pages` (`uid`, `pid`, `title`, `slug`, `doktype`, `is_siteroot`, `hidden`, `deleted`, `tstamp`, `crdate`, `tx_sluggi_sync`, `slug_locked`, `perms_userid`, `perms_groupid`, `perms_user`, `perms_group`, `perms_everybody`)
 VALUES (64, 63, 'Diverged Sync On', '/organization/department/diverged-sync-on', 1, 0, 0, 0, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 1, 0, 1, 2, 31, 31, 1)
-ON DUPLICATE KEY UPDATE `title` = VALUES(`title`), `slug` = VALUES(`slug`), `tx_sluggi_sync` = 1, `slug_locked` = 0, `perms_userid` = 1, `perms_groupid` = 2, `perms_user` = 31, `perms_group` = 31, `perms_everybody` = 1;
+ON DUPLICATE KEY UPDATE
+  `pid` = VALUES(`pid`),
+  `title` = VALUES(`title`),
+  `slug` = VALUES(`slug`),
+  `doktype` = VALUES(`doktype`),
+  `is_siteroot` = VALUES(`is_siteroot`),
+  `hidden` = VALUES(`hidden`),
+  `deleted` = VALUES(`deleted`),
+  `tstamp` = VALUES(`tstamp`),
+  `crdate` = VALUES(`crdate`),
+  `tx_sluggi_sync` = VALUES(`tx_sluggi_sync`),
+  `slug_locked` = VALUES(`slug_locked`),
+  `perms_userid` = VALUES(`perms_userid`),
+  `perms_groupid` = VALUES(`perms_groupid`),
+  `perms_user` = VALUES(`perms_user`),
+  `perms_group` = VALUES(`perms_group`),
+  `perms_everybody` = VALUES(`perms_everybody`);
 
 -- Page 65: Diverged slug, sync OFF (triggers prefixMismatch.cannotRegenerate.lock advice)
 INSERT INTO `pages` (`uid`, `pid`, `title`, `slug`, `doktype`, `is_siteroot`, `hidden`, `deleted`, `tstamp`, `crdate`, `tx_sluggi_sync`, `slug_locked`, `perms_userid`, `perms_groupid`, `perms_user`, `perms_group`, `perms_everybody`)
 VALUES (65, 63, 'Diverged Sync Off', '/organization/department/diverged-sync-off', 1, 0, 0, 0, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 0, 0, 1, 2, 31, 31, 1)
-ON DUPLICATE KEY UPDATE `title` = VALUES(`title`), `slug` = VALUES(`slug`), `tx_sluggi_sync` = 0, `slug_locked` = 0, `perms_userid` = 1, `perms_groupid` = 2, `perms_user` = 31, `perms_group` = 31, `perms_everybody` = 1;
+ON DUPLICATE KEY UPDATE
+  `pid` = VALUES(`pid`),
+  `title` = VALUES(`title`),
+  `slug` = VALUES(`slug`),
+  `doktype` = VALUES(`doktype`),
+  `is_siteroot` = VALUES(`is_siteroot`),
+  `hidden` = VALUES(`hidden`),
+  `deleted` = VALUES(`deleted`),
+  `tstamp` = VALUES(`tstamp`),
+  `crdate` = VALUES(`crdate`),
+  `tx_sluggi_sync` = VALUES(`tx_sluggi_sync`),
+  `slug_locked` = VALUES(`slug_locked`),
+  `perms_userid` = VALUES(`perms_userid`),
+  `perms_groupid` = VALUES(`perms_groupid`),
+  `perms_user` = VALUES(`perms_user`),
+  `perms_group` = VALUES(`perms_group`),
+  `perms_everybody` = VALUES(`perms_everybody`);
 
 -- =============================================
 -- redirect-control.spec.ts hidden-page test (uses page 70)
@@ -413,4 +1339,20 @@ ON DUPLICATE KEY UPDATE `title` = VALUES(`title`), `slug` = VALUES(`slug`), `tx_
 -- never emit redirects, so redirectsCreated is 0).
 INSERT INTO `pages` (`uid`, `pid`, `title`, `slug`, `doktype`, `is_siteroot`, `hidden`, `deleted`, `tstamp`, `crdate`, `tx_sluggi_sync`, `slug_locked`, `perms_userid`, `perms_groupid`, `perms_user`, `perms_group`, `perms_everybody`)
 VALUES (70, 1, 'Hidden Rename Test', '/hidden-rename-test', 1, 0, 1, 0, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 0, 0, 1, 0, 31, 31, 31)
-ON DUPLICATE KEY UPDATE `title` = VALUES(`title`), `slug` = VALUES(`slug`), `hidden` = 1, `tx_sluggi_sync` = 0, `slug_locked` = 0, `perms_userid` = 1, `perms_groupid` = 0, `perms_user` = 31, `perms_group` = 31, `perms_everybody` = 31;
+ON DUPLICATE KEY UPDATE
+  `pid` = VALUES(`pid`),
+  `title` = VALUES(`title`),
+  `slug` = VALUES(`slug`),
+  `doktype` = VALUES(`doktype`),
+  `is_siteroot` = VALUES(`is_siteroot`),
+  `hidden` = VALUES(`hidden`),
+  `deleted` = VALUES(`deleted`),
+  `tstamp` = VALUES(`tstamp`),
+  `crdate` = VALUES(`crdate`),
+  `tx_sluggi_sync` = VALUES(`tx_sluggi_sync`),
+  `slug_locked` = VALUES(`slug_locked`),
+  `perms_userid` = VALUES(`perms_userid`),
+  `perms_groupid` = VALUES(`perms_groupid`),
+  `perms_user` = VALUES(`perms_user`),
+  `perms_group` = VALUES(`perms_group`),
+  `perms_everybody` = VALUES(`perms_everybody`);

@@ -1,5 +1,5 @@
 import {expect, test} from '@playwright/test';
-import { expandPageTreeNode, getPageTreeItemByName, scrollPageTreeToBottom, waitForEditForm, waitForPageTree } from '../fixtures/typo3-compat';
+import { expandPageTreeNode, getPageTreeNode, waitForEditForm, waitForPageTree } from '../fixtures/typo3-compat';
 
 test.describe('Recursive Slug Update - Context Menu', () => {
   test.use({
@@ -14,10 +14,7 @@ test.describe('Recursive Slug Update - Context Menu', () => {
     await page.goto('/typo3/module/web/layout');
     await waitForPageTree(page);
     await expandPageTreeNode(page, 1);
-    await scrollPageTreeToBottom(page);
-
-    const parentNode = await getPageTreeItemByName(page, 'Recursive Parent');
-    await expect(parentNode).toBeVisible({ timeout: 10000 });
+    const parentNode = await getPageTreeNode(page, 49);
     await parentNode.click({ button: 'right' });
 
     const moreOptions = page.getByRole('menuitem', { name: 'More options' });

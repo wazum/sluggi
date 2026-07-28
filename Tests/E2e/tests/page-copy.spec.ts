@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { expandPageTreeNode, getPageTreeItemByName, getListModuleUrl, waitForEditForm, waitForPageTree } from '../fixtures/typo3-compat';
+import { expandPageTreeNode, getPageTreeNode, getListModuleUrl, waitForEditForm, waitForPageTree } from '../fixtures/typo3-compat';
 
 test.describe('Page Copy - Slug Update', () => {
   test('copying a page into another updates slug with parent prefix', async ({ page }) => {
@@ -8,20 +8,16 @@ test.describe('Page Copy - Slug Update', () => {
 
     await expandPageTreeNode(page, 1);
 
-    // Copy "Copy Source" (page 23)
-    const sourceNode = await getPageTreeItemByName(page, /Copy Source/);
-    await expect(sourceNode.first()).toBeVisible({ timeout: 10000 });
-    await sourceNode.first().click({ button: 'right' });
+    const sourceNode = await getPageTreeNode(page, 23);
+    await sourceNode.click({ button: 'right' });
 
     const copyMenuItem = page.getByRole('menuitem', { name: 'Copy' });
     await expect(copyMenuItem).toBeVisible({ timeout: 5000 });
     await copyMenuItem.click();
     await expect(copyMenuItem).not.toBeVisible({ timeout: 5000 });
 
-    // Paste into "Copy Target" (page 24) - wait for paste AJAX to complete
-    const targetNode = await getPageTreeItemByName(page, /Copy Target/);
-    await expect(targetNode.first()).toBeVisible({ timeout: 10000 });
-    await targetNode.first().click({ button: 'right' });
+    const targetNode = await getPageTreeNode(page, 24);
+    await targetNode.click({ button: 'right' });
 
     const pasteMenuItem = page.getByRole('menuitem', { name: 'Paste into' });
     await expect(pasteMenuItem).toBeVisible({ timeout: 5000 });

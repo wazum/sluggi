@@ -89,7 +89,7 @@ export async function clickModuleMenuItem(page: Page, name: string, moduleIdenti
  * TYPO3 12: Uses treeitem role with "id=X - Title" name pattern
  * TYPO3 13+: Uses data-id="X" attribute
  */
-export async function getPageTreeNode(page: Page, pageId: number | string): Promise<Locator> {
+async function pageTreeNodeLocator(page: Page, pageId: number | string): Promise<Locator> {
   const version = await getTypo3Version(page);
   const pageTree = await getPageTreeContainer(page);
 
@@ -98,6 +98,43 @@ export async function getPageTreeNode(page: Page, pageId: number | string): Prom
   }
 
   return pageTree.locator(`[data-id="${pageId}"]`).first();
+}
+
+/**
+ * Locate a page tree node, scrolling it into view first.
+ *
+ * The tree grows as tests add pages, and TYPO3 12/13 virtualise it: an
+ * off-screen node is not in the DOM at all, so the container has to be
+ * scrolled until it renders.
+ */
+export async function getPageTreeNode(page: Page, pageId: number | string): Promise<Locator> {
+  const node = await pageTreeNodeLocator(page, pageId);
+  const wrapper = page.locator('.svg-tree-wrapper, .nodes-root').first();
+
+  for (let step = 1; step <= 40; step++) {
+    if (await node.count() > 0) {
+      await node.scrollIntoViewIfNeeded({ timeout: 10000 });
+
+      return node;
+    }
+
+    const reachedEnd = await wrapper.evaluate((element, index) => {
+      const previous = element.scrollTop;
+      element.scrollTop = index * Math.max(200, Math.round(element.clientHeight * 0.75));
+
+      return element.scrollTop === previous;
+    }, step);
+    await page.waitForTimeout(150);
+
+    if (reachedEnd) {
+      break;
+    }
+  }
+
+  await node.waitFor({ state: 'attached', timeout: 10000 });
+  await node.scrollIntoViewIfNeeded({ timeout: 10000 });
+
+  return node;
 }
 
 /**
@@ -130,47 +167,6 @@ export async function expandPageTreeNode(page: Page, pageId: number | string): P
       }
     }
   }
-}
-
-/**
- * Scroll the page tree to make bottom items visible.
- *
- * TYPO3 12/13 use SVG-based virtual rendering that only renders
- * visible nodes. Scrolling the container triggers rendering of
- * off-screen nodes.
- */
-export async function scrollPageTreeToBottom(page: Page): Promise<void> {
-  const version = await getTypo3Version(page);
-  if (version >= 14) {
-    return;
-  }
-
-  await page.evaluate(async () => {
-    const wrapper = document.querySelector('.svg-tree-wrapper');
-    if (wrapper) {
-      wrapper.scrollTop = wrapper.scrollHeight;
-      await new Promise(r => setTimeout(r, 300));
-    }
-  });
-}
-
-/**
- * Get page tree item locator by page name.
- *
- * TYPO3 12: Tree items have "id=X - Name" format
- * TYPO3 13+: Tree items have just "Name" format
- */
-export async function getPageTreeItemByName(page: Page, name: string | RegExp): Promise<Locator> {
-  const version = await getTypo3Version(page);
-
-  if (version === 12) {
-    const pattern = typeof name === 'string'
-      ? new RegExp(`id=\\d+ - ${name}`)
-      : new RegExp(`id=\\d+ - ${name.source}`);
-    return page.getByRole('treeitem', { name: pattern });
-  }
-
-  return page.getByRole('treeitem', { name });
 }
 
 /**

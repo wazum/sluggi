@@ -1,5 +1,5 @@
 import {expect, test} from '@playwright/test';
-import { expandPageTreeNode, getPageTreeItemByName, waitForEditForm, waitForPageTree } from '../fixtures/typo3-compat';
+import { expandPageTreeNode, getPageTreeNode, waitForEditForm, waitForPageTree } from '../fixtures/typo3-compat';
 
 test.describe('Page Move - Slug Update', () => {
   test('moving a page into another updates slug with parent prefix', async ({ page }) => {
@@ -9,15 +9,13 @@ test.describe('Page Move - Slug Update', () => {
     // Expand root node to show child pages
     await expandPageTreeNode(page, 1);
 
-    const childNode = await getPageTreeItemByName(page, 'Child Page');
-    await expect(childNode).toBeVisible({ timeout: 10000 });
+    const childNode = await getPageTreeNode(page, 17);
     await childNode.click({ button: 'right' });
     const cutMenuItem = page.getByRole('menuitem', { name: 'Cut' });
     await cutMenuItem.click();
     await expect(cutMenuItem).not.toBeVisible();
 
-    const parentNode = await getPageTreeItemByName(page, 'Parent Page');
-    await expect(parentNode).toBeVisible({ timeout: 10000 });
+    const parentNode = await getPageTreeNode(page, 16);
     await parentNode.click({ button: 'right' });
 
     // Paste navigates the iframe to /record/commit (the tce_db route path shared
