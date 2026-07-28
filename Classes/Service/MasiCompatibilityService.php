@@ -16,6 +16,11 @@ final readonly class MasiCompatibilityService
         return ExtensionManagementUtility::isLoaded('masi');
     }
 
+    public function getExclusionFieldName(): string
+    {
+        return self::FIELD_NAME;
+    }
+
     /**
      * @return list<string>
      */

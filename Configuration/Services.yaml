@@ -153,6 +153,12 @@ services:
     public: true
 
   # EventListener
+  Wazum\Sluggi\EventListener\CoupleMasiExclusionAcrossLanguages:
+    tags:
+      - name: event.listener
+        identifier: 'sluggi/couple-masi-exclusion-across-languages'
+        event: TYPO3\CMS\Core\Configuration\Event\AfterTcaCompilationEvent
+
   Wazum\Sluggi\EventListener\PreventSelfReferencingRedirect:
     tags:
       - name: event.listener

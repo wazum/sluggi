@@ -43,6 +43,11 @@ final class SlugChangeReportStore
      */
     private array $entries = [];
 
+    /**
+     * @var array{pageId:int, title:string, correlations: array<string,string>}|null
+     */
+    private ?array $cascadeRoot = null;
+
     private int $pagesUpdated = 0;
 
     private int $redirectsCreated = 0;
@@ -83,7 +88,7 @@ final class SlugChangeReportStore
     }
 
     /**
-     * @return array{entries: array<int, array{pageId:int, title:string, correlations: array<string,string>}>, pagesUpdated: int, redirectsCreated: int}|null
+     * @return array{entries: array<int, array{pageId:int, title:string, correlations: array<string,string>}>, pagesUpdated: int, redirectsCreated: int, cascadeRoot: array{pageId:int, title:string, correlations: array<string,string>}|null}|null
      */
     public function getReport(): ?array
     {
@@ -95,6 +100,7 @@ final class SlugChangeReportStore
             'entries' => $this->entries,
             'pagesUpdated' => $this->pagesUpdated,
             'redirectsCreated' => $this->redirectsCreated,
+            'cascadeRoot' => $this->cascadeRoot,
         ];
     }
 
@@ -104,6 +110,15 @@ final class SlugChangeReportStore
     public function addEntry(int $pageId, string $title, array $correlations): void
     {
         $this->entries[$pageId] = ['pageId' => $pageId, 'title' => $title, 'correlations' => $correlations];
+        $this->emit();
+    }
+
+    /**
+     * @param array<string, string> $correlations
+     */
+    public function setCascadeRoot(int $pageId, string $title, array $correlations): void
+    {
+        $this->cascadeRoot = ['pageId' => $pageId, 'title' => $title, 'correlations' => $correlations];
         $this->emit();
     }
 
@@ -129,6 +144,7 @@ final class SlugChangeReportStore
     public function discard(): void
     {
         $this->entries = [];
+        $this->cascadeRoot = null;
         $this->pagesUpdated = 0;
         $this->redirectsCreated = 0;
 
@@ -157,6 +173,7 @@ final class SlugChangeReportStore
             'entries' => array_values($this->entries),
             'pagesUpdated' => $this->pagesUpdated,
             'redirectsCreated' => $this->redirectsCreated,
+            'cascadeRoot' => $this->cascadeRoot,
         ]);
     }
 }
