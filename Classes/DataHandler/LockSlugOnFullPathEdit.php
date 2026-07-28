@@ -11,11 +11,16 @@ use Wazum\Sluggi\Service\SlugGeneratorService;
 use Wazum\Sluggi\Utility\DataHandlerUtility;
 use Wazum\Sluggi\Utility\SlugUtility;
 
-final readonly class LockSlugOnFullPathEdit
+final class LockSlugOnFullPathEdit
 {
+    /**
+     * @var array<string, bool>
+     */
+    private array $pendingLocks = [];
+
     public function __construct(
-        private FullPathEditingService $fullPathEditingService,
-        private SlugGeneratorService $slugGeneratorService,
+        private readonly FullPathEditingService $fullPathEditingService,
+        private readonly SlugGeneratorService $slugGeneratorService,
     ) {
     }
 
@@ -61,6 +66,30 @@ final readonly class LockSlugOnFullPathEdit
             return;
         }
 
+        $fieldArray['slug_locked'] = 1;
+        $this->pendingLocks[$table . ':' . $id] = true;
+    }
+
+    /**
+     * Re-applies the lock after fillInFieldArray() dropped slug_locked for users
+     * without non_exclude_fields permission. The tx_sluggi_full_path flag the
+     * decision depends on is gone by then, so it is staged above instead.
+     *
+     * @param array<string, mixed> $fieldArray
+     */
+    public function processDatamap_postProcessFieldArray(
+        string $status,
+        string $table,
+        string|int $id,
+        array &$fieldArray,
+        DataHandler $dataHandler,
+    ): void {
+        $key = $table . ':' . $id;
+        if (!isset($this->pendingLocks[$key])) {
+            return;
+        }
+
+        unset($this->pendingLocks[$key]);
         $fieldArray['slug_locked'] = 1;
     }
 }

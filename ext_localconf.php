@@ -141,6 +141,8 @@ $GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['t3lib/class.t3lib_pagerenderer.php'][
 //   - HandlePageUpdate auto-regenerates page slugs when source fields changed.
 //   - HandleRecordUpdate auto-regenerates non-page table slugs configured in synchronize_tables.
 //   - ValidateReservedSlugPath rejects reserved final page slugs on update and rewrites reserved slugs on create.
+//   - InitializeSyncForNewPage re-seeds tx_sluggi_sync dropped by core's field access control.
+//     Must stay after ClearSlugForExcludedDoktypes so excluded page types keep sync off.
 // processCmdmap hooks (copy/undelete) and moveRecord (move) run independently per operation.
 // Sync/lock field initialisers are registered last because they only seed defaults on new records.
 $GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['t3lib/class.t3lib_tcemain.php']['processDatamapClass']['sluggi_redirect_access'] =

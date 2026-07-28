@@ -28,6 +28,34 @@ final readonly class InitializeSyncForNewPage
             return;
         }
 
+        $this->applySyncDefault($fieldArray, $table);
+    }
+
+    /**
+     * Re-applies the default after fillInFieldArray() dropped tx_sluggi_sync
+     * for users without non_exclude_fields permission.
+     *
+     * @param array<string, mixed> $fieldArray
+     */
+    public function processDatamap_postProcessFieldArray(
+        string $status,
+        string $table,
+        string|int $id,
+        array &$fieldArray,
+        DataHandler $dataHandler,
+    ): void {
+        if ($status !== 'new') {
+            return;
+        }
+
+        $this->applySyncDefault($fieldArray, $table);
+    }
+
+    /**
+     * @param array<string, mixed> $fieldArray
+     */
+    private function applySyncDefault(array &$fieldArray, string $table): void
+    {
         if (array_key_exists('tx_sluggi_sync', $fieldArray)) {
             return;
         }

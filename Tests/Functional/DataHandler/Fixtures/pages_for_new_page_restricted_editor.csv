@@ -1,0 +1,13 @@
+"be_groups"
+,"uid","pid","title","tables_modify","pagetypes_select","non_exclude_fields","db_mountpoints"
+,1,0,"Editor without sync field","pages","1,254","pages:slug,pages:title","2"
+
+"be_users"
+,"uid","pid","username","password","admin","usergroup"
+,1,0,"admin","$2y$12$abc123",1,""
+,2,0,"restricted_editor","$2y$12$abc123",0,"1"
+
+"pages"
+,"uid","pid","title","slug","tx_sluggi_sync","doktype","perms_userid","perms_groupid","perms_user","perms_group","perms_everybody"
+,1,0,"Root Page","/",0,1,1,0,31,0,0
+,2,1,"Editor Area","/editor-area",0,1,2,1,31,31,0

@@ -150,6 +150,35 @@ final class LockedSlugTest extends FunctionalTestCase
     }
 
     #[Test]
+    public function lockStateClearedOnCopyWithoutLockFieldPermission(): void
+    {
+        parent::setUp();
+        $this->importCSVDataSet(__DIR__ . '/Fixtures/pages_locked_no_lock_permission.csv');
+        $this->setUpSite();
+        $this->setUpBackendUser(2);
+        $GLOBALS['LANG'] = GeneralUtility::makeInstance(LanguageServiceFactory::class)->create('default');
+
+        $dataHandler = GeneralUtility::makeInstance(DataHandler::class);
+        $dataHandler->start([], [
+            'pages' => [
+                3 => [
+                    'copy' => 2,
+                ],
+            ],
+        ]);
+        $dataHandler->process_cmdmap();
+
+        $copiedUid = (int)($dataHandler->copyMappingArray['pages'][3] ?? 0);
+        $lockState = $this->getConnectionPool()
+            ->getConnectionForTable('pages')
+            ->executeQuery('SELECT slug_locked FROM pages WHERE uid = ?', [$copiedUid])
+            ->fetchOne();
+
+        self::assertSame(0, (int)$lockState);
+        self::assertEmpty($dataHandler->errorLog);
+    }
+
+    #[Test]
     public function editorCanEditUnlockedSlugWithoutLockPermission(): void
     {
         parent::setUp();
