@@ -330,6 +330,81 @@ describe('SluggiElement - Buttons', () => {
             expect(copyBtn.classList.contains('is-copied')).to.be.false;
             expect(el.shadowRoot!.querySelector('.sluggi-copy-confirmation')).to.be.null;
         });
+
+        it('is visible on a synced page without sync-feature-enabled', async () => {
+            const el = await fixture<SluggiElement>(html`
+                <sluggi-element
+                    value="/demo"
+                    is-synced
+                    copy-url-feature-enabled
+                    page-url="https://example.com"
+                ></sluggi-element>
+            `);
+
+            expect(el.shadowRoot!.querySelector('.sluggi-copy-url-btn')).to.exist;
+        });
+
+        it('is visible on a locked page without lock-feature-enabled', async () => {
+            const el = await fixture<SluggiElement>(html`
+                <sluggi-element
+                    value="/demo"
+                    is-locked
+                    copy-url-feature-enabled
+                    page-url="https://example.com"
+                ></sluggi-element>
+            `);
+
+            expect(el.shadowRoot!.querySelector('.sluggi-copy-url-btn')).to.exist;
+        });
+
+        it('is the only control on a synced page without sync-feature-enabled', async () => {
+            const el = await fixture<SluggiElement>(html`
+                <sluggi-element
+                    value="/demo"
+                    is-synced
+                    copy-url-feature-enabled
+                    page-url="https://example.com"
+                ></sluggi-element>
+            `);
+
+            expect(el.shadowRoot!.querySelector('.sluggi-controls')?.children.length).to.equal(1);
+            expect(el.shadowRoot!.querySelector('.sluggi-edit-btn')).to.be.null;
+            expect(el.shadowRoot!.querySelector('.sluggi-regenerate-btn')).to.be.null;
+            expect(el.shadowRoot!.querySelector('.sluggi-sync-toggle')).to.be.null;
+            expect(el.shadowRoot!.querySelector('.sluggi-lock-toggle')).to.be.null;
+        });
+
+        it('is not wrapped in the collapsed menu when it is the only control', async () => {
+            const el = await fixture<SluggiElement>(html`
+                <sluggi-element
+                    value="/demo"
+                    is-synced
+                    collapsed-controls
+                    copy-url-feature-enabled
+                    page-url="https://example.com"
+                ></sluggi-element>
+            `);
+
+            expect(el.shadowRoot!.querySelector('.sluggi-menu-trigger')).to.be.null;
+            expect(el.shadowRoot!.querySelector('.sluggi-copy-url-btn')).to.exist;
+        });
+
+        it('is replaced by the spinner while a proposal is in flight', async () => {
+            const el = await fixture<SluggiElement>(html`
+                <sluggi-element
+                    value="/demo"
+                    is-synced
+                    copy-url-feature-enabled
+                    page-url="https://example.com"
+                ></sluggi-element>
+            `);
+
+            el.loading = true;
+            await el.updateComplete;
+
+            expect(el.shadowRoot!.querySelector('.sluggi-spinner')).to.exist;
+            expect(el.shadowRoot!.querySelector('.sluggi-copy-url-btn')).to.be.null;
+        });
     });
 
     describe('Full Path Edit Button', () => {

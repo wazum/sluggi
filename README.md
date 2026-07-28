@@ -216,6 +216,10 @@ Right-click any page in the page tree and select **More options > Re-apply URL p
 
 ![URL copied](Documentation/sluggi_url_copied_clipboard.png)
 
+Copying is read-only, so the button stays available even when the URL path itself cannot be
+edited – on locked or synchronized pages, on read-only fields, and for editors without access
+to the `tx_sluggi_sync` or `slug_locked` fields.
+
 ### Slug Normalization
 
 TYPO3 core turns a title like "Products/Services" into `/products/services` (two segments) instead of `/products-services` (one segment). _sluggi_ fixes this globally – for manual edits, auto-sync, regeneration, and page tree inline editing. Optional underscore preservation (RFC 3986) is also available.

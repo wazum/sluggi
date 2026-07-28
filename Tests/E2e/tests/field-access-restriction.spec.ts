@@ -11,6 +11,7 @@ test.describe('Field Access Restriction - Restricted Editor', () => {
     await expect(slugElement.locator('.sluggi-sync-toggle')).not.toBeVisible();
     await expect(slugElement.locator('.sluggi-edit-btn')).not.toBeVisible();
     await expect(slugElement.locator('.sluggi-editable')).toHaveClass(/no-edit/);
+    await expect(slugElement.locator('.sluggi-copy-url-btn')).toBeVisible();
 
     const hiddenInput = frame.locator('input.sluggi-hidden-field');
     const originalSlug = await hiddenInput.inputValue();
@@ -36,5 +37,23 @@ test.describe('Field Access Restriction - Restricted Editor', () => {
     await expect(slugElement.locator('.sluggi-wrapper')).toHaveClass(/locked/);
     await expect(slugElement.locator('.sluggi-editable')).toHaveClass(/locked/);
     await expect(slugElement.locator('.sluggi-editable')).toHaveClass(/no-edit/);
+    await expect(slugElement.locator('.sluggi-copy-url-btn')).toBeVisible();
+  });
+
+  test('copies the page URL from a synced page without sync access', async ({ page, context }) => {
+    await context.grantPermissions(['clipboard-write']);
+
+    await page.goto('/typo3/record/edit?edit[pages][37]=edit');
+    const frame = page.frameLocator('iframe');
+    await waitForEditForm(frame, page);
+    const slugElement = frame.locator('sluggi-element');
+
+    await slugElement.locator('.sluggi-copy-url-btn').click();
+
+    await expect(slugElement.locator('.sluggi-copy-confirmation')).toBeVisible();
+    await expect(slugElement.locator('.sluggi-copy-confirmation a')).toHaveAttribute(
+      'href',
+      /\/restricted-section\/synced-no-toggle$/
+    );
   });
 });

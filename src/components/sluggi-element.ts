@@ -661,8 +661,12 @@ export class SluggiElement extends LitElement {
     }
 
     private renderControls() {
+        // Copying is read-only and changes nothing on the record, so it stays
+        // available even when every editing control is withheld.
         if (this.hasNoControls) {
-            return nothing;
+            return this.loading
+                ? html`<span class="sluggi-spinner" aria-label="Loading..."></span>`
+                : this.renderCopyUrlButton();
         }
 
         if (this.loading) {
