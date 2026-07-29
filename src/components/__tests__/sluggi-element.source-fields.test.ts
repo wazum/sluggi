@@ -81,6 +81,43 @@ describe('SluggiElement - Source Field Listening', () => {
         document.body.removeChild(title3);
     });
 
+    it('only uses source fields of its own table when two tables share a record ID', async () => {
+        const pageTitle = document.createElement('input');
+        pageTitle.setAttribute('data-sluggi-source', '');
+        pageTitle.setAttribute('data-formengine-input-name', 'data[pages][1][title]');
+        pageTitle.value = 'Page Title';
+        document.body.appendChild(pageTitle);
+
+        const newsTitle = document.createElement('input');
+        newsTitle.setAttribute('data-sluggi-source', '');
+        newsTitle.setAttribute('data-formengine-input-name', 'data[tx_news_domain_model_news][1][title]');
+        newsTitle.value = 'News Title';
+        document.body.appendChild(newsTitle);
+
+        const pageElement = document.createElement('sluggi-element') as SluggiElement;
+        pageElement.setAttribute('value', '/page');
+        pageElement.setAttribute('table-name', 'pages');
+        pageElement.setAttribute('record-id', '1');
+        document.body.appendChild(pageElement);
+
+        const newsElement = document.createElement('sluggi-element') as SluggiElement;
+        newsElement.setAttribute('value', 'news');
+        newsElement.setAttribute('table-name', 'tx_news_domain_model_news');
+        newsElement.setAttribute('record-id', '1');
+        document.body.appendChild(newsElement);
+
+        await pageElement.updateComplete;
+        await newsElement.updateComplete;
+
+        expect((pageElement as any).collectFormFieldValues()).to.deep.equal({ title: 'Page Title' });
+        expect((newsElement as any).collectFormFieldValues()).to.deep.equal({ title: 'News Title' });
+
+        document.body.removeChild(pageElement);
+        document.body.removeChild(newsElement);
+        document.body.removeChild(pageTitle);
+        document.body.removeChild(newsTitle);
+    });
+
     it('collects values from multiple source fields', async () => {
         const titleInput = document.createElement('input');
         titleInput.setAttribute('data-sluggi-source', '');

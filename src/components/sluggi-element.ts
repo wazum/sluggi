@@ -1840,10 +1840,11 @@ export class SluggiElement extends LitElement {
 
         for (const element of sourceElements) {
             const inputName = element.getAttribute('data-formengine-input-name') || element.getAttribute('name') || '';
-            const match = inputName.match(/data\[[^\]]+\]\[([^\]]+)\]\[([^\]]+)\]/);
+            const match = inputName.match(/data\[([^\]]+)\]\[([^\]]+)\]\[([^\]]+)\]/);
             if (!match) continue;
 
-            const [, elementRecordId, fieldName] = match;
+            const [, elementTableName, elementRecordId, fieldName] = match;
+            if (elementTableName !== (this.tableName || 'pages')) continue;
             if (elementRecordId !== this.recordId) continue;
 
             this.sourceFieldElements.set(fieldName, element);
