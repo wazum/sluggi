@@ -148,6 +148,9 @@ services:
   Wazum\Sluggi\Upgrade\CoupleMasiExclusionWizard:
     public: true
 
+  Wazum\Sluggi\Upgrade\EnableLockForLockedPagesWizard:
+    public: true
+
   Wazum\Sluggi\Upgrade\SetDefaultExcludedPageTypesWizard:
     public: true
 

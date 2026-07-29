@@ -1,0 +1,5 @@
+"pages"
+,"uid","pid","title","slug","slug_locked","doktype","deleted"
+,1,0,"Root Page","/",0,1,0
+,2,1,"Unlocked Page","/unlocked-page",0,1,0
+,3,1,"Deleted Locked Page","/deleted-locked-page",1,1,1

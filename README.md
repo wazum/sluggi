@@ -499,7 +499,15 @@ The following extension configuration keys were renamed. Your existing values ar
 | Old key (v12/v13) | New key (v14) |
 |---|---|
 | `exclude_page_types` | `exclude_doktypes` |
-| `allow_lock` | `lock` |
+
+**URL path locking became opt-in**
+
+Up to v13 locking a URL path was always available and only gated by the `pages:slug_locked` field permission. It is now the `lock` setting, and its default is **off** — so after upgrading, pages that already carry `slug_locked = 1` keep the flag but it is no longer evaluated: their URL path follows the page title again, and renaming a page above them moves it.
+
+Set `lock = 1` to keep the previous behavior. The **"Enable URL path locking for sluggi"** upgrade wizard offers this and tells you how many pages are affected; it only appears while the setting is off and locked pages exist.
+
+> [!NOTE]
+> The wizard writes to `config/system/settings.php`. If you keep extension configuration under version control in `additional.php` (or any file included after `settings.php`), that value wins over what the wizard writes — set `lock = 1` there instead. The same applies to every upgrade wizard that changes a setting.
 
 **Configuration keys removed**
 
