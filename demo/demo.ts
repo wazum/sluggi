@@ -22,6 +22,21 @@ function delay(ms: number): Promise<void> {
     return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
+// URL paths the fake backend treats as occupied by another record. None of them
+// belongs to a card on this page, so a card never conflicts with itself.
+const takenSlugs = ['imprint', 'privacy', 'team'];
+
+function isTaken(slug: string): boolean {
+    return takenSlugs.includes(slug.replace(/^\//, '').toLowerCase());
+}
+
+// Parent URL path per parent page id. The real backend reads these from the
+// page tree so a regenerated page slug always lands under its parent.
+const parentPaths: Record<string, string> = {
+    '20': '/organization/department/institute',
+    '21': '/organization/department',
+};
+
 const originalFetch = window.fetch.bind(window);
 
 window.fetch = async (input: RequestInfo | URL, init?: RequestInit): Promise<Response> => {
@@ -32,21 +47,28 @@ window.fetch = async (input: RequestInfo | URL, init?: RequestInit): Promise<Res
         const mode = formData.get('mode') as string;
 
         let proposal: string;
-        let hasConflicts = false;
 
         if (mode === 'manual') {
             proposal = formData.get('values[manual]') as string;
-            hasConflicts = Math.random() < 0.3;
-            if (hasConflicts) {
-                proposal = proposal + '-1';
-            }
         } else {
             const tableName = (formData.get('tableName') as string) ?? 'pages';
             const title = (formData.get('values[title]') as string) ?? '';
             const navTitle = (formData.get('values[nav_title]') as string) ?? '';
             const source = navTitle || title;
             const isPageTable = tableName === 'pages';
-            proposal = source ? (isPageTable ? '/' : '') + slugify(source) : (isPageTable ? '/' : '');
+            const parentPath = isPageTable ? (parentPaths[formData.get('parentPageId') as string] ?? '') : '';
+            proposal = isPageTable
+                ? parentPath + '/' + (source ? slugify(source) : '')
+                : slugify(source);
+        }
+
+        // Core reports the conflict for every mode, generated slugs included,
+        // and answers with the next free path. The path that was asked for is
+        // returned alongside it, so the dialog can name it.
+        const requestedPath = proposal;
+        const hasConflicts = isTaken(proposal);
+        if (hasConflicts) {
+            proposal = proposal + '-1';
         }
 
         await delay(300 + Math.random() * 400);
@@ -56,6 +78,7 @@ window.fetch = async (input: RequestInfo | URL, init?: RequestInit): Promise<Res
                 hasConflicts,
                 proposal,
                 manual: proposal,
+                ...(hasConflicts ? { slug: requestedPath } : {}),
             }),
             {
                 status: 200,
@@ -91,6 +114,9 @@ const labels: Record<string, string> = {
     'toggle.sync.off': 'Auto-sync disabled: click to enable',
     'toggle.lock.on': 'URL path is locked: click to unlock',
     'toggle.lock.off': 'URL path is unlocked: click to lock',
+    'toggle.lock.ancestor': 'Locked by a parent page: only an administrator can change this',
+    'prefixMismatch.tooltip': 'Custom URL path. Click the regenerate button to reset it to the page hierarchy.',
+    'prefixMismatch.note.expected': 'Actual hierarchy path: %s',
 };
 
 customElements.whenDefined('sluggi-element').then(async () => {

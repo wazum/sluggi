@@ -34,7 +34,7 @@
         <!-- Default -->
         <section class="demo-card">
             <h2>Default</h2>
-            <p>What you get after <code>composer require wazum/sluggi</code>. Click the slug to edit inline, or regenerate it from the title.</p>
+            <p>What you get after installing: auto-sync is on, so the URL path follows the page title. Rename the title to “Imprint” and the path updates on its own – that path belongs to another page, so <em>sluggi</em> asks you before taking the next free one. Switch sync off if you'd rather type the path yourself.</p>
 
             <label class="demo-field-label">Page title</label>
             <div>
@@ -53,6 +53,8 @@
                 <div class="demo-element-wrapper">
                     <sluggi-element
                         value="/my-example-page"
+                        sync-feature-enabled
+                        is-synced
                         page-id="1"
                         record-id="1"
                         table-name="pages"
@@ -63,7 +65,7 @@
                         parent-page-id="0"
                     ></sluggi-element>
                     <input type="hidden" class="sluggi-hidden-field" name="data[pages][1][slug]" value="/my-example-page" />
-                    <input type="hidden" class="sluggi-sync-field" name="data[pages][1][tx_sluggi_sync]" value="0" />
+                    <input type="hidden" class="sluggi-sync-field" name="data[pages][1][tx_sluggi_sync]" value="1" />
                     <input type="hidden" class="sluggi-lock-field" name="data[pages][1][slug_locked]" value="0" />
                     <input type="hidden" class="sluggi-full-path-field" value="0" />
                     <input type="hidden" class="sluggi-redirect-field" value="0" />
@@ -133,6 +135,8 @@
             <h2>Locking</h2>
             <p>Pin critical URLs so nobody accidentally breaks them. Click the lock toggle to unlock.</p>
 
+            <h3 class="demo-subheading">A Locked Page</h3>
+
             <fieldset class="demo-slug-fieldset" style="margin-top: 0;">
                 <legend class="demo-slug-legend">
                     <svg class="demo-chain-icon" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
@@ -159,6 +163,38 @@
                     <input type="hidden" class="sluggi-redirect-field" value="0" />
                 </div>
             </fieldset>
+
+            <h3 class="demo-subheading">Pages Below a Locked Page</h3>
+            <p class="demo-subdescription">With <code>lock_descendants</code> the whole subtree of a locked page is protected. A child page shows where the lock comes from: the URL path is read-only and the lock toggle is disabled, because only unlocking the parent releases it. The child keeps its own lock untouched.</p>
+
+            <fieldset class="demo-slug-fieldset" style="margin-top: 0;">
+                <legend class="demo-slug-legend">
+                    <svg class="demo-chain-icon" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+                    URL Segment <span class="demo-domain">(https://example.com)</span>
+                </legend>
+                <div class="demo-element-wrapper">
+                    <sluggi-element
+                        value="/locked-page/child"
+                        lock-feature-enabled
+                        ancestor-locked
+                        page-id="9"
+                        record-id="9"
+                        table-name="pages"
+                        field-name="slug"
+                        language="0"
+                        signature="demo"
+                        command="edit"
+                        parent-page-id="3"
+                    ></sluggi-element>
+                    <input type="hidden" class="sluggi-hidden-field" name="data[pages][9][slug]" value="/locked-page/child" />
+                    <input type="hidden" class="sluggi-sync-field" name="data[pages][9][tx_sluggi_sync]" value="0" />
+                    <input type="hidden" class="sluggi-lock-field" name="data[pages][9][slug_locked]" value="0" />
+                    <input type="hidden" class="sluggi-full-path-field" value="0" />
+                    <input type="hidden" class="sluggi-redirect-field" value="0" />
+                </div>
+            </fieldset>
+
+            <p class="demo-config-hint">Enable via <code>lock_descendants: 1</code> in extension settings.</p>
         </section>
 
         <!-- Access Control -->
@@ -266,8 +302,8 @@
                     <sluggi-element
                         value="/news/annual-report"
                         is-synced
-                        page-id="7"
-                        record-id="7"
+                        page-id="10"
+                        record-id="10"
                         table-name="pages"
                         field-name="slug"
                         language="0"
@@ -275,9 +311,9 @@
                         command="edit"
                         parent-page-id="0"
                     ></sluggi-element>
-                    <input type="hidden" class="sluggi-hidden-field" name="data[pages][7][slug]" value="/news/annual-report" />
-                    <input type="hidden" class="sluggi-sync-field" name="data[pages][7][tx_sluggi_sync]" value="1" />
-                    <input type="hidden" class="sluggi-lock-field" name="data[pages][7][slug_locked]" value="0" />
+                    <input type="hidden" class="sluggi-hidden-field" name="data[pages][10][slug]" value="/news/annual-report" />
+                    <input type="hidden" class="sluggi-sync-field" name="data[pages][10][tx_sluggi_sync]" value="1" />
+                    <input type="hidden" class="sluggi-lock-field" name="data[pages][10][slug_locked]" value="0" />
                     <input type="hidden" class="sluggi-full-path-field" value="0" />
                     <input type="hidden" class="sluggi-redirect-field" value="0" />
                 </div>
@@ -306,8 +342,8 @@ TCEFORM.pages.tx_sluggi_sync.disabled = 1</code>
                     <sluggi-element
                         value="/api"
                         reserved-paths='["/api","/typo3","/fileadmin"]'
-                        page-id="7"
-                        record-id="7"
+                        page-id="11"
+                        record-id="11"
                         table-name="pages"
                         field-name="slug"
                         language="0"
@@ -315,9 +351,52 @@ TCEFORM.pages.tx_sluggi_sync.disabled = 1</code>
                         command="edit"
                         parent-page-id="0"
                     ></sluggi-element>
-                    <input type="hidden" class="sluggi-hidden-field" name="data[pages][7][slug]" value="/api" />
-                    <input type="hidden" class="sluggi-sync-field" name="data[pages][7][tx_sluggi_sync]" value="0" />
-                    <input type="hidden" class="sluggi-lock-field" name="data[pages][7][slug_locked]" value="0" />
+                    <input type="hidden" class="sluggi-hidden-field" name="data[pages][11][slug]" value="/api" />
+                    <input type="hidden" class="sluggi-sync-field" name="data[pages][11][tx_sluggi_sync]" value="0" />
+                    <input type="hidden" class="sluggi-lock-field" name="data[pages][11][slug_locked]" value="0" />
+                    <input type="hidden" class="sluggi-full-path-field" value="0" />
+                    <input type="hidden" class="sluggi-redirect-field" value="0" />
+                </div>
+            </fieldset>
+        </section>
+
+        <!-- Out-of-Sync URL Detection -->
+        <section class="demo-card">
+            <h2>Out-of-Sync URL Detection</h2>
+            <p>When a URL path no longer matches the page tree, <em>sluggi</em> points it out instead of leaving it unnoticed: the prefix turns amber and an inline note names the path the hierarchy would give it. This page sits under <code>/organization/department</code> but its URL path doesn't. Regenerate to move it back, or lock it to keep the custom URL on purpose.</p>
+
+            <label class="demo-field-label">Page title</label>
+            <div>
+                <span class="input-group-text sluggi-source-badge" style="display:none" title="This field influences the URL slug"><span class="sluggi-source-badge__icon"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg></span></span>
+                <input type="text" class="demo-field-input" value="Annual Report"
+                    data-sluggi-source
+                    data-formengine-input-name="data[pages][12][title]"
+                    data-formengine-input-initialized="true" />
+            </div>
+
+            <fieldset class="demo-slug-fieldset">
+                <legend class="demo-slug-legend">
+                    <svg class="demo-chain-icon" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+                    URL Path <span class="demo-domain">(https://example.com)</span>
+                </legend>
+                <div class="demo-element-wrapper">
+                    <sluggi-element
+                        value="/campaign-2024/annual-report"
+                        parent-slug="/organization/department"
+                        last-segment-only
+                        lock-feature-enabled
+                        page-id="12"
+                        record-id="12"
+                        table-name="pages"
+                        field-name="slug"
+                        language="0"
+                        signature="demo"
+                        command="edit"
+                        parent-page-id="21"
+                    ></sluggi-element>
+                    <input type="hidden" class="sluggi-hidden-field" name="data[pages][12][slug]" value="/campaign-2024/annual-report" />
+                    <input type="hidden" class="sluggi-sync-field" name="data[pages][12][tx_sluggi_sync]" value="0" />
+                    <input type="hidden" class="sluggi-lock-field" name="data[pages][12][slug_locked]" value="0" />
                     <input type="hidden" class="sluggi-full-path-field" value="0" />
                     <input type="hidden" class="sluggi-redirect-field" value="0" />
                 </div>
@@ -448,7 +527,7 @@ TCEFORM.pages.tx_sluggi_sync.disabled = 1</code>
                         language="0"
                         signature="demo"
                         command="edit"
-                        parent-page-id="1"
+                        parent-page-id="20"
                     ></sluggi-element>
                     <input type="hidden" class="sluggi-hidden-field" name="data[pages][8][slug]" value="/organization/department/institute/about-us" />
                     <input type="hidden" class="sluggi-sync-field" name="data[pages][8][tx_sluggi_sync]" value="0" />
