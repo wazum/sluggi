@@ -21,6 +21,7 @@ final readonly class SlugGeneratorService
         private ExtensionConfiguration $extensionConfiguration,
         private MasiCompatibilityService $masiCompatibilityService,
         private PageTranslationResolver $pageTranslationResolver,
+        private SlugGenerationRecordResolver $slugGenerationRecordResolver,
     ) {
     }
 
@@ -205,6 +206,17 @@ final readonly class SlugGeneratorService
         if ($postModifiers === []) {
             return $slug;
         }
+
+        // A post modifier rebuilds the path from the record it is handed, so it
+        // has to see the same source field values the slug was generated from.
+        $record = $this->slugGenerationRecordResolver->resolve(
+            $record,
+            'pages',
+            'slug',
+            $pid,
+            $this->getWorkspaceId(),
+            $fieldConfig,
+        );
 
         // TYPO3 core calls postModifiers without leading slash
         $slug = ltrim($slug, '/');

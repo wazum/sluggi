@@ -1,0 +1,19 @@
+{
+    "name": "wazum/sluggi-event-test",
+    "description": "Functional test fixture extension for sluggi (listens to the slug source field event). Not intended for production use.",
+    "type": "typo3-cms-extension",
+    "license": "GPL-2.0-or-later",
+    "require": {
+        "typo3/cms-core": "^12.4 || ^13.4 || ^14.0"
+    },
+    "extra": {
+        "typo3/cms": {
+            "extension-key": "sluggi_event_test"
+        }
+    },
+    "autoload": {
+        "psr-4": {
+            "Wazum\\SluggiEventTest\\": "Classes/"
+        }
+    }
+}

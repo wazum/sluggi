@@ -7,10 +7,13 @@ namespace Wazum\Sluggi\Tests\Unit\Service;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
+use Psr\EventDispatcher\EventDispatcherInterface;
 use TYPO3\CMS\Core\Configuration\ExtensionConfiguration as CoreExtensionConfiguration;
 use Wazum\Sluggi\Configuration\ExtensionConfiguration;
 use Wazum\Sluggi\Service\MasiCompatibilityService;
 use Wazum\Sluggi\Service\PageTranslationResolver;
+use Wazum\Sluggi\Service\SlugConfigurationService;
+use Wazum\Sluggi\Service\SlugGenerationRecordResolver;
 use Wazum\Sluggi\Service\SlugGeneratorService;
 
 final class SlugGeneratorServiceTest extends TestCase
@@ -22,10 +25,17 @@ final class SlugGeneratorServiceTest extends TestCase
         parent::setUp();
         $coreExtensionConfiguration = $this->createMock(CoreExtensionConfiguration::class);
         $extensionConfiguration = new ExtensionConfiguration($coreExtensionConfiguration);
+        $eventDispatcher = new class implements EventDispatcherInterface {
+            public function dispatch(object $event): object
+            {
+                return $event;
+            }
+        };
         $this->subject = new SlugGeneratorService(
             $extensionConfiguration,
             new MasiCompatibilityService(),
             new PageTranslationResolver(),
+            new SlugGenerationRecordResolver($eventDispatcher, new SlugConfigurationService()),
         );
     }
 

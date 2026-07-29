@@ -1,0 +1,13 @@
+services:
+  _defaults:
+    autowire: true
+    autoconfigure: true
+    public: false
+
+  # Registered through a tag, not the AsEventListener attribute, which TYPO3 12.4
+  # does not have
+  Wazum\SluggiEventTest\EventListener\ReplaceSourceTitle:
+    tags:
+      - name: event.listener
+        identifier: 'sluggi-event-test/replace-source-title'
+        event: Wazum\Sluggi\Event\ModifySlugGenerationSourceFieldsEvent

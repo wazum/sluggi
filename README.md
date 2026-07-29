@@ -453,6 +453,47 @@ For more configuration options (e.g. multiple fields, fallback chains, field sep
 
 For non-page tables, add the table name to the `synchronize_tables` extension setting. The slug auto-regenerates whenever a source field changes on save, unless the editor has disabled sync for that specific record via the per-record toggle.
 
+### Changing the values a URL path is built from
+
+`ModifySlugGenerationSourceFieldsEvent` lets an extension replace the source field values a URL path is generated from, without touching the path itself. It fires on every generation path — new pages, the live preview in the backend, auto-sync, recursive updates, copy and move — so the path an editor sees is the path that gets saved.
+
+An example: pages in a language written in a non-Latin script take their path segment from another language.
+
+```php
+use TYPO3\CMS\Core\Attribute\AsEventListener;
+use Wazum\Sluggi\Event\ModifySlugGenerationSourceFieldsEvent;
+
+#[AsEventListener('my-extension/path-from-another-language')]
+final readonly class GeneratePathFromAnotherLanguage
+{
+    private const SOURCE_LANGUAGE = [3 => 2, 4 => 0];   // page language => language to read from
+
+    public function __invoke(ModifySlugGenerationSourceFieldsEvent $event): void
+    {
+        $record = $event->getRecord();
+        $sourceLanguage = self::SOURCE_LANGUAGE[(int)($record['sys_language_uid'] ?? 0)] ?? null;
+        if ($sourceLanguage === null) {
+            return;
+        }
+
+        $title = $this->titleOfTranslation((int)($record['l10n_parent'] ?? 0), $sourceLanguage);
+        if ($title !== null) {
+            $event->setSourceFieldValues(['title' => $title]);
+        }
+    }
+}
+```
+
+Three rules for a listener:
+
+- **Source fields only.** `setSourceFieldValues()` rejects `uid`, `pid`, `sys_language_uid` and `l10n_parent`, because uniqueness is evaluated against the untouched record — changing them would make the check and the generated path describe different records.
+- **Be idempotent.** With a post modifier installed (e.g. _masi_) the event fires twice for one path, once for generation and once before the post modifier rebuilds it. Setting the same values twice must be harmless.
+- **Be cheap.** It fires once per page, including recursive updates across whole subtrees. Cache lookups; a database query per page turns a large update into a crawl.
+
+`getConfiguration()` returns the configuration as seen at that call site, which is not necessarily the effective one: it may carry `columnsOverrides`, and _masi_ applies page TSconfig afterwards. The event can also fire for an ancestor record while a parent prefix is being derived, so decide what to change based on `getRecord()`, not on the assumption that it is always the record being saved.
+
+Regenerating a page because a *different* record changed is up to the listener — inject `Wazum\Sluggi\Service\SlugGeneratorService` from your own DataHandler hook. _sluggi_'s auto-sync only reacts to source fields of the record being saved.
+
 ## Requirements
 
 - TYPO3 12.4, 13.4.26+, or 14.3+

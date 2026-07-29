@@ -55,7 +55,8 @@
     },
     "autoload-dev": {
         "psr-4": {
-            "Wazum\\Sluggi\\Tests\\": "Tests/"
+            "Wazum\\Sluggi\\Tests\\": "Tests/",
+            "Wazum\\SluggiEventTest\\": "Tests/Functional/Fixtures/Extensions/sluggi_event_test/Classes/"
         }
     },
     "config": {

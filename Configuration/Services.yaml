@@ -120,6 +120,11 @@ services:
   Wazum\Sluggi\Service\SlugGeneratorService:
     public: true
 
+  # Reached through makeInstance() from the SlugHelper, which is built with
+  # positional arguments and cannot have dependencies injected
+  Wazum\Sluggi\Service\SlugGenerationRecordResolver:
+    public: true
+
   Wazum\Sluggi\Service\SlugLockService:
     public: true
 

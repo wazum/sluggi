@@ -8,6 +8,7 @@ use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\DataHandling\SlugHelper as CoreSlugHelper;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use Wazum\Sluggi\Service\PageTranslationResolver;
+use Wazum\Sluggi\Service\SlugGenerationRecordResolver;
 use Wazum\Sluggi\Slug\SlugNormalizer;
 
 class SlugHelper extends CoreSlugHelper
@@ -38,6 +39,24 @@ class SlugHelper extends CoreSlugHelper
         $configuration['generatorOptions']['replacements']['/'] ??= (string)($configuration['fallbackCharacter'] ?? '-');
 
         return $configuration;
+    }
+
+    /**
+     * @param array<string, mixed> $recordData
+     */
+    public function generate(array $recordData, int $pid): string
+    {
+        return parent::generate(
+            GeneralUtility::makeInstance(SlugGenerationRecordResolver::class)->resolve(
+                $recordData,
+                $this->tableName,
+                $this->fieldName,
+                $pid,
+                $this->workspaceId,
+                $this->configuration,
+            ),
+            $pid
+        );
     }
 
     public function sanitize(string $slug): string
