@@ -16,7 +16,12 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
-      - name: Upload sources
+      # The language packs TYPO3 serves are built from Crowdin, and an installation
+      # prefers the pack over the file shipped here. Translations that stay in this
+      # repository therefore never reach a backend, so they are uploaded as the
+      # approved version. Nothing is downloaded: this repository stays the source
+      # of truth for English and German.
+      - name: Upload sources and translations
         uses: crowdin/github-action@v2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -26,6 +31,7 @@ jobs:
           token: ${{ secrets.CROWDIN_PERSONAL_TOKEN }}
           crowdin_branch_name: 'main'
           upload_sources: true
-          upload_translations: false
+          upload_translations: true
+          auto_approve_imported: true
           download_sources: false
           download_translations: false
