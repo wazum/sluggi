@@ -12,10 +12,10 @@
 [![GitHub Stars](https://img.shields.io/github/stars/wazum/sluggi?style=flat)](https://github.com/wazum/sluggi/stargazers)
 [![License](https://img.shields.io/badge/License-GPL%20v2-blue.svg)](LICENSE)
 
-URLs that stay in sync when titles change. Automatic redirects. Duplicate prevention on copy, move, and recycler restore. Locking, access control, conflict detection – everything you need to manage URL paths with confidence.
+URLs that stay in sync when titles change. Automatic redirects. Duplicate prevention on copy, move, and recycler restore. Locking, access control, conflict detection – for pages, news, events, or any record with a slug field. And a lot of attention to the details editors meet every day: save notifications that match what really happened, batch changes you can revert in one click, no redirects for pages that are still hidden, a slash in a title kept inside one segment – everything you need to manage URL paths with confidence.
 
 > [!NOTE]
-> **TYPO3 13.4** has a core bug where `TemporaryPermissionMutationService` does not grant page-level access for redirect storage. Non-admin editors without the site root page in their webmounts cannot create redirects on slug changes. Sluggi includes a workaround; this does not affect TYPO3 12 or 14.
+> **TYPO3 13.4** has a core bug where `TemporaryPermissionMutationService` does not grant page-level access for redirect storage. Non-admin editors without the site root page in their webmounts cannot create redirects on slug changes. _sluggi_ includes a workaround; this does not affect TYPO3 12 or 14.
 
 One `composer require`, sensible defaults – [highly configurable](#configuration) when you need it.
 
@@ -367,7 +367,7 @@ redirects:
 
 ### How It All Fits Together
 
-| What happens | `autoUpdateSlugs` | `autoCreateRedirects` | sluggi `synchronize` | sluggi `redirect_control` |
+| What happens | `autoUpdateSlugs` | `autoCreateRedirects` | _sluggi_ `synchronize` | _sluggi_ `redirect_control` |
 |---|:---:|:---:|:---:|:---:|
 | Title changes → slug updates | – | – | **controls this** | – |
 | Parent slug changes → child slugs update | **controls this** | – | – | – |
@@ -517,9 +517,9 @@ Extension-level redirect keys (`redirect_lifetime`, `redirect_code`, `redirect_f
 
 **`exclude_doktypes` default changed from empty to `199,254`** ([#135](https://github.com/wazum/sluggi/issues/135))
 
-Previous versions shipped with an empty `exclude_doktypes` default, which caused sluggi's copy/move handlers to include Spacer and Sysfolder names in generated slug paths — contrary to TYPO3 core's built-in behavior in `SlugHelper::resolveParentPageRecord()`. The default is now `199,254` (Spacer, Sysfolder) to match core.
+Previous versions shipped with an empty `exclude_doktypes` default, which caused _sluggi_'s copy/move handlers to include Spacer and Sysfolder names in generated slug paths — contrary to TYPO3 core's built-in behavior in `SlugHelper::resolveParentPageRecord()`. The default is now `199,254` (Spacer, Sysfolder) to match core.
 
-Sluggi now also overrides core's `resolveParentPageRecord()` so that _all_ slug generation paths (AJAX suggestions, new pages, copy, move, sync) consistently respect the `exclude_doktypes` setting. Without this override, TYPO3 core hardcodes the exclusion of Spacer and Sysfolder regardless of configuration.
+_sluggi_ now also overrides core's `resolveParentPageRecord()` so that _all_ slug generation paths (AJAX suggestions, new pages, copy, move, sync) consistently respect the `exclude_doktypes` setting. Without this override, TYPO3 core hardcodes the exclusion of Spacer and Sysfolder regardless of configuration.
 
 **Upgrade wizard:** Run **Admin Tools > Upgrade > Upgrade Wizard** after updating. The wizard _"Set default excluded page types for sluggi"_ sets `exclude_doktypes` to `199,254` for existing installations where it was empty.
 
