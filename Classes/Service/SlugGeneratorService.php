@@ -75,7 +75,19 @@ final readonly class SlugGeneratorService
         }
 
         if ($record !== null) {
-            $slug = $this->applyPostModifiers($slug, $record, $pid ?? 0);
+            $modifiedSlug = $this->applyPostModifiers($slug, $record, $pid ?? 0);
+            if ($modifiedSlug !== $slug) {
+                // A post modifier rebuilds the path from the page tree and drops
+                // the uniqueness suffix the incoming slug carried, so uniqueness
+                // has to be re-established as the last step.
+                $modifiedSlug = $this->ensureUnique(
+                    $modifiedSlug,
+                    $record,
+                    $pid ?? 0,
+                    (int)($record['uid'] ?? 0),
+                );
+            }
+            $slug = $modifiedSlug;
         }
 
         return $slug;
