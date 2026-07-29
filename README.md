@@ -264,7 +264,7 @@ All features work out of the box with sensible defaults. Fine-tune via **System 
 | Setting | Description | Default |
 |---------|-------------|---------|
 | `lock` | Let editors pin important URLs so they can't be changed accidentally. Locked paths are also skipped during auto-sync, giving you full control over critical landing page URLs. | Off |
-| `lock_descendants` | When a parent page has a locked URL, protect all child page URLs too. Useful for entire sections of your site where URL stability is critical (e.g. campaign landing pages). | Off |
+| `lock_descendants` | When a parent page has a locked URL, protect all child page URLs too. Useful for entire sections of your site where URL stability is critical (e.g. campaign landing pages). Child pages show the inherited lock in the form: the URL path is read-only and the lock toggle is disabled, since only unlocking the parent releases them. | Off |
 
 **Redirect**
 

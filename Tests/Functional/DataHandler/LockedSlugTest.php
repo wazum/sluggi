@@ -266,6 +266,82 @@ final class LockedSlugTest extends FunctionalTestCase
     }
 
     #[Test]
+    public function discardedEditUnderLockedAncestorIsReported(): void
+    {
+        $this->setUpTest('pages_locked_child.csv');
+
+        $dataHandler = GeneralUtility::makeInstance(DataHandler::class);
+        $dataHandler->start(
+            [
+                'pages' => [
+                    5 => [
+                        'slug' => '/parent-page/locked-child/renamed',
+                    ],
+                ],
+            ],
+            []
+        );
+        $dataHandler->process_datamap();
+
+        $slug = $this->getConnectionPool()
+            ->getConnectionForTable('pages')
+            ->select(['slug'], 'pages', ['uid' => 5])
+            ->fetchOne();
+
+        self::assertSame('/parent-page/locked-child/grandchild', $slug);
+        self::assertNotEmpty($dataHandler->errorLog, 'Discarding the value must be reported to the editor');
+    }
+
+    #[Test]
+    public function unlockingInTheSameSaveDoesNotBypassAnAncestorLock(): void
+    {
+        $this->setUpTest('pages_locked_child.csv');
+
+        $dataHandler = GeneralUtility::makeInstance(DataHandler::class);
+        $dataHandler->start(
+            [
+                'pages' => [
+                    5 => [
+                        'slug' => '/parent-page/locked-child/renamed',
+                        'slug_locked' => 0,
+                    ],
+                ],
+            ],
+            []
+        );
+        $dataHandler->process_datamap();
+
+        $slug = $this->getConnectionPool()
+            ->getConnectionForTable('pages')
+            ->select(['slug'], 'pages', ['uid' => 5])
+            ->fetchOne();
+
+        self::assertSame('/parent-page/locked-child/grandchild', $slug);
+    }
+
+    #[Test]
+    public function savingAnUnchangedSlugUnderLockedAncestorStaysSilent(): void
+    {
+        $this->setUpTest('pages_locked_child.csv');
+
+        $dataHandler = GeneralUtility::makeInstance(DataHandler::class);
+        $dataHandler->start(
+            [
+                'pages' => [
+                    5 => [
+                        'title' => 'Renamed Grandchild',
+                        'slug' => '/parent-page/locked-child/grandchild',
+                    ],
+                ],
+            ],
+            []
+        );
+        $dataHandler->process_datamap();
+
+        self::assertSame([], $dataHandler->errorLog);
+    }
+
+    #[Test]
     public function lockedChildSlugNotUpdatedWhenParentChanges(): void
     {
         $this->setUpTest('pages_locked_child.csv');
@@ -286,5 +362,6 @@ final class LockedSlugTest extends FunctionalTestCase
         $dataHandler->process_datamap();
 
         $this->assertCSVDataSet(__DIR__ . '/Fixtures/pages_locked_child_after_parent_change.csv');
+        self::assertSame([], $dataHandler->errorLog, 'A cascade must not report one error per locked descendant');
     }
 }

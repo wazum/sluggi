@@ -166,6 +166,10 @@ trait SlugElementTrait
             'syncFieldName' => $this->slugElementRenderer->buildSyncFieldName($table, $recordId),
             'lockFeatureEnabled' => $lockFeatureEnabled,
             'isLocked' => $this->slugLockService->isLockFeatureEnabled() && $this->slugLockService->isLocked($row),
+            'hasLockedAncestor' => $table === 'pages'
+                && is_numeric($recordId)
+                && (int)$recordId > 0
+                && $this->slugLockService->hasLockedAncestor((int)$recordId),
             'lockFieldName' => $this->slugElementRenderer->buildLockFieldName($table, $recordId),
             'isTranslation' => $isTranslation,
             'requiredSourceFields' => $requiredSourceFields,
@@ -350,6 +354,7 @@ trait SlugElementTrait
             'syncRestore.notification.title' => $languageService->sL($prefix . 'syncRestore.notification.title'),
             'syncRestore.notification.message' => $languageService->sL($prefix . 'syncRestore.notification.message'),
             'lockRestrictionNote' => $languageService->sL($prefix . 'restriction.lock'),
+            'lockAncestorRestrictionNote' => $languageService->sL($prefix . 'restriction.lockAncestor'),
             'fullPathNote' => $languageService->sL($prefix . 'restriction.fullPath'),
             'button.edit' => $languageService->sL($prefix . 'button.edit'),
             'button.regenerate' => $languageService->sL($prefix . 'button.regenerate'),
@@ -360,6 +365,7 @@ trait SlugElementTrait
             'toggle.sync.static' => $languageService->sL($prefix . 'toggle.sync.static'),
             'toggle.lock.on' => $languageService->sL($prefix . 'toggle.lock.on'),
             'toggle.lock.off' => $languageService->sL($prefix . 'toggle.lock.off'),
+            'toggle.lock.ancestor' => $languageService->sL($prefix . 'toggle.lock.ancestor'),
             'toggle.path.on' => $languageService->sL($prefix . 'toggle.path.on'),
             'toggle.path.off' => $languageService->sL($prefix . 'toggle.path.off'),
             'button.menu' => $languageService->sL($prefix . 'button.menu'),

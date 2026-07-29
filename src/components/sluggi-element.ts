@@ -42,6 +42,9 @@ export class SluggiElement extends LitElement {
     @property({ type: Boolean, attribute: 'is-locked' })
     isLocked = false;
 
+    @property({ type: Boolean, attribute: 'ancestor-locked' })
+    ancestorLocked = false;
+
     @property({ type: Boolean, attribute: 'last-segment-only' })
     lastSegmentOnly = false;
 
@@ -296,8 +299,12 @@ export class SluggiElement extends LitElement {
         return this.lastSegmentOnly || !!this.lockedPrefix;
     }
 
+    private get isPathLocked(): boolean {
+        return this.isLocked || this.ancestorLocked;
+    }
+
     private get isEditDisabled(): boolean {
-        return this.isLocked || this.isSynced;
+        return this.isPathLocked || this.isSynced;
     }
 
     private get regenerateWouldLeaveLockedHierarchy(): boolean {
@@ -313,11 +320,11 @@ export class SluggiElement extends LitElement {
     }
 
     private get canLockToKeepUrl(): boolean {
-        return this.lockFeatureEnabled && !this.isLocked && !this.isLockToggleDisabled;
+        return this.lockFeatureEnabled && !this.isPathLocked && !this.isLockToggleDisabled;
     }
 
     private get cannotRegenerateAdviceKey(): string | null {
-        if (this.isLocked) return null;
+        if (this.isPathLocked) return null;
         if (!this.regenerateWouldLeaveLockedHierarchy) return null;
         if (this.canDisableSyncToKeepUrl) return 'prefixMismatch.cannotRegenerate.disableSync';
         if (this.canLockToKeepUrl) return 'prefixMismatch.cannotRegenerate.lock';
@@ -329,28 +336,28 @@ export class SluggiElement extends LitElement {
     }
 
     private get isRegenerateDisabled(): boolean {
-        if (this.isLocked || this.isSynced) return true;
+        if (this.isPathLocked || this.isSynced) return true;
         if (this.regenerateWouldLeaveLockedHierarchy) return true;
         if (this.hasPostModifiers) return false;
         return !this.hasNonEmptySourceFieldValue();
     }
 
     private get isSyncToggleDisabled(): boolean {
-        return this.isLocked
+        return this.isPathLocked
             || this.isTranslation
             || (!this.isSynced && this.regenerateWouldLeaveLockedHierarchy);
     }
 
     private get isLockToggleDisabled(): boolean {
-        return this.isSynced || this.isTranslation;
+        return this.isSynced || this.isTranslation || this.ancestorLocked;
     }
 
     private get isFullPathEditButtonDisabled(): boolean {
-        return this.isLocked || this.isSynced;
+        return this.isPathLocked || this.isSynced;
     }
 
     private get hasNoControls(): boolean {
-        if (this.isLocked && !this.lockFeatureEnabled) return true;
+        if (this.isPathLocked && !this.lockFeatureEnabled) return true;
         if (this.isSynced && !this.syncFeatureEnabled) return true;
         return false;
     }
@@ -359,7 +366,7 @@ export class SluggiElement extends LitElement {
         const hasRestriction = this.lastSegmentOnly || !!this.lockedPrefix;
         if (!hasRestriction) return false;
 
-        if (this.isLocked && !this.lockFeatureEnabled) return true;
+        if (this.isPathLocked && !this.lockFeatureEnabled) return true;
         if (this.isSynced && !this.syncFeatureEnabled) return true;
 
         return false;
@@ -381,7 +388,7 @@ export class SluggiElement extends LitElement {
         if (this.isFullPathMode) return false;
         if (!this.lockedPrefix) return false;
         if (!this.isOutsideLockedHierarchy) return false;
-        if (!this.isLocked) return false;
+        if (!this.isPathLocked) return false;
         if (this.fullPathFeatureEnabled) return false;
         return true;
     }
@@ -443,7 +450,7 @@ export class SluggiElement extends LitElement {
         // for them — they can't act on it. Suppress it here.
         if (this.hasCustomPath) return false;
         const expectedPrefix = this.parentSlug || this.lockedPrefix;
-        if (!expectedPrefix || !this.value || this.isLocked || this.isSynced) return false;
+        if (!expectedPrefix || !this.value || this.isPathLocked || this.isSynced) return false;
         return !this.value.startsWith(expectedPrefix + '/') && this.value !== expectedPrefix;
     }
 
@@ -520,7 +527,7 @@ export class SluggiElement extends LitElement {
     override render() {
         return html`
             <div
-                class="sluggi-wrapper ${this.isLocked ? 'locked' : ''}"
+                class="sluggi-wrapper ${this.isPathLocked ? 'locked' : ''}"
                 @mouseenter="${this.handleWrapperMouseEnter}"
                 @mouseleave="${this.handleWrapperMouseLeave}"
                 @keydown="${this.handleWrapperKeydown}"
@@ -545,7 +552,7 @@ export class SluggiElement extends LitElement {
 
     private renderHiddenPageNote() {
         if (!this.pageHidden || !this.redirectControlEnabled) return nothing;
-        if (this.isLocked) return nothing;
+        if (this.isPathLocked) return nothing;
         if (this.isSynced && !this.hasSourceFields) return nothing;
         const message = this.labels['notification.note.hiddenPageNoRedirect']
             || 'This page is hidden — saving will not create a redirect for the changed URL path.';
@@ -597,7 +604,7 @@ export class SluggiElement extends LitElement {
         // or duplicate it).
         if (this.hasCustomPath) return nothing;
 
-        if (!this.isSynced && !this.isLocked && !this.isFullPathMode && !this.hasPrefixMismatch && !this.showCannotRegenerateAdvice) return nothing;
+        if (!this.isSynced && !this.isPathLocked && !this.isFullPathMode && !this.hasPrefixMismatch && !this.showCannotRegenerateAdvice) return nothing;
 
         if (this.cannotRegenerateAdviceKey) {
             const highlight = this.labels['prefixMismatch.note.highlight'] || 'Custom URL path.';
@@ -610,6 +617,8 @@ export class SluggiElement extends LitElement {
         let message: string;
         if (this.isSynced) {
             message = this.labels.syncRestrictionNote || 'The URL path is automatically synchronized with the source fields.';
+        } else if (this.ancestorLocked) {
+            message = this.labels.lockAncestorRestrictionNote || 'The URL path is locked by a parent page and cannot be edited.';
         } else if (this.isLocked) {
             message = this.labels.lockRestrictionNote || 'The URL path is locked and cannot be edited.';
         } else if (this.hasPrefixMismatch) {
@@ -646,11 +655,11 @@ export class SluggiElement extends LitElement {
     }
 
     private renderViewMode() {
-        const isEditable = !this.isLocked && !this.isSynced && !this.hasCustomPath;
+        const isEditable = !this.isPathLocked && !this.isSynced && !this.hasCustomPath;
         const editable = this.editableValue || (this.isPageTable ? '/' : '');
         const classes = [
             'sluggi-editable',
-            this.isLocked ? 'locked' : '',
+            this.isPathLocked ? 'locked' : '',
             this.isSynced ? 'synced' : '',
             this.hasNoControls ? 'no-edit' : '',
             this.showRestoreHighlight ? 'is-restored' : '',
@@ -846,7 +855,7 @@ export class SluggiElement extends LitElement {
 
         return this.renderToggle({
             name: 'lock',
-            isActive: this.isLocked,
+            isActive: this.isPathLocked,
             isDisabled: this.isLockToggleDisabled,
             activeClass: 'is-locked',
             iconBaseClass: 'sluggi-lock-icon-toggle',
@@ -857,6 +866,9 @@ export class SluggiElement extends LitElement {
             iconOn: lockOnIcon,
             iconOff: lockOffIcon,
             onToggle: this.toggleLock,
+            disabledTitle: this.ancestorLocked
+                ? (this.labels['toggle.lock.ancestor'] || 'Locked by a parent page — only an administrator can change this.')
+                : undefined,
         });
     }
 
@@ -909,7 +921,7 @@ export class SluggiElement extends LitElement {
     // =========================================================================
 
     enterEditMode() {
-        if (this.isLocked) return;
+        if (this.isPathLocked) return;
         if (this.hasCustomPath) return;
 
         this.mode = 'edit';
@@ -1159,13 +1171,13 @@ export class SluggiElement extends LitElement {
     // =========================================================================
 
     private handleEditableClick() {
-        if (!this.isLocked && !this.isSynced) {
+        if (!this.isPathLocked && !this.isSynced) {
             this.enterEditMode();
         }
     }
 
     private handleEditableKeydown(e: KeyboardEvent) {
-        if ((e.key === 'Enter' || e.key === ' ') && !this.isLocked && !this.isSynced) {
+        if ((e.key === 'Enter' || e.key === ' ') && !this.isPathLocked && !this.isSynced) {
             e.preventDefault();
             this.enterEditMode();
         }

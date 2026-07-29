@@ -49,12 +49,21 @@ final readonly class PreventLockedSlugEdit
             return;
         }
 
-        if ($this->isBeingUnlocked($fieldArray)) {
+        $hasLockedAncestor = $this->lockService->hasLockedAncestor((int)$id);
+
+        if ($this->isBeingUnlocked($fieldArray) && !$hasLockedAncestor) {
             return;
         }
 
-        if ($this->lockService->isLocked($record) || $this->lockService->hasLockedAncestor((int)$id)) {
-            unset($fieldArray['slug']);
+        if (!$this->lockService->isLocked($record) && !$hasLockedAncestor) {
+            return;
+        }
+
+        $slugWasChanged = !DataHandlerUtility::isSlugUnchanged((int)$id, (string)$fieldArray['slug']);
+        unset($fieldArray['slug']);
+
+        if ($slugWasChanged && !DataHandlerUtility::isNestedSlugUpdate($dataHandler)) {
+            DataHandlerUtility::logSlugValidationError($dataHandler, (int)$id, 'error.slugLocked');
         }
     }
 

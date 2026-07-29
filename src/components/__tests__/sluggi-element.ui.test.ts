@@ -47,6 +47,19 @@ describe('SluggiElement - UI', () => {
             expect(note?.textContent).to.contain('locked');
         });
 
+        it('shows the ancestor lock restriction note when the lock is inherited', async () => {
+            const el = await fixture<SluggiElement>(html`
+                <sluggi-element
+                    value="/parent/child"
+                    ancestor-locked
+                ></sluggi-element>
+            `);
+
+            const note = el.shadowRoot!.querySelector('.sluggi-note');
+            expect(note).to.exist;
+            expect(note?.textContent).to.contain('locked by a parent page');
+        });
+
         it('does not show restriction note when neither synced nor locked', async () => {
             const el = await fixture<SluggiElement>(html`
                 <sluggi-element

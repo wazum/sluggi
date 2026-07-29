@@ -402,6 +402,13 @@ jobs:
                   'synchronize' => '1',
                   'lock' => '1',
               ],
+              'lock-descendants' => [
+                  'exclude_doktypes' => '254',
+                  'last_segment_only' => '0',
+                  'synchronize' => '1',
+                  'lock' => '1',
+                  'lock_descendants' => '1',
+              ],
               'redirect-control' => [
                   'exclude_doktypes' => '254',
                   'last_segment_only' => '0',

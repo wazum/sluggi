@@ -612,6 +612,55 @@ describe('SluggiElement - Toggles', () => {
             expect(el.shadowRoot!.querySelector('input.sluggi-input')).to.not.exist;
         });
 
+        it('is locked and disabled when the lock is inherited from an ancestor', async () => {
+            const el = await fixture<SluggiElement>(html`
+                <sluggi-element
+                    value="/parent/child"
+                    page-id="123"
+                    record-id="456"
+                    table-name="pages"
+                    field-name="slug"
+                    lock-feature-enabled
+                    ancestor-locked
+                ></sluggi-element>
+            `);
+
+            const lockToggle = el.shadowRoot!.querySelector('.sluggi-lock-toggle') as HTMLButtonElement;
+            expect(lockToggle).to.exist;
+            expect(lockToggle.classList.contains('is-locked')).to.be.true;
+            expect(lockToggle.disabled).to.be.true;
+        });
+
+        it('explains the inherited lock in the disabled toggle tooltip', async () => {
+            const el = await fixture<SluggiElement>(html`
+                <sluggi-element
+                    value="/parent/child"
+                    lock-feature-enabled
+                    ancestor-locked
+                ></sluggi-element>
+            `);
+
+            const lockToggle = el.shadowRoot!.querySelector('.sluggi-lock-toggle') as HTMLButtonElement;
+            expect(lockToggle.getAttribute('title')).to.contain('parent page');
+        });
+
+        it('renders the path as read-only when the lock is inherited from an ancestor', async () => {
+            const el = await fixture<SluggiElement>(html`
+                <sluggi-element
+                    value="/parent/child"
+                    ancestor-locked
+                ></sluggi-element>
+            `);
+
+            expect(el.shadowRoot!.querySelector('.sluggi-wrapper')!.classList.contains('locked')).to.be.true;
+            expect(el.shadowRoot!.querySelector('.sluggi-editable')!.classList.contains('locked')).to.be.true;
+
+            (el.shadowRoot!.querySelector('.sluggi-editable') as HTMLElement).click();
+            await el.updateComplete;
+
+            expect(el.shadowRoot!.querySelector('input.sluggi-input')).to.not.exist;
+        });
+
         it('enabling LOCK disables full path edit button', async () => {
             const el = await fixture<SluggiElement>(html`
                 <sluggi-element

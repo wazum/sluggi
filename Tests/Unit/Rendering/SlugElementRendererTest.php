@@ -368,6 +368,18 @@ final class SlugElementRendererTest extends TestCase
     }
 
     #[Test]
+    public function buildAttributesMarksAnInheritedLockWithoutMarkingTheRecordItself(): void
+    {
+        $subject = new SlugElementRenderer();
+        $context = $this->createContext(['hasLockedAncestor' => true]);
+
+        $result = $subject->buildAttributes($context, []);
+
+        self::assertArrayHasKey('ancestor-locked', $result);
+        self::assertArrayNotHasKey('is-locked', $result);
+    }
+
+    #[Test]
     public function buildAttributesOmitsReservedPathsWhenMissingFromContext(): void
     {
         $subject = new SlugElementRenderer();

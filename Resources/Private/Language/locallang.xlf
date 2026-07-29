@@ -30,6 +30,9 @@
             <trans-unit id="restriction.lock" resname="restriction.lock">
                 <source>The URL path is locked and cannot be edited.</source>
             </trans-unit>
+            <trans-unit id="restriction.lockAncestor" resname="restriction.lockAncestor">
+                <source>The URL path is locked by a parent page and cannot be edited.</source>
+            </trans-unit>
             <trans-unit id="pages.tx_sluggi_full_path" resname="pages.tx_sluggi_full_path">
                 <source>Sluggi: Edit full path</source>
             </trans-unit>
@@ -62,6 +65,9 @@
             </trans-unit>
             <trans-unit id="toggle.lock.off" resname="toggle.lock.off">
                 <source>URL path is unlocked: click to lock</source>
+            </trans-unit>
+            <trans-unit id="toggle.lock.ancestor" resname="toggle.lock.ancestor">
+                <source>Locked by a parent page: only an administrator can change this</source>
             </trans-unit>
             <trans-unit id="toggle.path.on" resname="toggle.path.on">
                 <source>Full path editing enabled: click to restrict</source>
@@ -116,6 +122,12 @@
             </trans-unit>
             <trans-unit id="error.hierarchyPermission.message" resname="error.hierarchyPermission.message">
                 <source>You cannot modify path segments above your permission level.</source>
+            </trans-unit>
+            <trans-unit id="error.slugLocked.title" resname="error.slugLocked.title">
+                <source>Slug change blocked</source>
+            </trans-unit>
+            <trans-unit id="error.slugLocked.message" resname="error.slugLocked.message">
+                <source>The URL path is locked. Your change was not saved.</source>
             </trans-unit>
             <trans-unit id="error.reservedPath.title" resname="error.reservedPath.title">
                 <source>URL path is reserved</source>

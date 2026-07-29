@@ -50,6 +50,9 @@ final readonly class SlugElementRenderer
         if ($context['isLocked'] ?? false) {
             $attributes['is-locked'] = '';
         }
+        if ($context['hasLockedAncestor'] ?? false) {
+            $attributes['ancestor-locked'] = '';
+        }
         if ($context['lastSegmentOnly'] ?? false) {
             $attributes['last-segment-only'] = '';
         }

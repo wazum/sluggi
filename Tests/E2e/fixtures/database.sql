@@ -1356,3 +1356,71 @@ ON DUPLICATE KEY UPDATE
   `perms_user` = VALUES(`perms_user`),
   `perms_group` = VALUES(`perms_group`),
   `perms_everybody` = VALUES(`perms_everybody`);
+
+-- =============================================
+-- lock-descendants.spec.ts (uses pages 71-73)
+-- =============================================
+-- Page 71: locked parent. With lock_descendants enabled its whole subtree is
+-- protected, so pages 72 and 73 must render as locked without carrying a lock
+-- of their own.
+INSERT INTO `pages` (`uid`, `pid`, `title`, `slug`, `doktype`, `is_siteroot`, `hidden`, `deleted`, `tstamp`, `crdate`, `tx_sluggi_sync`, `slug_locked`, `perms_userid`, `perms_groupid`, `perms_user`, `perms_group`, `perms_everybody`)
+VALUES (71, 1, 'Descendant Lock Parent', '/descendant-lock-parent', 1, 0, 0, 0, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 0, 1, 1, 0, 31, 31, 31)
+ON DUPLICATE KEY UPDATE
+  `pid` = VALUES(`pid`),
+  `title` = VALUES(`title`),
+  `slug` = VALUES(`slug`),
+  `doktype` = VALUES(`doktype`),
+  `is_siteroot` = VALUES(`is_siteroot`),
+  `hidden` = VALUES(`hidden`),
+  `deleted` = VALUES(`deleted`),
+  `tstamp` = VALUES(`tstamp`),
+  `crdate` = VALUES(`crdate`),
+  `tx_sluggi_sync` = VALUES(`tx_sluggi_sync`),
+  `slug_locked` = VALUES(`slug_locked`),
+  `perms_userid` = VALUES(`perms_userid`),
+  `perms_groupid` = VALUES(`perms_groupid`),
+  `perms_user` = VALUES(`perms_user`),
+  `perms_group` = VALUES(`perms_group`),
+  `perms_everybody` = VALUES(`perms_everybody`);
+
+-- Page 72: direct child of the locked page, unlocked itself.
+INSERT INTO `pages` (`uid`, `pid`, `title`, `slug`, `doktype`, `is_siteroot`, `hidden`, `deleted`, `tstamp`, `crdate`, `tx_sluggi_sync`, `slug_locked`, `perms_userid`, `perms_groupid`, `perms_user`, `perms_group`, `perms_everybody`)
+VALUES (72, 71, 'Descendant Lock Child', '/descendant-lock-parent/child', 1, 0, 0, 0, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 0, 0, 1, 0, 31, 31, 31)
+ON DUPLICATE KEY UPDATE
+  `pid` = VALUES(`pid`),
+  `title` = VALUES(`title`),
+  `slug` = VALUES(`slug`),
+  `doktype` = VALUES(`doktype`),
+  `is_siteroot` = VALUES(`is_siteroot`),
+  `hidden` = VALUES(`hidden`),
+  `deleted` = VALUES(`deleted`),
+  `tstamp` = VALUES(`tstamp`),
+  `crdate` = VALUES(`crdate`),
+  `tx_sluggi_sync` = VALUES(`tx_sluggi_sync`),
+  `slug_locked` = VALUES(`slug_locked`),
+  `perms_userid` = VALUES(`perms_userid`),
+  `perms_groupid` = VALUES(`perms_groupid`),
+  `perms_user` = VALUES(`perms_user`),
+  `perms_group` = VALUES(`perms_group`),
+  `perms_everybody` = VALUES(`perms_everybody`);
+
+-- Page 73: grandchild, to prove the whole rootline is evaluated.
+INSERT INTO `pages` (`uid`, `pid`, `title`, `slug`, `doktype`, `is_siteroot`, `hidden`, `deleted`, `tstamp`, `crdate`, `tx_sluggi_sync`, `slug_locked`, `perms_userid`, `perms_groupid`, `perms_user`, `perms_group`, `perms_everybody`)
+VALUES (73, 72, 'Descendant Lock Grandchild', '/descendant-lock-parent/child/grandchild', 1, 0, 0, 0, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 0, 0, 1, 0, 31, 31, 31)
+ON DUPLICATE KEY UPDATE
+  `pid` = VALUES(`pid`),
+  `title` = VALUES(`title`),
+  `slug` = VALUES(`slug`),
+  `doktype` = VALUES(`doktype`),
+  `is_siteroot` = VALUES(`is_siteroot`),
+  `hidden` = VALUES(`hidden`),
+  `deleted` = VALUES(`deleted`),
+  `tstamp` = VALUES(`tstamp`),
+  `crdate` = VALUES(`crdate`),
+  `tx_sluggi_sync` = VALUES(`tx_sluggi_sync`),
+  `slug_locked` = VALUES(`slug_locked`),
+  `perms_userid` = VALUES(`perms_userid`),
+  `perms_groupid` = VALUES(`perms_groupid`),
+  `perms_user` = VALUES(`perms_user`),
+  `perms_group` = VALUES(`perms_group`),
+  `perms_everybody` = VALUES(`perms_everybody`);
