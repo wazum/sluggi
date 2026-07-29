@@ -194,7 +194,9 @@ Matching is segment-aware: `/api` blocks `/api` and `/api/v1` but not `/api-docs
 | `/api-docs` | ❌ |
 | `/apis` | ❌ |
 
-Editing a slug to a reserved value is rejected with a flash error; the slug stays at its previous value. Creating a new page with a reserved slug clears the slug field — TYPO3 saves the record with a title-derived fallback slug so the editor keeps all the other form data they entered, and a flash error prompts them to set a non-reserved slug before publishing.
+Editing a slug to a reserved value is rejected with a flash error; the slug stays at its previous value.
+
+Creating a page on a reserved path — or moving one there — replaces its first path segment with a temporary one carrying a random suffix, so `/api` is saved as `/api-3f2b8c1d9e`, and a flash error asks the editor to set a proper path. The record itself is saved, so nothing else typed into the form is lost. Clearing the field instead is not an option: TYPO3 would fall back to the empty default, which ends up as `/` and collides with the site root. Editors rarely get this far — the inline warning appears while typing and the save is blocked client-side — it is the server-side safety net.
 
 Redirects from reserved slugs are suppressed — a path that's handled by something else than TYPO3 would never route to the new slug anyway.
 
@@ -434,6 +436,8 @@ Users can enable compact controls via **User Settings > Personalization** to col
 
 _sluggi_ reads the source fields for slug generation from the standard TCA [`generatorOptions.fields`](https://docs.typo3.org/m/typo3/reference-tca/main/en-us/ColumnsConfig/Type/Slug/Index.html) configuration of the `slug` column. All referenced fields are automatically detected — they get a badge in the backend and the frontend component listens to them for real-time sync.
 
+For pages, TYPO3 core ships `['title']`. The override below is an example that puts the navigation title first and falls back to the page title:
+
 ```php
 'slug' => [
     'config' => [
@@ -516,6 +520,9 @@ Set `lock = 1` to keep the previous behavior. The **"Enable URL path locking for
 | `pages_fields` | Configure source fields via TCA `generatorOptions.fields` |
 | `whitelist` | Use standard TYPO3 backend user/group permissions for `pages:slug` |
 | `slash_replacement` | Now always active, no longer configurable |
+
+> [!IMPORTANT]
+> `pages_fields` defaulted to `[["nav_title","title"]]`, so installations that never changed it generated URL paths from the navigation title, falling back to the page title. TYPO3 core's TCA ships `['title']`, and that now applies: after the upgrade a path comes from the page title and the navigation title is ignored. Add the TCA override shown under [Slug Source Fields](#slug-source-fields) to keep the previous behavior.
 
 **Redirect settings moved to site configuration**
 
