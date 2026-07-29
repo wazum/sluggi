@@ -98,4 +98,28 @@ final class ClearExcludedPageTypeSlugsWizardTest extends FunctionalTestCase
         self::assertSame('/standard-page', $row['slug']);
         self::assertSame(1, (int)$row['tx_sluggi_sync']);
     }
+
+    #[Test]
+    public function executeUpdateLeavesDeletedPagesAlone(): void
+    {
+        $this->importCSVDataSet(__DIR__ . '/Fixtures/pages_with_deleted_excluded_page.csv');
+
+        $subject = $this->get(ClearExcludedPageTypeSlugsWizard::class);
+        $subject->executeUpdate();
+
+        $queryBuilder = $this->getConnectionPool()->getQueryBuilderForTable('pages');
+        $queryBuilder->getRestrictions()->removeAll();
+        $slugs = $queryBuilder
+            ->select('uid', 'slug')
+            ->from('pages')
+            ->executeQuery()
+            ->fetchAllKeyValue();
+
+        self::assertSame('', $slugs[10]);
+        self::assertSame(
+            '/deleted-sysfolder',
+            $slugs[11],
+            'Deleted pages are never counted, so restoring one must not surface an emptied slug',
+        );
+    }
 }

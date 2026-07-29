@@ -1,0 +1,4 @@
+"pages"
+,"uid","pid","title","slug","tx_sluggi_sync","doktype","deleted"
+,10,1,"Live Sysfolder","/live-sysfolder",0,254,0
+,11,1,"Deleted Sysfolder","/deleted-sysfolder",0,254,1

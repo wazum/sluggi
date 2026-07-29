@@ -538,7 +538,7 @@ _sluggi_ now also overrides core's `resolveParentPageRecord()` so that _all_ slu
 
 **Upgrade wizard:** Run **Admin Tools > Upgrade > Upgrade Wizard** after updating. The wizard _"Set default excluded page types for sluggi"_ sets `exclude_doktypes` to `199,254` for existing installations where it was empty.
 
-**_masi_ users:** Remove `254` from `exclude_doktypes` after the upgrade if you want folders in URL paths. See [_masi_](#masi).
+**_masi_ users:** with _masi_ installed the wizard sets `199` only and leaves folders to _masi_, because `254` in this list makes every folder disappear from subpage paths and the per-folder switch inert. If you ran the wizard before this behavior existed, remove `254` by hand if you want folders in URL paths. The wizard _"Clear slugs for excluded page types"_ skips folders for the same reason — it empties slugs with a direct database update that writes no history and cannot be undone. See [_masi_](#masi).
 
 ## Support and Feature Requests
 
