@@ -1,0 +1,29 @@
+version: 2
+
+updates:
+  # Build and test tooling only — none of it is shipped, package.json and
+  # package-lock.json are export-ignored. A single grouped pull request per month
+  # keeps the security alerts actionable without a stream of one-line updates.
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: monthly
+    open-pull-requests-limit: 3
+    groups:
+      build-tooling:
+        patterns:
+          - '*'
+
+  - package-ecosystem: composer
+    directory: /
+    schedule:
+      interval: monthly
+    open-pull-requests-limit: 3
+    groups:
+      dev-tooling:
+        patterns:
+          - '*'
+    ignore:
+      # The supported TYPO3 versions are a deliberate decision, not something to
+      # bump automatically
+      - dependency-name: typo3/cms-*
