@@ -15,8 +15,23 @@
             <trans-unit id="conflict.button.cancel" resname="conflict.button.cancel">
                 <source>Cancel</source>
             </trans-unit>
+            <trans-unit id="conflict.button.keepCurrent" resname="conflict.button.keepCurrent">
+                <source>Keep current URL path</source>
+            </trans-unit>
             <trans-unit id="conflict.button.useSuggestion" resname="conflict.button.useSuggestion">
                 <source>Use Suggestion</source>
+            </trans-unit>
+            <trans-unit id="conflict.suggestionApplied.title" resname="conflict.suggestionApplied.title">
+                <source>URL path adjusted</source>
+            </trans-unit>
+            <trans-unit id="conflict.suggestionApplied.message" resname="conflict.suggestionApplied.message">
+                <source>The requested URL path was already in use, %s was used instead.</source>
+            </trans-unit>
+            <trans-unit id="conflict.syncDisabled.title" resname="conflict.syncDisabled.title">
+                <source>Auto-sync turned off</source>
+            </trans-unit>
+            <trans-unit id="conflict.syncDisabled.message" resname="conflict.syncDisabled.message">
+                <source>Auto-sync was turned off so the URL path %s can stay.</source>
             </trans-unit>
             <trans-unit id="pages.tx_sluggi_sync" resname="pages.tx_sluggi_sync">
                 <source>Sluggi: Auto-sync URL path</source>

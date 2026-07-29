@@ -53,9 +53,17 @@ const Modal = {
             Modal.dismiss();
         });
 
+        // TYPO3's modal announces every close on the modal element, which is how
+        // callers notice a dismissal that bypassed the buttons.
+        dialog.addEventListener('close', () => {
+            dialog.dispatchEvent(new CustomEvent('typo3-modal-hidden'));
+        });
+
         document.body.appendChild(dialog);
         dialog.showModal();
         currentDialog = dialog;
+
+        return dialog;
     },
 
     dismiss() {

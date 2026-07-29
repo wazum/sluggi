@@ -703,3 +703,68 @@ main {
         padding: 100px 40px 80px;
     }
 }
+
+/* Notifications — the demo counterpart of TYPO3's backend toasts */
+.sluggi-demo-toasts {
+    position: fixed;
+    right: 20px;
+    bottom: 20px;
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    max-width: min(380px, calc(100vw - 40px));
+}
+
+.sluggi-demo-toast {
+    border: 1px solid var(--demo-border);
+    border-left-width: 4px;
+    border-radius: var(--typo3-input-border-radius);
+    background: var(--demo-surface);
+    color: var(--demo-text);
+    padding: 14px 16px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+    animation: sluggi-demo-toast-in 0.2s ease-out;
+}
+
+.sluggi-demo-toast strong {
+    display: block;
+    font-size: 0.9375rem;
+    font-weight: 600;
+    margin-bottom: 4px;
+}
+
+.sluggi-demo-toast p {
+    font-size: 0.875rem;
+    line-height: 1.45;
+    color: var(--demo-text-body);
+    margin: 0;
+}
+
+.sluggi-demo-toast--info,
+.sluggi-demo-toast--notice {
+    border-left-color: #3b82f6;
+}
+
+.sluggi-demo-toast--warning {
+    border-left-color: #f59e0b;
+}
+
+.sluggi-demo-toast--error {
+    border-left-color: #ef4444;
+}
+
+.sluggi-demo-toast--success {
+    border-left-color: #10b981;
+}
+
+@keyframes sluggi-demo-toast-in {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

@@ -83,6 +83,33 @@ final class HandlePageUpdateTest extends FunctionalTestCase
     }
 
     #[Test]
+    public function submittedSlugSurvivesWhenSyncIsSwitchedOffInTheSameSave(): void
+    {
+        $dataHandler = GeneralUtility::makeInstance(DataHandler::class);
+        $dataHandler->start(
+            [
+                'pages' => [
+                    2 => [
+                        'title' => 'Updated Title',
+                        'slug' => '/test-page',
+                        'tx_sluggi_sync' => 0,
+                    ],
+                ],
+            ],
+            []
+        );
+        $dataHandler->process_datamap();
+
+        $row = $this->getConnectionPool()
+            ->getConnectionForTable('pages')
+            ->select(['slug', 'tx_sluggi_sync'], 'pages', ['uid' => 2])
+            ->fetchAssociative();
+
+        self::assertSame('/test-page', $row['slug'], 'Switching sync off must keep the submitted URL path');
+        self::assertSame(0, (int)$row['tx_sluggi_sync']);
+    }
+
+    #[Test]
     public function slugIsNotRegeneratedWhenTitleIsClearedAndSyncEnabled(): void
     {
         $dataHandler = GeneralUtility::makeInstance(DataHandler::class);

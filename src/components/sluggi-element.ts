@@ -316,7 +316,7 @@ export class SluggiElement extends LitElement {
     }
 
     private get canDisableSyncToKeepUrl(): boolean {
-        return this.isSynced && !this.isSyncToggleDisabled;
+        return this.isSynced && this.syncFeatureEnabled && !this.isSyncToggleDisabled;
     }
 
     private get canLockToKeepUrl(): boolean {
@@ -1434,6 +1434,17 @@ export class SluggiElement extends LitElement {
             this.value = this.valueBeforeEdit;
             this.notifyFormEngineOfChange();
         }
+        // Keeping the path while auto-sync stays on is not a state the server
+        // can honour — it re-derives the slug from the title on save. Switching
+        // sync off is what makes the editor's choice stick.
+        if (this.isSynced) {
+            this.isSynced = false;
+            this.notifySyncFieldOfChange();
+            this.updateSourceBadgeVisibility();
+            this.discardPendingProposal();
+            this.valueBeforeSync = '';
+            this.announceSyncKept(this.value);
+        }
         this.clearConflictState();
     }
 
@@ -1441,32 +1452,63 @@ export class SluggiElement extends LitElement {
         const title = this.getLabel('conflict.title');
         const message = this.getLabel('conflict.message', this.conflictingSlug);
         const suggestion = this.getLabel('conflict.suggestion', this.conflictProposal);
-        const cancelButton = this.getLabel('conflict.button.cancel');
+        const cancelButton = this.isSynced
+            ? this.getLabel('conflict.button.keepCurrent')
+            : this.getLabel('conflict.button.cancel');
         const useSuggestionButton = this.getLabel('conflict.button.useSuggestion');
 
-        Modal.confirm(
+        let decisionMade = false;
+        const buttons = [];
+        // Keeping the path means switching auto-sync off. Where sync is policy
+        // the editor may not do that, so the suggestion is the only honest offer.
+        const keepOffered = !this.isSynced || this.canDisableSyncToKeepUrl;
+        if (keepOffered) {
+            buttons.push({
+                text: cancelButton,
+                active: true,
+                trigger: () => {
+                    decisionMade = true;
+                    Modal.dismiss();
+                    this.revertToOriginal();
+                },
+            });
+        }
+        buttons.push({
+            text: useSuggestionButton,
+            btnClass: 'btn-warning',
+            trigger: () => {
+                decisionMade = true;
+                Modal.dismiss();
+                this.useSuggestion();
+            },
+        });
+
+        const modal = Modal.confirm(
             title,
             `${message}\n\n${suggestion}`,
             Severity.warning,
-            [
-                {
-                    text: cancelButton,
-                    active: true,
-                    trigger: () => {
-                        Modal.dismiss();
-                        this.revertToOriginal();
-                    },
-                },
-                {
-                    text: useSuggestionButton,
-                    btnClass: 'btn-warning',
-                    trigger: () => {
-                        Modal.dismiss();
-                        this.useSuggestion();
-                    },
-                },
-            ]
+            buttons
         );
+
+        // Escape, backdrop or the X bypass every button trigger, which would
+        // leave a path on screen that the save replaces. Fall back to the
+        // dialog's default: the active button where the editor has that choice,
+        // otherwise the only offer there was. The event can fire more than once,
+        // and resolving twice would apply an already-cleared proposal.
+        modal?.addEventListener('typo3-modal-hidden', () => {
+            if (decisionMade || !this.hasConflict) {
+                return;
+            }
+            decisionMade = true;
+
+            if (keepOffered) {
+                this.revertToOriginal();
+
+                return;
+            }
+            this.useSuggestion();
+            this.announceSuggestionApplied(this.value);
+        });
     }
 
     // =========================================================================
@@ -1732,13 +1774,32 @@ export class SluggiElement extends LitElement {
     }
 
     private announceSyncRestore(restoredValue: string) {
-        const message = this.labels['syncRestore.notification.message']
-            || 'Auto-sync was turned off — the URL path was reset to %s.';
-        Notification.info(
+        this.announceSyncOff(
             this.labels['syncRestore.notification.title'] || 'URL path reset',
-            message.replace('%s', restoredValue),
+            (this.labels['syncRestore.notification.message']
+                || 'Auto-sync was turned off — the URL path was reset to %s.').replace('%s', restoredValue),
+        );
+    }
+
+    private announceSyncKept(keptValue: string) {
+        this.announceSyncOff(
+            this.labels['conflict.syncDisabled.title'] || 'Auto-sync turned off',
+            (this.labels['conflict.syncDisabled.message']
+                || 'Auto-sync was turned off so the URL path %s can stay.').replace('%s', keptValue),
+        );
+    }
+
+    private announceSuggestionApplied(appliedValue: string) {
+        Notification.info(
+            this.labels['conflict.suggestionApplied.title'] || 'URL path adjusted',
+            (this.labels['conflict.suggestionApplied.message']
+                || 'The requested URL path was already in use, %s was used instead.').replace('%s', appliedValue),
             10,
         );
+    }
+
+    private announceSyncOff(title: string, message: string) {
+        Notification.info(title, message, 10);
 
         this.clearRestoreHighlight();
         this.showRestoreHighlight = true;

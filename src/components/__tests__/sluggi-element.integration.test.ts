@@ -2,6 +2,7 @@ import '../sluggi-element.js';
 import { fixture, html, expect, oneEvent, enterEditMode } from './helpers.js';
 import type { SluggiElement } from './helpers.js';
 import Notification from '@typo3/backend/notification.js';
+import Modal from '@typo3/backend/modal.js';
 
 describe('SluggiElement - Integration', () => {
     describe('Conflict Handling', () => {
@@ -80,6 +81,254 @@ describe('SluggiElement - Integration', () => {
             expect(el.value).to.equal('/parent/child/my-new-page');
             const placeholderStillVisible = el.shadowRoot!.querySelector('.sluggi-placeholder') !== null;
             expect(placeholderStillVisible, 'placeholder must hide after accepting conflict suggestion').to.be.false;
+        });
+
+        it('turns auto-sync off when the editor keeps the current path', async () => {
+            (Modal as any)._reset();
+            const container = document.createElement('div');
+            container.innerHTML = `
+                <sluggi-element
+                    value="/my-example-page"
+                    table-name="pages"
+                    record-id="1"
+                    sync-feature-enabled
+                    is-synced
+                ></sluggi-element>
+                <input type="hidden" class="sluggi-sync-field" value="1" />
+            `;
+            document.body.appendChild(container);
+            const el = container.querySelector('sluggi-element') as SluggiElement;
+            await el.updateComplete;
+
+            el.setProposal('/imprint-1', true, '/imprint');
+            await el.updateComplete;
+
+            const buttons = (Modal as any)._calls.at(-1).buttons;
+            buttons[0].trigger();
+            await el.updateComplete;
+
+            expect(el.isSynced, 'keeping the path must switch sync off').to.be.false;
+            expect((container.querySelector('.sluggi-sync-field') as HTMLInputElement).value).to.equal('0');
+            expect(el.value).to.equal('/my-example-page');
+
+            document.body.removeChild(container);
+        });
+
+        it('offers only the suggestion when auto-sync is enforced', async () => {
+            (Modal as any)._reset();
+            const el = await fixture<SluggiElement>(html`
+                <sluggi-element
+                    value="/my-example-page"
+                    table-name="pages"
+                    record-id="1"
+                    is-synced
+                ></sluggi-element>
+            `);
+
+            el.setProposal('/imprint-1', true, '/imprint');
+            await el.updateComplete;
+
+            const buttons = (Modal as any)._calls.at(-1).buttons;
+            expect(buttons, 'keeping the path would defeat the enforced sync policy').to.have.lengthOf(1);
+            expect(buttons[0].btnClass).to.contain('btn-warning');
+        });
+
+        it('restores the previous path on a manual conflict without touching sync', async () => {
+            (Modal as any)._reset();
+            const container = document.createElement('div');
+            container.innerHTML = `
+                <sluggi-element
+                    value="/current"
+                    table-name="pages"
+                    record-id="1"
+                    sync-feature-enabled
+                ></sluggi-element>
+                <input type="hidden" class="sluggi-sync-field" value="0" />
+            `;
+            document.body.appendChild(container);
+            const el = container.querySelector('sluggi-element') as SluggiElement;
+            await el.updateComplete;
+
+            el.enterEditMode();
+            await el.updateComplete;
+            el.setProposal('/privacy-1', true, '/privacy');
+            await el.updateComplete;
+
+            (Modal as any)._calls.at(-1).buttons[0].trigger();
+            await el.updateComplete;
+
+            expect(el.value).to.equal('/current');
+            expect(el.isSynced).to.be.false;
+            expect((container.querySelector('.sluggi-sync-field') as HTMLInputElement).value).to.equal('0');
+
+            document.body.removeChild(container);
+        });
+
+        it('names the keep action instead of a revert when the path is synced', async () => {
+            (Modal as any)._reset();
+            const labels = {
+                'conflict.button.cancel': 'Revert to original',
+                'conflict.button.keepCurrent': 'Keep current URL path',
+            };
+            const container = document.createElement('div');
+            container.innerHTML = `
+                <sluggi-element
+                    value="/my-example-page"
+                    table-name="pages"
+                    record-id="1"
+                    sync-feature-enabled
+                    is-synced
+                ></sluggi-element>
+                <input type="hidden" class="sluggi-sync-field" value="1" />
+            `;
+            document.body.appendChild(container);
+            const el = container.querySelector('sluggi-element') as SluggiElement;
+            el.labels = labels;
+            await el.updateComplete;
+
+            el.setProposal('/imprint-1', true, '/imprint');
+            await el.updateComplete;
+
+            expect((Modal as any)._calls.at(-1).buttons[0].text).to.equal('Keep current URL path');
+
+            document.body.removeChild(container);
+        });
+
+        it('tells the editor that auto-sync was switched off', async () => {
+            (Modal as any)._reset();
+            (Notification as any)._reset();
+            const container = document.createElement('div');
+            container.innerHTML = `
+                <sluggi-element
+                    value="/my-example-page"
+                    table-name="pages"
+                    record-id="1"
+                    sync-feature-enabled
+                    is-synced
+                ></sluggi-element>
+                <input type="hidden" class="sluggi-sync-field" value="1" />
+            `;
+            document.body.appendChild(container);
+            const el = container.querySelector('sluggi-element') as SluggiElement;
+            el.labels = { 'conflict.syncDisabled.message': 'Auto-sync was turned off so the URL path %s can stay.' };
+            await el.updateComplete;
+
+            el.setProposal('/imprint-1', true, '/imprint');
+            await el.updateComplete;
+            (Modal as any)._calls.at(-1).buttons[0].trigger();
+            await el.updateComplete;
+
+            const calls = (Notification as any)._calls;
+            expect(calls, 'switching sync off silently is its own surprise').to.have.lengthOf(1);
+            expect(calls[0].message).to.equal('Auto-sync was turned off so the URL path /my-example-page can stay.');
+
+            document.body.removeChild(container);
+        });
+
+        it('falls back to the active button when a conflict dialog is closed without a choice', async () => {
+            (Modal as any)._reset();
+            const container = document.createElement('div');
+            container.innerHTML = `
+                <sluggi-element
+                    value="/my-example-page"
+                    table-name="pages"
+                    record-id="1"
+                    sync-feature-enabled
+                    is-synced
+                ></sluggi-element>
+                <input type="hidden" class="sluggi-sync-field" value="1" />
+            `;
+            document.body.appendChild(container);
+            const el = container.querySelector('sluggi-element') as SluggiElement;
+            await el.updateComplete;
+
+            el.setProposal('/imprint-1', true, '/imprint');
+            await el.updateComplete;
+
+            (Modal as any)._calls.at(-1).modal.dispatchEvent(new CustomEvent('typo3-modal-hidden'));
+            await el.updateComplete;
+
+            expect(el.value, 'dismissing keeps the path, like the active button').to.equal('/my-example-page');
+            expect(el.isSynced, 'keeping the path only works with sync off').to.be.false;
+            expect(el.hasConflict).to.be.false;
+
+            document.body.removeChild(container);
+        });
+
+        it('applies the suggestion on dismissal when auto-sync is enforced', async () => {
+            (Modal as any)._reset();
+            (Notification as any)._reset();
+            const el = await fixture<SluggiElement>(html`
+                <sluggi-element
+                    value="/my-example-page"
+                    table-name="pages"
+                    record-id="1"
+                    is-synced
+                ></sluggi-element>
+            `);
+
+            el.setProposal('/imprint-1', true, '/imprint');
+            await el.updateComplete;
+
+            (Modal as any)._calls.at(-1).modal.dispatchEvent(new CustomEvent('typo3-modal-hidden'));
+            await el.updateComplete;
+
+            expect(el.value, 'the suggestion was the only offer').to.equal('/imprint-1');
+            expect(el.isSynced).to.be.true;
+            expect((Notification as any)._calls.at(-1).message).to.contain('/imprint-1');
+        });
+
+        it('resolves a dismissed conflict dialog only once', async () => {
+            (Modal as any)._reset();
+            const container = document.createElement('div');
+            container.innerHTML = `
+                <sluggi-element
+                    value="/my-example-page"
+                    table-name="pages"
+                    record-id="1"
+                    sync-feature-enabled
+                    is-synced
+                ></sluggi-element>
+                <input type="hidden" class="sluggi-sync-field" value="1" />
+            `;
+            document.body.appendChild(container);
+            const el = container.querySelector('sluggi-element') as SluggiElement;
+            await el.updateComplete;
+
+            el.setProposal('/imprint-1', true, '/imprint');
+            await el.updateComplete;
+
+            const modal = (Modal as any)._calls.at(-1).modal;
+            modal.dispatchEvent(new CustomEvent('typo3-modal-hidden'));
+            modal.dispatchEvent(new CustomEvent('typo3-modal-hidden'));
+            await el.updateComplete;
+
+            expect(el.value, 'a second hide event must not wipe the path').to.equal('/my-example-page');
+
+            document.body.removeChild(container);
+        });
+
+        it('keeps the stored path when an unsynced conflict dialog is closed without a choice', async () => {
+            (Modal as any)._reset();
+            const el = await fixture<SluggiElement>(html`
+                <sluggi-element
+                    value="/current"
+                    table-name="pages"
+                    record-id="1"
+                    sync-feature-enabled
+                ></sluggi-element>
+            `);
+
+            el.enterEditMode();
+            await el.updateComplete;
+            el.setProposal('/privacy-1', true, '/privacy');
+            await el.updateComplete;
+
+            (Modal as any)._calls.at(-1).modal.dispatchEvent(new CustomEvent('typo3-modal-hidden'));
+            await el.updateComplete;
+
+            expect(el.value).to.equal('/current');
+            expect(el.hasConflict).to.be.false;
         });
 
         it('setProposal updates value or sets conflict state', async () => {
