@@ -80,7 +80,7 @@ When sync is enabled, URL paths regenerate automatically when source fields (e.g
 ![Locked URL](Documentation/sluggi_lock.png)
 
 - Locked URLs cannot be edited and are skipped during auto-sync
-- Optionally lock all descendant paths when an ancestor is locked
+- Optionally lock all descendant paths when an ancestor is locked – child pages show the inherited lock with a read-only path and a disabled toggle, as only unlocking the ancestor releases them
 - Editing the full path auto-locks it to prevent sync from overwriting your work
 
 > [!NOTE]
