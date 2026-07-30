@@ -1,9 +1,14 @@
 version: 2
 
+# Build and test tooling only — none of it is shipped, package.json and
+# package-lock.json are export-ignored.
+#
+# Patch and minor updates arrive as one grouped pull request per month, which is
+# what closes the security advisories. Major updates are left out on purpose:
+# they are migrations (a new TypeScript drops compiler options, a new Vite emits
+# a different bundle) and belong on their own branch, at a time of our choosing.
+# Alerts for them still show up in the security tab, so nothing goes unnoticed.
 updates:
-  # Build and test tooling only — none of it is shipped, package.json and
-  # package-lock.json are export-ignored. A single grouped pull request per month
-  # keeps the security alerts actionable without a stream of one-line updates.
   - package-ecosystem: npm
     directory: /
     schedule:
@@ -13,6 +18,13 @@ updates:
       build-tooling:
         patterns:
           - '*'
+        update-types:
+          - patch
+          - minor
+    ignore:
+      - dependency-name: '*'
+        update-types:
+          - version-update:semver-major
 
   - package-ecosystem: composer
     directory: /
@@ -23,7 +35,13 @@ updates:
       dev-tooling:
         patterns:
           - '*'
+        update-types:
+          - patch
+          - minor
     ignore:
+      - dependency-name: '*'
+        update-types:
+          - version-update:semver-major
       # The supported TYPO3 versions are a deliberate decision, not something to
       # bump automatically
       - dependency-name: typo3/cms-*
