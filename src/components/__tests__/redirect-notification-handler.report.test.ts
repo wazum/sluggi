@@ -81,6 +81,16 @@ describe('RedirectNotificationHandler - slugChangeReport rendering', () => {
         host.__sluggiRecentReportSignatures?.clear();
     });
 
+    it('shows no notification when the report names no page', () => {
+        dispatchReport({
+            pagesUpdated: 1,
+            redirectsCreated: 1,
+            entries: [],
+        });
+
+        expect(notificationCalls.filter((call) => call.type === 'info')).to.be.empty;
+    });
+
     it('renders title + UID in message for a single direct edit, no redirect', () => {
         dispatchReport({
             pagesUpdated: 1,

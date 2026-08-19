@@ -92,7 +92,9 @@ final class SlugChangeReportStore
      */
     public function getReport(): ?array
     {
-        if ($this->pagesUpdated === 0 && $this->redirectsCreated === 0 && $this->entries === []) {
+        // Copy and move land here: they rewrite the path to match the new
+        // parent, so there is no edit to report.
+        if ($this->entries === [] && $this->cascadeRoot === null) {
             return null;
         }
 

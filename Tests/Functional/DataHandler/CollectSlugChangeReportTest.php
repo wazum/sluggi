@@ -104,6 +104,28 @@ final class CollectSlugChangeReportTest extends FunctionalTestCase
         self::assertNotEmpty($report['entries'][7]['correlations']['correlationIdSlugUpdate']);
     }
 
+    #[Test]
+    public function copyingAPageDoesNotWriteAReport(): void
+    {
+        $this->runCommand(['pages' => [2 => ['copy' => 3]]]);
+
+        self::assertNull(
+            $this->getStore()->getReport(),
+            'A copy gets a fresh path, nobody edited one.'
+        );
+    }
+
+    #[Test]
+    public function movingAPageDoesNotWriteAReport(): void
+    {
+        $this->runCommand(['pages' => [2 => ['move' => 3]]]);
+
+        self::assertNull(
+            $this->getStore()->getReport(),
+            'A move rewrites the path to match the new parent, nobody edited one.'
+        );
+    }
+
     protected function setUp(): void
     {
         parent::setUp();
@@ -138,6 +160,16 @@ final class CollectSlugChangeReportTest extends FunctionalTestCase
         $dataHandler = GeneralUtility::makeInstance(DataHandler::class);
         $dataHandler->start(['pages' => [$pageId => $fields]], []);
         $dataHandler->process_datamap();
+    }
+
+    /**
+     * @param array<string, array<int, array<string, mixed>>> $commands
+     */
+    private function runCommand(array $commands): void
+    {
+        $dataHandler = GeneralUtility::makeInstance(DataHandler::class);
+        $dataHandler->start([], $commands);
+        $dataHandler->process_cmdmap();
     }
 
     private function getStore(): SlugChangeReportStore

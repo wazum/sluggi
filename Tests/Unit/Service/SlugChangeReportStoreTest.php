@@ -21,9 +21,32 @@ final class SlugChangeReportStoreTest extends TestCase
     }
 
     #[Test]
+    public function reportIsNullWhenOnlyCountersWereRecorded(): void
+    {
+        $store = new SlugChangeReportStore();
+
+        $store->incrementPagesUpdated();
+        $store->incrementRedirectsCreated();
+
+        self::assertNull($store->getReport());
+    }
+
+    #[Test]
+    public function reportIsKeptWhenOnlyACascadeRootWasRecorded(): void
+    {
+        $store = new SlugChangeReportStore();
+
+        $store->setCascadeRoot(7, 'Parent', []);
+        $store->incrementPagesUpdated();
+
+        self::assertNotNull($store->getReport());
+    }
+
+    #[Test]
     public function incrementPagesUpdatedAccumulatesAcrossCalls(): void
     {
         $store = new SlugChangeReportStore();
+        $store->addEntry(42, 'Page Forty-Two', []);
 
         $store->incrementPagesUpdated();
         $store->incrementPagesUpdated();

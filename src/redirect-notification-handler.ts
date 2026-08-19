@@ -89,6 +89,12 @@ class RedirectNotificationHandler {
             return;
         }
 
+        // Copy and move rewrite the path to match the new parent without anyone
+        // editing one, so they reach here with nothing to name.
+        if (detail.entries.length === 0 && !detail.cascadeRoot) {
+            return;
+        }
+
         // Dedup across realms: the handler module is loaded in both the parent
         // backend frame and any iframe, and each instance registers a listener
         // on window.top.document. Without a shared dedup bag, both instances
@@ -147,7 +153,7 @@ class RedirectNotificationHandler {
             return { title: lang[titleKey] ?? '', message };
         }
 
-        const single = detail.entries.length <= 1;
+        const single = detail.entries.length === 1;
         const hasRedirects = detail.redirectsCreated >= 1;
         const descendantCount = Math.max(0, detail.pagesUpdated - detail.entries.length);
         const descendantSuffix = descendantCount === 0
@@ -156,28 +162,16 @@ class RedirectNotificationHandler {
                 ? lang['notification.slugReport.descendantSuffix.singular'] ?? ''
                 : (lang['notification.slugReport.descendantSuffix.plural'] ?? '').replace('{count}', String(descendantCount)));
 
-        if (single && !hasRedirects) {
+        if (single) {
+            const key = hasRedirects
+                ? 'notification.slugReport.singleSlugAndRedirect'
+                : 'notification.slugReport.singleSlug';
             const entry = detail.entries[0];
-            const message = entry
-                ? (lang['notification.slugReport.singleSlug.message'] ?? '')
-                    .replace('{title}', entry.title)
-                    .replace('{uid}', String(entry.pageId)) + descendantSuffix
-                : lang['notification.slugReport.singleSlug.message'] ?? '';
+            const message = (lang[key + '.message'] ?? '')
+                .replace('{title}', entry.title)
+                .replace('{uid}', String(entry.pageId)) + descendantSuffix;
             return {
-                title: lang['notification.slugReport.singleSlug.title'] ?? '',
-                message,
-            };
-        }
-
-        if (single && hasRedirects) {
-            const entry = detail.entries[0];
-            const message = entry
-                ? (lang['notification.slugReport.singleSlugAndRedirect.message'] ?? '')
-                    .replace('{title}', entry.title)
-                    .replace('{uid}', String(entry.pageId)) + descendantSuffix
-                : lang['notification.slugReport.singleSlugAndRedirect.message'] ?? '';
-            return {
-                title: lang['notification.slugReport.singleSlugAndRedirect.title'] ?? '',
+                title: lang[key + '.title'] ?? '',
                 message,
             };
         }
