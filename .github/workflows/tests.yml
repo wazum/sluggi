@@ -58,6 +58,7 @@ jobs:
   js-unit:
     name: JavaScript Unit Tests
     runs-on: ubuntu-latest
+    timeout-minutes: 15
 
     steps:
       - uses: actions/checkout@v4
@@ -81,13 +82,20 @@ jobs:
           restore-keys: |
             playwright-jsunit-${{ runner.os }}-
 
-      - name: Install Playwright browsers (cache miss only)
+      # No "--with-deps": the runner image already ships Chromium's libraries,
+      # and apt-get update has stalled for tens of minutes in CI.
+      - name: Install Playwright browser (cache miss only)
         if: steps.playwright-cache.outputs.cache-hit != 'true'
-        run: npx playwright install --with-deps chromium
-
-      - name: Install Playwright OS deps (cache hit — binaries cached, apt deps not)
-        if: steps.playwright-cache.outputs.cache-hit == 'true'
-        run: npx playwright install-deps chromium
+        timeout-minutes: 6
+        run: |
+          for attempt in 1 2 3; do
+            if timeout -k 10 120 npx playwright install chromium; then
+              exit 0
+            fi
+            echo "::warning::Playwright download attempt $attempt stalled or failed, retrying"
+            sleep 10
+          done
+          exit 1
 
       - name: Run TypeScript check
         run: npm run typecheck
@@ -541,13 +549,21 @@ jobs:
           cd Tests/E2e
           npm ci
 
-      - name: Install Playwright browsers (cache miss only)
+      # No "--with-deps": the runner image already ships Chromium's libraries,
+      # and apt-get update has stalled for tens of minutes in CI.
+      - name: Install Playwright browser (cache miss only)
         if: steps.playwright-cache.outputs.cache-hit != 'true'
-        run: cd Tests/E2e && npx playwright install --with-deps chromium
-
-      - name: Install Playwright OS deps (cache hit — binaries cached, apt deps not)
-        if: steps.playwright-cache.outputs.cache-hit == 'true'
-        run: cd Tests/E2e && npx playwright install-deps chromium
+        timeout-minutes: 6
+        run: |
+          cd Tests/E2e
+          for attempt in 1 2 3; do
+            if timeout -k 10 120 npx playwright install chromium; then
+              exit 0
+            fi
+            echo "::warning::Playwright download attempt $attempt stalled or failed, retrying"
+            sleep 10
+          done
+          exit 1
 
       - name: Run E2E tests
         run: |
