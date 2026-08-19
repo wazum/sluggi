@@ -216,4 +216,54 @@ final class HandlePageCopyTest extends FunctionalTestCase
 
         $this->assertCSVDataSet(__DIR__ . '/Fixtures/pages_after_copy_within_sysfolder.csv');
     }
+
+    #[Test]
+    public function copyingPageOutsideTheEditorsHierarchyPrefixUpdatesTheSlug(): void
+    {
+        $this->setUpTest('pages_for_copy_hierarchy_permission.csv');
+        $this->setUpBackendUser(2);
+
+        $GLOBALS['TYPO3_CONF_VARS']['EXTENSIONS']['sluggi']['exclude_doktypes'] = '199,254';
+
+        // Copy the locked page 4 into Sysfolder B (page 3) as an editor
+        // Its stored path lies outside the editor's hierarchy prefix
+        $dataHandler = GeneralUtility::makeInstance(DataHandler::class);
+        $dataHandler->start([], [
+            'pages' => [
+                4 => [
+                    'copy' => 3,
+                ],
+            ],
+        ]);
+        $dataHandler->process_cmdmap();
+
+        $this->assertCSVDataSet(__DIR__ . '/Fixtures/pages_after_copy_hierarchy_permission.csv');
+        self::assertSame([], $dataHandler->errorLog, 'Copying is not a path edit by the editor');
+    }
+
+    #[Test]
+    public function copyingPageUnderALockedAncestorUpdatesTheSlug(): void
+    {
+        $this->setUpTest('pages_for_copy_under_locked_ancestor.csv');
+        $this->setUpBackendUser(2);
+
+        $GLOBALS['TYPO3_CONF_VARS']['EXTENSIONS']['sluggi']['exclude_doktypes'] = '199,254';
+        $GLOBALS['TYPO3_CONF_VARS']['EXTENSIONS']['sluggi']['lock'] = '1';
+        $GLOBALS['TYPO3_CONF_VARS']['EXTENSIONS']['sluggi']['lock_descendants'] = '1';
+
+        // Copy page 4 into the Sysfolder (page 3) below the locked page 2
+        // lock_descendants makes the copy inherit the lock
+        $dataHandler = GeneralUtility::makeInstance(DataHandler::class);
+        $dataHandler->start([], [
+            'pages' => [
+                4 => [
+                    'copy' => 3,
+                ],
+            ],
+        ]);
+        $dataHandler->process_cmdmap();
+
+        $this->assertCSVDataSet(__DIR__ . '/Fixtures/pages_after_copy_under_locked_ancestor.csv');
+        self::assertSame([], $dataHandler->errorLog, 'A lock prevents edits, not relocations');
+    }
 }

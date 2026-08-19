@@ -38,9 +38,8 @@ final readonly class PreventLockedSlugEdit
             return;
         }
 
-        // A move always rewrites the slug to match the new parent, even for
-        // locked pages — the lock prevents edits, not relocations.
-        if (DataHandlerUtility::isMoveInducedSlugUpdate($dataHandler)) {
+        // The lock prevents edits, not relocations.
+        if (DataHandlerUtility::isRelocationInducedSlugUpdate($dataHandler)) {
             return;
         }
 

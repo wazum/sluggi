@@ -1,0 +1,7 @@
+"pages"
+,"uid","pid","title","slug","slug_locked","doktype"
+,1,0,"Root Page","/",0,1
+,2,1,"Locked Parent","/locked-parent",1,1
+,3,2,"Sysfolder","/locked-parent/sysfolder",0,254
+,4,1,"Page to Copy","/page-to-copy",0,1
+,5,3,"Page to Copy","/locked-parent/page-to-copy",0,1

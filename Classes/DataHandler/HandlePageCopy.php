@@ -6,7 +6,9 @@ namespace Wazum\Sluggi\DataHandler;
 
 use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\DataHandling\DataHandler;
+use TYPO3\CMS\Core\Utility\GeneralUtility;
 use Wazum\Sluggi\Service\SlugGeneratorService;
+use Wazum\Sluggi\Utility\DataHandlerUtility;
 
 final readonly class HandlePageCopy
 {
@@ -31,40 +33,57 @@ final readonly class HandlePageCopy
             return;
         }
 
-        $copiedPages = $dataHandler->copyMappingArray['pages'] ?? [];
+        $this->updateSlugsForCopiedPages($dataHandler);
+    }
+
+    private function updateSlugsForCopiedPages(DataHandler $dataHandler): void
+    {
+        $data = [];
         $processedSlugs = [];
 
-        foreach ($copiedPages as $sourceUid => $targetUid) {
-            $this->updateSlugForCopiedPage($sourceUid, $targetUid, $pasteDataMap, $copiedPages, $processedSlugs);
+        foreach ($dataHandler->copyMappingArray['pages'] ?? [] as $sourceUid => $targetUid) {
+            $newSlug = $this->resolveSlugForCopiedPage((int)$sourceUid, (int)$targetUid, $processedSlugs);
+            if ($newSlug === null) {
+                continue;
+            }
+
+            $data['pages'][(int)$targetUid] = ['slug' => $newSlug, 'slug_locked' => 0];
         }
+
+        if ($data === []) {
+            return;
+        }
+
+        // Marked as a relocation so the validation hooks let it through.
+        $localDataHandler = GeneralUtility::makeInstance(DataHandler::class);
+        $localDataHandler->start($data, []);
+        $localDataHandler->setCorrelationId(
+            DataHandlerUtility::correlationIdWithAspect($dataHandler, DataHandlerUtility::COPY_CORRELATION_ASPECT)
+        );
+        $localDataHandler->process_datamap();
     }
 
     /**
-     * @param array<string, array<int, array<string, mixed>>> $pasteDataMap
-     * @param array<int, int>                                 $copiedPages
-     * @param array<int, array<int, string>>                  $processedSlugs
+     * @param array<int, array<int, string>> $processedSlugs
      */
-    private function updateSlugForCopiedPage(
+    private function resolveSlugForCopiedPage(
         int $sourceUid,
         int $targetUid,
-        array &$pasteDataMap,
-        array $copiedPages,
         array &$processedSlugs,
-    ): void {
+    ): ?string {
         $sourcePage = BackendUtility::getRecordWSOL('pages', $sourceUid);
         if (empty($sourcePage)) {
-            return;
+            return null;
         }
 
         $targetPage = BackendUtility::getRecordWSOL('pages', $targetUid);
         if (empty($targetPage)) {
-            return;
+            return null;
         }
 
         $languageId = (int)($sourcePage['sys_language_uid'] ?? 0);
         $parentPid = (int)$targetPage['pid'];
 
-        // Check if parent was also copied and we already processed its slug
         $parentSlug = $processedSlugs[$parentPid][$languageId]
             ?? $this->slugGeneratorService->getParentSlug($parentPid, $languageId);
 
@@ -77,15 +96,13 @@ final readonly class HandlePageCopy
 
         $newSlug = $this->slugGeneratorService->ensureUnique($newSlug, $targetPage, $parentPid, $targetUid);
 
-        $pasteDataMap['pages'][$targetUid]['slug'] = $newSlug;
-        $pasteDataMap['pages'][$targetUid]['slug_locked'] = 0;
-
-        // Track this slug for child pages that might reference it;
-        // children carry the default-language uid as pid, so translations
-        // register under their l10n_parent
+        // Children carry the default-language uid as pid, so a translation
+        // registers under its l10n_parent.
         $cacheUid = $languageId === 0 ? $targetUid : (int)($targetPage['l10n_parent'] ?? 0);
         if ($cacheUid > 0) {
             $processedSlugs[$cacheUid][$languageId] = $newSlug;
         }
+
+        return $newSlug;
     }
 }

@@ -7,6 +7,7 @@ namespace Wazum\Sluggi\Utility;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\Authentication\BackendUserAuthentication;
 use TYPO3\CMS\Core\DataHandling\DataHandler;
+use TYPO3\CMS\Core\DataHandling\Model\CorrelationId;
 use TYPO3\CMS\Core\Localization\LanguageServiceFactory;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Redirects\Service\SlugService;
@@ -14,6 +15,8 @@ use TYPO3\CMS\Redirects\Service\SlugService;
 final class DataHandlerUtility
 {
     public const MOVE_CORRELATION_ASPECT = 'sluggi-move';
+
+    public const COPY_CORRELATION_ASPECT = 'sluggi-copy';
 
     public static function isNewRecord(string|int $id): bool
     {
@@ -61,14 +64,27 @@ final class DataHandlerUtility
             && !in_array('redirect', $aspects, true);
     }
 
-    public static function isMoveInducedSlugUpdate(DataHandler $dataHandler): bool
+    public static function correlationIdWithAspect(DataHandler $dataHandler, string $aspect): CorrelationId
+    {
+        $correlationId = $dataHandler->getCorrelationId() ?? CorrelationId::forScope('sluggi');
+
+        return $correlationId->withAspects(...array_unique([
+            ...$correlationId->getAspects(),
+            $aspect,
+        ]));
+    }
+
+    public static function isRelocationInducedSlugUpdate(DataHandler $dataHandler): bool
     {
         $correlationId = $dataHandler->getCorrelationId();
         if ($correlationId === null) {
             return false;
         }
 
-        return in_array(self::MOVE_CORRELATION_ASPECT, $correlationId->getAspects(), true);
+        $aspects = $correlationId->getAspects();
+
+        return in_array(self::MOVE_CORRELATION_ASPECT, $aspects, true)
+            || in_array(self::COPY_CORRELATION_ASPECT, $aspects, true);
     }
 
     public static function logSlugValidationError(
