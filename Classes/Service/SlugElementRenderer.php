@@ -38,6 +38,9 @@ final readonly class SlugElementRenderer
         if (!empty($context['requiredSourceFields'])) {
             $attributes['required-source-fields'] = implode(',', $context['requiredSourceFields']);
         }
+        if (!empty($context['sourceFields'])) {
+            $attributes['source-fields'] = (string)json_encode($context['sourceFields']);
+        }
         if ($context['syncFeatureEnabled'] ?? false) {
             $attributes['sync-feature-enabled'] = '';
         }

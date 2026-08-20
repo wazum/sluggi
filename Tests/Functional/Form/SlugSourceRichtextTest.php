@@ -8,6 +8,7 @@ use PHPUnit\Framework\Attributes\Test;
 use TYPO3\CMS\Backend\Form\FormDataCompiler;
 use TYPO3\CMS\Backend\Form\FormDataGroup\TcaDatabaseRecord;
 use TYPO3\CMS\Backend\Form\NodeFactory;
+use TYPO3\CMS\Core\Core\SystemEnvironmentBuilder;
 use TYPO3\CMS\Core\Http\NormalizedParams;
 use TYPO3\CMS\Core\Http\ServerRequest;
 use TYPO3\CMS\Core\Localization\LanguageServiceFactory;
@@ -15,7 +16,7 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\TestingFramework\Core\Functional\FunctionalTestCase;
 use Wazum\Sluggi\Compatibility\Typo3Compatibility;
 
-final class SlugElementNonPageTableTest extends FunctionalTestCase
+final class SlugSourceRichtextTest extends FunctionalTestCase
 {
     protected array $testExtensionsToLoad = [
         'wazum/sluggi',
@@ -24,6 +25,7 @@ final class SlugElementNonPageTableTest extends FunctionalTestCase
 
     protected array $coreExtensionsToLoad = [
         'redirects',
+        'rte_ckeditor',
     ];
 
     protected array $configurationToUseInTestInstance = [
@@ -40,16 +42,20 @@ final class SlugElementNonPageTableTest extends FunctionalTestCase
     {
         parent::setUp();
 
-        $this->applySluggiRenderType();
+        $this->applyRichtextSourceField();
         $this->importCSVDataSet(__DIR__ . '/Fixtures/non_page_table_test.csv');
         $this->setUpSite();
 
         $GLOBALS['LANG'] = GeneralUtility::makeInstance(LanguageServiceFactory::class)->create('default');
     }
 
-    private function applySluggiRenderType(): void
+    private function applyRichtextSourceField(): void
     {
-        $GLOBALS['TCA']['tx_sluggitest_article']['columns']['slug']['config']['renderType'] = 'sluggiSlug';
+        $GLOBALS['TCA']['tx_sluggitest_article']['columns']['title']['config'] = [
+            'type' => 'text',
+            'enableRichtext' => true,
+            'richtextConfiguration' => 'default',
+        ];
     }
 
     private function setUpSite(): void
@@ -69,11 +75,11 @@ final class SlugElementNonPageTableTest extends FunctionalTestCase
         Typo3Compatibility::writeSiteConfiguration('test', $configuration);
     }
 
-    private function renderSlugElement(int $recordId): string
+    private function renderSourceField(int $recordId, string $fieldName): string
     {
         $request = (new ServerRequest('https://example.com/typo3/'))
             ->withAttribute('normalizedParams', NormalizedParams::createFromServerParams($_SERVER))
-            ->withAttribute('applicationType', \TYPO3\CMS\Core\Core\SystemEnvironmentBuilder::REQUESTTYPE_BE);
+            ->withAttribute('applicationType', SystemEnvironmentBuilder::REQUESTTYPE_BE);
 
         $formDataCompiler = GeneralUtility::makeInstance(FormDataCompiler::class);
         $formDataGroup = GeneralUtility::makeInstance(TcaDatabaseRecord::class);
@@ -85,73 +91,32 @@ final class SlugElementNonPageTableTest extends FunctionalTestCase
             'request' => $request,
         ], $formDataGroup);
 
-        $formData['renderType'] = 'sluggiSlug';
-        $formData['fieldName'] = 'slug';
+        $fieldConfiguration = $formData['processedTca']['columns'][$fieldName];
+
+        // Mirrors core's SingleFieldContainer node name resolution.
+        $formData['renderType'] = $fieldConfiguration['config']['renderType'] ?? $fieldConfiguration['config']['type'];
+        $formData['fieldName'] = $fieldName;
         $formData['parameterArray'] = [
-            'itemFormElValue' => $formData['databaseRow']['slug'],
-            'itemFormElName' => 'data[tx_sluggitest_article][' . $recordId . '][slug]',
-            'itemFormElID' => 'data_tx_sluggitest_article_' . $recordId . '_slug',
-            'fieldConf' => $formData['processedTca']['columns']['slug'],
+            'itemFormElValue' => $formData['databaseRow'][$fieldName],
+            'itemFormElName' => 'data[tx_sluggitest_article][' . $recordId . '][' . $fieldName . ']',
+            'itemFormElID' => 'data_tx_sluggitest_article_' . $recordId . '_' . $fieldName,
+            'fieldConf' => $fieldConfiguration,
         ];
 
         $nodeFactory = GeneralUtility::makeInstance(NodeFactory::class);
-        $result = $nodeFactory->create($formData)->render();
 
-        return $result['html'];
+        return $nodeFactory->create($formData)->render()['html'];
     }
 
     #[Test]
-    public function nonPageTableWithSyncTableConfiguredShowsSyncToggle(): void
+    public function richtextSourceFieldKeepsItsEditor(): void
     {
         $this->setUpBackendUser(1);
-        $html = $this->renderSlugElement(1);
-
-        self::assertStringContainsString('sync-feature-enabled', $html);
-    }
-
-    #[Test]
-    public function nonPageTableWithAutoSyncDoesNotShowLockToggle(): void
-    {
-        $this->setUpBackendUser(1);
-        $html = $this->renderSlugElement(1);
-
-        self::assertStringNotContainsString('lock-feature-enabled', $html);
-    }
-
-    #[Test]
-    public function nonPageTableWithAutoSyncShowsIsSyncedState(): void
-    {
-        $this->setUpBackendUser(1);
-        $html = $this->renderSlugElement(1);
-
-        self::assertStringContainsString('is-synced', $html);
-    }
-
-    #[Test]
-    public function slugElementPublishesSourceFieldMetadata(): void
-    {
-        $this->setUpBackendUser(1);
-        $html = $this->renderSlugElement(1);
 
         self::assertStringContainsString(
-            'source-fields=',
-            $html,
-            'The client needs the source field metadata to tag and wire the source inputs.'
-        );
-        self::assertStringContainsString('&quot;title&quot;', $html);
-        self::assertStringContainsString('&quot;subtitle&quot;', $html);
-    }
-
-    #[Test]
-    public function nonAdminEditorSeesSyncToggleOnNonPageTable(): void
-    {
-        $this->setUpBackendUser(2);
-        $html = $this->renderSlugElement(1);
-
-        self::assertStringContainsString(
-            'sync-feature-enabled',
-            $html,
-            'Non-admin editor must see sync toggle on non-page tables (field is non-exclude)'
+            'typo3-rte-ckeditor-ckeditor5',
+            $this->renderSourceField(1, 'title'),
+            'A slug source field with enableRichtext must still be rendered by the RTE.'
         );
     }
 }

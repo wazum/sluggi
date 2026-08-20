@@ -87,6 +87,21 @@ final class SlugNormalizerTest extends TestCase
                 'expected' => 'hello_world',
                 'fallback' => '_',
             ],
+            'richtext markup stripped' => [
+                'input' => '<p>Hello <em>World</em></p>',
+                'expected' => 'hello-world',
+                'fallback' => '-',
+            ],
+            'ampersand entity decoded instead of leaking its name' => [
+                'input' => 'Hello &amp; World',
+                'expected' => 'hello-world',
+                'fallback' => '-',
+            ],
+            'non-breaking space entity decoded' => [
+                'input' => '<h2>Hello&nbsp;World</h2>',
+                'expected' => 'hello-world',
+                'fallback' => '-',
+            ],
         ];
     }
 

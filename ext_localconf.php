@@ -5,7 +5,6 @@ declare(strict_types=1);
 use Psr\Http\Message\ServerRequestInterface;
 use TYPO3\CMS\Backend\Controller\FormSlugAjaxController as CoreFormSlugAjaxController;
 use TYPO3\CMS\Backend\Form\FormDataProvider\TcaColumnsProcessCommon;
-use TYPO3\CMS\Backend\Form\FormDataProvider\TcaColumnsRemoveUnused;
 use TYPO3\CMS\Core\Http\ApplicationType;
 use TYPO3\CMS\Core\DataHandling\SlugHelper as CoreSlugHelper;
 use Wazum\Sluggi\DataHandling\SlugHelper;
@@ -38,9 +37,6 @@ use Wazum\Sluggi\DataHandler\ValidateLastSegmentOnly;
 use Wazum\Sluggi\DataHandler\ValidateReservedSlugPath;
 use Wazum\Sluggi\Form\Element\SlugElementV12;
 use Wazum\Sluggi\Form\Element\SlugElementV14;
-use Wazum\Sluggi\Form\Element\SlugSourceElementV12;
-use Wazum\Sluggi\Form\Element\SlugSourceElementV14;
-use Wazum\Sluggi\Form\FormDataProvider\EnsureSlugSourceRenderTypes;
 use Wazum\Sluggi\Form\FormDataProvider\HideSlugForExcludedPageTypes;
 use Wazum\Sluggi\Form\FormDataProvider\InitializeSyncField;
 use Wazum\Sluggi\Hooks\DispatchSlugChangeReport;
@@ -71,14 +67,6 @@ $GLOBALS['TYPO3_CONF_VARS']['SYS']['formEngine']['nodeRegistry'][1733600000] = [
         : SlugElementV12::class,
 ];
 
-$GLOBALS['TYPO3_CONF_VARS']['SYS']['formEngine']['nodeRegistry'][1733600001] = [
-    'nodeName' => 'slugSourceInput',
-    'priority' => 50,
-    'class' => Typo3Compatibility::getMajorVersion() >= 13
-        ? SlugSourceElementV14::class
-        : SlugSourceElementV12::class,
-];
-
 // Form data providers
 $GLOBALS['TYPO3_CONF_VARS']['SYS']['formEngine']['formDataGroup']['tcaDatabaseRecord'][HideSlugForExcludedPageTypes::class] = [
     'depends' => [TcaColumnsProcessCommon::class],
@@ -86,10 +74,6 @@ $GLOBALS['TYPO3_CONF_VARS']['SYS']['formEngine']['formDataGroup']['tcaDatabaseRe
 
 $GLOBALS['TYPO3_CONF_VARS']['SYS']['formEngine']['formDataGroup']['tcaDatabaseRecord'][InitializeSyncField::class] = [
     'depends' => [TcaColumnsProcessCommon::class],
-];
-
-$GLOBALS['TYPO3_CONF_VARS']['SYS']['formEngine']['formDataGroup']['tcaDatabaseRecord'][EnsureSlugSourceRenderTypes::class] = [
-    'depends' => [TcaColumnsRemoveUnused::class],
 ];
 
 // PageRenderer hook

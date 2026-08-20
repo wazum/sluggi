@@ -36,12 +36,13 @@ final class PagesTcaOverrideTest extends TestCase
     }
 
     #[Test]
-    public function pagesTcaOverrideMarksEveryFallbackGeneratorFieldAsSlugSource(): void
+    public function pagesTcaOverrideLeavesGeneratorFieldRenderersUntouched(): void
     {
         $GLOBALS['TCA']['pages']['columns'] = [
             'title' => [
                 'config' => [
-                    'type' => 'input',
+                    'type' => 'text',
+                    'enableRichtext' => true,
                 ],
             ],
             'nav_title' => [
@@ -63,15 +64,15 @@ final class PagesTcaOverrideTest extends TestCase
 
         require __DIR__ . '/../../../Configuration/TCA/Overrides/pages.php';
 
-        self::assertSame(
-            'slugSourceInput',
-            $GLOBALS['TCA']['pages']['columns']['nav_title']['config']['renderType'] ?? null,
-            'The preferred fallback field must be sent to the slug AJAX generator.'
+        self::assertArrayNotHasKey(
+            'renderType',
+            $GLOBALS['TCA']['pages']['columns']['nav_title']['config'],
+            'A source field must keep whatever renderer its own TCA asks for.'
         );
-        self::assertSame(
-            'slugSourceInput',
-            $GLOBALS['TCA']['pages']['columns']['title']['config']['renderType'] ?? null,
-            'The final fallback field must still be sent to the slug AJAX generator.'
+        self::assertArrayNotHasKey(
+            'renderType',
+            $GLOBALS['TCA']['pages']['columns']['title']['config'],
+            'A richtext source field must keep its editor instead of becoming a text input.'
         );
     }
 }

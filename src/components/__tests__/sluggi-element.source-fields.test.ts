@@ -1,5 +1,5 @@
 import '../sluggi-element.js';
-import { fixture, html, expect, oneEvent } from './helpers.js';
+import { fixture, html, expect, oneEvent, defineRichtextHost } from './helpers.js';
 import type { SluggiElement } from './helpers.js';
 
 describe('SluggiElement - Source Field Listening', () => {
@@ -22,6 +22,135 @@ describe('SluggiElement - Source Field Listening', () => {
         expect(values).to.deep.equal({ title: 'Test Title' });
 
         document.body.removeChild(titleInput);
+    });
+
+    it('tags a configured source field that carries no data-sluggi-source', async () => {
+        const wrapper = document.createElement('div');
+        wrapper.className = 'form-wizards-item-element';
+        const titleInput = document.createElement('input');
+        titleInput.setAttribute('data-formengine-input-name', 'data[pages][456][title]');
+        titleInput.value = 'Test Title';
+        wrapper.appendChild(titleInput);
+        document.body.appendChild(wrapper);
+
+        const el = await fixture<SluggiElement>(html`
+            <sluggi-element
+                value="/test"
+                table-name="pages"
+                record-id="456"
+                source-fields='{"title":{"slot":1,"role":"single","chainSize":1}}'
+            ></sluggi-element>
+        `);
+
+        expect(titleInput.hasAttribute('data-sluggi-source')).to.be.true;
+        expect((el as any).collectFormFieldValues()).to.deep.equal({ title: 'Test Title' });
+
+        document.body.removeChild(wrapper);
+    });
+
+    it('wraps an input source field in a badge group with a confirm button', async () => {
+        const wrapper = document.createElement('div');
+        wrapper.className = 'form-wizards-item-element';
+        const titleInput = document.createElement('input');
+        titleInput.type = 'text';
+        titleInput.setAttribute('data-formengine-input-name', 'data[pages][456][title]');
+        wrapper.appendChild(titleInput);
+        document.body.appendChild(wrapper);
+
+        await fixture<SluggiElement>(html`
+            <sluggi-element
+                value="/test"
+                table-name="pages"
+                record-id="456"
+                source-fields='{"title":{"slot":1,"role":"single","chainSize":1}}'
+            ></sluggi-element>
+        `);
+
+        const group = titleInput.closest('.sluggi-source-group');
+        expect(group, 'source field must be wrapped in a badge group').to.exist;
+        expect(group!.querySelector('.sluggi-source-badge')).to.exist;
+        expect(group!.querySelector('.sluggi-source-confirm')).to.exist;
+        expect(group!.parentElement).to.equal(wrapper);
+
+        document.body.removeChild(wrapper);
+    });
+
+    it('decorates a richtext source field without reparenting its textarea', async () => {
+        defineRichtextHost();
+
+        const wrapper = document.createElement('div');
+        wrapper.className = 'form-wizards-item-element';
+        const editor = document.createElement('typo3-rte-ckeditor-ckeditor5');
+        const textarea = document.createElement('textarea');
+        textarea.setAttribute('slot', 'textarea');
+        textarea.setAttribute('name', 'data[pages][456][title]');
+        textarea.value = '<p>Rich Title</p>';
+        editor.appendChild(textarea);
+        wrapper.appendChild(editor);
+        document.body.appendChild(wrapper);
+
+        const el = await fixture<SluggiElement>(html`
+            <sluggi-element
+                value="/test"
+                table-name="pages"
+                record-id="456"
+                source-fields='{"title":{"slot":1,"role":"single","chainSize":1}}'
+            ></sluggi-element>
+        `);
+
+        expect(
+            textarea.parentElement?.tagName.toLowerCase(),
+            'CKEditor source element must stay inside its host'
+        ).to.equal('typo3-rte-ckeditor-ckeditor5');
+        expect(textarea.hasAttribute('data-sluggi-source')).to.be.true;
+
+        const group = textarea.closest('.sluggi-source-group');
+        expect(group, 'richtext field must still get a badge group').to.exist;
+        expect(group!.classList.contains('sluggi-source-group--stacked')).to.be.true;
+        expect(group!.querySelector('.sluggi-source-badge')).to.exist;
+        expect(group!.querySelector('.sluggi-source-confirm')).to.exist;
+        expect((el as any).collectFormFieldValues()).to.deep.equal({ title: '<p>Rich Title</p>' });
+
+        document.body.removeChild(wrapper);
+    });
+
+    it('debounces proposals from a richtext source field firing change per keystroke', async () => {
+        defineRichtextHost();
+
+        const wrapper = document.createElement('div');
+        wrapper.className = 'form-wizards-item-element';
+        const editor = document.createElement('typo3-rte-ckeditor-ckeditor5');
+        const textarea = document.createElement('textarea');
+        textarea.setAttribute('name', 'data[pages][456][title]');
+        textarea.value = '<p>A</p>';
+        editor.appendChild(textarea);
+        wrapper.appendChild(editor);
+        document.body.appendChild(wrapper);
+
+        const el = await fixture<SluggiElement>(html`
+            <sluggi-element
+                value="/test"
+                table-name="pages"
+                record-id="456"
+                sync-feature-enabled
+                is-synced
+                source-fields='{"title":{"slot":1,"role":"single","chainSize":1}}'
+            ></sluggi-element>
+        `);
+
+        let proposalCount = 0;
+        el.addEventListener('sluggi-request-proposal', () => { proposalCount++; });
+
+        for (const value of ['<p>Ab</p>', '<p>Abc</p>', '<p>Abcd</p>']) {
+            textarea.value = value;
+            textarea.dispatchEvent(new Event('change'));
+        }
+
+        await new Promise(resolve => setTimeout(resolve, 400));
+
+        expect(proposalCount, 'CKEditor change bursts must collapse into one proposal').to.equal(1);
+
+        document.body.removeChild(wrapper);
     });
 
     it('only uses source fields matching its own record ID in multi-edit mode', async () => {

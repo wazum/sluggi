@@ -4,8 +4,8 @@ import Modal from '@typo3/backend/modal.js';
 import Severity from '@typo3/backend/severity.js';
 import Notification from '@typo3/backend/notification.js';
 import { isSlugProposalResponse } from '../types/index.js';
-import type { ComponentMode, ToggleConfig } from '@/types';
-import { editIcon, fullPathEditIcon, refreshIcon, checkIcon, closeIcon, syncOnIcon, syncOffIcon, lockOnIcon, lockOffIcon, copyIcon, menuIcon } from './icons.js';
+import type { ComponentMode, SourceFieldMetadata, ToggleConfig } from '@/types';
+import { editIcon, fullPathEditIcon, refreshIcon, checkIcon, closeIcon, syncOnIcon, syncOffIcon, lockOnIcon, lockOffIcon, copyIcon, menuIcon, sourceBadgeIconMarkup, sourceConfirmIconMarkup } from './icons.js';
 import styles from '../styles/sluggi-element.scss?inline';
 
 @customElement('sluggi-element')
@@ -59,6 +59,9 @@ export class SluggiElement extends LitElement {
 
     @property({ type: String, attribute: 'required-source-fields' })
     requiredSourceFields = '';
+
+    @property({ type: String, attribute: 'source-fields' })
+    sourceFields = '';
 
     @property({ type: Boolean, attribute: 'is-synced' })
     isSynced = false;
@@ -233,6 +236,7 @@ export class SluggiElement extends LitElement {
         if (SluggiElement.connectedElementCount === 1) {
             this.ownerDocument.addEventListener('click', SluggiElement.handleSaveClickDuringProposal, true);
         }
+        this.decorateSourceFields();
         this.setupSourceFieldListeners();
         this.setupSourceConfirmListeners();
         this.observeSourceFieldInitialization();
@@ -1347,6 +1351,26 @@ export class SluggiElement extends LitElement {
 
     private handleSourceFieldChange(event: Event) {
         const changedElement = event.target as HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement;
+
+        // CKEditor emits change on every keystroke, unlike an input which only
+        // emits it on blur, so a burst has to collapse into a single proposal.
+        if (changedElement.closest('typo3-rte-ckeditor-ckeditor5')) {
+            if (this.sourceFieldChangeTimeout) {
+                clearTimeout(this.sourceFieldChangeTimeout);
+            }
+            this.sourceFieldChangeTimeout = window.setTimeout(() => {
+                this.sourceFieldChangeTimeout = null;
+                this.applySourceFieldChange(changedElement);
+            }, 150);
+            return;
+        }
+
+        this.applySourceFieldChange(changedElement);
+    }
+
+    private sourceFieldChangeTimeout: number | null = null;
+
+    private applySourceFieldChange(changedElement: HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement) {
         if (changedElement.value.trim() === '') {
             this.requestUpdate();
             return;
@@ -1896,6 +1920,93 @@ export class SluggiElement extends LitElement {
     // Private Helpers: Source Field Listeners
     // =========================================================================
 
+    private get sourceFieldMetadata(): Record<string, SourceFieldMetadata> {
+        if (!this.sourceFields) return {};
+        try {
+            const parsed = JSON.parse(this.sourceFields);
+            return parsed && typeof parsed === 'object' && !Array.isArray(parsed) ? parsed : {};
+        } catch {
+            return {};
+        }
+    }
+
+    private decorateSourceFields() {
+        const metadata = this.sourceFieldMetadata;
+        const totalFields = Object.keys(metadata).length;
+        const table = this.tableName || 'pages';
+
+        for (const [fieldName, fieldMetadata] of Object.entries(metadata)) {
+            const element = this.findSourceFieldControl(
+                `data[${table}][${this.recordId}][${fieldName}]`
+            );
+            if (!element) continue;
+
+            element.setAttribute('data-sluggi-source', '');
+            if (element.closest('.sluggi-source-group')) continue;
+
+            // CKEditor keeps the textarea as its source element, so the host is
+            // wrapped instead of the control to leave that relation intact.
+            const richtextHost = element.closest<HTMLElement>('typo3-rte-ckeditor-ckeditor5');
+            const wrapTarget = richtextHost ?? element;
+            const parent = wrapTarget.parentElement;
+            if (!parent) continue;
+
+            const group = document.createElement('div');
+            group.className = richtextHost
+                ? 'sluggi-source-group sluggi-source-group--stacked'
+                : 'sluggi-source-group';
+            parent.insertBefore(group, wrapTarget);
+            group.appendChild(this.buildSourceBadge(fieldMetadata, totalFields));
+            group.appendChild(wrapTarget);
+            group.appendChild(this.buildSourceConfirmButton());
+        }
+    }
+
+    /**
+     * Core's InputTextElement renders a visible input carrying
+     * data-formengine-input-name plus a hidden input carrying the name, so the
+     * visible one is preferred. Elements rendered by other FormEngine nodes
+     * (textarea, RTE, select) only ever carry the name.
+     */
+    private findSourceFieldControl(inputName: string): HTMLElement | null {
+        return document.querySelector<HTMLElement>(`[data-formengine-input-name="${inputName}"]`)
+            ?? document.querySelector<HTMLElement>(`[name="${inputName}"]`);
+    }
+
+    private buildSourceBadge(metadata: SourceFieldMetadata, totalFields: number): HTMLElement {
+        const suffix = metadata.role === 'preferred'
+            ? ', used if filled'
+            : metadata.role === 'fallback' ? ', fallback' : '';
+
+        const badge = document.createElement('span');
+        badge.className = 'input-group-text sluggi-source-badge'
+            + (metadata.role === 'fallback' ? ' sluggi-source-badge--fallback' : '');
+        badge.title = `This field influences the URL slug (priority ${metadata.slot}${suffix})`;
+
+        const icon = document.createElement('span');
+        icon.className = 'sluggi-source-badge__icon';
+        icon.innerHTML = sourceBadgeIconMarkup;
+        if (totalFields > 1) {
+            const number = document.createElement('span');
+            number.className = 'sluggi-source-badge__number';
+            number.textContent = String(metadata.slot);
+            icon.appendChild(number);
+        }
+        badge.appendChild(icon);
+
+        return badge;
+    }
+
+    private buildSourceConfirmButton(): HTMLButtonElement {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'input-group-text sluggi-source-confirm';
+        button.title = this.labels['sourceConfirm.title'] || 'Update URL path now';
+        button.innerHTML = sourceConfirmIconMarkup;
+
+        return button;
+    }
+
     private setupSourceFieldListeners() {
         const sourceElements = document.querySelectorAll<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>('[data-sluggi-source]');
 
@@ -1945,6 +2056,10 @@ export class SluggiElement extends LitElement {
     }
 
     private removeSourceFieldListeners() {
+        if (this.sourceFieldChangeTimeout) {
+            clearTimeout(this.sourceFieldChangeTimeout);
+            this.sourceFieldChangeTimeout = null;
+        }
         for (const element of this.sourceFieldElements.values()) {
             element.removeEventListener('change', this.boundSourceFieldHandler);
             element.removeEventListener('input', this.boundSourceFieldInitHandler);

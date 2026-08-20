@@ -13,8 +13,6 @@ services:
       - '../Classes/Controller/RecordHistoryRollbackControllerV14.php'
       - '../Classes/Form/Element/SlugElementV12.php'
       - '../Classes/Form/Element/SlugElementV14.php'
-      - '../Classes/Form/Element/SlugSourceElementV12.php'
-      - '../Classes/Form/Element/SlugSourceElementV14.php'
 
   # DataHandler
   Wazum\Sluggi\DataHandler\ClearSlugForExcludedDoktypes:
@@ -79,22 +77,11 @@ services:
     public: true
     shared: false
 
-  Wazum\Sluggi\Form\Element\SlugSourceElementV12:
-    public: true
-    shared: false
-
-  Wazum\Sluggi\Form\Element\SlugSourceElementV14:
-    public: true
-    shared: false
-
   # Form/FormDataProvider
   Wazum\Sluggi\Form\FormDataProvider\HideSlugForExcludedPageTypes:
     public: true
 
   Wazum\Sluggi\Form\FormDataProvider\InitializeSyncField:
-    public: true
-
-  Wazum\Sluggi\Form\FormDataProvider\EnsureSlugSourceRenderTypes:
     public: true
 
   # Service
@@ -132,9 +119,6 @@ services:
     public: true
 
   Wazum\Sluggi\Service\ReservedPathService:
-    public: true
-
-  Wazum\Sluggi\Service\SlugSourceBadgeRenderer:
     public: true
 
   Wazum\Sluggi\Service\SlugSyncService:

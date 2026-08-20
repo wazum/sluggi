@@ -2,8 +2,6 @@
 
 declare(strict_types=1);
 
-use Wazum\Sluggi\Service\SlugConfigurationService;
-
 $GLOBALS['TCA']['pages']['columns']['slug']['config']['renderType'] = 'sluggiSlug';
 
 $GLOBALS['TCA']['pages']['columns']['tx_sluggi_sync'] = [
@@ -31,9 +29,3 @@ $GLOBALS['TCA']['pages']['columns']['tx_sluggi_full_path'] = [
         'type' => 'none',
     ],
 ];
-
-foreach ((new SlugConfigurationService())->getSourceFields('pages') as $fieldName) {
-    if (isset($GLOBALS['TCA']['pages']['columns'][$fieldName]['config'])) {
-        $GLOBALS['TCA']['pages']['columns'][$fieldName]['config']['renderType'] = 'slugSourceInput';
-    }
-}

@@ -107,6 +107,7 @@ trait SlugElementTrait
             && $this->slugLockService->isLockFeatureEnabled()
             && $this->canUserAccessLockField($table);
         $requiredSourceFields = $this->slugConfigurationService->getRequiredSourceFields($table);
+        $sourceFields = $this->slugConfigurationService->getFieldMetadata($table);
         $lastSegmentOnly = $this->lastSegmentValidationService->shouldRestrictUser(
             $this->getBackendUser()->isAdmin()
         );
@@ -173,6 +174,7 @@ trait SlugElementTrait
             'lockFieldName' => $this->slugElementRenderer->buildLockFieldName($table, $recordId),
             'isTranslation' => $isTranslation,
             'requiredSourceFields' => $requiredSourceFields,
+            'sourceFields' => $sourceFields,
             'lastSegmentOnly' => $lastSegmentOnly,
             'lockedPrefix' => $lockedPrefix,
             'parentSlug' => $parentSlug,

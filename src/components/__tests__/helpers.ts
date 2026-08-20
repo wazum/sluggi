@@ -29,3 +29,13 @@ export async function createElementWithSourceField(
 export function cleanup(container: HTMLElement): void {
     document.body.removeChild(container);
 }
+
+/**
+ * Stubs core's CKEditor host element. Without a definition, fixture() waits
+ * forever on customElements.whenDefined() for an unknown tag.
+ */
+export function defineRichtextHost(): void {
+    if (!customElements.get('typo3-rte-ckeditor-ckeditor5')) {
+        customElements.define('typo3-rte-ckeditor-ckeditor5', class extends HTMLElement {});
+    }
+}

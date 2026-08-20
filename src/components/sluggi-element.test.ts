@@ -378,7 +378,9 @@ describe('sluggi-element handleSourceFieldChange (hierarchy guard)', () => {
         (el as unknown as { sendSlugProposal: (kind: string) => void }).sendSlugProposal =
             () => { proposalCalls += 1; };
 
-        const fakeEvent = { target: { value: 'Hello' } } as unknown as Event;
+        const changedInput = document.createElement('input');
+        changedInput.value = 'Hello';
+        const fakeEvent = { target: changedInput } as unknown as Event;
         (el as unknown as { handleSourceFieldChange: (e: Event) => void }).handleSourceFieldChange(fakeEvent);
 
         expect(proposalCalls).to.equal(0);
@@ -402,7 +404,9 @@ describe('sluggi-element handleSourceFieldChange (hierarchy guard)', () => {
         (el as unknown as { sendSlugProposal: (kind: string) => void }).sendSlugProposal =
             () => { proposalCalls += 1; };
 
-        const fakeEvent = { target: { value: 'Hello' } } as unknown as Event;
+        const changedInput = document.createElement('input');
+        changedInput.value = 'Hello';
+        const fakeEvent = { target: changedInput } as unknown as Event;
         (el as unknown as { handleSourceFieldChange: (e: Event) => void }).handleSourceFieldChange(fakeEvent);
 
         expect(proposalCalls).to.equal(1);

@@ -34,10 +34,4 @@ foreach ($synchronizeTables as $table) {
     $GLOBALS['TCA'][$table]['columns']['tx_sluggi_sync'] = [
         'config' => ['type' => 'passthrough'],
     ];
-
-    foreach ($slugConfigurationService->getSourceFields($table) as $fieldName) {
-        if (isset($GLOBALS['TCA'][$table]['columns'][$fieldName]['config'])) {
-            $GLOBALS['TCA'][$table]['columns'][$fieldName]['config']['renderType'] = 'slugSourceInput';
-        }
-    }
 }

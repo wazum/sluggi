@@ -357,6 +357,37 @@ final class SlugElementRendererTest extends TestCase
     }
 
     #[Test]
+    public function buildAttributesEmitsSourceFieldsWhenNonEmpty(): void
+    {
+        $subject = new SlugElementRenderer();
+        $context = $this->createContext([
+            'sourceFields' => [
+                'nav_title' => ['slot' => 1, 'role' => 'preferred', 'chainSize' => 2],
+                'title' => ['slot' => 1, 'role' => 'fallback', 'chainSize' => 2],
+            ],
+        ]);
+
+        $result = $subject->buildAttributes($context, []);
+
+        self::assertArrayHasKey('source-fields', $result);
+        self::assertSame(
+            '{"nav_title":{"slot":1,"role":"preferred","chainSize":2},"title":{"slot":1,"role":"fallback","chainSize":2}}',
+            $result['source-fields']
+        );
+    }
+
+    #[Test]
+    public function buildAttributesOmitsSourceFieldsWhenEmpty(): void
+    {
+        $subject = new SlugElementRenderer();
+        $context = $this->createContext(['sourceFields' => []]);
+
+        $result = $subject->buildAttributes($context, []);
+
+        self::assertArrayNotHasKey('source-fields', $result);
+    }
+
+    #[Test]
     public function buildAttributesOmitsReservedPathsWhenEmpty(): void
     {
         $subject = new SlugElementRenderer();

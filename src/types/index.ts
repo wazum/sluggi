@@ -20,6 +20,14 @@ export type ProposalMode = 'auto' | 'recreate' | 'manual';
 
 export type ComponentMode = 'view' | 'edit';
 
+export type SourceFieldRole = 'single' | 'preferred' | 'fallback';
+
+export interface SourceFieldMetadata {
+    slot: number;
+    role: SourceFieldRole;
+    chainSize: number;
+}
+
 export interface ToggleConfig {
     name: string;
     isActive: boolean;

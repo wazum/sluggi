@@ -26,6 +26,9 @@ final readonly class SlugNormalizer
         $preserveUnderscore = $this->isPreserveUnderscoreEnabled();
 
         $value = mb_strtolower($value, 'utf-8');
+        // Decoded before stripping so escaped markup becomes real markup and is
+        // removed, instead of leaking entity names into the slug.
+        $value = html_entity_decode($value, ENT_QUOTES | ENT_HTML5, 'UTF-8');
         $value = strip_tags($value);
 
         if ($preserveUnderscore) {
