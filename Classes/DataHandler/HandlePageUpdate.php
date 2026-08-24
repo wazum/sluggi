@@ -58,16 +58,21 @@ final readonly class HandlePageUpdate
         // Evaluate lock/sync against the final state of this save so a same-save
         // toggle (e.g. lock activated together with a title change) wins over the
         // pre-save DB value.
-        if ($this->lockService->isLocked($merged)) {
-            return;
-        }
+        $isPending = $this->lockService->isSlugGenerationPending($record)
+            && $this->syncService->hasPrimarySourceValueChanged($table, $record, $merged);
 
-        if (!$this->syncService->shouldSync($merged)) {
-            return;
-        }
+        if (!$isPending) {
+            if ($this->lockService->isLocked($merged)) {
+                return;
+            }
 
-        if (!$this->syncService->hasSourceFieldChanged($table, $fieldArray)) {
-            return;
+            if (!$this->syncService->shouldSync($merged)) {
+                return;
+            }
+
+            if (!$this->syncService->hasSourceFieldChanged($table, $fieldArray)) {
+                return;
+            }
         }
 
         if (!$this->syncService->hasNonEmptySourceFieldValue($table, $merged)) {

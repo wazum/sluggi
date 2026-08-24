@@ -90,6 +90,36 @@ final readonly class SlugConfigurationService
     }
 
     /**
+     * The fields of the first generator slot, in chain order (preferred first).
+     *
+     * @return string[]
+     */
+    public function getPrimarySourceFields(string $table): array
+    {
+        return array_keys(array_filter(
+            $this->getFieldMetadata($table),
+            static fn (array $metadata): bool => $metadata['slot'] === 1,
+        ));
+    }
+
+    /**
+     * The value the first slot contributes to the slug: the first non-empty field of its chain,
+     * resolved exactly as the core SlugHelper does.
+     *
+     * @param array<string, mixed> $record
+     */
+    public function getPrimarySourceValue(string $table, array $record): string
+    {
+        foreach ($this->getPrimarySourceFields($table) as $field) {
+            if (!empty($record[$field])) {
+                return (string)$record[$field];
+            }
+        }
+
+        return '';
+    }
+
+    /**
      * Get the required fallback fields (last field in each fallback chain).
      * For config [['nav_title', 'title'], 'subtitle'], returns ['title', 'subtitle'].
      * These fields must have values for a valid slug to be generated.

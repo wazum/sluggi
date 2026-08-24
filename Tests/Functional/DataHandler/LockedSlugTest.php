@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace Wazum\Sluggi\Tests\Functional\DataHandler;
 
+use Doctrine\DBAL\ParameterType;
 use PHPUnit\Framework\Attributes\Test;
+use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\DataHandling\DataHandler;
 use TYPO3\CMS\Core\Localization\LanguageServiceFactory;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
@@ -43,6 +45,12 @@ final class LockedSlugTest extends FunctionalTestCase
                     'locale' => 'en_US.UTF-8',
                     'base' => '/',
                 ],
+                [
+                    'languageId' => 1,
+                    'title' => 'German',
+                    'locale' => 'de_DE.UTF-8',
+                    'base' => '/de/',
+                ],
             ],
             'settings' => [
                 'redirects' => [
@@ -61,6 +69,41 @@ final class LockedSlugTest extends FunctionalTestCase
         $this->setUpSite();
         $this->setUpBackendUser(1);
         $GLOBALS['LANG'] = GeneralUtility::makeInstance(LanguageServiceFactory::class)->create('default');
+    }
+
+    #[Test]
+    public function pendingTranslationSlugIsRegeneratedFromTheTranslatedTitle(): void
+    {
+        $this->setUpTest('pages_locked_translation_pending.csv');
+
+        $dataHandler = GeneralUtility::makeInstance(DataHandler::class);
+        $dataHandler->start(
+            [
+                'pages' => [
+                    3 => [
+                        'title' => 'Gesperrte Seite',
+                        'slug' => '/translate-to-german-locked-page',
+                    ],
+                ],
+            ],
+            []
+        );
+        $dataHandler->process_datamap();
+
+        self::assertSame('/gesperrte-seite', $this->fetchSlug(3));
+    }
+
+    private function fetchSlug(int $pageId): string
+    {
+        $queryBuilder = GeneralUtility::makeInstance(ConnectionPool::class)->getQueryBuilderForTable('pages');
+        $queryBuilder->getRestrictions()->removeAll();
+        $row = $queryBuilder->select('slug')
+            ->from('pages')
+            ->where($queryBuilder->expr()->eq('uid', $queryBuilder->createNamedParameter($pageId, ParameterType::INTEGER)))
+            ->executeQuery()
+            ->fetchAssociative();
+
+        return (string)($row['slug'] ?? '');
     }
 
     #[Test]

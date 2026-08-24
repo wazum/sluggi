@@ -1,0 +1,8 @@
+"be_users"
+,"uid","pid","username","password","admin"
+,1,0,"admin","$2y$12$abc123",1
+
+"pages"
+,"uid","pid","title","nav_title","slug","tx_sluggi_sync","slug_locked","doktype","sys_language_uid","l10n_parent","l10n_source","perms_userid","perms_groupid","perms_user","perms_group","perms_everybody"
+,1,0,"Root Page","","/",0,0,1,0,0,0,1,0,31,31,31
+,2,1,"Locked Page","","/locked-page",0,1,1,0,0,0,1,0,31,31,31

@@ -52,6 +52,22 @@ final readonly class SlugLockService
         return (bool)($record['slug_locked'] ?? false);
     }
 
+    /**
+     * A translation whose slug has never been derived from editor-chosen content, while an
+     * effective lock blocks the regular regeneration path.
+     *
+     * @param array<string, mixed> $record
+     */
+    public function isSlugGenerationPending(array $record): bool
+    {
+        if (!($record['tx_sluggi_slug_pending'] ?? false)) {
+            return false;
+        }
+
+        return $this->isLocked($record)
+            || $this->hasLockedAncestor(DataHandlerUtility::integerFieldValue($record, 'uid'));
+    }
+
     public function hasLockedAncestor(int $pageId): bool
     {
         if (!$this->extensionConfiguration->isLockDescendantsEnabled()) {

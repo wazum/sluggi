@@ -32,6 +32,7 @@ use Wazum\Sluggi\DataHandler\HandleMasiExclusionChange;
 use Wazum\Sluggi\DataHandler\LockSlugOnFullPathEdit;
 use Wazum\Sluggi\DataHandler\PreventLockedSlugEdit;
 use Wazum\Sluggi\DataHandler\RejectNewPageWithoutSource;
+use Wazum\Sluggi\DataHandler\TrackPendingSlug;
 use Wazum\Sluggi\DataHandler\ValidateHierarchyPermission;
 use Wazum\Sluggi\DataHandler\ValidateLastSegmentOnly;
 use Wazum\Sluggi\DataHandler\ValidateReservedSlugPath;
@@ -169,6 +170,9 @@ $GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['t3lib/class.t3lib_tcemain.php']['proc
 
 $GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['t3lib/class.t3lib_tcemain.php']['processDatamapClass']['sluggi_lock_new'] =
     InitializeLockForNewPage::class;
+
+$GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['t3lib/class.t3lib_tcemain.php']['processDatamapClass']['sluggi_pending_slug'] =
+    TrackPendingSlug::class;
 
 $GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['t3lib/class.t3lib_tcemain.php']['processDatamapClass']['sluggi_lock_full_path'] =
     LockSlugOnFullPathEdit::class;

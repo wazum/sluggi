@@ -197,6 +197,18 @@ final class SlugSyncService
 
     /**
      * @param array<string, mixed> $record
+     * @param array<string, mixed> $merged
+     */
+    public function hasPrimarySourceValueChanged(string $table, array $record, array $merged): bool
+    {
+        $after = $this->slugConfigurationService->getPrimarySourceValue($table, $merged);
+
+        return $after !== ''
+            && $after !== $this->slugConfigurationService->getPrimarySourceValue($table, $record);
+    }
+
+    /**
+     * @param array<string, mixed> $record
      */
     public function hasNonEmptySourceFieldValue(string $table, array $record): bool
     {
