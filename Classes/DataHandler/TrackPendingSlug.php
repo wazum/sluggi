@@ -25,8 +25,12 @@ final readonly class TrackPendingSlug
 
         if ($status === 'update') {
             // A written slug — whether generated for a pending translation or set by hand by a
-            // user allowed to touch the lock — is the confirmed one from now on.
-            if (isset($fieldArray['slug'])) {
+            // user allowed to touch the lock — is the confirmed one from now on. Relocations are
+            // not: a move or cascade rewrites the path without anyone confirming this URL.
+            if (isset($fieldArray['slug'])
+                && !DataHandlerUtility::isRelocationInducedSlugUpdate($dataHandler)
+                && !DataHandlerUtility::isNestedSlugUpdate($dataHandler)
+            ) {
                 $fieldArray['tx_sluggi_slug_pending'] = 0;
             }
 

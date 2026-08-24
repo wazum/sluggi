@@ -93,6 +93,29 @@ final class LockedSlugTest extends FunctionalTestCase
         self::assertSame('/gesperrte-seite', $this->fetchSlug(3));
     }
 
+    #[Test]
+    public function aPendingTranslationSaveGeneratesTheSlugWithoutLoggingALockError(): void
+    {
+        $this->setUpTest('pages_locked_translation_pending.csv');
+
+        $dataHandler = GeneralUtility::makeInstance(DataHandler::class);
+        $dataHandler->start(
+            [
+                'pages' => [
+                    3 => [
+                        'title' => 'Gesperrte Seite',
+                        'slug' => '/hijacked',
+                    ],
+                ],
+            ],
+            []
+        );
+        $dataHandler->process_datamap();
+
+        self::assertSame([], $dataHandler->errorLog, 'The lock error is misleading while the slug is pending');
+        self::assertSame('/gesperrte-seite', $this->fetchSlug(3), 'The submitted slug must never be trusted');
+    }
+
     private function fetchSlug(int $pageId): string
     {
         $queryBuilder = GeneralUtility::makeInstance(ConnectionPool::class)->getQueryBuilderForTable('pages');

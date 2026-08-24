@@ -92,6 +92,8 @@ When sync is enabled, URL paths regenerate automatically when source fields (e.g
 
 Translated pages inherit the sync and lock settings from the default language record. The toggles are disabled and display the parent's state – translations cannot override these flags independently. This ensures consistent URL behavior across all language versions.
 
+A new translation starts with the URL path TYPO3 derives from the **Translate to …** placeholder title. When the default language page is locked, that path is generated once from the translated source fields on the first save, so editors without access to the lock field are not stuck with it. The path is previewed while the title is typed, and a confirmation names the path that is about to be locked. Every save after that follows the inherited lock again.
+
 ### Non-Page Tables (News, Events, Custom Records)
 
 ![Non-page table sync](Documentation/sluggi_non_page_sync.png)

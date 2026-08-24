@@ -98,6 +98,24 @@ final class TrackPendingSlugTest extends FunctionalTestCase
         self::assertSame(0, $translation['tx_sluggi_slug_pending']);
     }
 
+    #[Test]
+    public function movingTheSourcePageRelocatesThePendingTranslationWithoutConsumingTheFlag(): void
+    {
+        $this->setUpTest('pages_locked_translation_pending_cascade.csv', 1);
+
+        $dataHandler = GeneralUtility::makeInstance(DataHandler::class);
+        $dataHandler->start([], ['pages' => [3 => ['move' => 2]]]);
+        $dataHandler->process_cmdmap();
+
+        $translation = $this->fetchTranslation(3, 1);
+        self::assertStringStartsWith(
+            '/eltern-seite/',
+            $translation['slug'],
+            'The move must relocate the translation, otherwise this test proves nothing',
+        );
+        self::assertSame(1, $translation['tx_sluggi_slug_pending'], 'A relocation is not a confirmation');
+    }
+
     private function useFallbackChain(): void
     {
         $GLOBALS['TCA']['pages']['columns']['slug']['config']['generatorOptions']['fields'] = [['nav_title', 'title']];

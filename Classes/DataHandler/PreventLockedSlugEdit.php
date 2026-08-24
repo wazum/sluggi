@@ -59,7 +59,14 @@ final readonly class PreventLockedSlugEdit
         }
 
         $slugWasChanged = !DataHandlerUtility::isSlugUnchanged((int)$id, (string)$fieldArray['slug']);
+        // Still dropped, so a submitted value can never reach a locked record — but while the
+        // slug is pending, HandlePageUpdate is about to generate one, so reporting the lock
+        // would contradict what the editor sees happen.
         unset($fieldArray['slug']);
+
+        if ($this->lockService->isSlugGenerationPending($record)) {
+            return;
+        }
 
         if ($slugWasChanged && !DataHandlerUtility::isNestedSlugUpdate($dataHandler)) {
             DataHandlerUtility::logSlugValidationError($dataHandler, (int)$id, 'error.slugLocked');

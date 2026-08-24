@@ -59,6 +59,26 @@
                 <source>The URL path is locked and cannot be edited.</source>
                 <target>Der URL-Pfad ist gesperrt und kann nicht bearbeitet werden.</target>
             </trans-unit>
+            <trans-unit id="restriction.slugPending" resname="restriction.slugPending">
+                <source>The URL path is generated from the source fields when you save. Afterwards it is locked, like the original language version.</source>
+                <target>Der URL-Pfad wird beim Speichern aus den Quellfeldern erzeugt. Danach ist er gesperrt, wie in der Ausgangssprache.</target>
+            </trans-unit>
+            <trans-unit id="pendingLockModal.title" resname="pendingLockModal.title">
+                <source>URL path will be locked</source>
+                <target>URL-Pfad wird gesperrt</target>
+            </trans-unit>
+            <trans-unit id="pendingLockModal.message" resname="pendingLockModal.message">
+                <source>The URL path of this page will be set to %s and then locked. Afterwards it can only be changed by unlocking the original language page, so please make sure it is correct before saving.</source>
+                <target>Der URL-Pfad dieser Seite wird auf %s gesetzt und anschließend gesperrt. Danach lässt er sich nur ändern, indem die Seite in der Ausgangssprache entsperrt wird – prüfen Sie ihn daher vor dem Speichern.</target>
+            </trans-unit>
+            <trans-unit id="pendingLockModal.button.cancel" resname="pendingLockModal.button.cancel">
+                <source>Check again</source>
+                <target>Noch einmal prüfen</target>
+            </trans-unit>
+            <trans-unit id="pendingLockModal.button.confirm" resname="pendingLockModal.button.confirm">
+                <source>Save and lock URL path</source>
+                <target>Speichern und URL-Pfad sperren</target>
+            </trans-unit>
             <trans-unit id="restriction.lockAncestor" resname="restriction.lockAncestor">
                 <source>The URL path is locked by a parent page and cannot be edited.</source>
                 <target>Der URL-Pfad ist durch eine übergeordnete Seite gesperrt und kann nicht bearbeitet werden.</target>

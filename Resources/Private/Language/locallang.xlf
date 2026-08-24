@@ -45,6 +45,21 @@
             <trans-unit id="restriction.lock" resname="restriction.lock">
                 <source>The URL path is locked and cannot be edited.</source>
             </trans-unit>
+            <trans-unit id="restriction.slugPending" resname="restriction.slugPending">
+                <source>The URL path is generated from the source fields when you save. Afterwards it is locked, like the original language version.</source>
+            </trans-unit>
+            <trans-unit id="pendingLockModal.title" resname="pendingLockModal.title">
+                <source>URL path will be locked</source>
+            </trans-unit>
+            <trans-unit id="pendingLockModal.message" resname="pendingLockModal.message">
+                <source>The URL path of this page will be set to %s and then locked. Afterwards it can only be changed by unlocking the original language page, so please make sure it is correct before saving.</source>
+            </trans-unit>
+            <trans-unit id="pendingLockModal.button.cancel" resname="pendingLockModal.button.cancel">
+                <source>Check again</source>
+            </trans-unit>
+            <trans-unit id="pendingLockModal.button.confirm" resname="pendingLockModal.button.confirm">
+                <source>Save and lock URL path</source>
+            </trans-unit>
             <trans-unit id="restriction.lockAncestor" resname="restriction.lockAncestor">
                 <source>The URL path is locked by a parent page and cannot be edited.</source>
             </trans-unit>

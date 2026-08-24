@@ -411,6 +411,26 @@ final class SlugElementRendererTest extends TestCase
     }
 
     #[Test]
+    public function buildAttributesMarksAPendingSlugGeneration(): void
+    {
+        $subject = new SlugElementRenderer();
+
+        $result = $subject->buildAttributes($this->createContext(['slugPending' => true]), []);
+
+        self::assertArrayHasKey('slug-pending', $result);
+    }
+
+    #[Test]
+    public function buildAttributesOmitsThePendingMarkerByDefault(): void
+    {
+        $subject = new SlugElementRenderer();
+
+        $result = $subject->buildAttributes($this->createContext(), []);
+
+        self::assertArrayNotHasKey('slug-pending', $result);
+    }
+
+    #[Test]
     public function buildAttributesOmitsReservedPathsWhenMissingFromContext(): void
     {
         $subject = new SlugElementRenderer();

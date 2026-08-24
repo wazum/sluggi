@@ -45,6 +45,9 @@ export class SluggiElement extends LitElement {
     @property({ type: Boolean, attribute: 'ancestor-locked' })
     ancestorLocked = false;
 
+    @property({ type: Boolean, attribute: 'slug-pending' })
+    slugPending = false;
+
     @property({ type: Boolean, attribute: 'last-segment-only' })
     lastSegmentOnly = false;
 
@@ -192,6 +195,12 @@ export class SluggiElement extends LitElement {
     /** @deprecated Make private when dropping TYPO3 12 support (used by compat/typo3-v12-form-submit.ts) */
     @state()
     redirectChoiceMade = false;
+
+    @state()
+    private pendingLockConfirmed = false;
+
+    @state()
+    private pendingPreviewFailed = false;
 
     private valueBeforeSync = '';
     private initialSyncValue = '';
@@ -619,7 +628,9 @@ export class SluggiElement extends LitElement {
         }
 
         let message: string;
-        if (this.isSynced) {
+        if (this.slugPending) {
+            message = this.getLabel('restriction.slugPending');
+        } else if (this.isSynced) {
             message = this.labels.syncRestrictionNote || 'The URL path is automatically synchronized with the source fields.';
         } else if (this.ancestorLocked) {
             message = this.labels.lockAncestorRestrictionNote || 'The URL path is locked by a parent page and cannot be edited.';
@@ -1107,15 +1118,16 @@ export class SluggiElement extends LitElement {
                 throw new Error('Malformed slug proposal response');
             }
             this.setProposal(data.proposal, data.hasConflicts, data.slug ?? '');
+            this.pendingPreviewFailed = false;
         } catch (error) {
             if (requestId !== this.latestProposalRequestId) {
                 return;
             }
             console.error('Slug proposal request failed:', error);
-            Notification.warning(
-                this.labels['error.proposalFailed.title'] || 'URL preview unavailable',
-                this.labels['error.proposalFailed.message'] || 'Could not update the URL preview. Please check your connection and try again.',
-            );
+            // A pending slug is about to be locked, so saving it unseen is worse than not
+            // saving at all — remember the failure and block the save until a preview arrives.
+            this.pendingPreviewFailed = this.slugPending;
+            this.warnProposalUnavailable();
         } finally {
             this.endProposalRequest();
             if (requestId === this.latestProposalRequestId) {
@@ -1371,7 +1383,11 @@ export class SluggiElement extends LitElement {
     private sourceFieldChangeTimeout: number | null = null;
 
     private applySourceFieldChange(changedElement: HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement) {
-        if (changedElement.value.trim() === '') {
+        // Clearing the preferred field of the first slot makes its fallback effective, so a
+        // pending slug still needs a fresh preview — the regular early return would hide that.
+        const isPendingPrimaryChange = this.slugPending && this.isPrimarySourceField(changedElement);
+
+        if (changedElement.value.trim() === '' && !isPendingPrimaryChange) {
             this.requestUpdate();
             return;
         }
@@ -1380,10 +1396,21 @@ export class SluggiElement extends LitElement {
             return;
         }
 
-        const shouldAutoSync = this.isSynced || (!this.syncFeatureEnabled && this.command === 'new');
+        const shouldAutoSync = this.isSynced || (!this.syncFeatureEnabled && this.command === 'new') || isPendingPrimaryChange;
         if (shouldAutoSync && this.mode === 'view' && !this.regenerateWouldLeaveLockedHierarchy) {
             this.sendSlugProposal('recreate');
         }
+    }
+
+    private isPrimarySourceField(changedElement: HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement): boolean {
+        const metadata = this.sourceFieldMetadata;
+        for (const [fieldName, element] of this.sourceFieldElements) {
+            if (element === changedElement) {
+                return metadata[fieldName]?.slot === 1;
+            }
+        }
+
+        return false;
     }
 
     private hasRequiredFieldValues(): boolean {
@@ -1539,28 +1566,35 @@ export class SluggiElement extends LitElement {
     // Private Helpers: Redirect Control
     // =========================================================================
 
-    private static connectedRedirectControlElementCount = 0;
+    private static connectedSaveInterceptorElementCount = 0;
 
     private static redirectModalPending = false;
 
-    private setupFormSubmitListener(): void {
-        if (!this.redirectControlEnabled) return;
+    private static pendingLockModalOpen = false;
 
-        SluggiElement.connectedRedirectControlElementCount++;
+    private get needsSaveInterceptor(): boolean {
+        return this.redirectControlEnabled || this.slugPending;
+    }
+
+    private setupFormSubmitListener(): void {
+        if (!this.needsSaveInterceptor) return;
+
+        SluggiElement.connectedSaveInterceptorElementCount++;
         // TYPO3 FormEngine doesn't fire standard 'submit' events - intercept save button clicks
         // Using the same handler function means addEventListener won't add duplicates
         this.ownerDocument.addEventListener('click', SluggiElement.handleSaveButtonClick, true);
     }
 
     private removeFormSubmitListener(): void {
-        if (!this.redirectControlEnabled) return;
+        if (!this.needsSaveInterceptor) return;
 
-        SluggiElement.connectedRedirectControlElementCount--;
+        SluggiElement.connectedSaveInterceptorElementCount--;
         // Other connected elements still rely on the shared document listener
-        if (SluggiElement.connectedRedirectControlElementCount > 0) return;
+        if (SluggiElement.connectedSaveInterceptorElementCount > 0) return;
         this.ownerDocument.removeEventListener('click', SluggiElement.handleSaveButtonClick, true);
         // No element left that could resolve a pending modal decision
         SluggiElement.redirectModalPending = false;
+        SluggiElement.pendingLockModalOpen = false;
     }
 
     private syncReservedSlugValidity(): void {
@@ -1602,7 +1636,7 @@ export class SluggiElement extends LitElement {
         const saveButton = target.closest('button[name^="_save"]') as HTMLButtonElement | null;
         if (!saveButton) return;
 
-        if (SluggiElement.redirectModalPending) {
+        if (SluggiElement.redirectModalPending || SluggiElement.pendingLockModalOpen) {
             // A modal decision is still pending — the elements are already
             // marked redirectChoiceMade, so without this guard a second save
             // trigger would sail through to TYPO3's original handler.
@@ -1618,7 +1652,52 @@ export class SluggiElement extends LitElement {
         const sluggiElements = form.querySelectorAll('sluggi-element') as NodeListOf<SluggiElement>;
         if (sluggiElements.length === 0) return;
 
-        for (const el of Array.from(sluggiElements)) {
+        const elementsWithFailedPreview = Array.from(sluggiElements).filter(el => el.pendingPreviewFailed);
+        if (elementsWithFailedPreview.length > 0) {
+            event.preventDefault();
+            event.stopPropagation();
+            event.stopImmediatePropagation();
+            elementsWithFailedPreview[0].warnProposalUnavailable();
+
+            return;
+        }
+
+        // The lock confirmation is the first stage: its URL path becomes unchangeable, and
+        // submitForm() bypasses this listener, so the redirect stage has to follow it here
+        // rather than through a second save click.
+        const elementsNeedingLockConfirmation = Array.from(sluggiElements).filter(el =>
+            el.slugPending && !el.pendingLockConfirmed && el.value !== el.originalValue
+        );
+        if (elementsNeedingLockConfirmation.length > 0) {
+            event.preventDefault();
+            event.stopPropagation();
+            event.stopImmediatePropagation();
+            SluggiElement.showPendingLockModal(elementsNeedingLockConfirmation, form);
+
+            return;
+        }
+
+        const elementsNeedingModal = SluggiElement.collectRedirectCandidates(form);
+        if (elementsNeedingModal.length === 0) return;
+
+        event.preventDefault();
+        event.stopPropagation();
+        event.stopImmediatePropagation();
+
+        SluggiElement.showRedirectModalForAll(elementsNeedingModal, form);
+    }
+
+    private warnProposalUnavailable(): void {
+        Notification.warning(
+            this.getLabel('error.proposalFailed.title'),
+            this.getLabel('error.proposalFailed.message'),
+        );
+    }
+
+    private static collectRedirectCandidates(form: HTMLFormElement): SluggiElement[] {
+        const sluggiElements = Array.from(form.querySelectorAll('sluggi-element') as NodeListOf<SluggiElement>);
+
+        for (const el of sluggiElements) {
             if (
                 el.redirectControlEnabled
                 && el.pageHidden
@@ -1630,14 +1709,68 @@ export class SluggiElement extends LitElement {
             }
         }
 
-        const elementsNeedingModal = Array.from(sluggiElements).filter(el =>
+        return sluggiElements.filter(el =>
             el.redirectControlEnabled && !el.redirectChoiceMade && el.value !== el.originalValue
         );
-        if (elementsNeedingModal.length === 0) return;
+    }
 
-        event.preventDefault();
-        event.stopPropagation();
-        event.stopImmediatePropagation();
+    private static showPendingLockModal(elements: SluggiElement[], form: HTMLFormElement): void {
+        SluggiElement.pendingLockModalOpen = true;
+
+        const firstElement = elements[0];
+        const message = firstElement.getLabel(
+            'pendingLockModal.message',
+            elements.map(el => el.value).join(', '),
+        );
+        let decisionMade = false;
+
+        const modal = Modal.confirm(
+            firstElement.getLabel('pendingLockModal.title'),
+            message,
+            Severity.warning,
+            [
+                {
+                    text: firstElement.getLabel('pendingLockModal.button.cancel'),
+                    btnClass: 'btn-default',
+                    trigger: () => {
+                        decisionMade = true;
+                        SluggiElement.pendingLockModalOpen = false;
+                        Modal.dismiss();
+                    },
+                },
+                {
+                    text: firstElement.getLabel('pendingLockModal.button.confirm'),
+                    active: true,
+                    btnClass: 'btn-primary',
+                    trigger: () => {
+                        decisionMade = true;
+                        SluggiElement.pendingLockModalOpen = false;
+                        Modal.dismiss();
+                        for (const el of elements) {
+                            el.pendingLockConfirmed = true;
+                        }
+                        SluggiElement.continueSaveAfterLockConfirmation(form);
+                    },
+                },
+            ]
+        );
+
+        // Closing the modal via Escape, backdrop or the X bypasses every
+        // button trigger — treat it as cancel so saving isn't blocked forever.
+        modal?.addEventListener('typo3-modal-hidden', () => {
+            if (!decisionMade) {
+                SluggiElement.pendingLockModalOpen = false;
+            }
+        });
+    }
+
+    private static continueSaveAfterLockConfirmation(form: HTMLFormElement): void {
+        const elementsNeedingModal = SluggiElement.collectRedirectCandidates(form);
+        if (elementsNeedingModal.length === 0) {
+            SluggiElement.submitForm(form);
+
+            return;
+        }
 
         SluggiElement.showRedirectModalForAll(elementsNeedingModal, form);
     }

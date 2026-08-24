@@ -127,4 +127,40 @@ final class SlugElementTranslationInheritanceTest extends FunctionalTestCase
 
         self::assertStringContainsString('is-locked', $html);
     }
+
+    #[Test]
+    public function pendingTranslationOfALockedPageShowsTheSlugPendingAttribute(): void
+    {
+        $html = $this->renderSlugElement(5);
+
+        self::assertStringContainsString('slug-pending', $html);
+    }
+
+    #[Test]
+    public function theRenderedLabelsCarryTheTranslatedPendingNote(): void
+    {
+        $html = $this->renderSlugElement(5);
+
+        self::assertStringContainsString('restriction.slugPending', $html);
+        self::assertStringNotContainsString('&quot;restriction.slugPending&quot;:&quot;&quot;', $html);
+    }
+
+    #[Test]
+    public function theRenderedLabelsCarryTheLockConfirmationTexts(): void
+    {
+        $html = $this->renderSlugElement(5);
+
+        foreach (['pendingLockModal.title', 'pendingLockModal.message', 'pendingLockModal.button.cancel', 'pendingLockModal.button.confirm'] as $key) {
+            self::assertStringContainsString($key, $html);
+            self::assertStringNotContainsString('&quot;' . $key . '&quot;:&quot;&quot;', $html);
+        }
+    }
+
+    #[Test]
+    public function pendingTranslationOfAnUnlockedPageDoesNotShowTheSlugPendingAttribute(): void
+    {
+        $html = $this->renderSlugElement(3);
+
+        self::assertStringNotContainsString('slug-pending', $html);
+    }
 }
