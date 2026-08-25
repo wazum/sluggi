@@ -90,7 +90,7 @@ final readonly class SlugConfigurationService
     }
 
     /**
-     * The fields of the first generator slot, in chain order (preferred first).
+     * Fields of the first generator slot, in chain order.
      *
      * @return string[]
      */
@@ -103,13 +103,11 @@ final readonly class SlugConfigurationService
     }
 
     /**
-     * The value the first slot contributes to the slug: the first non-empty field of its chain,
-     * resolved exactly as the core SlugHelper does.
-     *
      * @param array<string, mixed> $record
      */
     public function getPrimarySourceValue(string $table, array $record): string
     {
+        // Same rule as the core SlugHelper: the first non-empty field of the slot wins.
         foreach ($this->getPrimarySourceFields($table) as $field) {
             if (!empty($record[$field])) {
                 return (string)$record[$field];

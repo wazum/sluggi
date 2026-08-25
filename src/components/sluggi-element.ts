@@ -1124,8 +1124,7 @@ export class SluggiElement extends LitElement {
                 return;
             }
             console.error('Slug proposal request failed:', error);
-            // A pending slug is about to be locked, so saving it unseen is worse than not
-            // saving at all — remember the failure and block the save until a preview arrives.
+            // A pending slug gets locked on save, so it must never be saved unseen.
             this.pendingPreviewFailed = this.slugPending;
             this.warnProposalUnavailable();
         } finally {
@@ -1383,8 +1382,7 @@ export class SluggiElement extends LitElement {
     private sourceFieldChangeTimeout: number | null = null;
 
     private applySourceFieldChange(changedElement: HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement) {
-        // Clearing the preferred field of the first slot makes its fallback effective, so a
-        // pending slug still needs a fresh preview — the regular early return would hide that.
+        // Clearing the preferred field makes its fallback effective, so still preview.
         const isPendingPrimaryChange = this.slugPending && this.isPrimarySourceField(changedElement);
 
         if (changedElement.value.trim() === '' && !isPendingPrimaryChange) {
@@ -1662,9 +1660,8 @@ export class SluggiElement extends LitElement {
             return;
         }
 
-        // The lock confirmation is the first stage: its URL path becomes unchangeable, and
-        // submitForm() bypasses this listener, so the redirect stage has to follow it here
-        // rather than through a second save click.
+        // submitForm() does not come back through this listener, so the redirect stage
+        // has to follow the lock confirmation here instead of on a second save click.
         const elementsNeedingLockConfirmation = Array.from(sluggiElements).filter(el =>
             el.slugPending && !el.pendingLockConfirmed && el.value !== el.originalValue
         );
@@ -1709,10 +1706,7 @@ export class SluggiElement extends LitElement {
             }
         }
 
-        // A pending slug replaces the path core derived from the "Translate to …"
-        // placeholder, which was never a published URL — asking about a redirect from it
-        // would be a meaningless question, and SuppressRedirectForPendingSlug drops the
-        // source server-side anyway.
+        // No redirect question for a pending slug: its old path was never public.
         return sluggiElements.filter(el =>
             el.redirectControlEnabled && !el.slugPending && !el.redirectChoiceMade && el.value !== el.originalValue
         );

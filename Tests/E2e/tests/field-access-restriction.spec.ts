@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { waitForEditForm, waitForSourceFieldsInitialized } from '../fixtures/typo3-compat';
+import { waitForEditForm, waitForSaveSuccess, waitForSourceFieldsInitialized } from '../fixtures/typo3-compat';
 import { resetPendingTranslations } from '../fixtures/database';
 
 test.describe('Field Access Restriction - Restricted Editor', () => {
@@ -42,8 +42,6 @@ test.describe('Field Access Restriction - Restricted Editor', () => {
   });
 
   test.describe('Pending slug generation', () => {
-    // Both tests start from a freshly armed translation, so a re-run and a retry see
-    // the same state as the first attempt.
     test.beforeEach(() => resetPendingTranslations());
 
     test('previews the URL path from the title', async ({ page }) => {
@@ -64,8 +62,7 @@ test.describe('Field Access Restriction - Restricted Editor', () => {
       await titleInput.fill('Vorschau Titel');
       await titleInput.blur();
 
-      // Proves the proposal endpoint serves a locked, pending record — without it the
-      // editor would save a URL path nobody ever saw.
+      // The proposal endpoint has to answer for a locked record, or nobody sees the path.
       await expect(hiddenInput).toHaveValue('/restricted-section/vorschau-titel', { timeout: 10000 });
     });
 
@@ -87,9 +84,9 @@ test.describe('Field Access Restriction - Restricted Editor', () => {
       await expect(modal).toBeVisible({ timeout: 5000 });
       await expect(modal.locator('.modal-body')).toContainText('/restricted-section/bestaetigter-titel');
 
-      // No redirect question follows: the placeholder path was never a public URL.
+      // No redirect question follows for a placeholder path.
       await modal.getByRole('button', { name: 'Save and lock URL path', exact: true }).click();
-      await page.locator('.alert-success').waitFor({ state: 'visible', timeout: 10000 });
+      await waitForSaveSuccess(page, frame);
 
       await expect(frame.locator('input.sluggi-hidden-field')).toHaveValue('/restricted-section/bestaetigter-titel');
       await expect(frame.locator('sluggi-element')).not.toHaveAttribute('slug-pending', '');

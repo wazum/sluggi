@@ -373,6 +373,13 @@ jobs:
             "    locale: en_US.UTF-8" \
             "    navigationTitle: ''" \
             "    flag: us" \
+            "  - title: German" \
+            "    enabled: true" \
+            "    languageId: 1" \
+            "    base: /de/" \
+            "    locale: de_DE.UTF-8" \
+            "    navigationTitle: ''" \
+            "    flag: de" \
             > typo3-test/config/sites/main/config.yaml
 
       - name: Import test fixtures

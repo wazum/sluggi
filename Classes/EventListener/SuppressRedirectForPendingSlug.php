@@ -16,9 +16,7 @@ final readonly class SuppressRedirectForPendingSlug
             return;
         }
 
-        // The path being replaced is the one core derived from the "Translate to …"
-        // placeholder. Nobody ever published or linked it, so a redirect from it is
-        // noise for every translated page.
+        // The old path came from the "Translate to …" placeholder and was never public.
         $event->setSlugRedirectChangeItem(
             $changeItem->withSourcesCollection(new RedirectSourceCollection()),
         );

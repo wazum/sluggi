@@ -4,8 +4,7 @@ import path from 'path';
 /**
  * Applies one of the .sql files next to this helper to the test database.
  *
- * Connection details come from the environment so the same call works in the DDEV
- * container (defaults below) and in CI, which talks to its own MySQL service.
+ * Connection details come from the environment; the defaults are the DDEV container.
  */
 export function applyFixtureSql(fileName: string): void {
   const file = path.join(__dirname, fileName);
@@ -23,8 +22,7 @@ export function applyFixtureSql(fileName: string): void {
 
 /**
  * Re-arms the seeded pending translations. Saving one spends its one-shot window, so
- * every test that gets that far has to put the state back — otherwise it passes once
- * and fails on the next run and on its own retries.
+ * without this a test passes once and fails on the next run and on its own retries.
  */
 export function resetPendingTranslations(): void {
   applyFixtureSql('reset-pending-translations.sql');

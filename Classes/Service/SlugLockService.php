@@ -53,9 +53,6 @@ final readonly class SlugLockService
     }
 
     /**
-     * A translation whose slug has never been derived from editor-chosen content, while an
-     * effective lock blocks the regular regeneration path.
-     *
      * @param array<string, mixed> $record
      */
     public function isSlugGenerationPending(array $record): bool

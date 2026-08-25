@@ -1428,12 +1428,11 @@ ON DUPLICATE KEY UPDATE
 -- =============================================
 -- field-access-restriction.spec.ts, pending slug generation (uses pages 74-77)
 -- =============================================
--- Two independent pairs: each translation carries the placeholder slug core
--- generates for it plus tx_sluggi_slug_pending, so the restricted editor meets
--- exactly the state a fresh "Translate" leaves behind on a locked page. The
--- second pair exists because confirming the dialog spends the one-shot window.
--- The translations are mutable: reset-pending-translations.sql re-arms them before
--- each test that saves one. The locked source pages 74 and 76 are read-only.
+-- Each translation holds the placeholder slug and the pending flag, the state a fresh
+-- "Translate" leaves behind on a locked page. One pair per test, because confirming the
+-- dialog spends the one-shot window; reset-pending-translations.sql re-arms them.
+-- Pages 74 and 76 are read-only. Saving a translation resolves its language, so site
+-- "main" must declare language 1 (see the workflow's site configuration step).
 -- Page 74: locked source page, owned by the restricted editors group.
 INSERT INTO `pages` (`uid`, `pid`, `title`, `slug`, `doktype`, `is_siteroot`, `hidden`, `deleted`, `tstamp`, `crdate`, `tx_sluggi_sync`, `slug_locked`, `sys_language_uid`, `l10n_parent`, `perms_userid`, `perms_groupid`, `perms_user`, `perms_group`, `perms_everybody`)
 VALUES (74, 36, 'Pending Preview Source', '/restricted-section/pending-preview-source', 1, 0, 0, 0, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 0, 1, 0, 0, 1, 3, 31, 31, 0)
@@ -1457,7 +1456,7 @@ ON DUPLICATE KEY UPDATE
   `perms_group` = VALUES(`perms_group`),
   `perms_everybody` = VALUES(`perms_everybody`);
 
--- Page 75: its German translation, still carrying the placeholder URL path.
+-- Page 75: its pending German translation.
 INSERT INTO `pages` (`uid`, `pid`, `title`, `slug`, `doktype`, `is_siteroot`, `hidden`, `deleted`, `tstamp`, `crdate`, `tx_sluggi_sync`, `slug_locked`, `tx_sluggi_slug_pending`, `sys_language_uid`, `l10n_parent`, `l10n_source`, `perms_userid`, `perms_groupid`, `perms_user`, `perms_group`, `perms_everybody`)
 VALUES (75, 36, '[Translate to German:] Pending Preview Source', '/restricted-section/translate-to-german-pending-preview-source', 1, 0, 0, 0, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 0, 0, 1, 1, 74, 74, 1, 3, 31, 31, 0)
 ON DUPLICATE KEY UPDATE
@@ -1505,7 +1504,7 @@ ON DUPLICATE KEY UPDATE
   `perms_group` = VALUES(`perms_group`),
   `perms_everybody` = VALUES(`perms_everybody`);
 
--- Page 77: its German translation, still carrying the placeholder URL path.
+-- Page 77: its pending German translation.
 INSERT INTO `pages` (`uid`, `pid`, `title`, `slug`, `doktype`, `is_siteroot`, `hidden`, `deleted`, `tstamp`, `crdate`, `tx_sluggi_sync`, `slug_locked`, `tx_sluggi_slug_pending`, `sys_language_uid`, `l10n_parent`, `l10n_source`, `perms_userid`, `perms_groupid`, `perms_user`, `perms_group`, `perms_everybody`)
 VALUES (77, 36, '[Translate to German:] Pending Confirm Source', '/restricted-section/translate-to-german-pending-confirm-source', 1, 0, 0, 0, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 0, 0, 1, 1, 76, 76, 1, 3, 31, 31, 0)
 ON DUPLICATE KEY UPDATE

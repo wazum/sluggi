@@ -366,3 +366,31 @@ export async function openNewSubpageForm(
 export async function waitForSaveComplete(page: Page): Promise<void> {
   await page.waitForLoadState('load');
 }
+
+/**
+ * Wait for the flash message of a successful save.
+ *
+ * A save that hits a TYPO3 exception shows an error page in the iframe and no flash
+ * message, so report that message instead of a bare timeout.
+ */
+export async function waitForSaveSuccess(
+  page: Page,
+  frame: ReturnType<Page['frameLocator']>,
+  timeout = 15000,
+): Promise<void> {
+  try {
+    await page.locator('.alert-success').first().waitFor({ state: 'visible', timeout });
+  } catch (timeoutError) {
+    const errorHeading = frame.locator('h1', { hasText: 'Oops, an error occurred' });
+    if (await errorHeading.count() === 0) {
+      throw timeoutError;
+    }
+
+    const detail = await errorHeading
+      .locator('xpath=following-sibling::p[1]')
+      .innerText()
+      .catch(() => '');
+
+    throw new Error(`Save failed with a TYPO3 backend error: ${detail.trim() || 'see the attached screenshot'}`);
+  }
+}

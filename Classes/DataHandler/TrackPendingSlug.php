@@ -24,9 +24,7 @@ final readonly class TrackPendingSlug
         }
 
         if ($status === 'update') {
-            // A written slug — whether generated for a pending translation or set by hand by a
-            // user allowed to touch the lock — is the confirmed one from now on. Relocations are
-            // not: a move or cascade rewrites the path without anyone confirming this URL.
+            // A move or cascade writes a slug too, but nobody confirmed that path.
             if (isset($fieldArray['slug'])
                 && !DataHandlerUtility::isRelocationInducedSlugUpdate($dataHandler)
                 && !DataHandlerUtility::isNestedSlugUpdate($dataHandler)
@@ -58,8 +56,7 @@ final readonly class TrackPendingSlug
             return $fromFieldArray;
         }
 
-        // Whether the pointer survives fillInFieldArray() depends on the TYPO3 version and the
-        // editor's field permissions; the datamap is what localize() writes in every version.
+        // The field array does not always keep the pointer, the datamap always has it.
         return DataHandlerUtility::integerFieldValue($dataHandler->datamap['pages'][$id] ?? [], 'l10n_parent');
     }
 }

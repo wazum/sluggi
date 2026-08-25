@@ -31,12 +31,8 @@ final class SuppressRedirectForPendingSlugTest extends FunctionalTestCase
     ];
 
     /**
-     * The interesting case: a translation that is already visible when its slug is first
-     * generated. TYPO3 hides a fresh translation (hideAtCopy), and hidden pages are
-     * already covered by SuppressRedirectForUnpublishedPage — but a translation the
-     * editor published before naming it, or one created with hideAtCopy switched off,
-     * reaches this point visible, and only this listener keeps the placeholder path out
-     * of the redirect table.
+     * Hidden translations are already covered by SuppressRedirectForUnpublishedPage, so
+     * only a visible one (published before it was named, or hideAtCopy off) needs this.
      */
     #[Test]
     public function generatingThePendingSlugOfAVisibleTranslationCreatesNoRedirect(): void
