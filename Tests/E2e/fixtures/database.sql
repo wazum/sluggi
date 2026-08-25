@@ -1432,8 +1432,8 @@ ON DUPLICATE KEY UPDATE
 -- generates for it plus tx_sluggi_slug_pending, so the restricted editor meets
 -- exactly the state a fresh "Translate" leaves behind on a locked page. The
 -- second pair exists because confirming the dialog spends the one-shot window.
--- For the same reason a local re-run needs this file applied again — CI starts
--- from an empty database, so it is unaffected.
+-- The translations are mutable: reset-pending-translations.sql re-arms them before
+-- each test that saves one. The locked source pages 74 and 76 are read-only.
 -- Page 74: locked source page, owned by the restricted editors group.
 INSERT INTO `pages` (`uid`, `pid`, `title`, `slug`, `doktype`, `is_siteroot`, `hidden`, `deleted`, `tstamp`, `crdate`, `tx_sluggi_sync`, `slug_locked`, `sys_language_uid`, `l10n_parent`, `perms_userid`, `perms_groupid`, `perms_user`, `perms_group`, `perms_everybody`)
 VALUES (74, 36, 'Pending Preview Source', '/restricted-section/pending-preview-source', 1, 0, 0, 0, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 0, 1, 0, 0, 1, 3, 31, 31, 0)

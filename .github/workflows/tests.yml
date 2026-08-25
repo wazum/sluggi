@@ -574,6 +574,11 @@ jobs:
           TYPO3_BASE_URL: http://127.0.0.1:8080
           TYPO3_ADMIN_USER: admin
           TYPO3_ADMIN_PASS: docker
+          # Lets tests re-arm fixture rows they consume (see fixtures/database.ts)
+          TYPO3_DB_HOST: 127.0.0.1
+          TYPO3_DB_USER: root
+          TYPO3_DB_PASSWORD: root
+          TYPO3_DB_NAME: typo3
 
       - name: Upload test results
         if: ${{ !cancelled() }}

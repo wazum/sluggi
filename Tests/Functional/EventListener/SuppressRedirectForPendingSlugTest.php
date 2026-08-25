@@ -30,8 +30,16 @@ final class SuppressRedirectForPendingSlugTest extends FunctionalTestCase
         ],
     ];
 
+    /**
+     * The interesting case: a translation that is already visible when its slug is first
+     * generated. TYPO3 hides a fresh translation (hideAtCopy), and hidden pages are
+     * already covered by SuppressRedirectForUnpublishedPage — but a translation the
+     * editor published before naming it, or one created with hideAtCopy switched off,
+     * reaches this point visible, and only this listener keeps the placeholder path out
+     * of the redirect table.
+     */
     #[Test]
-    public function generatingThePendingSlugOfATranslationCreatesNoRedirect(): void
+    public function generatingThePendingSlugOfAVisibleTranslationCreatesNoRedirect(): void
     {
         $this->saveFields(3, ['title' => 'Gesperrte Seite']);
 
@@ -41,6 +49,19 @@ final class SuppressRedirectForPendingSlugTest extends FunctionalTestCase
             'The generation must happen, otherwise this test proves nothing',
         );
         self::assertSame(0, $this->countAllRedirects(), 'The placeholder path was never a public URL');
+    }
+
+    #[Test]
+    public function generatingThePendingSlugOfAHiddenTranslationCreatesNoRedirect(): void
+    {
+        $this->saveFields(6, ['title' => 'Versteckte Uebersetzung']);
+
+        self::assertSame(
+            '/versteckte-uebersetzung',
+            $this->fetchSlug(6),
+            'The generation must happen, otherwise this test proves nothing',
+        );
+        self::assertSame(0, $this->countAllRedirects());
     }
 
     #[Test]
