@@ -193,6 +193,13 @@ services:
         event: TYPO3\CMS\Redirects\Event\SlugRedirectChangeItemCreatedEvent
         after: 'redirects-add-plain-slug-replacement-source,redirects-add-page-type-zero-source'
 
+  Wazum\Sluggi\EventListener\SuppressRedirectForPendingSlug:
+    tags:
+      - name: event.listener
+        identifier: 'sluggi/suppress-redirect-for-pending-slug'
+        event: TYPO3\CMS\Redirects\Event\SlugRedirectChangeItemCreatedEvent
+        after: 'redirects-add-plain-slug-replacement-source,redirects-add-page-type-zero-source'
+
   Wazum\Sluggi\DataHandler\CollectSlugChangeReport:
     public: true
     tags:

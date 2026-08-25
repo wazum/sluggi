@@ -1709,8 +1709,12 @@ export class SluggiElement extends LitElement {
             }
         }
 
+        // A pending slug replaces the path core derived from the "Translate to …"
+        // placeholder, which was never a published URL — asking about a redirect from it
+        // would be a meaningless question, and SuppressRedirectForPendingSlug drops the
+        // source server-side anyway.
         return sluggiElements.filter(el =>
-            el.redirectControlEnabled && !el.redirectChoiceMade && el.value !== el.originalValue
+            el.redirectControlEnabled && !el.slugPending && !el.redirectChoiceMade && el.value !== el.originalValue
         );
     }
 

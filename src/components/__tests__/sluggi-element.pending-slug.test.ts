@@ -205,6 +205,21 @@ describe('SluggiElement - pending slug lock confirmation', () => {
         document.body.removeChild(container);
     });
 
+    it('never asks about redirects for a URL path that was only ever a placeholder', async () => {
+        const { container, element, saveButton, wasSubmitted } = await buildPendingForm({ 'redirect-control': '' });
+        element.value = '/parent/neuer-titel';
+        await element.updateComplete;
+
+        saveButton.click();
+        expect(Modal._calls.length, 'only the lock confirmation belongs here').to.equal(1);
+
+        Modal._calls[0].buttons.find(button => button.btnClass === 'btn-primary')?.trigger?.();
+
+        expect(Modal._calls.length, 'a redirect from the placeholder path is meaningless').to.equal(1);
+        expect(wasSubmitted(), 'confirming is the only decision needed').to.be.true;
+        document.body.removeChild(container);
+    });
+
     it('blocks the save while the URL preview could not be loaded', async () => {
         const originalFetch = window.fetch;
         const originalTypo3 = (window as unknown as { TYPO3?: unknown }).TYPO3;

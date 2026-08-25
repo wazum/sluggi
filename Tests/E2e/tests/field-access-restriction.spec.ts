@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { waitForEditForm } from '../fixtures/typo3-compat';
+import { waitForEditForm, waitForSourceFieldsInitialized } from '../fixtures/typo3-compat';
 
 test.describe('Field Access Restriction - Restricted Editor', () => {
   test('synced page without toggle hides all controls and auto-syncs on title change', async ({ page }) => {
@@ -38,6 +38,56 @@ test.describe('Field Access Restriction - Restricted Editor', () => {
     await expect(slugElement.locator('.sluggi-editable')).toHaveClass(/locked/);
     await expect(slugElement.locator('.sluggi-editable')).toHaveClass(/no-edit/);
     await expect(slugElement.locator('.sluggi-copy-url-btn')).toBeVisible();
+  });
+
+  test('pending translation of a locked page previews the URL path from the title', async ({ page }) => {
+    await page.goto('/typo3/record/edit?edit[pages][75]=edit');
+    const frame = page.frameLocator('iframe');
+    await waitForEditForm(frame, page);
+    await waitForSourceFieldsInitialized(frame);
+    const slugElement = frame.locator('sluggi-element');
+
+    await expect(slugElement).toHaveAttribute('slug-pending', '');
+    await expect(slugElement.locator('.sluggi-lock-toggle')).not.toBeVisible();
+    await expect(slugElement.locator('.sluggi-note')).toContainText('generated from the source fields');
+
+    const hiddenInput = frame.locator('input.sluggi-hidden-field');
+    await expect(hiddenInput).toHaveValue('/restricted-section/translate-to-german-pending-preview-source');
+
+    const titleInput = frame.locator('input[data-formengine-input-name*="[title]"]');
+    await titleInput.fill('Vorschau Titel');
+    await titleInput.blur();
+
+    // Proves the proposal endpoint serves a locked, pending record — without it the
+    // editor would save a URL path nobody ever saw.
+    await expect(hiddenInput).toHaveValue('/restricted-section/vorschau-titel', { timeout: 10000 });
+  });
+
+  test('confirms the generated URL path before locking it, and saves it', async ({ page }) => {
+    await page.goto('/typo3/record/edit?edit[pages][77]=edit');
+    const frame = page.frameLocator('iframe');
+    await waitForEditForm(frame, page);
+    await waitForSourceFieldsInitialized(frame);
+
+    const hiddenInput = frame.locator('input.sluggi-hidden-field');
+    const titleInput = frame.locator('input[data-formengine-input-name*="[title]"]');
+    await titleInput.fill('Bestaetigter Titel');
+    await titleInput.blur();
+    await expect(hiddenInput).toHaveValue('/restricted-section/bestaetigter-titel', { timeout: 10000 });
+
+    await frame.locator('button[name="_savedok"]').click();
+
+    const modal = page.locator('.modal');
+    await expect(modal).toBeVisible({ timeout: 5000 });
+    await expect(modal.locator('.modal-body')).toContainText('/restricted-section/bestaetigter-titel');
+
+    // No redirect question follows: the placeholder path was never a public URL.
+    await modal.getByRole('button', { name: 'Save and lock URL path', exact: true }).click();
+    await page.locator('.alert-success').waitFor({ state: 'visible', timeout: 10000 });
+
+    await expect(frame.locator('input.sluggi-hidden-field')).toHaveValue('/restricted-section/bestaetigter-titel');
+    await expect(frame.locator('sluggi-element')).not.toHaveAttribute('slug-pending', '');
+    await expect(frame.locator('sluggi-element').locator('.sluggi-note')).toContainText('locked');
   });
 
   test('copies the page URL from a synced page without sync access', async ({ page, context }) => {

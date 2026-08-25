@@ -1424,3 +1424,108 @@ ON DUPLICATE KEY UPDATE
   `perms_user` = VALUES(`perms_user`),
   `perms_group` = VALUES(`perms_group`),
   `perms_everybody` = VALUES(`perms_everybody`);
+
+-- =============================================
+-- field-access-restriction.spec.ts, pending slug generation (uses pages 74-77)
+-- =============================================
+-- Two independent pairs: each translation carries the placeholder slug core
+-- generates for it plus tx_sluggi_slug_pending, so the restricted editor meets
+-- exactly the state a fresh "Translate" leaves behind on a locked page. The
+-- second pair exists because confirming the dialog spends the one-shot window.
+-- For the same reason a local re-run needs this file applied again — CI starts
+-- from an empty database, so it is unaffected.
+-- Page 74: locked source page, owned by the restricted editors group.
+INSERT INTO `pages` (`uid`, `pid`, `title`, `slug`, `doktype`, `is_siteroot`, `hidden`, `deleted`, `tstamp`, `crdate`, `tx_sluggi_sync`, `slug_locked`, `sys_language_uid`, `l10n_parent`, `perms_userid`, `perms_groupid`, `perms_user`, `perms_group`, `perms_everybody`)
+VALUES (74, 36, 'Pending Preview Source', '/restricted-section/pending-preview-source', 1, 0, 0, 0, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 0, 1, 0, 0, 1, 3, 31, 31, 0)
+ON DUPLICATE KEY UPDATE
+  `pid` = VALUES(`pid`),
+  `title` = VALUES(`title`),
+  `slug` = VALUES(`slug`),
+  `doktype` = VALUES(`doktype`),
+  `is_siteroot` = VALUES(`is_siteroot`),
+  `hidden` = VALUES(`hidden`),
+  `deleted` = VALUES(`deleted`),
+  `tstamp` = VALUES(`tstamp`),
+  `crdate` = VALUES(`crdate`),
+  `tx_sluggi_sync` = VALUES(`tx_sluggi_sync`),
+  `slug_locked` = VALUES(`slug_locked`),
+  `sys_language_uid` = VALUES(`sys_language_uid`),
+  `l10n_parent` = VALUES(`l10n_parent`),
+  `perms_userid` = VALUES(`perms_userid`),
+  `perms_groupid` = VALUES(`perms_groupid`),
+  `perms_user` = VALUES(`perms_user`),
+  `perms_group` = VALUES(`perms_group`),
+  `perms_everybody` = VALUES(`perms_everybody`);
+
+-- Page 75: its German translation, still carrying the placeholder URL path.
+INSERT INTO `pages` (`uid`, `pid`, `title`, `slug`, `doktype`, `is_siteroot`, `hidden`, `deleted`, `tstamp`, `crdate`, `tx_sluggi_sync`, `slug_locked`, `tx_sluggi_slug_pending`, `sys_language_uid`, `l10n_parent`, `l10n_source`, `perms_userid`, `perms_groupid`, `perms_user`, `perms_group`, `perms_everybody`)
+VALUES (75, 36, '[Translate to German:] Pending Preview Source', '/restricted-section/translate-to-german-pending-preview-source', 1, 0, 0, 0, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 0, 0, 1, 1, 74, 74, 1, 3, 31, 31, 0)
+ON DUPLICATE KEY UPDATE
+  `pid` = VALUES(`pid`),
+  `title` = VALUES(`title`),
+  `slug` = VALUES(`slug`),
+  `doktype` = VALUES(`doktype`),
+  `is_siteroot` = VALUES(`is_siteroot`),
+  `hidden` = VALUES(`hidden`),
+  `deleted` = VALUES(`deleted`),
+  `tstamp` = VALUES(`tstamp`),
+  `crdate` = VALUES(`crdate`),
+  `tx_sluggi_sync` = VALUES(`tx_sluggi_sync`),
+  `slug_locked` = VALUES(`slug_locked`),
+  `tx_sluggi_slug_pending` = VALUES(`tx_sluggi_slug_pending`),
+  `sys_language_uid` = VALUES(`sys_language_uid`),
+  `l10n_parent` = VALUES(`l10n_parent`),
+  `l10n_source` = VALUES(`l10n_source`),
+  `perms_userid` = VALUES(`perms_userid`),
+  `perms_groupid` = VALUES(`perms_groupid`),
+  `perms_user` = VALUES(`perms_user`),
+  `perms_group` = VALUES(`perms_group`),
+  `perms_everybody` = VALUES(`perms_everybody`);
+
+-- Page 76: locked source page for the save-and-lock test.
+INSERT INTO `pages` (`uid`, `pid`, `title`, `slug`, `doktype`, `is_siteroot`, `hidden`, `deleted`, `tstamp`, `crdate`, `tx_sluggi_sync`, `slug_locked`, `sys_language_uid`, `l10n_parent`, `perms_userid`, `perms_groupid`, `perms_user`, `perms_group`, `perms_everybody`)
+VALUES (76, 36, 'Pending Confirm Source', '/restricted-section/pending-confirm-source', 1, 0, 0, 0, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 0, 1, 0, 0, 1, 3, 31, 31, 0)
+ON DUPLICATE KEY UPDATE
+  `pid` = VALUES(`pid`),
+  `title` = VALUES(`title`),
+  `slug` = VALUES(`slug`),
+  `doktype` = VALUES(`doktype`),
+  `is_siteroot` = VALUES(`is_siteroot`),
+  `hidden` = VALUES(`hidden`),
+  `deleted` = VALUES(`deleted`),
+  `tstamp` = VALUES(`tstamp`),
+  `crdate` = VALUES(`crdate`),
+  `tx_sluggi_sync` = VALUES(`tx_sluggi_sync`),
+  `slug_locked` = VALUES(`slug_locked`),
+  `sys_language_uid` = VALUES(`sys_language_uid`),
+  `l10n_parent` = VALUES(`l10n_parent`),
+  `perms_userid` = VALUES(`perms_userid`),
+  `perms_groupid` = VALUES(`perms_groupid`),
+  `perms_user` = VALUES(`perms_user`),
+  `perms_group` = VALUES(`perms_group`),
+  `perms_everybody` = VALUES(`perms_everybody`);
+
+-- Page 77: its German translation, still carrying the placeholder URL path.
+INSERT INTO `pages` (`uid`, `pid`, `title`, `slug`, `doktype`, `is_siteroot`, `hidden`, `deleted`, `tstamp`, `crdate`, `tx_sluggi_sync`, `slug_locked`, `tx_sluggi_slug_pending`, `sys_language_uid`, `l10n_parent`, `l10n_source`, `perms_userid`, `perms_groupid`, `perms_user`, `perms_group`, `perms_everybody`)
+VALUES (77, 36, '[Translate to German:] Pending Confirm Source', '/restricted-section/translate-to-german-pending-confirm-source', 1, 0, 0, 0, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 0, 0, 1, 1, 76, 76, 1, 3, 31, 31, 0)
+ON DUPLICATE KEY UPDATE
+  `pid` = VALUES(`pid`),
+  `title` = VALUES(`title`),
+  `slug` = VALUES(`slug`),
+  `doktype` = VALUES(`doktype`),
+  `is_siteroot` = VALUES(`is_siteroot`),
+  `hidden` = VALUES(`hidden`),
+  `deleted` = VALUES(`deleted`),
+  `tstamp` = VALUES(`tstamp`),
+  `crdate` = VALUES(`crdate`),
+  `tx_sluggi_sync` = VALUES(`tx_sluggi_sync`),
+  `slug_locked` = VALUES(`slug_locked`),
+  `tx_sluggi_slug_pending` = VALUES(`tx_sluggi_slug_pending`),
+  `sys_language_uid` = VALUES(`sys_language_uid`),
+  `l10n_parent` = VALUES(`l10n_parent`),
+  `l10n_source` = VALUES(`l10n_source`),
+  `perms_userid` = VALUES(`perms_userid`),
+  `perms_groupid` = VALUES(`perms_groupid`),
+  `perms_user` = VALUES(`perms_user`),
+  `perms_group` = VALUES(`perms_group`),
+  `perms_everybody` = VALUES(`perms_everybody`);
