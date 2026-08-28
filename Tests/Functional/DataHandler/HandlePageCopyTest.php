@@ -118,6 +118,24 @@ final class HandlePageCopyTest extends FunctionalTestCase
     }
 
     #[Test]
+    public function copyingTranslatedPageWithMediaKeepsOneFileReferencePerLanguage(): void
+    {
+        $this->setUpTest('pages_for_copy_translated_media.csv');
+
+        $dataHandler = GeneralUtility::makeInstance(DataHandler::class);
+        $dataHandler->start([], [
+            'pages' => [
+                3 => [
+                    'copy' => 2,
+                ],
+            ],
+        ]);
+        $dataHandler->process_cmdmap();
+
+        $this->assertCSVDataSet(__DIR__ . '/Fixtures/file_references_after_copy_translated_media.csv');
+    }
+
+    #[Test]
     public function copyingPageTreeCopiesTranslatedChildrenWithLocalizedParentSlugs(): void
     {
         $this->setUpTest('pages_for_copy_translated_tree.csv');

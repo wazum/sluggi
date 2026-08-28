@@ -9,12 +9,19 @@ use TYPO3\CMS\Core\DataHandling\DataHandler;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use Wazum\Sluggi\Service\SlugGeneratorService;
 use Wazum\Sluggi\Utility\DataHandlerUtility;
+use WeakMap;
 
 final readonly class HandlePageCopy
 {
+    /**
+     * @var WeakMap<DataHandler, list<array<int, int>>>
+     */
+    private WeakMap $copiedPagesPerCommand;
+
     public function __construct(
         private SlugGeneratorService $slugGeneratorService,
     ) {
+        $this->copiedPagesPerCommand = new WeakMap();
     }
 
     /**
@@ -33,21 +40,48 @@ final readonly class HandlePageCopy
             return;
         }
 
-        $this->updateSlugsForCopiedPages($dataHandler);
+        $copiedPages = [];
+        foreach ($dataHandler->copyMappingArray['pages'] ?? [] as $sourceUid => $targetUid) {
+            $copiedPages[(int)$sourceUid] = (int)$targetUid;
+        }
+
+        if ($copiedPages === []) {
+            return;
+        }
+
+        // No data map yet: the copied records still point at the source page, so TYPO3
+        // would delete or duplicate the file references of the copied translations.
+        $collected = $this->copiedPagesPerCommand[$dataHandler] ?? [];
+        $collected[] = $copiedPages;
+        $this->copiedPagesPerCommand[$dataHandler] = $collected;
     }
 
-    private function updateSlugsForCopiedPages(DataHandler $dataHandler): void
+    public function processCmdmap_afterFinish(DataHandler $dataHandler): void
+    {
+        $collected = $this->copiedPagesPerCommand[$dataHandler] ?? [];
+        unset($this->copiedPagesPerCommand[$dataHandler]);
+
+        // One data map per command, so a later command sees the slugs of the earlier ones.
+        foreach ($collected as $copiedPages) {
+            $this->updateSlugsForCopiedPages($dataHandler, $copiedPages);
+        }
+    }
+
+    /**
+     * @param array<int, int> $copiedPages source uid => target uid
+     */
+    private function updateSlugsForCopiedPages(DataHandler $dataHandler, array $copiedPages): void
     {
         $data = [];
         $processedSlugs = [];
 
-        foreach ($dataHandler->copyMappingArray['pages'] ?? [] as $sourceUid => $targetUid) {
-            $newSlug = $this->resolveSlugForCopiedPage((int)$sourceUid, (int)$targetUid, $processedSlugs);
+        foreach ($copiedPages as $sourceUid => $targetUid) {
+            $newSlug = $this->resolveSlugForCopiedPage($sourceUid, $targetUid, $processedSlugs);
             if ($newSlug === null) {
                 continue;
             }
 
-            $data['pages'][(int)$targetUid] = ['slug' => $newSlug, 'slug_locked' => 0];
+            $data['pages'][$targetUid] = ['slug' => $newSlug, 'slug_locked' => 0];
         }
 
         if ($data === []) {
