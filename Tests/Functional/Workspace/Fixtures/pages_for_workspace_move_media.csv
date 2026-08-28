@@ -1,0 +1,13 @@
+"pages"
+,"uid","pid","l10n_parent","l10n_source","sys_language_uid","title","slug","tx_sluggi_sync","doktype","media","t3ver_wsid","t3ver_state","t3ver_oid"
+,6,2,0,0,0,"Media Child","/parent-a/media-child",1,1,1,0,0,0
+,7,2,6,6,1,"Medien Kind","/parent-a/medien-kind",1,1,1,0,0,0
+
+"sys_file"
+,"uid","pid","storage","type","identifier","identifier_hash","folder_hash","extension","mime_type","name","sha1","size","missing"
+,1,0,1,2,"/image.jpg","d41d8cd98f00b204e9800998ecf8427e","d41d8cd98f00b204e9800998ecf8427f","jpg","image/jpeg","image.jpg","da39a3ee5e6b4b0d3255bfef95601890afd80709",100,0
+
+"sys_file_reference"
+,"uid","pid","uid_local","uid_foreign","tablenames","fieldname","sorting_foreign","sys_language_uid","l10n_parent"
+,1,6,1,6,"pages","media",1,0,0
+,2,6,1,7,"pages","media",1,1,1

@@ -37,6 +37,12 @@ final class HandlePageMoveWorkspaceTest extends FunctionalTestCase
                     'locale' => 'en_US.UTF-8',
                     'base' => '/',
                 ],
+                [
+                    'languageId' => 1,
+                    'title' => 'German',
+                    'locale' => 'de_DE.UTF-8',
+                    'base' => '/de/',
+                ],
             ],
             'settings' => [
                 'redirects' => [
@@ -78,5 +84,27 @@ final class HandlePageMoveWorkspaceTest extends FunctionalTestCase
 
         $liveRecord = BackendUtility::getRecord('pages', 4, 'slug');
         self::assertSame('/parent-a/child', $liveRecord['slug']);
+    }
+
+    #[Test]
+    public function movingTranslatedPageWithMediaKeepsOneFileReferencePerLanguage(): void
+    {
+        $this->importCSVDataSet(__DIR__ . '/Fixtures/pages_for_workspace_move_media.csv');
+
+        $backendUser = $GLOBALS['BE_USER'];
+        $backendUser->workspace = 1;
+        $this->get(Context::class)->setAspect('workspace', new WorkspaceAspect(1));
+
+        $dataHandler = GeneralUtility::makeInstance(DataHandler::class);
+        $dataHandler->start([], [
+            'pages' => [
+                6 => [
+                    'move' => 3,
+                ],
+            ],
+        ]);
+        $dataHandler->process_cmdmap();
+
+        $this->assertCSVDataSet(__DIR__ . '/Fixtures/file_references_after_workspace_move_media.csv');
     }
 }
