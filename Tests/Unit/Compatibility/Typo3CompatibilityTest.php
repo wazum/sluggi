@@ -10,6 +10,13 @@ use Wazum\Sluggi\Compatibility\Typo3Compatibility;
 
 final class Typo3CompatibilityTest extends TestCase
 {
+    public function testUsesLegacySaveClickOnlyOnTypo312(): void
+    {
+        $major = (new Typo3Version())->getMajorVersion();
+
+        self::assertSame($major === 12, Typo3Compatibility::usesLegacySaveClick());
+    }
+
     public function testFormElementFieldInformationMatchesCurrentMajorVersion(): void
     {
         $major = (new Typo3Version())->getMajorVersion();

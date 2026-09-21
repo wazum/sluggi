@@ -31,6 +31,17 @@ final class Typo3Compatibility
     }
 
     /**
+     * TYPO3 12 saves through jQuery's trigger('submit'), which calls the native
+     * form.submit() and dispatches no submit event, so the save can only be
+     * caught on the save button click.
+     * TYPO3 13+: every save goes through a real, cancelable submit event.
+     */
+    public static function usesLegacySaveClick(): bool
+    {
+        return self::getMajorVersion() === 12;
+    }
+
+    /**
      * FormEngine form wizards element CSS class
      * TYPO3 12: 'form-wizards-element'
      * TYPO3 13+: 'form-wizards-item-element'.

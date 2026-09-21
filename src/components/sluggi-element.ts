@@ -4,6 +4,7 @@ import Modal from '@typo3/backend/modal.js';
 import Severity from '@typo3/backend/severity.js';
 import Notification from '@typo3/backend/notification.js';
 import { isSlugProposalResponse } from '../types/index.js';
+import { findLegacySave } from '../compat/legacy-save.js';
 import type { ComponentMode, SourceFieldMetadata, ToggleConfig } from '@/types';
 import { editIcon, fullPathEditIcon, refreshIcon, checkIcon, closeIcon, syncOnIcon, syncOffIcon, lockOnIcon, lockOffIcon, copyIcon, menuIcon, sourceBadgeIconMarkup, sourceConfirmIconMarkup } from './icons.js';
 import styles from '../styles/sluggi-element.scss?inline';
@@ -92,6 +93,10 @@ export class SluggiElement extends LitElement {
 
     @property({ type: Boolean, attribute: 'redirect-control' })
     redirectControlEnabled = false;
+
+    /** @deprecated Remove together with src/compat/legacy-save.ts */
+    @property({ type: Boolean, attribute: 'legacy-save' })
+    legacySave = false;
 
     @property({ type: Boolean, attribute: 'page-hidden' })
     pageHidden = false;
@@ -241,7 +246,7 @@ export class SluggiElement extends LitElement {
         this.initialLockValue = (this.parentElement?.querySelector('.sluggi-lock-field') as HTMLInputElement | null)?.value ?? '';
         SluggiElement.connectedElementCount++;
         if (SluggiElement.connectedElementCount === 1) {
-            this.ownerDocument.addEventListener('submit', SluggiElement.handleFormSubmit, true);
+            this.listenForSaves();
         }
         this.decorateSourceFields();
         this.setupSourceFieldListeners();
@@ -255,7 +260,8 @@ export class SluggiElement extends LitElement {
         super.disconnectedCallback();
         SluggiElement.connectedElementCount--;
         if (SluggiElement.connectedElementCount <= 0) {
-            this.ownerDocument.removeEventListener('submit', SluggiElement.handleFormSubmit, true);
+            SluggiElement.stopListeningForSaves?.();
+            SluggiElement.stopListeningForSaves = null;
             SluggiElement.pendingProposalRequestCount = 0;
             SluggiElement.deferredSave = null;
             // No element left that could resolve a pending modal decision
@@ -1550,6 +1556,23 @@ export class SluggiElement extends LitElement {
 
     private static pendingLockModalOpen = false;
 
+    private static stopListeningForSaves: (() => void) | null = null;
+
+    private listenForSaves(): void {
+        const document = this.ownerDocument;
+        if (this.legacySave) {
+            document.addEventListener('click', SluggiElement.handleLegacySaveClick, true);
+            SluggiElement.stopListeningForSaves = () =>
+                document.removeEventListener('click', SluggiElement.handleLegacySaveClick, true);
+
+            return;
+        }
+
+        document.addEventListener('submit', SluggiElement.handleFormSubmit, true);
+        SluggiElement.stopListeningForSaves = () =>
+            document.removeEventListener('submit', SluggiElement.handleFormSubmit, true);
+    }
+
     private syncReservedSlugValidity(): void {
         const hidden = this.parentElement?.querySelector('.sluggi-hidden-field') as HTMLInputElement | null;
         if (!hidden) return;
@@ -1588,7 +1611,23 @@ export class SluggiElement extends LitElement {
     // must stop propagation as well, otherwise core's SubmitInterceptor marks
     // the form as submitting and disables the save button behind the modal.
     private static handleFormSubmit(event: SubmitEvent): void {
+        // The save resumes exactly as it started: the submitter carries the
+        // intent of buttons like _savedok, everything the keyboard shortcuts
+        // put into the form is already there.
         const form = event.target as HTMLFormElement;
+        const submitter = event.submitter ?? undefined;
+
+        SluggiElement.holdSaveForDecisions(form, event, () => form.requestSubmit(submitter));
+    }
+
+    private static handleLegacySaveClick(event: MouseEvent): void {
+        const legacySave = findLegacySave(event);
+        if (!legacySave) return;
+
+        SluggiElement.holdSaveForDecisions(legacySave.form, event, legacySave.resumeSave);
+    }
+
+    private static holdSaveForDecisions(form: HTMLFormElement, event: Event, resumeSave: () => void): void {
         const sluggiElements = Array.from(form.querySelectorAll('sluggi-element')) as SluggiElement[];
         if (sluggiElements.length === 0) return;
 
@@ -1597,11 +1636,6 @@ export class SluggiElement extends LitElement {
             event.stopPropagation();
             event.stopImmediatePropagation();
         };
-        // The save resumes exactly as it started: the submitter carries the
-        // intent of buttons like _savedok, everything the keyboard shortcuts
-        // put into the form is already there.
-        const submitter = event.submitter ?? undefined;
-        const resumeSave = (): void => form.requestSubmit(submitter);
 
         if (SluggiElement.redirectModalPending || SluggiElement.pendingLockModalOpen) {
             // A modal decision is still pending — the elements are already

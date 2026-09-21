@@ -447,6 +447,33 @@ describe('SluggiElement - Integration', () => {
             document.body.removeChild(container);
         });
 
+        it('asks about redirects on the save click when TYPO3 12 never fires a submit event', async () => {
+            const container = document.createElement('div');
+            container.innerHTML = `
+                <form>
+                    <sluggi-element value="/page-a" record-id="1" page-id="1" redirect-control legacy-save></sluggi-element>
+                    <input type="hidden" class="sluggi-redirect-field" value="0" />
+                    <button name="_savedok" type="button">Save</button>
+                </form>
+            `;
+            document.body.appendChild(container);
+            const element = container.querySelector('sluggi-element') as SluggiElement;
+            await element.updateComplete;
+            element.value = '/page-a-changed';
+
+            (Modal as any)._reset();
+            // TYPO3 12 saves through jQuery's trigger('submit'), which calls the
+            // native form.submit() — the click is the only thing to hold on to
+            const button = container.querySelector('button[name="_savedok"]') as HTMLButtonElement;
+            const clickEvent = new MouseEvent('click', { bubbles: true, cancelable: true });
+            button.dispatchEvent(clickEvent);
+
+            expect((Modal as any)._calls.length, 'the redirect question must be asked').to.equal(1);
+            expect(clickEvent.defaultPrevented, 'the save waits for the decision').to.equal(true);
+
+            document.body.removeChild(container);
+        });
+
         it('still intercepts the save after one of several elements disconnects', async () => {
             const container = document.createElement('div');
             container.innerHTML = `

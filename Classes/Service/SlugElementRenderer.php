@@ -97,6 +97,9 @@ final readonly class SlugElementRenderer
         if (!empty($context['reservedPaths'])) {
             $attributes['reserved-paths'] = (string)json_encode($context['reservedPaths']);
         }
+        if ($context['legacySave'] ?? false) {
+            $attributes['legacy-save'] = '';
+        }
 
         return $attributes;
     }

@@ -195,6 +195,7 @@ trait SlugElementTrait
             'redirectFieldName' => $this->slugElementRenderer->buildRedirectFieldName($table, $recordId),
             'redirectCount' => 0,
             'redirectsModuleUrl' => '',
+            'legacySave' => Typo3Compatibility::usesLegacySaveClick(),
         ];
 
         if ($table === 'pages' && $command !== 'new' && is_numeric($recordId)
