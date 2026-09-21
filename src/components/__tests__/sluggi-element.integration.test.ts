@@ -417,87 +417,12 @@ describe('SluggiElement - Integration', () => {
     });
 
     describe('Redirect Control Save Interception', () => {
-        it('still intercepts the save button after one of several elements disconnects', async () => {
-            const container = document.createElement('div');
-            container.innerHTML = `
-                <form>
-                    <sluggi-element value="/page-a" record-id="1" page-id="1" redirect-control></sluggi-element>
-                    <sluggi-element value="/page-b" record-id="2" page-id="2" redirect-control></sluggi-element>
-                    <button name="_savedok" type="button">Save</button>
-                </form>
-            `;
-            document.body.appendChild(container);
-            const elements = Array.from(container.querySelectorAll('sluggi-element')) as SluggiElement[];
-            await Promise.all(elements.map((element) => element.updateComplete));
-            for (const element of elements) {
-                element.value = `${element.value}-changed`;
-            }
-
-            elements[0].remove();
-
-            const button = container.querySelector('button[name="_savedok"]') as HTMLButtonElement;
-            const clickEvent = new MouseEvent('click', { bubbles: true, cancelable: true });
-            button.dispatchEvent(clickEvent);
-
-            expect(clickEvent.defaultPrevented).to.equal(true);
-
-            document.body.removeChild(container);
-        });
-
-        it('keeps blocking save clicks while the redirect modal decision is pending', async () => {
-            const container = document.createElement('div');
-            container.innerHTML = `
-                <form>
-                    <sluggi-element value="/page-a" record-id="1" page-id="1" redirect-control></sluggi-element>
-                    <button name="_savedok" type="button">Save</button>
-                </form>
-            `;
-            document.body.appendChild(container);
-            const element = container.querySelector('sluggi-element') as SluggiElement;
-            await element.updateComplete;
-            element.value = '/page-a-changed';
-
-            const button = container.querySelector('button[name="_savedok"]') as HTMLButtonElement;
-            const firstClick = new MouseEvent('click', { bubbles: true, cancelable: true });
-            button.dispatchEvent(firstClick);
-            expect(firstClick.defaultPrevented, 'first click opens the modal and is blocked').to.equal(true);
-
-            const secondClick = new MouseEvent('click', { bubbles: true, cancelable: true });
-            button.dispatchEvent(secondClick);
-            expect(secondClick.defaultPrevented, 'second click while the modal is pending must be blocked too').to.equal(true);
-
-            document.body.removeChild(container);
-        });
-
-        it('intercepts other save submitters like save-and-close', async () => {
-            const container = document.createElement('div');
-            container.innerHTML = `
-                <form>
-                    <sluggi-element value="/page-a" record-id="1" page-id="1" redirect-control></sluggi-element>
-                    <button name="_saveandclosedok" type="button">Save and close</button>
-                </form>
-            `;
-            document.body.appendChild(container);
-            const element = container.querySelector('sluggi-element') as SluggiElement;
-            await element.updateComplete;
-            element.value = '/page-a-changed';
-
-            const button = container.querySelector('button[name="_saveandclosedok"]') as HTMLButtonElement;
-            const clickEvent = new MouseEvent('click', { bubbles: true, cancelable: true });
-            button.dispatchEvent(clickEvent);
-
-            expect(clickEvent.defaultPrevented).to.equal(true);
-
-            document.body.removeChild(container);
-        });
-
-        it('lets the save button keep its own click handler after the redirect modal', async () => {
+        it('asks about redirects when the form is saved with the keyboard', async () => {
             const container = document.createElement('div');
             container.innerHTML = `
                 <form>
                     <sluggi-element value="/page-a" record-id="1" page-id="1" redirect-control></sluggi-element>
                     <input type="hidden" class="sluggi-redirect-field" value="0" />
-                    <button name="_saveandclosedok">Save and close</button>
                 </form>
             `;
             document.body.appendChild(container);
@@ -506,35 +431,138 @@ describe('SluggiElement - Integration', () => {
             element.value = '/page-a-changed';
 
             const form = container.querySelector('form') as HTMLFormElement;
-            form.addEventListener('submit', (event) => event.preventDefault());
-
-            // EXT:save_and_close hangs its own handler on the button and turns the
-            // click into FormEngine.saveAndCloseDocument()
-            const button = container.querySelector('button[name="_saveandclosedok"]') as HTMLButtonElement;
-            let saveAndCloseRequested = false;
-            button.addEventListener('click', (event) => {
+            let submitted = false;
+            form.addEventListener('submit', (event) => {
                 event.preventDefault();
-                saveAndCloseRequested = true;
+                submitted = true;
             });
 
             (Modal as any)._reset();
-            button.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
+            // Ctrl+S never clicks a button, it goes straight to FormEngine.saveDocument()
+            form.requestSubmit();
 
-            const createButton = (Modal as any)._calls.at(-1).buttons.find((modalButton: any) => modalButton.btnClass === 'btn-primary');
-            createButton.trigger();
-
-            expect(saveAndCloseRequested, 'the save-and-close intent must survive the modal').to.equal(true);
+            expect((Modal as any)._calls.length, 'the redirect question must be asked').to.equal(1);
+            expect(submitted, 'the save waits for the decision').to.equal(false);
 
             document.body.removeChild(container);
         });
 
-        it('no longer intercepts the save button after the last element disconnects', async () => {
+        it('still intercepts the save after one of several elements disconnects', async () => {
             const container = document.createElement('div');
             container.innerHTML = `
                 <form>
                     <sluggi-element value="/page-a" record-id="1" page-id="1" redirect-control></sluggi-element>
                     <sluggi-element value="/page-b" record-id="2" page-id="2" redirect-control></sluggi-element>
-                    <button name="_savedok" type="button">Save</button>
+                    <button name="_savedok" type="submit">Save</button>
+                </form>
+            `;
+            document.body.appendChild(container);
+            const elements = Array.from(container.querySelectorAll('sluggi-element')) as SluggiElement[];
+            await Promise.all(elements.map((element) => element.updateComplete));
+            for (const element of elements) {
+                element.value = `${element.value}-changed`;
+            }
+            const form = container.querySelector('form') as HTMLFormElement;
+            let submitted = false;
+            form.addEventListener('submit', (event) => {
+                event.preventDefault();
+                submitted = true;
+            });
+
+            elements[0].remove();
+
+            (container.querySelector('button[name="_savedok"]') as HTMLButtonElement).click();
+
+            expect(submitted, 'the remaining element still needs its redirect decision').to.equal(false);
+
+            document.body.removeChild(container);
+        });
+
+        it('keeps blocking saves while the redirect modal decision is pending', async () => {
+            const container = document.createElement('div');
+            container.innerHTML = `
+                <form>
+                    <sluggi-element value="/page-a" record-id="1" page-id="1" redirect-control></sluggi-element>
+                    <button name="_savedok" type="submit">Save</button>
+                </form>
+            `;
+            document.body.appendChild(container);
+            const element = container.querySelector('sluggi-element') as SluggiElement;
+            await element.updateComplete;
+            element.value = '/page-a-changed';
+            const form = container.querySelector('form') as HTMLFormElement;
+            let submitted = false;
+            form.addEventListener('submit', (event) => {
+                event.preventDefault();
+                submitted = true;
+            });
+
+            const button = container.querySelector('button[name="_savedok"]') as HTMLButtonElement;
+            button.click();
+            expect(submitted, 'the first save opens the modal and is blocked').to.equal(false);
+
+            button.click();
+            expect(submitted, 'a second save while the modal is pending must be blocked too').to.equal(false);
+
+            document.body.removeChild(container);
+        });
+
+        it('keeps the save-and-close intent through the redirect modal', async () => {
+            const container = document.createElement('div');
+            container.innerHTML = `
+                <form>
+                    <sluggi-element value="/page-a" record-id="1" page-id="1" redirect-control></sluggi-element>
+                    <input type="hidden" class="sluggi-redirect-field" value="0" />
+                    <button name="_savedok" type="submit">Save</button>
+                </form>
+            `;
+            document.body.appendChild(container);
+            const element = container.querySelector('sluggi-element') as SluggiElement;
+            await element.updateComplete;
+            element.value = '/page-a-changed';
+
+            const form = container.querySelector('form') as HTMLFormElement;
+            const submits: SubmitEvent[] = [];
+            form.addEventListener('submit', (event) => {
+                event.preventDefault();
+                submits.push(event as SubmitEvent);
+            });
+
+            // EXT:save_and_close turns its click into FormEngine.saveAndCloseDocument(),
+            // which appends the hidden field and submits the form
+            const button = container.querySelector('button[name="_savedok"]') as HTMLButtonElement;
+            button.addEventListener('click', (event) => {
+                event.preventDefault();
+                const intent = document.createElement('input');
+                intent.type = 'hidden';
+                intent.name = '_saveandclosedok';
+                intent.value = '1';
+                form.append(intent);
+                form.requestSubmit();
+            });
+
+            (Modal as any)._reset();
+            button.click();
+
+            const createButton = (Modal as any)._calls.at(-1).buttons.find((modalButton: any) => modalButton.btnClass === 'btn-primary');
+            createButton.trigger();
+
+            expect(submits, 'the save must go through once the redirect is decided').to.have.lengthOf(1);
+            expect(
+                form.querySelector('input[name="_saveandclosedok"]'),
+                'the save-and-close intent must survive the modal',
+            ).to.exist;
+
+            document.body.removeChild(container);
+        });
+
+        it('no longer intercepts the save after the last element disconnects', async () => {
+            const container = document.createElement('div');
+            container.innerHTML = `
+                <form>
+                    <sluggi-element value="/page-a" record-id="1" page-id="1" redirect-control></sluggi-element>
+                    <sluggi-element value="/page-b" record-id="2" page-id="2" redirect-control></sluggi-element>
+                    <button name="_savedok" type="submit">Save</button>
                 </form>
             `;
             document.body.appendChild(container);
@@ -544,12 +572,16 @@ describe('SluggiElement - Integration', () => {
                 element.value = `${element.value}-changed`;
                 element.remove();
             }
+            const form = container.querySelector('form') as HTMLFormElement;
+            let submitted = false;
+            form.addEventListener('submit', (event) => {
+                event.preventDefault();
+                submitted = true;
+            });
 
-            const button = container.querySelector('button[name="_savedok"]') as HTMLButtonElement;
-            const clickEvent = new MouseEvent('click', { bubbles: true, cancelable: true });
-            button.dispatchEvent(clickEvent);
+            (container.querySelector('button[name="_savedok"]') as HTMLButtonElement).click();
 
-            expect(clickEvent.defaultPrevented).to.equal(false);
+            expect(submitted, 'no element is left to ask about redirects').to.equal(true);
 
             document.body.removeChild(container);
         });
@@ -902,87 +934,82 @@ describe('SluggiElement - Integration', () => {
             { status: 200, headers: { 'Content-Type': 'application/json' } },
         );
 
-        it('defers a save click while a proposal request is in flight and replays it afterwards', async () => {
+        const buildSaveForm = () => {
+            const container = document.createElement('div');
+            container.innerHTML = `
+                <form>
+                    <sluggi-element value="/test" record-id="123" page-id="1" table-name="pages" field-name="slug"></sluggi-element>
+                    <button name="_savedok" type="submit">Save</button>
+                </form>
+            `;
+            document.body.appendChild(container);
+            const form = container.querySelector('form') as HTMLFormElement;
+            const submits: SubmitEvent[] = [];
+            form.addEventListener('submit', (event) => {
+                event.preventDefault();
+                submits.push(event as SubmitEvent);
+            });
+
+            return {
+                container,
+                element: container.querySelector('sluggi-element') as SluggiElement,
+                saveButton: container.querySelector('button[name="_savedok"]') as HTMLButtonElement,
+                submits,
+            };
+        };
+
+        it('defers a save while a proposal request is in flight and replays it afterwards', async () => {
             let resolveResponse!: (response: Response) => void;
             window.fetch = () => new Promise<Response>((resolve) => {
                 resolveResponse = resolve;
             });
 
-            const container = document.createElement('div');
-            container.innerHTML = `
-                <sluggi-element value="/test" record-id="123" page-id="1" table-name="pages" field-name="slug"></sluggi-element>
-                <button name="_savedok" type="button">Save</button>
-            `;
-            document.body.appendChild(container);
-            const el = container.querySelector('sluggi-element') as SluggiElement;
-            const saveButton = container.querySelector('button[name="_savedok"]') as HTMLButtonElement;
-            await el.updateComplete;
+            const { container, element, saveButton, submits } = buildSaveForm();
+            await element.updateComplete;
 
-            const reachedButton: MouseEvent[] = [];
-            saveButton.addEventListener('click', (event) => reachedButton.push(event));
-
-            const request = el.sendSlugProposal('manual');
-            const blockedClick = new MouseEvent('click', { bubbles: true, cancelable: true });
-            const proceeded = saveButton.dispatchEvent(blockedClick);
-            expect(proceeded, 'a save click during a pending request must be canceled').to.equal(false);
-            expect(reachedButton, 'the canceled click must not reach the button').to.have.lengthOf(0);
+            const request = element.sendSlugProposal('manual');
+            saveButton.click();
+            expect(submits, 'a save during a pending request must be blocked').to.have.lengthOf(0);
 
             resolveResponse(proposalResponse());
             await request;
-            expect(reachedButton, 'the save click must be replayed after the request settles').to.have.lengthOf(1);
-            expect(reachedButton[0].defaultPrevented).to.equal(false);
+            expect(submits, 'the save must be replayed after the request settles').to.have.lengthOf(1);
+            expect(submits[0].submitter, 'the replayed save keeps the original submitter').to.equal(saveButton);
 
             document.body.removeChild(container);
         });
 
-        it('drops a deferred save click when the proposal came back with a conflict', async () => {
+        it('drops a deferred save when the proposal came back with a conflict', async () => {
             let resolveResponse!: (response: Response) => void;
             window.fetch = () => new Promise<Response>((resolve) => {
                 resolveResponse = resolve;
             });
 
-            const container = document.createElement('div');
-            container.innerHTML = `
-                <sluggi-element value="/test" record-id="123" page-id="1" table-name="pages" field-name="slug"></sluggi-element>
-                <button name="_savedok" type="button">Save</button>
-            `;
-            document.body.appendChild(container);
-            const el = container.querySelector('sluggi-element') as SluggiElement;
-            const saveButton = container.querySelector('button[name="_savedok"]') as HTMLButtonElement;
-            await el.updateComplete;
+            const { container, element, saveButton, submits } = buildSaveForm();
+            await element.updateComplete;
 
-            const reachedButton: MouseEvent[] = [];
-            saveButton.addEventListener('click', (event) => reachedButton.push(event));
-
-            const request = el.sendSlugProposal('manual');
-            saveButton.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
+            const request = element.sendSlugProposal('manual');
+            saveButton.click();
 
             resolveResponse(new Response(
                 JSON.stringify({ proposal: '/test-1', hasConflicts: true, manual: '', slug: '/test' }),
                 { status: 200, headers: { 'Content-Type': 'application/json' } },
             ));
             await request;
-            expect(reachedButton, 'the editor must decide on the conflict before the save replays').to.have.lengthOf(0);
+            expect(submits, 'the editor must decide on the conflict before the save replays').to.have.lengthOf(0);
 
             document.body.removeChild(container);
         });
 
-        it('leaves save clicks alone when no proposal request is pending', async () => {
+        it('leaves saves alone when no proposal request is pending', async () => {
             window.fetch = async () => proposalResponse();
 
-            const container = document.createElement('div');
-            container.innerHTML = `
-                <sluggi-element value="/test" record-id="123" page-id="1" table-name="pages" field-name="slug"></sluggi-element>
-                <button name="_savedok" type="button">Save</button>
-            `;
-            document.body.appendChild(container);
-            const el = container.querySelector('sluggi-element') as SluggiElement;
-            const saveButton = container.querySelector('button[name="_savedok"]') as HTMLButtonElement;
-            await el.updateComplete;
+            const { container, element, saveButton, submits } = buildSaveForm();
+            await element.updateComplete;
 
-            const clickEvent = new MouseEvent('click', { bubbles: true, cancelable: true });
-            const proceeded = saveButton.dispatchEvent(clickEvent);
-            expect(proceeded).to.equal(true);
+            saveButton.click();
+
+            expect(submits, 'nothing is pending, the save goes straight through').to.have.lengthOf(1);
 
             document.body.removeChild(container);
         });

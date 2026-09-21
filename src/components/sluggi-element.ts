@@ -239,17 +239,14 @@ export class SluggiElement extends LitElement {
         }
         this.initialSyncValue = (this.parentElement?.querySelector('.sluggi-sync-field') as HTMLInputElement | null)?.value ?? '';
         this.initialLockValue = (this.parentElement?.querySelector('.sluggi-lock-field') as HTMLInputElement | null)?.value ?? '';
-        // Registered before the redirect-modal interceptor so a pending
-        // proposal defers the save before any modal decision is made.
         SluggiElement.connectedElementCount++;
         if (SluggiElement.connectedElementCount === 1) {
-            this.ownerDocument.addEventListener('click', SluggiElement.handleSaveClickDuringProposal, true);
+            this.ownerDocument.addEventListener('submit', SluggiElement.handleFormSubmit, true);
         }
         this.decorateSourceFields();
         this.setupSourceFieldListeners();
         this.setupSourceConfirmListeners();
         this.observeSourceFieldInitialization();
-        this.setupFormSubmitListener();
         this.updateSourceBadgeVisibility();
         this.notifyPrefixMismatch();
     }
@@ -258,15 +255,17 @@ export class SluggiElement extends LitElement {
         super.disconnectedCallback();
         SluggiElement.connectedElementCount--;
         if (SluggiElement.connectedElementCount <= 0) {
-            this.ownerDocument.removeEventListener('click', SluggiElement.handleSaveClickDuringProposal, true);
+            this.ownerDocument.removeEventListener('submit', SluggiElement.handleFormSubmit, true);
             SluggiElement.pendingProposalRequestCount = 0;
-            SluggiElement.deferredSaveButton = null;
+            SluggiElement.deferredSave = null;
+            // No element left that could resolve a pending modal decision
+            SluggiElement.redirectModalPending = false;
+            SluggiElement.pendingLockModalOpen = false;
         }
         this.removeSourceFieldListeners();
         this.removeSourceConfirmListeners();
         this.sourceFieldObserver?.disconnect();
         this.sourceFieldObserver = null;
-        this.removeFormSubmitListener();
         if (this.hideTimeoutId !== null) {
             clearTimeout(this.hideTimeoutId);
             this.hideTimeoutId = null;
@@ -1141,43 +1140,26 @@ export class SluggiElement extends LitElement {
 
     private static pendingProposalRequestCount = 0;
 
-    private static deferredSaveButton: HTMLButtonElement | null = null;
-
-    private static connectedElementCount = 0;
-
     // Saving while a proposal request is in flight would submit a provisional
     // slug and skip the conflict modal. Disabling the buttons instead would
     // swallow clicks whose mousedown already happened — the mousedown blurs
     // the source field, which fires the change event that starts the request,
     // so by mouseup the button would be disabled and the activation lost.
-    // Defer the click and replay it once the request settles. FormEngine's
-    // Ctrl+S shortcut clicks the save button, so keyboard saves defer too.
-    private static handleSaveClickDuringProposal(event: MouseEvent): void {
-        if (SluggiElement.pendingProposalRequestCount === 0) {
-            return;
-        }
-        const target = event.target as HTMLElement;
-        const saveButton = target.closest('button[name^="_save"]') as HTMLButtonElement | null;
-        if (!saveButton) {
-            return;
-        }
-        event.preventDefault();
-        event.stopPropagation();
-        event.stopImmediatePropagation();
-        SluggiElement.deferredSaveButton = saveButton;
-    }
+    private static deferredSave: (() => void) | null = null;
+
+    private static connectedElementCount = 0;
 
     private endProposalRequest(): void {
         SluggiElement.pendingProposalRequestCount = Math.max(0, SluggiElement.pendingProposalRequestCount - 1);
         if (SluggiElement.pendingProposalRequestCount > 0) {
             return;
         }
-        const deferredSaveButton = SluggiElement.deferredSaveButton;
-        SluggiElement.deferredSaveButton = null;
+        const deferredSave = SluggiElement.deferredSave;
+        SluggiElement.deferredSave = null;
         // A conflict needs the editor's decision first — the deferred save
         // must not race past the conflict modal.
-        if (deferredSaveButton !== null && !this.hasConflict) {
-            deferredSaveButton.click();
+        if (deferredSave !== null && !this.hasConflict) {
+            deferredSave();
         }
     }
 
@@ -1564,36 +1546,9 @@ export class SluggiElement extends LitElement {
     // Private Helpers: Redirect Control
     // =========================================================================
 
-    private static connectedSaveInterceptorElementCount = 0;
-
     private static redirectModalPending = false;
 
     private static pendingLockModalOpen = false;
-
-    private get needsSaveInterceptor(): boolean {
-        return this.redirectControlEnabled || this.slugPending;
-    }
-
-    private setupFormSubmitListener(): void {
-        if (!this.needsSaveInterceptor) return;
-
-        SluggiElement.connectedSaveInterceptorElementCount++;
-        // TYPO3 FormEngine doesn't fire standard 'submit' events - intercept save button clicks
-        // Using the same handler function means addEventListener won't add duplicates
-        this.ownerDocument.addEventListener('click', SluggiElement.handleSaveButtonClick, true);
-    }
-
-    private removeFormSubmitListener(): void {
-        if (!this.needsSaveInterceptor) return;
-
-        SluggiElement.connectedSaveInterceptorElementCount--;
-        // Other connected elements still rely on the shared document listener
-        if (SluggiElement.connectedSaveInterceptorElementCount > 0) return;
-        this.ownerDocument.removeEventListener('click', SluggiElement.handleSaveButtonClick, true);
-        // No element left that could resolve a pending modal decision
-        SluggiElement.redirectModalPending = false;
-        SluggiElement.pendingLockModalOpen = false;
-    }
 
     private syncReservedSlugValidity(): void {
         const hidden = this.parentElement?.querySelector('.sluggi-hidden-field') as HTMLInputElement | null;
@@ -1628,46 +1583,56 @@ export class SluggiElement extends LitElement {
         }
     }
 
-    private static handleSaveButtonClick(event: MouseEvent): void {
-        const target = event.target as HTMLElement;
-        // Covers every FormEngine save submitter (_savedok, _saveandclosedok, …)
-        const saveButton = target.closest('button[name^="_save"]') as HTMLButtonElement | null;
-        if (!saveButton) return;
+    // Every save routes through the form's submit event: the save buttons,
+    // Ctrl+S and Ctrl+Shift+S, and FormEngine's own save calls. Blocking here
+    // must stop propagation as well, otherwise core's SubmitInterceptor marks
+    // the form as submitting and disables the save button behind the modal.
+    private static handleFormSubmit(event: SubmitEvent): void {
+        const form = event.target as HTMLFormElement;
+        const sluggiElements = Array.from(form.querySelectorAll('sluggi-element')) as SluggiElement[];
+        if (sluggiElements.length === 0) return;
+
+        const blockSave = (): void => {
+            event.preventDefault();
+            event.stopPropagation();
+            event.stopImmediatePropagation();
+        };
+        // The save resumes exactly as it started: the submitter carries the
+        // intent of buttons like _savedok, everything the keyboard shortcuts
+        // put into the form is already there.
+        const submitter = event.submitter ?? undefined;
+        const resumeSave = (): void => form.requestSubmit(submitter);
 
         if (SluggiElement.redirectModalPending || SluggiElement.pendingLockModalOpen) {
             // A modal decision is still pending — the elements are already
             // marked redirectChoiceMade, so without this guard a second save
             // trigger would sail through to TYPO3's original handler.
-            event.preventDefault();
-            event.stopPropagation();
-            event.stopImmediatePropagation();
+            blockSave();
+
             return;
         }
 
-        const form = SluggiElement.findAssociatedForm(saveButton);
-        if (!form) return;
+        if (SluggiElement.pendingProposalRequestCount > 0) {
+            blockSave();
+            SluggiElement.deferredSave = resumeSave;
 
-        const sluggiElements = form.querySelectorAll('sluggi-element') as NodeListOf<SluggiElement>;
-        if (sluggiElements.length === 0) return;
+            return;
+        }
 
-        const elementsWithFailedPreview = Array.from(sluggiElements).filter(el => el.pendingPreviewFailed);
+        const elementsWithFailedPreview = sluggiElements.filter(el => el.pendingPreviewFailed);
         if (elementsWithFailedPreview.length > 0) {
-            event.preventDefault();
-            event.stopPropagation();
-            event.stopImmediatePropagation();
+            blockSave();
             elementsWithFailedPreview[0].warnProposalUnavailable();
 
             return;
         }
 
-        const elementsNeedingLockConfirmation = Array.from(sluggiElements).filter(el =>
+        const elementsNeedingLockConfirmation = sluggiElements.filter(el =>
             el.slugPending && !el.pendingLockConfirmed && el.value !== el.originalValue
         );
         if (elementsNeedingLockConfirmation.length > 0) {
-            event.preventDefault();
-            event.stopPropagation();
-            event.stopImmediatePropagation();
-            SluggiElement.showPendingLockModal(elementsNeedingLockConfirmation, saveButton);
+            blockSave();
+            SluggiElement.showPendingLockModal(elementsNeedingLockConfirmation, resumeSave);
 
             return;
         }
@@ -1675,11 +1640,8 @@ export class SluggiElement extends LitElement {
         const elementsNeedingModal = SluggiElement.collectRedirectCandidates(form);
         if (elementsNeedingModal.length === 0) return;
 
-        event.preventDefault();
-        event.stopPropagation();
-        event.stopImmediatePropagation();
-
-        SluggiElement.showRedirectModalForAll(elementsNeedingModal, saveButton);
+        blockSave();
+        SluggiElement.showRedirectModalForAll(elementsNeedingModal, resumeSave);
     }
 
     private warnProposalUnavailable(): void {
@@ -1710,7 +1672,7 @@ export class SluggiElement extends LitElement {
         );
     }
 
-    private static showPendingLockModal(elements: SluggiElement[], saveButton: HTMLButtonElement): void {
+    private static showPendingLockModal(elements: SluggiElement[], resumeSave: () => void): void {
         SluggiElement.pendingLockModalOpen = true;
 
         const firstElement = elements[0];
@@ -1745,7 +1707,7 @@ export class SluggiElement extends LitElement {
                         for (const el of elements) {
                             el.pendingLockConfirmed = true;
                         }
-                        saveButton.click();
+                        resumeSave();
                     },
                 },
             ]
@@ -1760,15 +1722,7 @@ export class SluggiElement extends LitElement {
         });
     }
 
-    private static findAssociatedForm(button: HTMLButtonElement): HTMLFormElement | null {
-        const formId = button.getAttribute('form');
-        if (formId) {
-            return document.getElementById(formId) as HTMLFormElement | null;
-        }
-        return button.closest('form');
-    }
-
-    private static showRedirectModalForAll(elements: SluggiElement[], saveButton: HTMLButtonElement): void {
+    private static showRedirectModalForAll(elements: SluggiElement[], resumeSave: () => void): void {
         SluggiElement.redirectModalPending = true;
         for (const el of elements) {
             el.redirectChoiceMade = true;
@@ -1812,7 +1766,7 @@ export class SluggiElement extends LitElement {
                         SluggiElement.redirectModalPending = false;
                         Modal.dismiss();
                         SluggiElement.applyRedirectChoiceToAll(elements, false);
-                        saveButton.click();
+                        resumeSave();
                     },
                 },
                 {
@@ -1824,7 +1778,7 @@ export class SluggiElement extends LitElement {
                         SluggiElement.redirectModalPending = false;
                         Modal.dismiss();
                         SluggiElement.applyRedirectChoiceToAll(elements, true);
-                        saveButton.click();
+                        resumeSave();
                     },
                 },
             ]
