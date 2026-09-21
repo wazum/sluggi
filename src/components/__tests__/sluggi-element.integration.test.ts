@@ -491,6 +491,43 @@ describe('SluggiElement - Integration', () => {
             document.body.removeChild(container);
         });
 
+        it('lets the save button keep its own click handler after the redirect modal', async () => {
+            const container = document.createElement('div');
+            container.innerHTML = `
+                <form>
+                    <sluggi-element value="/page-a" record-id="1" page-id="1" redirect-control></sluggi-element>
+                    <input type="hidden" class="sluggi-redirect-field" value="0" />
+                    <button name="_saveandclosedok">Save and close</button>
+                </form>
+            `;
+            document.body.appendChild(container);
+            const element = container.querySelector('sluggi-element') as SluggiElement;
+            await element.updateComplete;
+            element.value = '/page-a-changed';
+
+            const form = container.querySelector('form') as HTMLFormElement;
+            form.addEventListener('submit', (event) => event.preventDefault());
+
+            // EXT:save_and_close hangs its own handler on the button and turns the
+            // click into FormEngine.saveAndCloseDocument()
+            const button = container.querySelector('button[name="_saveandclosedok"]') as HTMLButtonElement;
+            let saveAndCloseRequested = false;
+            button.addEventListener('click', (event) => {
+                event.preventDefault();
+                saveAndCloseRequested = true;
+            });
+
+            (Modal as any)._reset();
+            button.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
+
+            const createButton = (Modal as any)._calls.at(-1).buttons.find((modalButton: any) => modalButton.btnClass === 'btn-primary');
+            createButton.trigger();
+
+            expect(saveAndCloseRequested, 'the save-and-close intent must survive the modal').to.equal(true);
+
+            document.body.removeChild(container);
+        });
+
         it('no longer intercepts the save button after the last element disconnects', async () => {
             const container = document.createElement('div');
             container.innerHTML = `

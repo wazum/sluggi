@@ -1660,8 +1660,6 @@ export class SluggiElement extends LitElement {
             return;
         }
 
-        // submitForm() does not come back through this listener, so the redirect stage
-        // has to follow the lock confirmation here instead of on a second save click.
         const elementsNeedingLockConfirmation = Array.from(sluggiElements).filter(el =>
             el.slugPending && !el.pendingLockConfirmed && el.value !== el.originalValue
         );
@@ -1669,7 +1667,7 @@ export class SluggiElement extends LitElement {
             event.preventDefault();
             event.stopPropagation();
             event.stopImmediatePropagation();
-            SluggiElement.showPendingLockModal(elementsNeedingLockConfirmation, form);
+            SluggiElement.showPendingLockModal(elementsNeedingLockConfirmation, saveButton);
 
             return;
         }
@@ -1681,7 +1679,7 @@ export class SluggiElement extends LitElement {
         event.stopPropagation();
         event.stopImmediatePropagation();
 
-        SluggiElement.showRedirectModalForAll(elementsNeedingModal, form);
+        SluggiElement.showRedirectModalForAll(elementsNeedingModal, saveButton);
     }
 
     private warnProposalUnavailable(): void {
@@ -1712,7 +1710,7 @@ export class SluggiElement extends LitElement {
         );
     }
 
-    private static showPendingLockModal(elements: SluggiElement[], form: HTMLFormElement): void {
+    private static showPendingLockModal(elements: SluggiElement[], saveButton: HTMLButtonElement): void {
         SluggiElement.pendingLockModalOpen = true;
 
         const firstElement = elements[0];
@@ -1747,7 +1745,7 @@ export class SluggiElement extends LitElement {
                         for (const el of elements) {
                             el.pendingLockConfirmed = true;
                         }
-                        SluggiElement.continueSaveAfterLockConfirmation(form);
+                        saveButton.click();
                     },
                 },
             ]
@@ -1762,17 +1760,6 @@ export class SluggiElement extends LitElement {
         });
     }
 
-    private static continueSaveAfterLockConfirmation(form: HTMLFormElement): void {
-        const elementsNeedingModal = SluggiElement.collectRedirectCandidates(form);
-        if (elementsNeedingModal.length === 0) {
-            SluggiElement.submitForm(form);
-
-            return;
-        }
-
-        SluggiElement.showRedirectModalForAll(elementsNeedingModal, form);
-    }
-
     private static findAssociatedForm(button: HTMLButtonElement): HTMLFormElement | null {
         const formId = button.getAttribute('form');
         if (formId) {
@@ -1781,7 +1768,7 @@ export class SluggiElement extends LitElement {
         return button.closest('form');
     }
 
-    private static showRedirectModalForAll(elements: SluggiElement[], form: HTMLFormElement): void {
+    private static showRedirectModalForAll(elements: SluggiElement[], saveButton: HTMLButtonElement): void {
         SluggiElement.redirectModalPending = true;
         for (const el of elements) {
             el.redirectChoiceMade = true;
@@ -1825,7 +1812,7 @@ export class SluggiElement extends LitElement {
                         SluggiElement.redirectModalPending = false;
                         Modal.dismiss();
                         SluggiElement.applyRedirectChoiceToAll(elements, false);
-                        SluggiElement.submitForm(form);
+                        saveButton.click();
                     },
                 },
                 {
@@ -1837,7 +1824,7 @@ export class SluggiElement extends LitElement {
                         SluggiElement.redirectModalPending = false;
                         Modal.dismiss();
                         SluggiElement.applyRedirectChoiceToAll(elements, true);
-                        SluggiElement.submitForm(form);
+                        saveButton.click();
                     },
                 },
             ]
@@ -1875,24 +1862,6 @@ export class SluggiElement extends LitElement {
             createRedirects,
             timestamp: Date.now(),
         }));
-    }
-
-    private static submitForm(form: HTMLFormElement): void {
-        // TYPO3 12/13: hidden `doSave` field triggers save.
-        const doSaveField = form.querySelector('input[name="doSave"]') as HTMLInputElement | null;
-        if (doSaveField) {
-            doSaveField.value = '1';
-            form.requestSubmit();
-            return;
-        }
-
-        // TYPO3 14+: no `doSave` field — submit with the `_savedok` button
-        // as submitter so FormEngine sees the intended action.
-        const saveButton = form.ownerDocument.querySelector(
-            `button[name="_savedok"][form="${form.id}"]`
-        ) as HTMLButtonElement | null
-            ?? form.querySelector('button[name="_savedok"]') as HTMLButtonElement | null;
-        form.requestSubmit(saveButton ?? undefined);
     }
 
     // =========================================================================
