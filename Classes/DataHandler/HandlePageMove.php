@@ -6,6 +6,8 @@ namespace Wazum\Sluggi\DataHandler;
 
 use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\DataHandling\DataHandler;
+use TYPO3\CMS\Core\Exception\SiteNotFoundException;
+use TYPO3\CMS\Core\Site\SiteFinder;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use Wazum\Sluggi\Service\SlugGeneratorService;
 use Wazum\Sluggi\Utility\DataHandlerUtility;
@@ -14,6 +16,7 @@ final readonly class HandlePageMove
 {
     public function __construct(
         private SlugGeneratorService $slugGeneratorService,
+        private SiteFinder $siteFinder,
     ) {
     }
 
@@ -34,7 +37,7 @@ final readonly class HandlePageMove
             return;
         }
 
-        $this->updateSlugForMovedPage($id, $targetId, $dataHandler);
+        $this->updateSlugForMovedPage($id, (int)($moveRecord['pid'] ?? 0), $targetId, $dataHandler);
     }
 
     /**
@@ -53,10 +56,10 @@ final readonly class HandlePageMove
             return;
         }
 
-        $this->updateSlugForMovedPage($id, $targetId, $dataHandler);
+        $this->updateSlugForMovedPage($id, (int)($moveRecord['pid'] ?? 0), $targetId, $dataHandler);
     }
 
-    private function updateSlugForMovedPage(int $id, int $targetId, DataHandler $dataHandler): void
+    private function updateSlugForMovedPage(int $id, int $previousPid, int $targetId, DataHandler $dataHandler): void
     {
         $currentPage = BackendUtility::getRecordWSOL('pages', $id);
         if (empty($currentPage)) {
@@ -72,9 +75,42 @@ final readonly class HandlePageMove
             $targetId,
         );
 
-        $data = ['pages' => [$id => ['slug' => $newSlug]]];
+        $this->writeSlugs([$id => ['slug' => $newSlug]], $dataHandler);
+        if ($this->siteRootPageId($previousPid) !== $this->siteRootPageId($targetId)) {
+            $this->makeSubpageSlugsUnique($id, $dataHandler);
+        }
+    }
+
+    private function siteRootPageId(int $pageId): ?int
+    {
+        try {
+            return $this->siteFinder->getSiteByPageId($pageId)->getRootPageId();
+        } catch (SiteNotFoundException) {
+            return null;
+        }
+    }
+
+    private function makeSubpageSlugsUnique(int $id, DataHandler $dataHandler): void
+    {
+        $subpageData = [];
+        foreach (array_keys($dataHandler->int_pageTreeInfo([], $id, 99, $id)) as $subpageId) {
+            $subpage = BackendUtility::getRecordWSOL('pages', (int)$subpageId, 'slug');
+            if (!empty($subpage['slug'])) {
+                $subpageData[$subpageId] = ['slug' => $subpage['slug']];
+            }
+        }
+        if ($subpageData !== []) {
+            $this->writeSlugs($subpageData, $dataHandler);
+        }
+    }
+
+    /**
+     * @param array<int|string, array{slug: string}> $pageData
+     */
+    private function writeSlugs(array $pageData, DataHandler $dataHandler): void
+    {
         $localDataHandler = GeneralUtility::makeInstance(DataHandler::class);
-        $localDataHandler->start($data, []);
+        $localDataHandler->start(['pages' => $pageData], []);
         $localDataHandler->setCorrelationId(
             DataHandlerUtility::correlationIdWithAspect($dataHandler, DataHandlerUtility::MOVE_CORRELATION_ASPECT)
         );
