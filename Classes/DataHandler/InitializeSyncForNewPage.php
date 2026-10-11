@@ -61,7 +61,7 @@ final class InitializeSyncForNewPage
         $currentValue = $fieldArray['tx_sluggi_sync'] ?? null;
         // Never overwrite what another hook set, only our own seed.
         $isReplaceable = $currentValue === null || (int)$currentValue === $seededValue;
-        $tsConfigDefault = DataHandlerUtility::tcaDefaultValue($dataHandler, $table, 'tx_sluggi_sync');
+        $tsConfigDefault = DataHandlerUtility::tcaDefaultValue($dataHandler, $table, $fieldArray, 'tx_sluggi_sync');
 
         if ($tsConfigDefault !== null && $isReplaceable) {
             $fieldArray['tx_sluggi_sync'] = $tsConfigDefault;

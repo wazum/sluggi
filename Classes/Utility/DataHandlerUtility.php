@@ -36,10 +36,19 @@ final class DataHandlerUtility
     /**
      * Resolved TCAdefaults value from page and user TSconfig, null when unconfigured.
      * Core applies these only to fields in a showitem, so passthrough columns need this.
+     *
+     * @param array<string, mixed> $fieldArray
      */
-    public static function tcaDefaultValue(DataHandler $dataHandler, string $table, string $fieldName): ?int
+    public static function tcaDefaultValue(DataHandler $dataHandler, string $table, array $fieldArray, string $fieldName): ?int
     {
-        $value = $dataHandler->defaultValues[$table][$fieldName] ?? null;
+        $pageId = (int)($fieldArray['pid'] ?? 0);
+        if ($pageId < 0) {
+            $pageId = (int)(BackendUtility::getRecord($table, abs($pageId), 'pid')['pid'] ?? 0);
+        }
+
+        $value = BackendUtility::getPagesTSconfig($pageId)['TCAdefaults.'][$table . '.'][$fieldName]
+            ?? $dataHandler->defaultValues[$table][$fieldName]
+            ?? null;
 
         return $value === null ? null : (int)$value;
     }

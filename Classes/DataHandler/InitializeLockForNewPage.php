@@ -27,7 +27,7 @@ final readonly class InitializeLockForNewPage
             return;
         }
 
-        $tsConfigDefault = DataHandlerUtility::tcaDefaultValue($dataHandler, $table, 'slug_locked');
+        $tsConfigDefault = DataHandlerUtility::tcaDefaultValue($dataHandler, $table, $fieldArray, 'slug_locked');
         if ($tsConfigDefault !== null) {
             $fieldArray['slug_locked'] = $tsConfigDefault;
         }
