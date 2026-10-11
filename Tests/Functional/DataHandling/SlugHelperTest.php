@@ -5,8 +5,11 @@ declare(strict_types=1);
 namespace Wazum\Sluggi\Tests\Functional\DataHandling;
 
 use PHPUnit\Framework\Attributes\Test;
+use TYPO3\CMS\Core\Cache\CacheManager;
+use TYPO3\CMS\Core\DataHandling\Model\RecordStateFactory;
 use TYPO3\CMS\Core\DataHandling\SlugHelper;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
+use TYPO3\CMS\Core\Utility\RootlineUtility;
 use TYPO3\TestingFramework\Core\Functional\FunctionalTestCase;
 use Wazum\Sluggi\Compatibility\Typo3Compatibility;
 
@@ -51,7 +54,45 @@ final class SlugHelperTest extends FunctionalTestCase
         $this->setUpBackendUser(1);
     }
 
-    private function createSlugHelper(): SlugHelper
+    private function setUpThreeSites(): void
+    {
+        parent::setUp();
+        $this->importCSVDataSet(__DIR__ . '/Fixtures/pages_in_three_sites.csv');
+        foreach (['main' => 1, 'second' => 10, 'third' => 20] as $identifier => $rootPageId) {
+            Typo3Compatibility::writeSiteConfiguration($identifier, [
+                'rootPageId' => $rootPageId,
+                'base' => 'https://' . $identifier . '.example/',
+                'languages' => [
+                    [
+                        'languageId' => 0,
+                        'title' => 'English',
+                        'locale' => 'en_US.UTF-8',
+                        'base' => '/',
+                    ],
+                    [
+                        'languageId' => 1,
+                        'title' => 'German',
+                        'locale' => 'de_DE.UTF-8',
+                        'base' => '/de/',
+                    ],
+                ],
+            ]);
+        }
+        $this->setUpBackendUser(1);
+    }
+
+    /**
+     * @return list<string>
+     */
+    private function cachedRootlineIdentifiers(): array
+    {
+        return GeneralUtility::makeInstance(CacheManager::class)
+            ->getCache('runtime')
+            ->getBackend()
+            ->findIdentifiersByTag(RootlineUtility::RUNTIME_CACHE_TAG);
+    }
+
+    private function createSlugHelper(int $workspaceId = 0): SlugHelper
     {
         $fieldConfig = $GLOBALS['TCA']['pages']['columns']['slug']['config'] ?? [];
 
@@ -59,7 +100,8 @@ final class SlugHelperTest extends FunctionalTestCase
             SlugHelper::class,
             'pages',
             'slug',
-            $fieldConfig
+            $fieldConfig,
+            $workspaceId
         );
     }
 
@@ -150,5 +192,100 @@ final class SlugHelperTest extends FunctionalTestCase
         $slug = $slugHelper->generate($record, 2);
 
         self::assertSame('/sysfolder/page-to-copy', $slug);
+    }
+
+    #[Test]
+    public function isUniqueInSiteKeepsRootlineCachesWarmWhenSlugExistsInAnotherSite(): void
+    {
+        $this->setUpThreeSites();
+        // Page 4 ("/contact") is not involved in the check below
+        GeneralUtility::makeInstance(RootlineUtility::class, 4)->get();
+        $cachedBefore = $this->cachedRootlineIdentifiers();
+        self::assertNotSame([], $cachedBefore);
+
+        // "/about/team" exists in the main and third site, not in the second one
+        $state = RecordStateFactory::forName('pages')->fromArray(['uid' => 11, 'pid' => 10, 'sys_language_uid' => 0]);
+        self::assertTrue($this->createSlugHelper()->isUniqueInSite('/about/team', $state));
+
+        self::assertSame([], array_diff($cachedBefore, $this->cachedRootlineIdentifiers()));
+    }
+
+    #[Test]
+    public function isUniqueInSiteRejectsSlugUsedByAnotherPageOfTheSameSite(): void
+    {
+        $this->setUpThreeSites();
+
+        // Page 4 ("/contact") wants "/about", which page 2 of the same site already has
+        $state = RecordStateFactory::forName('pages')->fromArray(['uid' => 4, 'pid' => 1, 'sys_language_uid' => 0]);
+
+        self::assertFalse($this->createSlugHelper()->isUniqueInSite('/about', $state));
+    }
+
+    #[Test]
+    public function isUniqueInSiteIgnoresTheSlugOfTheRecordItself(): void
+    {
+        $this->setUpThreeSites();
+
+        // Page 4 already has "/contact" and nobody else in the main site does
+        $state = RecordStateFactory::forName('pages')->fromArray(['uid' => 4, 'pid' => 1, 'sys_language_uid' => 0]);
+
+        self::assertTrue($this->createSlugHelper()->isUniqueInSite('/contact', $state));
+    }
+
+    #[Test]
+    public function isUniqueInSiteIgnoresSlugsOfOtherLanguages(): void
+    {
+        $this->setUpThreeSites();
+
+        // Page 4 (English) wants "/ueber-uns", which only the German translation of page 2 has
+        $state = RecordStateFactory::forName('pages')->fromArray(['uid' => 4, 'pid' => 1, 'sys_language_uid' => 0]);
+
+        self::assertTrue($this->createSlugHelper()->isUniqueInSite('/ueber-uns', $state));
+    }
+
+    #[Test]
+    public function isUniqueInSiteResolvesTheSiteOfANewPageFromItsParent(): void
+    {
+        $this->setUpThreeSites();
+
+        // A new page below the second site's root wants "/about", which page 11 of that site has
+        $state = RecordStateFactory::forName('pages')->fromArray(['pid' => 10, 'sys_language_uid' => 0], 10, 'NEW1');
+
+        self::assertFalse($this->createSlugHelper()->isUniqueInSite('/about', $state));
+    }
+
+    #[Test]
+    public function isUniqueInSiteSeesAPageMovedIntoTheSiteWithinTheWorkspace(): void
+    {
+        $this->setUpThreeSites();
+        $GLOBALS['BE_USER']->workspace = 1;
+
+        // In workspace 1 page 3 ("/about/team") was moved from the main site below the second site's root
+        $state = RecordStateFactory::forName('pages')->fromArray(['pid' => 10, 'sys_language_uid' => 0, 't3ver_wsid' => 1], 10, 'NEW1');
+
+        self::assertFalse($this->createSlugHelper(1)->isUniqueInSite('/about/team', $state));
+    }
+
+    #[Test]
+    public function isUniqueInSiteIgnoresAPageDeletedWithinTheWorkspace(): void
+    {
+        $this->setUpThreeSites();
+        $GLOBALS['BE_USER']->workspace = 1;
+
+        // In workspace 1 page 21 ("/about/team" in the third site) is deleted, so the slug is free there
+        $state = RecordStateFactory::forName('pages')->fromArray(['pid' => 20, 'sys_language_uid' => 0, 't3ver_wsid' => 1], 20, 'NEW1');
+
+        self::assertTrue($this->createSlugHelper(1)->isUniqueInSite('/about/team', $state));
+    }
+
+    #[Test]
+    public function isUniqueInSiteIgnoresPagesThatOnlyExistInAWorkspaceWhenCheckingLive(): void
+    {
+        $this->setUpThreeSites();
+
+        // "/news" below the second site's root only exists as a new page in workspace 1
+        $state = RecordStateFactory::forName('pages')->fromArray(['pid' => 10, 'sys_language_uid' => 0], 10, 'NEW1');
+
+        self::assertTrue($this->createSlugHelper()->isUniqueInSite('/news', $state));
     }
 }
