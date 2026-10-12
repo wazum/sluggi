@@ -13,7 +13,13 @@ test.describe('Page Copy - Slug Update', () => {
 
     const copyMenuItem = page.getByRole('menuitem', { name: 'Copy' });
     await expect(copyMenuItem).toBeVisible({ timeout: 5000 });
+    // The target's context menu only offers "Paste into" once the clipboard is stored
+    const clipboardResponsePromise = page.waitForResponse(
+      response => response.url().includes('/context-menu/clipboard'),
+      { timeout: 15000 }
+    );
     await copyMenuItem.click();
+    await clipboardResponsePromise;
     await expect(copyMenuItem).not.toBeVisible({ timeout: 5000 });
 
     const targetNode = await getPageTreeNode(page, 24);
