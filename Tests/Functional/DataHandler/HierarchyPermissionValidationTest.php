@@ -351,4 +351,132 @@ final class HierarchyPermissionValidationTest extends FunctionalTestCase
         $this->assertCSVDataSet(__DIR__ . '/Fixtures/pages_hierarchy_blocked.csv');
         self::assertNotEmpty($dataHandler->errorLog, 'Expected an error to be logged');
     }
+
+    #[Test]
+    public function editorNewPageWithEmptySlugGetsGeneratedSlug(): void
+    {
+        $this->setUpBackendUser(2);
+
+        // The slug element submits an empty slug for a new page that has no own
+        // segment yet; the core generates it from the title. Nothing to validate
+        // at this point: the slug must not degrade to the bare hierarchy prefix.
+        $dataHandler = GeneralUtility::makeInstance(DataHandler::class);
+        $dataHandler->start(
+            [
+                'pages' => [
+                    'NEW1' => [
+                        'pid' => 4,
+                        'title' => 'New Page',
+                        'slug' => '',
+                        'doktype' => 1,
+                    ],
+                ],
+            ],
+            []
+        );
+        $dataHandler->process_datamap();
+
+        self::assertEmpty($dataHandler->errorLog, implode(' | ', $dataHandler->errorLog));
+        self::assertSame('/home/department/institute/new-page', $this->fetchSlug(6));
+    }
+
+    #[Test]
+    public function editorNewPageWithEmptySlugBelowCustomParentPathFollowsTheParent(): void
+    {
+        parent::setUp();
+        $this->importCSVDataSet(__DIR__ . '/Fixtures/pages_hierarchy_custom_parent.csv');
+        $this->setUpSite();
+        $GLOBALS['LANG'] = GeneralUtility::makeInstance(LanguageServiceFactory::class)->create('default');
+        $this->setUpBackendUser(2);
+
+        // An administrator gave "About Us" (uid=5) the custom path /about, which
+        // lies outside the editor's hierarchy prefix /home/department. A new
+        // page below it gets its slug generated from the parent, not the prefix.
+        $dataHandler = GeneralUtility::makeInstance(DataHandler::class);
+        $dataHandler->start(
+            [
+                'pages' => [
+                    'NEW1' => [
+                        'pid' => 5,
+                        'title' => 'New Page',
+                        'slug' => '',
+                        'doktype' => 1,
+                    ],
+                ],
+            ],
+            []
+        );
+        $dataHandler->process_datamap();
+
+        self::assertEmpty($dataHandler->errorLog, implode(' | ', $dataHandler->errorLog));
+        self::assertSame('/about/new-page', $this->fetchSlug(6));
+    }
+
+    #[Test]
+    public function editorNewPageWithSlugFollowingCustomParentPathIsAccepted(): void
+    {
+        parent::setUp();
+        $this->importCSVDataSet(__DIR__ . '/Fixtures/pages_hierarchy_custom_parent.csv');
+        $this->setUpSite();
+        $GLOBALS['LANG'] = GeneralUtility::makeInstance(LanguageServiceFactory::class)->create('default');
+        $this->setUpBackendUser(2);
+
+        // The form submits the proposal built from the parent's actual slug.
+        // Following the parent cannot leave the permitted hierarchy any further
+        // than the parent already did, so it must not be rewritten.
+        $dataHandler = GeneralUtility::makeInstance(DataHandler::class);
+        $dataHandler->start(
+            [
+                'pages' => [
+                    'NEW1' => [
+                        'pid' => 5,
+                        'title' => 'New Page',
+                        'slug' => '/about/new-page',
+                        'doktype' => 1,
+                    ],
+                ],
+            ],
+            []
+        );
+        $dataHandler->process_datamap();
+
+        self::assertEmpty($dataHandler->errorLog, implode(' | ', $dataHandler->errorLog));
+        self::assertSame('/about/new-page', $this->fetchSlug(6));
+    }
+
+    #[Test]
+    public function editorNewPageWithArbitrarySlugBelowCustomParentPathIsRewritten(): void
+    {
+        parent::setUp();
+        $this->importCSVDataSet(__DIR__ . '/Fixtures/pages_hierarchy_custom_parent.csv');
+        $this->setUpSite();
+        $GLOBALS['LANG'] = GeneralUtility::makeInstance(LanguageServiceFactory::class)->create('default');
+        $this->setUpBackendUser(2);
+
+        $dataHandler = GeneralUtility::makeInstance(DataHandler::class);
+        $dataHandler->start(
+            [
+                'pages' => [
+                    'NEW1' => [
+                        'pid' => 5,
+                        'title' => 'New Page',
+                        'slug' => '/totally/different/new-page',
+                        'doktype' => 1,
+                    ],
+                ],
+            ],
+            []
+        );
+        $dataHandler->process_datamap();
+
+        self::assertSame('/home/department/new-page', $this->fetchSlug(6));
+    }
+
+    private function fetchSlug(int $uid): string
+    {
+        return (string)$this->getConnectionPool()
+            ->getConnectionForTable('pages')
+            ->executeQuery('SELECT slug FROM pages WHERE uid = ' . $uid)
+            ->fetchOne();
+    }
 }

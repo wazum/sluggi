@@ -318,4 +318,38 @@ final class LastSegmentValidationTest extends FunctionalTestCase
 
         $this->assertCSVDataSet(__DIR__ . '/Fixtures/pages_sync_cascade_expected.csv');
     }
+
+    #[Test]
+    public function nonAdminNewPageWithEmptySlugGetsGeneratedSlug(): void
+    {
+        $this->setUpBackendUser(2);
+
+        // The slug element submits an empty slug for a new page that has no own
+        // segment yet; the core generates it from the title. Nothing to validate
+        // at this point: the slug must not degrade to the bare parent path.
+        $dataHandler = GeneralUtility::makeInstance(DataHandler::class);
+        $dataHandler->start(
+            [
+                'pages' => [
+                    'NEW1' => [
+                        'pid' => 2,
+                        'title' => 'New Page',
+                        'slug' => '',
+                        'doktype' => 1,
+                    ],
+                ],
+            ],
+            []
+        );
+        $dataHandler->process_datamap();
+
+        self::assertEmpty($dataHandler->errorLog, implode(' | ', $dataHandler->errorLog));
+
+        $slug = $this->getConnectionPool()
+            ->getConnectionForTable('pages')
+            ->executeQuery('SELECT slug FROM pages WHERE uid = 4')
+            ->fetchOne();
+
+        self::assertSame('/parent/new-page', $slug);
+    }
 }

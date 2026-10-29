@@ -55,6 +55,14 @@ final readonly class ValidateLastSegmentOnly
         $newSlug = (string)$fieldArray['slug'];
         $isNewRecord = DataHandlerUtility::isNewRecord($id);
 
+        // The slug element submits an empty slug for a new page that has no own
+        // segment yet; the core generates it below the parent afterwards.
+        // Enforcing the parent path on the empty value would store the bare
+        // parent path with a trailing slash instead.
+        if ($isNewRecord && $newSlug === '') {
+            return;
+        }
+
         if (!$isNewRecord && DataHandlerUtility::isSlugUnchanged((int)$id, $newSlug)) {
             return;
         }

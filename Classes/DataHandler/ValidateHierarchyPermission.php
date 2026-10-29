@@ -63,6 +63,10 @@ final readonly class ValidateHierarchyPermission
         $newSlug = (string)$fieldArray['slug'];
         $isNewRecord = DataHandlerUtility::isNewRecord($id);
 
+        if ($isNewRecord && $this->newRecordNeedsNoValidation($fieldArray, $newSlug)) {
+            return;
+        }
+
         if (!$isNewRecord && DataHandlerUtility::isSlugUnchanged((int)$id, $newSlug)) {
             return;
         }
@@ -94,6 +98,35 @@ final readonly class ValidateHierarchyPermission
     private function isWithinAllowedHierarchy(string $lockedPrefix, string $newSlug): bool
     {
         return $this->hierarchyPermissionService->validateSlugChange($lockedPrefix, $newSlug);
+    }
+
+    /**
+     * The slug element submits an empty slug for a new page that has no own
+     * segment yet, and the core then generates one below the parent. A slug
+     * that already sits below the parent is what the generator would produce
+     * as well. Neither can leave the permitted hierarchy any further than the
+     * parent does, and the DataHandler has checked that the editor may create
+     * pages there. Enforcing the locked prefix here would turn the empty slug
+     * into the bare prefix with a trailing slash, or detach the page from a
+     * parent whose path an administrator customised.
+     *
+     * @param array<string, mixed> $fieldArray
+     */
+    private function newRecordNeedsNoValidation(array $fieldArray, string $newSlug): bool
+    {
+        if ($newSlug === '') {
+            return true;
+        }
+
+        $pid = (int)($fieldArray['pid'] ?? 0);
+        if ($pid <= 0) {
+            return false;
+        }
+
+        $languageId = (int)($fieldArray['sys_language_uid'] ?? 0);
+        $parentSlug = $this->slugGeneratorService->getParentSlug($pid, $languageId);
+
+        return SlugUtility::getParentPath($newSlug) === rtrim($parentSlug, '/');
     }
 
     /**
