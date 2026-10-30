@@ -72,6 +72,16 @@ final class SlugNormalizerTest extends TestCase
                 'expected' => 'hello/world',
                 'fallback' => '-',
             ],
+            'trailing slash kept' => [
+                'input' => 'hello world/',
+                'expected' => 'hello-world/',
+                'fallback' => '-',
+            ],
+            'lone slash removed' => [
+                'input' => '/',
+                'expected' => '',
+                'fallback' => '-',
+            ],
             'leading trailing fallback trimmed' => [
                 'input' => '-hello-world-',
                 'expected' => 'hello-world',
