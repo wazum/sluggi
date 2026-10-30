@@ -11,6 +11,11 @@ use Wazum\Sluggi\Utility\SlugUtility;
 
 final readonly class HierarchyPermissionService
 {
+    public function __construct(
+        private PageTranslationResolver $pageTranslationResolver,
+    ) {
+    }
+
     /**
      * @param array<int, array<string, mixed>> $rootLine         TYPO3 rootLine (current page to root)
      * @param array<int>                       $editablePageUids
@@ -95,7 +100,7 @@ final readonly class HierarchyPermissionService
      */
     private function getRootLineWithPermissions(int $pageId): array
     {
-        return BackendUtility::BEgetRootLine(
+        $rootLine = BackendUtility::BEgetRootLine(
             $pageId,
             '',
             false,
@@ -106,8 +111,36 @@ final readonly class HierarchyPermissionService
                 'perms_group',
                 'perms_everybody',
                 'slug',
+                'sys_language_uid',
             ]
         );
+
+        // The rootline above a translated page holds default language pages
+        $languageId = (int)(reset($rootLine)['sys_language_uid'] ?? 0);
+        if ($languageId === 0) {
+            return $rootLine;
+        }
+
+        return array_map(
+            fn (array $page): array => [...$page, 'slug' => $this->getSlugInLanguage($page, $languageId)],
+            $rootLine
+        );
+    }
+
+    /**
+     * @param array<string, mixed> $page
+     */
+    private function getSlugInLanguage(array $page, int $languageId): string
+    {
+        $uid = (int)($page['uid'] ?? 0);
+        if ($uid <= 0 || (int)($page['sys_language_uid'] ?? 0) === $languageId) {
+            return (string)($page['slug'] ?? '');
+        }
+
+        $workspaceId = $this->getBackendUser()->workspace ?? 0;
+        $translation = $this->pageTranslationResolver->resolve($uid, $languageId, $workspaceId);
+
+        return (string)($translation['slug'] ?? $page['slug'] ?? '');
     }
 
     private function getBackendUser(): ?BackendUserAuthentication

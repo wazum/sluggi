@@ -8,13 +8,14 @@ use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 use Wazum\Sluggi\Service\HierarchyPermissionService;
+use Wazum\Sluggi\Service\PageTranslationResolver;
 
 final class HierarchyPermissionServiceTest extends TestCase
 {
     #[Test]
     public function getLockedPrefixReturnsEmptyStringWhenUserCanEditAllPages(): void
     {
-        $subject = new HierarchyPermissionService();
+        $subject = new HierarchyPermissionService(new PageTranslationResolver());
 
         // TYPO3's BEgetRootLine returns from current page to root
         $rootLine = [
@@ -33,7 +34,7 @@ final class HierarchyPermissionServiceTest extends TestCase
     #[Test]
     public function getLockedPrefixSkipsRootPageWhenCalculatingPrefix(): void
     {
-        $subject = new HierarchyPermissionService();
+        $subject = new HierarchyPermissionService(new PageTranslationResolver());
 
         // Real-world scenario: root page has perms_everybody=31 (all permissions)
         // so it appears in editablePageUids even though user only has content access to deeper pages
@@ -57,7 +58,7 @@ final class HierarchyPermissionServiceTest extends TestCase
     #[Test]
     public function getLockedPrefixReturnsParentOfTopmostEditablePage(): void
     {
-        $subject = new HierarchyPermissionService();
+        $subject = new HierarchyPermissionService(new PageTranslationResolver());
 
         // TYPO3's BEgetRootLine returns from current page to root
         $rootLine = [
@@ -76,7 +77,7 @@ final class HierarchyPermissionServiceTest extends TestCase
     #[Test]
     public function getLockedPrefixReturnsPartialPrefixBasedOnPermissions(): void
     {
-        $subject = new HierarchyPermissionService();
+        $subject = new HierarchyPermissionService(new PageTranslationResolver());
 
         // TYPO3's BEgetRootLine returns from current page to root
         $rootLine = [
@@ -96,7 +97,7 @@ final class HierarchyPermissionServiceTest extends TestCase
     #[Test]
     public function getEditablePageUidsReturnsOnlyPagesWithEditPermission(): void
     {
-        $subject = new HierarchyPermissionService();
+        $subject = new HierarchyPermissionService(new PageTranslationResolver());
 
         // TYPO3's BEgetRootLine returns from current page to root
         $rootLine = [
@@ -116,7 +117,7 @@ final class HierarchyPermissionServiceTest extends TestCase
     #[Test]
     public function validateSlugChangeReturnsTrueWhenLockedPrefixUnchanged(): void
     {
-        $subject = new HierarchyPermissionService();
+        $subject = new HierarchyPermissionService(new PageTranslationResolver());
 
         $lockedPrefix = '/home/department';
         $newSlug = '/home/department/new-institute';
@@ -129,7 +130,7 @@ final class HierarchyPermissionServiceTest extends TestCase
     #[Test]
     public function validateSlugChangeReturnsFalseWhenLockedPrefixChanged(): void
     {
-        $subject = new HierarchyPermissionService();
+        $subject = new HierarchyPermissionService(new PageTranslationResolver());
 
         $lockedPrefix = '/home/department';
         $newSlug = '/home/other-department/institute';
@@ -142,7 +143,7 @@ final class HierarchyPermissionServiceTest extends TestCase
     #[Test]
     public function validateSlugChangeReturnsTrueWhenNoLockedPrefix(): void
     {
-        $subject = new HierarchyPermissionService();
+        $subject = new HierarchyPermissionService(new PageTranslationResolver());
 
         $lockedPrefix = '';
         $newSlug = '/completely/different/path';
@@ -193,7 +194,7 @@ final class HierarchyPermissionServiceTest extends TestCase
         string $lockedPrefix,
         bool $expected,
     ): void {
-        $subject = new HierarchyPermissionService();
+        $subject = new HierarchyPermissionService(new PageTranslationResolver());
 
         $result = $subject->validateSlugChange($lockedPrefix, $newSlug);
 
