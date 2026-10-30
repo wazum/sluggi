@@ -55,6 +55,11 @@ final readonly class ValidateLastSegmentOnly
         $newSlug = (string)$fieldArray['slug'];
         $isNewRecord = DataHandlerUtility::isNewRecord($id);
 
+        // Core builds an empty slug from the title
+        if ($isNewRecord && $newSlug === '') {
+            return;
+        }
+
         if (!$isNewRecord && DataHandlerUtility::isSlugUnchanged((int)$id, $newSlug)) {
             return;
         }

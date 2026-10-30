@@ -63,6 +63,11 @@ final readonly class ValidateHierarchyPermission
         $newSlug = (string)$fieldArray['slug'];
         $isNewRecord = DataHandlerUtility::isNewRecord($id);
 
+        // Core builds an empty slug from the title
+        if ($isNewRecord && $newSlug === '') {
+            return;
+        }
+
         if (!$isNewRecord && DataHandlerUtility::isSlugUnchanged((int)$id, $newSlug)) {
             return;
         }
@@ -80,6 +85,10 @@ final readonly class ValidateHierarchyPermission
         }
 
         if (!$isNewRecord && $this->isLastSegmentOnlyChange((int)$id, $newSlug)) {
+            return;
+        }
+
+        if ($isNewRecord && $this->followsParentPath($fieldArray, $newSlug)) {
             return;
         }
 
@@ -134,6 +143,16 @@ final readonly class ValidateHierarchyPermission
         }
 
         return SlugUtility::getParentPath($newSlug) === SlugUtility::getParentPath((string)$currentRecord['slug']);
+    }
+
+    /**
+     * @param array<string, mixed> $fieldArray
+     */
+    private function followsParentPath(array $fieldArray, string $newSlug): bool
+    {
+        $parentSlug = $this->slugGeneratorService->getParentSlug((int)($fieldArray['pid'] ?? 0));
+
+        return SlugUtility::getParentPath($newSlug) === rtrim($parentSlug, '/');
     }
 
     private function getBackendUser(): ?BackendUserAuthentication

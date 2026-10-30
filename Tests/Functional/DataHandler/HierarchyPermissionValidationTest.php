@@ -170,6 +170,86 @@ final class HierarchyPermissionValidationTest extends FunctionalTestCase
     }
 
     #[Test]
+    public function editorNewPageWithEmptySlugGetsSlugFromTitle(): void
+    {
+        $this->setUpBackendUser(2);
+
+        $dataHandler = GeneralUtility::makeInstance(DataHandler::class);
+        $dataHandler->start(
+            [
+                'pages' => [
+                    'NEW1' => [
+                        'pid' => 4,
+                        'title' => 'New Page',
+                        'slug' => '',
+                        'doktype' => 1,
+                    ],
+                ],
+            ],
+            []
+        );
+        $dataHandler->process_datamap();
+
+        $this->assertCSVDataSet(__DIR__ . '/Fixtures/pages_hierarchy_new_page_empty_slug.csv');
+    }
+
+    #[Test]
+    public function editorNewPageFollowingCustomParentPathKeepsItsSlug(): void
+    {
+        parent::setUp();
+        $this->importCSVDataSet(__DIR__ . '/Fixtures/pages_hierarchy_custom_parent_path.csv');
+        $this->setUpSite();
+        $GLOBALS['LANG'] = GeneralUtility::makeInstance(LanguageServiceFactory::class)->create('default');
+        $this->setUpBackendUser(2);
+
+        $dataHandler = GeneralUtility::makeInstance(DataHandler::class);
+        $dataHandler->start(
+            [
+                'pages' => [
+                    'NEW1' => [
+                        'pid' => 5,
+                        'title' => 'New Page',
+                        'slug' => '/about/new-page',
+                        'doktype' => 1,
+                    ],
+                ],
+            ],
+            []
+        );
+        $dataHandler->process_datamap();
+
+        $this->assertCSVDataSet(__DIR__ . '/Fixtures/pages_hierarchy_custom_parent_path_followed.csv');
+    }
+
+    #[Test]
+    public function editorNewPageBelowCustomParentPathCannotChooseAnotherPath(): void
+    {
+        parent::setUp();
+        $this->importCSVDataSet(__DIR__ . '/Fixtures/pages_hierarchy_custom_parent_path.csv');
+        $this->setUpSite();
+        $GLOBALS['LANG'] = GeneralUtility::makeInstance(LanguageServiceFactory::class)->create('default');
+        $this->setUpBackendUser(2);
+
+        $dataHandler = GeneralUtility::makeInstance(DataHandler::class);
+        $dataHandler->start(
+            [
+                'pages' => [
+                    'NEW1' => [
+                        'pid' => 5,
+                        'title' => 'New Page',
+                        'slug' => '/totally/different/new-page',
+                        'doktype' => 1,
+                    ],
+                ],
+            ],
+            []
+        );
+        $dataHandler->process_datamap();
+
+        $this->assertCSVDataSet(__DIR__ . '/Fixtures/pages_hierarchy_custom_parent_path_rewritten.csv');
+    }
+
+    #[Test]
     public function editorNewPageUnderExcludedPageTypeIsLockedToEffectiveParentPath(): void
     {
         parent::setUp();

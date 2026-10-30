@@ -173,6 +173,30 @@ final class LastSegmentValidationTest extends FunctionalTestCase
     }
 
     #[Test]
+    public function nonAdminNewPageWithEmptySlugGetsSlugFromTitle(): void
+    {
+        $this->setUpBackendUser(2);
+
+        $dataHandler = GeneralUtility::makeInstance(DataHandler::class);
+        $dataHandler->start(
+            [
+                'pages' => [
+                    'NEW1' => [
+                        'pid' => 2,
+                        'title' => 'New Page',
+                        'slug' => '',
+                        'doktype' => 1,
+                    ],
+                ],
+            ],
+            []
+        );
+        $dataHandler->process_datamap();
+
+        $this->assertCSVDataSet(__DIR__ . '/Fixtures/pages_last_segment_new_page_accepted.csv');
+    }
+
+    #[Test]
     public function nonAdminCanFixOutOfSyncSlug(): void
     {
         parent::setUp();
