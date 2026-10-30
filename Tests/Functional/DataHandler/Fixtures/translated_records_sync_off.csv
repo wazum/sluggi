@@ -1,0 +1,12 @@
+"be_users"
+,"uid","pid","username","password","admin"
+,1,0,"admin","$2y$12$abc123",1
+
+"tx_sluggitest_translated"
+,"uid","pid","title","slug","sys_language_uid","l10n_parent"
+,1,0,"Original Title","original-title",0,0
+,2,0,"Originaltitel","originaltitel",1,1
+
+"tx_sluggi_record_sync"
+,"tablename","record_uid","is_synced"
+,"tx_sluggitest_translated",1,0

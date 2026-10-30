@@ -1,0 +1,4 @@
+"tx_sluggitest_translated"
+,"uid","pid","title","slug","sys_language_uid","l10n_parent"
+,1,0,"Original Title","original-title",0,0
+,2,0,"Neuer Titel","originaltitel",1,1
