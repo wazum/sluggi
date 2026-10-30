@@ -179,6 +179,11 @@ final class HierarchyPermissionServiceTest extends TestCase
                 'lockedPrefix' => '/home/department',
                 'expected' => false,
             ],
+            'extending the last locked segment is invalid' => [
+                'newSlug' => '/home/department-other/institute',
+                'lockedPrefix' => '/home/department',
+                'expected' => false,
+            ],
             'adding segment within editable range is valid' => [
                 'newSlug' => '/home/department/institute/sub-page',
                 'lockedPrefix' => '/home',
