@@ -57,6 +57,19 @@ final class SlugChangeReportStoreTest extends TestCase
     }
 
     #[Test]
+    public function incrementRedirectsCreatedAccumulatesAcrossCalls(): void
+    {
+        $store = new SlugChangeReportStore();
+        $store->addEntry(42, 'Page Forty-Two', []);
+
+        $store->incrementRedirectsCreated();
+        $store->incrementRedirectsCreated(2);
+
+        self::assertSame(3, $store->getReport()['redirectsCreated']);
+        self::assertSame(0, $store->getReport()['pagesUpdated']);
+    }
+
+    #[Test]
     public function addEntryKeysByPageIdAndOverwritesCorrelations(): void
     {
         $store = new SlugChangeReportStore();
