@@ -18,7 +18,7 @@
         "@web/dev-server-esbuild": "^2.0.0",
         "@web/test-runner": "^1.0.0",
         "@web/test-runner-playwright": "^1.0.0",
-        "sass": "^1.105.1",
+        "sass": "^1.107.0",
         "typescript": "^5.7.2",
         "vite": "^7.3.7"
     },
