@@ -29,8 +29,9 @@ final class DataHandlerUtility
     public static function integerFieldValue(array $record, string $fieldName): int
     {
         $value = $record[$fieldName] ?? 0;
+        $first = is_array($value) ? ($value[0] ?? 0) : $value;
 
-        return (int)(is_array($value) ? ($value[0] ?? 0) : $value);
+        return (int)(is_array($first) ? ($first['uid'] ?? 0) : $first);
     }
 
     /**

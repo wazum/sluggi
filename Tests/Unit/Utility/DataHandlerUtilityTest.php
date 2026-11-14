@@ -103,6 +103,18 @@ final class DataHandlerUtilityTest extends TestCase
     }
 
     #[Test]
+    public function integerFieldValueReturnsUidOfGroupFieldRecord(): void
+    {
+        $record = [
+            'l10n_parent' => [
+                ['table' => 'tx_news_domain_model_news', 'uid' => 5, 'title' => 'Parent', 'row' => ['uid' => 5]],
+            ],
+        ];
+
+        self::assertSame(5, DataHandlerUtility::integerFieldValue($record, 'l10n_parent'));
+    }
+
+    #[Test]
     public function integerFieldValueCastsScalarValue(): void
     {
         self::assertSame(17, DataHandlerUtility::integerFieldValue(['l10n_parent' => '17'], 'l10n_parent'));

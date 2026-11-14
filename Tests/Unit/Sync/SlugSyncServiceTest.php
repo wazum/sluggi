@@ -196,6 +196,40 @@ final class SlugSyncServiceTest extends TestCase
     }
 
     #[Test]
+    public function getEffectiveRecordSyncStateInheritsFromGroupTypeTranslationParent(): void
+    {
+        $GLOBALS['TCA']['tx_test']['ctrl'] = [
+            'languageField' => 'sys_language_uid',
+            'transOrigPointerField' => 'l10n_parent',
+        ];
+
+        $connectionPool = $this->createMock(ConnectionPool::class);
+        $connection = $this->createMock(\TYPO3\CMS\Core\Database\Connection::class);
+        $connectionPool->method('getConnectionForTable')->willReturn($connection);
+        $connection->method('select')->willReturnCallback(function (array $fields, string $table, array $identifiers) {
+            $result = $this->createMock(\Doctrine\DBAL\Result::class);
+            $result->method('fetchAssociative')->willReturn(
+                $identifiers['record_uid'] === 5 ? ['is_synced' => 0] : false
+            );
+
+            return $result;
+        });
+
+        $coreConfig = $this->createMock(CoreExtensionConfiguration::class);
+        $subject = new SlugSyncService(new ExtensionConfiguration($coreConfig), new SlugConfigurationService(), $connectionPool, new PendingSyncStateRegistry());
+
+        $record = [
+            'uid' => 6,
+            'sys_language_uid' => ['1'],
+            'l10n_parent' => [
+                ['table' => 'tx_test', 'uid' => 5, 'title' => 'Parent', 'row' => ['uid' => 5]],
+            ],
+        ];
+
+        self::assertFalse($subject->getEffectiveRecordSyncState('tx_test', $record));
+    }
+
+    #[Test]
     public function pendingSyncStateOverridesDbState(): void
     {
         $connectionPool = $this->createMock(ConnectionPool::class);
