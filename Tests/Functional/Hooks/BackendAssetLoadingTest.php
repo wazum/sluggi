@@ -17,6 +17,28 @@ final class BackendAssetLoadingTest extends FunctionalTestCase
     protected array $testExtensionsToLoad = ['wazum/sluggi'];
     protected array $coreExtensionsToLoad = ['redirects'];
 
+    #[Test]
+    public function slugChangeReportHandlerIsLoadedWithRedirectControlDisabled(): void
+    {
+        $this->importCSVDataSet(__DIR__ . '/../Service/Fixtures/be_users.csv');
+        $this->setUpBackendUser(1);
+        $GLOBALS['TYPO3_CONF_VARS']['EXTENSIONS']['sluggi']['redirect_control'] = '0';
+
+        self::assertStringContainsString(
+            'redirect-notification-handler',
+            $this->loadedJavaScriptModules(),
+        );
+    }
+
+    #[Test]
+    public function noModulesAreLoadedWithoutLoggedInBackendUser(): void
+    {
+        self::assertStringNotContainsString(
+            'sluggi',
+            $this->loadedJavaScriptModules(),
+        );
+    }
+
     private function loadedJavaScriptModules(): string
     {
         $GLOBALS['TYPO3_REQUEST'] = (new ServerRequest('https://example.com/typo3/'))
@@ -29,16 +51,5 @@ final class BackendAssetLoadingTest extends FunctionalTestCase
         $hook($parameters, $pageRenderer);
 
         return (string)json_encode($pageRenderer->getJavaScriptRenderer()->toArray());
-    }
-
-    #[Test]
-    public function slugChangeReportHandlerIsLoadedWithRedirectControlDisabled(): void
-    {
-        $GLOBALS['TYPO3_CONF_VARS']['EXTENSIONS']['sluggi']['redirect_control'] = '0';
-
-        self::assertStringContainsString(
-            'redirect-notification-handler',
-            $this->loadedJavaScriptModules(),
-        );
     }
 }
