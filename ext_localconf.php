@@ -81,7 +81,11 @@ $GLOBALS['TYPO3_CONF_VARS']['SYS']['formEngine']['formDataGroup']['tcaDatabaseRe
 $GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['t3lib/class.t3lib_pagerenderer.php']['render-preProcess']['sluggi'] =
     static function (array &$params, PageRenderer $pageRenderer): void {
         $request = $GLOBALS['TYPO3_REQUEST'] ?? null;
-        if ($request instanceof ServerRequestInterface && ApplicationType::fromRequest($request)->isBackend()) {
+        // Without a session, core's ~labels/ imports redirect to the login form.
+        if ($request instanceof ServerRequestInterface
+            && ApplicationType::fromRequest($request)->isBackend()
+            && ($GLOBALS['BE_USER']->user['uid'] ?? 0) > 0
+        ) {
             $pageRenderer->addCssFile('EXT:sluggi/Resources/Public/Css/sluggi-source-field.css');
             $pageRenderer->addInlineLanguageLabelFile('EXT:sluggi/Resources/Private/Language/locallang.xlf', 'contextMenu.');
             $pageRenderer->addInlineLanguageLabelFile(
